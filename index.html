@@ -107,6 +107,20 @@
 
   /* Default footer padding (matches earlier 12px 48px) */
   .app-footer { padding: 12px 48px; }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+  #root:empty::after {
+    content: '';
+    display: block;
+    width: 28px; height: 28px;
+    border: 2px solid var(--cream-dark);
+    border-top-color: var(--blush);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    position: fixed;
+    top: 50%; left: 50%;
+    margin: -14px 0 0 -14px;
+  }
 </style>
   <style>
     .dainty-range { -webkit-appearance: none; appearance: none; background: transparent; cursor: pointer; }

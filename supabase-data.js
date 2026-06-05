@@ -3,22 +3,23 @@ const _SUPABASE_KEY = 'sb_publishable_2RQlqm5VuZaTBZ7qrd5V1A_eSjFIpaB';
 
 (async function () {
   const client = supabase.createClient(_SUPABASE_URL, _SUPABASE_KEY);
-
+  const COLS = 'brand, product, shade, finish, lab_l, lab_a, lab_b, hex, image_url';
   const PAGE = 1000;
-  let all = [];
-  let from = 0;
 
-  while (true) {
-    const { data, error } = await client
-      .from('lipstick-data')
-      .select('brand, product, shade, finish, lab_l, lab_a, lab_b, hex, image_url')
-      .range(from, from + PAGE - 1);
+  const { count } = await client
+    .from('lipstick-data')
+    .select('*', { count: 'exact', head: true });
 
-    if (error) { console.error('Failed to load products:', error); break; }
-    all = all.concat(data);
-    if (data.length < PAGE) break;
-    from += PAGE;
-  }
+  const numPages = Math.ceil(count / PAGE);
+  const results = await Promise.all(
+    Array.from({ length: numPages }, (_, i) =>
+      client.from('lipstick-data')
+        .select(COLS)
+        .range(i * PAGE, (i + 1) * PAGE - 1)
+    )
+  );
+
+  const all = results.flatMap(r => r.data || []);
 
   REAL_PRODUCTS = all.map(r => ({
     brand: r.brand, product: r.product, shade: r.shade, finish: r.finish,
