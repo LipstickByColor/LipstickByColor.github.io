@@ -405,10 +405,7 @@
   }
   .proof-shot img {
     width: 100%; height: auto; display: block;
-  }
-  .proof-shot image-slot {
-    display: block; width: 100%; height: auto; aspect-ratio: 4 / 5;
-    background: var(--cream-dark);
+    aspect-ratio: 4 / 5; object-fit: cover; object-position: 50% 0%;
   }
   .proof-shot figcaption {
     padding: 14px 18px 16px;
@@ -473,12 +470,13 @@
     flex: 1 1 0; min-width: 0;
     display: flex; flex-direction: column;
   }
-  .flow-step image-slot {
+  .flow-step img {
     width: 100%; height: auto; aspect-ratio: 462 / 570;
     border: 1px solid var(--border);
     border-radius: 18px;
     background: var(--cream);
     box-shadow: 0 2px 10px var(--shadow);
+    object-fit: contain;
   }
   .step-cap {
     order: -1;
@@ -498,7 +496,7 @@
   }
   @media (max-width: 600px) {
     .flow-row { flex-direction: column; align-items: stretch; }
-    .flow-step image-slot { aspect-ratio: 462 / 570; }
+    .flow-step img { aspect-ratio: 462 / 570; }
     .flow-arrow { align-self: center; transform: rotate(90deg); margin: 2px 0; }
   }
 
@@ -923,7 +921,7 @@
             <div class="ps-sub"><b>"pink lipstick"</b> — keyword search</div>
           </figcaption>
           <figure>
-            <image-slot id="amazon-pink-results" fit="cover" radius="0" position="50% 0%" src="assets/amazon-pink-results.png" placeholder="Amazon results screenshot"></image-slot>
+            <img src="assets/amazon-pink-results.png" alt="Amazon results screenshot" />
           </figure>
         </div>
         <div class="proof-shot">
@@ -935,7 +933,7 @@
             <div class="ps-sub"><b>"pink lipstick"</b> — keyword search</div>
           </figcaption>
           <figure>
-            <image-slot id="google-pink-results" fit="cover" radius="0" position="50% 0%" src="assets/google-pink-results.png" placeholder="Google Shopping screenshot"></image-slot>
+            <img src="assets/google-pink-results.png" alt="Google Shopping screenshot" />
           </figure>
         </div>
       </div>
@@ -1001,23 +999,23 @@
           <div class="flow-grid">
             <div class="flow-row">
               <div class="flow-step">
-                <image-slot id="flow-wheel-a" fit="contain" radius="18" src="assets/flow-wheel-a.png" placeholder="Front page — the wheel"></image-slot>
+                <img src="assets/flow-wheel-a.png" alt="Front page — the wheel" />
                 <p class="step-cap"><span class="sn">A</span>Select a hue from the color wheel.</p>
               </div>
               <div class="flow-arrow">→</div>
               <div class="flow-step">
-                <image-slot id="flow-wheel-b" fit="contain" radius="18" src="assets/flow-wheel-b.png" placeholder="Results for chosen shade"></image-slot>
+                <img src="assets/flow-wheel-b.png" alt="Results for chosen shade" />
                 <p class="step-cap"><span class="sn">B</span>Matching products ranked by similarity.</p>
               </div>
             </div>
             <div class="flow-row">
               <div class="flow-step">
-                <image-slot id="flow-wheel-c" fit="contain" radius="18" src="assets/flow-wheel-c.png" placeholder="Lighter / deeper of that shade"></image-slot>
+                <img src="assets/flow-wheel-c.png" alt="Lighter / deeper of that shade" />
                 <p class="step-cap"><span class="sn">C</span>Zoom into the selected hue for lighter to deeper options.</p>
               </div>
               <div class="flow-arrow">→</div>
               <div class="flow-step">
-                <image-slot id="flow-wheel-d" fit="contain" radius="18" src="assets/flow-wheel-d.png" placeholder="Updated results"></image-slot>
+                <img src="assets/flow-wheel-d.png" alt="Updated results" />
                 <p class="step-cap"><span class="sn">D</span>Results re-rank to the new choice.</p>
               </div>
             </div>
@@ -1031,12 +1029,12 @@
           <div class="flow-grid">
             <div class="flow-row">
               <div class="flow-step">
-                <image-slot id="flow-photo-a" fit="contain" radius="18" src="assets/flow-photo-a.png" placeholder="Upload + color selection"></image-slot>
+                <img src="assets/flow-photo-a.png" alt="Upload + color selection" />
                 <p class="step-cap"><span class="sn">A</span>Upload an image and sample a color.</p>
               </div>
               <div class="flow-arrow">→</div>
               <div class="flow-step">
-                <image-slot id="flow-photo-b" fit="contain" radius="18" src="assets/flow-photo-b.png" placeholder="Results"></image-slot>
+                <img src="assets/flow-photo-b.png" alt="Results" />
                 <p class="step-cap"><span class="sn">B</span>Matching products and more options.</p>
               </div>
             </div>
@@ -1334,28 +1332,6 @@
   drag(hue, function (x) { state.h = x * 360; });
   render();
 })();
-</script>
-<script src="assets/image-slot.js"></script>
-<script>
-  // Make empty image-slot area match the page (cream) instead of the
-  // component's default translucent-grey frame, so under-filled crops blend in.
-  (function () {
-    function neutralize() {
-      document.querySelectorAll('.flow-step image-slot').forEach(function (s) {
-        var sr = s.shadowRoot;
-        if (!sr || sr.querySelector('style[data-bg-fix]')) return;
-        var st = document.createElement('style');
-        st.setAttribute('data-bg-fix', '');
-        st.textContent = '.frame{background:transparent !important}';
-        sr.appendChild(st);
-      });
-    }
-    if (window.customElements && customElements.whenDefined) {
-      customElements.whenDefined('image-slot').then(function () {
-        neutralize(); setTimeout(neutralize, 50);
-      });
-    } else { setTimeout(neutralize, 100); }
-  })();
 </script>
 </body>
 </html>
