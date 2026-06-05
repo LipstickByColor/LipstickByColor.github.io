@@ -1,1 +1,9 @@
 node_modules/
+lipstick-data.js
+lipstick-images.js
+.DS_Store
+assets/image-slot.js
+design-canvas.jsx
+*.py
+*.ipynb
+products.csv
