@@ -1690,7 +1690,7 @@ function PhotoPicker({ sampledHex, onColor }) {
 
   function sampleAt(px, py) {
     const canvas = canvasRef.current; if (!canvas) return;
-    const ctx = canvas.getContext('2d', { willReadFrequently:true });
+    const ctx = canvas.getContext('2d', { colorSpace: 'display-p3', willReadFrequently:true });
     const r = Math.max(1, Math.round(radius));
     const x0 = Math.max(0, Math.floor(px - r));
     const y0 = Math.max(0, Math.floor(py - r));
@@ -1731,7 +1731,7 @@ function PhotoPicker({ sampledHex, onColor }) {
     const scale = Math.min(1, MAX / Math.max(img.naturalWidth, img.naturalHeight));
     canvas.width  = Math.round(img.naturalWidth  * scale);
     canvas.height = Math.round(img.naturalHeight * scale);
-    canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+    canvas.getContext('2d', { colorSpace: 'display-p3' }).drawImage(img, 0, 0, canvas.width, canvas.height);
   }
 
   if (!src) {
