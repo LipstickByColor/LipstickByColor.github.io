@@ -25,6 +25,12 @@ The ML pipeline behind the color clustering and product data is described in the
 
 ---
 
+## UX Improvements
+
+**In-store camera photos were getting darker on iPhone.** When a user takes a photo directly in the app (common when color-matching at a store), the image appeared darker than reality, making accurate color matching harder. The cause was a color space mismatch: iPhone cameras shoot in Display P3 (wide gamut), but the HTML canvas used for pixel sampling defaulted to sRGB. Drawing a P3 image onto an sRGB canvas silently clips the color data, shifting the image darker. Fixed by setting `colorSpace: 'display-p3'` on the canvas context, which also improves the accuracy of the sampled hex color.
+
+---
+
 ## Credits
 
 Web application designed and built with the help of [Claude](https://claude.ai) (design and [Claude Code](https://claude.ai/claude-code)).
