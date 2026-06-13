@@ -2597,6 +2597,7 @@ function PhotoPicker({
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d', {
+      colorSpace: 'display-p3',
       willReadFrequently: true
     });
     const r = Math.max(1, Math.round(radius));
@@ -2656,7 +2657,9 @@ function PhotoPicker({
     const scale = Math.min(1, MAX / Math.max(img.naturalWidth, img.naturalHeight));
     canvas.width = Math.round(img.naturalWidth * scale);
     canvas.height = Math.round(img.naturalHeight * scale);
-    canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+    canvas.getContext('2d', {
+      colorSpace: 'display-p3'
+    }).drawImage(img, 0, 0, canvas.width, canvas.height);
   }
   if (!src) {
     return /*#__PURE__*/React.createElement("div", {

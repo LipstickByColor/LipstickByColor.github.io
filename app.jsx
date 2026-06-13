@@ -1678,6 +1678,7 @@ function PhotoPicker({ sampledHex, onColor }) {
 
   function handleFile(file) {
     if (!file || !file.type.startsWith('image/')) return;
+    window.gtag?.('event', 'photo_uploaded');
     const reader = new FileReader();
     reader.onload = e => { setSrc(e.target.result); setPoint(null); onColor(null); };
     reader.readAsDataURL(file);
