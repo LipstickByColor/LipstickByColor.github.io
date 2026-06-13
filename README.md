@@ -12,7 +12,7 @@ The color wheel is built from the actual product data: 48 cluster centers were d
 
 All product data is stored in [Supabase](https://supabase.com) and fetched on load. Color matching runs entirely in the browser using the CIELAB → sRGB math.
 
-The ML pipeline behind the color clustering and product data is described in the [About](https://lipstickbycolor.github.io/about.html) section and documented in detail on [GitHub (TBD)]().
+The ML pipeline behind the color clustering and product data is described in the [About](https://lipstickbycolor.github.io/about.html) section and documented in detail on [GitHub](https://github.com/ConstanzaSchibber/lipstick_color_extraction).
 
 ---
 
