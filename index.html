@@ -11,6 +11,12 @@
 <meta property="og:title" content="Lipstick Color Finder" />
 <meta property="og:description" content="Find your perfect lipstick shade. Search and filter by color, finish, and brand." />
 <meta property="og:image" content="https://lipstickbycolor.github.io/assets/flow-wheel-a.png" />
+<meta property="og:image:alt" content="Lipstick color wheel showing clustered shades" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Lipstick Color Finder" />
+<meta name="twitter:description" content="Find your perfect lipstick shade. Search and filter by color, finish, and brand." />
+<meta name="twitter:image" content="https://lipstickbycolor.github.io/assets/flow-wheel-a.png" />
+<link rel="canonical" href="https://lipstickbycolor.github.io/" />
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-83NRG1TJW2"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
@@ -19,12 +25,13 @@
   gtag('config', 'G-83NRG1TJW2');
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
-<script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" integrity="sha384-DGyLxAyjq0f9SPpVevD6IgztCFlnMF6oW/XQGmfe+IsZ8TqEiDrcHkMLKI6fiB/Z" crossorigin="anonymous"></script>
-<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" integrity="sha384-gTGxhz21lVGYNMcdJOyq01Edg0jhn/c22nsx0kyqP0TxaV5WVdsSH1fSDUf5YJj1" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="lipstick-utils.js"></script>
-<script src="supabase-data.js"></script>
+<script defer src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" integrity="sha384-DGyLxAyjq0f9SPpVevD6IgztCFlnMF6oW/XQGmfe+IsZ8TqEiDrcHkMLKI6fiB/Z" crossorigin="anonymous"></script>
+<script defer src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" integrity="sha384-gTGxhz21lVGYNMcdJOyq01Edg0jhn/c22nsx0kyqP0TxaV5WVdsSH1fSDUf5YJj1" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script defer src="lipstick-utils.js"></script>
+<script defer src="supabase-data.js"></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -132,6 +139,17 @@
     .dainty-range::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 10px; height: 10px; border-radius: 50%; background: var(--blush); margin-top: -4px; border: 1.5px solid #fff; box-shadow: 0 1px 3px rgba(42,26,20,0.2); }
     .dainty-range::-moz-range-thumb { width: 10px; height: 10px; border-radius: 50%; background: var(--blush); border: 1.5px solid #fff; box-shadow: 0 1px 3px rgba(42,26,20,0.2); }
   </style>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Lipstick Color Finder",
+  "url": "https://lipstickbycolor.github.io/",
+  "description": "Search 9,000+ lip products by exact color using CIELAB perceptual color matching — across brands, finishes, and price points.",
+  "applicationCategory": "LifestyleApplication",
+  "operatingSystem": "Web"
+}
+</script>
 </head>
 <body>
 <div id="root"></div>
