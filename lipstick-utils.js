@@ -41,6 +41,7 @@ function deltaE(lab1, lab2) {
 
 // ── Wheel palette: 42 GMM cluster centers + 6 novelty entry points ────────────
 const LIPSTICK_DATA = [
+  // ── GMM clusters (data-driven from 8684 real products, hue-ordered) ─────────
   {id:1,  hex:"#a22956", name:"Deep Raspberry"},
   {id:2,  hex:"#db2a6a", name:"Raspberry Sorbet"},
   {id:3,  hex:"#ed7491", name:"Bubblegum"},
@@ -64,7 +65,7 @@ const LIPSTICK_DATA = [
   {id:21, hex:"#842525", name:"Red Dahlia"},
   {id:22, hex:"#c26f67", name:"Faded Rose"},
   {id:23, hex:"#ea8e83", name:"Burnt Coral"},
-  {id:24, hex:"#686160", name:"Pebble"},
+  {id:34, hex:"#c47159", name:"Carnelian"},
   {id:25, hex:"#945c55", name:"Nude Rose"},
   {id:26, hex:"#76433d", name:"Sable"},
   {id:27, hex:"#bd1722", name:"Classic Red"},
@@ -72,23 +73,22 @@ const LIPSTICK_DATA = [
   {id:29, hex:"#cb8579", name:"Canyon Clay"},
   {id:30, hex:"#aa6155", name:"Terracotta"},
   {id:31, hex:"#e33830", name:"Grenadine"},
+  {id:50, hex:"#e02040", name:"Scarlet"},
   {id:32, hex:"#a34233", name:"Cayenne"},
   {id:33, hex:"#c48c7f", name:"Rose Dawn"},
-  {id:34, hex:"#c47159", name:"Carnelian"},
-  {id:35, hex:"#eae5e0", name:"Porcelain"},
-  {id:36, hex:"#8f8576", name:"Greige"},
-  {id:37, hex:"#b2d7ba", name:"Sage"},
-  {id:38, hex:"#2f3760", name:"Midnight"},
+  {id:38, hex:"#2f3760", name:"Midnight", novelty:true},
   {id:39, hex:"#c9579c", name:"Magenta"},
   {id:40, hex:"#a3487a", name:"Dahlia Mauve"},
-  {id:41, hex:"#170e12", name:"Onyx"},
+  {id:49, hex:"#F89FB5", name:"Flamingo"},
   {id:42, hex:"#6c3348", name:"Burgundy"},
   {id:43, hex:"#DC3092", name:"Hot Magenta"},
   {id:44, hex:"#4A1820", name:"Oxblood"},
-  {id:45, hex:"#2C7E94", name:"Aqua"},
-  {id:46, hex:"#2D6850", name:"Teal"},
-  {id:47, hex:"#454048", name:"Charcoal"},
-  {id:48, hex:"#C0A038", name:"Mustard"},
+  // ── Novelty entry points (hand-curated for outlier zones) ─────────────────
+  {id:41, hex:"#170e12", name:"Onyx",     novelty:true}, // GMM cluster — moved here; near-neutral hue sorts poorly
+  {id:45, hex:"#2C7E94", name:"Aqua",     novelty:true},
+  {id:46, hex:"#2D6850", name:"Teal",     novelty:true},
+  {id:47, hex:"#454048", name:"Charcoal", novelty:true},
+  {id:48, hex:"#C0A038", name:"Mustard",  novelty:true},
 ];
 
 // ── Convert wheel hex to CIELAB for matching ─────────────────────────────────

@@ -333,16 +333,7 @@ function ColorWheel({
   const SIZE = 440;
   const CX = SIZE / 2,
     CY = SIZE / 2;
-
-  // Sort colors by hue (skip when caller has already arranged them, e.g. by ΔE)
-  const sorted = preserveOrder ? [...colors] : [...colors].sort((a, b) => {
-    const ha = getHsl(a.hex).h;
-    const hb = getHsl(b.hex).h;
-    return ha - hb;
-  });
-  const N = sorted.length;
-  // Use single ring when there aren't enough colors for two rings to feel full,
-  // or when N is odd (pair logic needs even count).
+  const N = colors.length;
   const SINGLE_RING = N <= 14 || N % 2 !== 0;
   const HALF = SINGLE_RING ? N : N / 2;
 
@@ -358,33 +349,79 @@ function ColorWheel({
   const R_SINGLE_OUT = 184 * S;
   const R_SINGLE_IN = 60 * S;
   const GAP_DEG = 0.8;
+  const DIVIDER_GAP = 0; // no visual gap — novelty block sits at bottom, GMM fills the rest
 
-  // Build segments. In single-ring mode, inner is null.
+  // Build segments with explicit angle ranges.
   const segments = [];
-  if (SINGLE_RING) {
-    for (let i = 0; i < N; i++) {
-      segments.push({
-        outer: sorted[i],
+  if (preserveOrder) {
+    // Zoom / ΔE mode: colors in passed order, evenly spaced across full 360°
+    const sliceDeg = 360 / HALF;
+    if (SINGLE_RING) {
+      colors.forEach((c, i) => segments.push({
+        outer: c,
         inner: null,
-        index: i
-      });
+        startDeg: i * sliceDeg + GAP_DEG / 2,
+        endDeg: (i + 1) * sliceDeg - GAP_DEG / 2
+      }));
+    } else {
+      for (let i = 0; i < HALF; i++) {
+        const a = colors[i * 2],
+          b = colors[i * 2 + 1];
+        const la = getHsl(a.hex).l,
+          lb = getHsl(b.hex).l;
+        const outer = la >= lb ? a : b,
+          inner = la >= lb ? b : a;
+        segments.push({
+          outer,
+          inner,
+          startDeg: i * sliceDeg + GAP_DEG / 2,
+          endDeg: (i + 1) * sliceDeg - GAP_DEG / 2
+        });
+      }
     }
   } else {
-    for (let i = 0; i < HALF; i++) {
-      const a = sorted[i * 2];
-      const b = sorted[i * 2 + 1];
-      const la = getHsl(a.hex).l;
-      const lb = getHsl(b.hex).l;
-      const outer = la >= lb ? a : b;
-      const inner = la >= lb ? b : a;
+    // Normal mode: GMM colors hue-sorted across most of the wheel; novelty colors
+    // hue-sorted in a fixed block at the bottom (180°), separated by DIVIDER_GAP.
+    const sortByHue = arr => [...arr].sort((a, b) => getHsl(a.hex).h - getHsl(b.hex).h);
+    const gmmColors = sortByHue(colors.filter(c => !c.novelty));
+    const novColors = sortByHue(colors.filter(c => c.novelty));
+    const sliceDeg = (360 - DIVIDER_GAP) / HALF;
+    const novHalf = SINGLE_RING ? novColors.length : novColors.length / 2;
+    const gmmHalf = SINGLE_RING ? gmmColors.length : gmmColors.length / 2;
+    const novSpan = novHalf * sliceDeg;
+    const novStart = 180 - novSpan / 2; // center novelty block at bottom (180°)
+    const gmmStart = novStart + novSpan + DIVIDER_GAP;
+    for (let i = 0; i < gmmHalf; i++) {
+      const a = gmmColors[i * 2],
+        b = gmmColors[i * 2 + 1];
+      const la = getHsl(a.hex).l,
+        lb = getHsl(b.hex).l;
+      const outer = la >= lb ? a : b,
+        inner = la >= lb ? b : a;
+      const s = gmmStart + i * sliceDeg;
       segments.push({
         outer,
         inner,
-        index: i
+        startDeg: s + GAP_DEG / 2,
+        endDeg: s + sliceDeg - GAP_DEG / 2
+      });
+    }
+    for (let i = 0; i < novHalf; i++) {
+      const a = novColors[i * 2],
+        b = novColors[i * 2 + 1];
+      const la = getHsl(a.hex).l,
+        lb = getHsl(b.hex).l;
+      const outer = la >= lb ? a : b,
+        inner = la >= lb ? b : a;
+      const s = novStart + i * sliceDeg;
+      segments.push({
+        outer,
+        inner,
+        startDeg: s + GAP_DEG / 2,
+        endDeg: s + sliceDeg - GAP_DEG / 2
       });
     }
   }
-  const sliceDeg = 360 / HALF;
   function polarToXY(angleDeg, r) {
     const rad = (angleDeg - 90) * Math.PI / 180;
     return {
@@ -414,13 +451,6 @@ function ColorWheel({
     // Keep text readable: flip if in bottom half
     return mid > 90 && mid < 270 ? mid + 90 : mid - 90;
   }
-
-  // Font size based on arc length
-  const arcLen = sliceDeg * Math.PI / 180;
-  const outerArcPx = arcLen * ((R_OUTER_OUT + R_OUTER_IN) / 2);
-  const innerArcPx = arcLen * ((R_INNER_OUT + R_INNER_IN) / 2);
-  const outerFontSize = Math.max(7, Math.min(10, outerArcPx / 8));
-  const innerFontSize = Math.max(6, Math.min(9, innerArcPx / 8));
   return /*#__PURE__*/React.createElement("div", {
     style: {
       position: 'relative',
@@ -453,10 +483,9 @@ function ColorWheel({
   }), segments.map(({
     outer,
     inner,
-    index
+    startDeg,
+    endDeg
   }) => {
-    const startDeg = index * sliceDeg + GAP_DEG / 2;
-    const endDeg = (index + 1) * sliceDeg - GAP_DEG / 2;
     const outerSelected = outer.id === selectedId;
     const innerSelected = inner && inner.id === selectedId;
     const outerHovered = outer.id === hoveredId;
@@ -474,7 +503,7 @@ function ColorWheel({
     const outerLum = luminance(outer.hex);
     const innerLum = inner ? luminance(inner.hex) : 0;
     return /*#__PURE__*/React.createElement("g", {
-      key: index
+      key: outer.id
     }, /*#__PURE__*/React.createElement("path", {
       d: outerPath,
       fill: outer.hex,
