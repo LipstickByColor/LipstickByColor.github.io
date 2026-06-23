@@ -742,146 +742,278 @@ function ResultsTable({
       gap: 12
     }
   }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      lineHeight: 1
-    }
-  }, /*#__PURE__*/React.createElement("svg", {
-    width: "80",
-    height: "80",
-    viewBox: "0 0 80 80",
-    fill: "none",
-    xmlns: "http://www.w3.org/2000/svg"
-  }, /*#__PURE__*/React.createElement("rect", {
-    x: "28",
-    y: "48",
-    width: "24",
-    height: "24",
-    rx: "3",
-    fill: "#EDD8CE",
-    stroke: "#D4B8AC",
-    strokeWidth: "1.5"
-  }), /*#__PURE__*/React.createElement("rect", {
-    x: "28",
-    y: "54",
-    width: "24",
-    height: "5",
-    fill: "#E4C8BC",
-    stroke: "#D4B8AC",
-    strokeWidth: "1"
-  }), /*#__PURE__*/React.createElement("rect", {
-    x: "31",
-    y: "34",
-    width: "18",
-    height: "18",
-    rx: "2",
-    fill: "#F0DED8",
-    stroke: "#D4B8AC",
-    strokeWidth: "1.5"
-  }), /*#__PURE__*/React.createElement("rect", {
-    x: "33",
-    y: "22",
-    width: "14",
-    height: "14",
-    fill: "#F2E2DC",
-    stroke: "#D4B8AC",
-    strokeWidth: "1.2"
-  }), /*#__PURE__*/React.createElement("path", {
-    d: "M33 22 L33 18 Q33 8 36 6 Q38 5 40 5 Q42 5 44 6 Q47 8 47 18 L47 22 Z",
-    fill: "#F2E2DC",
-    stroke: "#D4B8AC",
-    strokeWidth: "1.2",
-    strokeLinejoin: "round"
-  }), /*#__PURE__*/React.createElement("line", {
-    x1: "33",
-    y1: "20",
-    x2: "47",
-    y2: "15",
-    stroke: "#D4B8AC",
-    strokeWidth: "1.2"
-  }), /*#__PURE__*/React.createElement("path", {
-    d: "M36 20 Q35 14 37 8",
-    stroke: "rgba(255,255,255,0.6)",
-    strokeWidth: "1.5",
-    strokeLinecap: "round"
-  }))), /*#__PURE__*/React.createElement("p", {
-    style: {
-      fontFamily: 'Cormorant Garamond',
-      fontSize: 20,
-      fontStyle: 'italic',
-      fontWeight: 300,
-      lineHeight: 1.5
-    }
-  }, "Pick a color from the wheel, a photo,", /*#__PURE__*/React.createElement("br", null), "or a hex code palette"), /*#__PURE__*/React.createElement("div", {
     className: "results-empty-tips",
     style: {
-      marginTop: 20,
-      paddingTop: 20,
-      borderTop: '1px solid var(--border)',
       display: 'flex',
       flexDirection: 'column',
-      gap: 14,
-      maxWidth: 320
+      gap: 18
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
       display: 'flex',
-      alignItems: 'center',
+      alignItems: 'flex-start',
       gap: 14,
       textAlign: 'left'
     }
   }, /*#__PURE__*/React.createElement("span", {
     style: {
-      fontSize: 18,
-      color: 'var(--blush)',
       flexShrink: 0,
-      width: 32,
-      height: 32,
+      width: 40,
+      height: 40,
       borderRadius: '50%',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      background: 'rgba(200,120,144,0.10)'
+      background: 'rgba(200,120,144,0.10)',
+      marginTop: 2
     }
-  }, "\u2665"), /*#__PURE__*/React.createElement("p", {
+  }, /*#__PURE__*/React.createElement("svg", {
+    width: "22",
+    height: "22",
+    viewBox: "0 0 20 20",
+    fill: "none"
+  }, /*#__PURE__*/React.createElement("path", {
+    d: "M 10 10 L 18 10 A 8 8 0 0 1 10 18 Z",
+    fill: "#F5C5C5",
+    stroke: "#D4B8AC",
+    strokeWidth: "0.5"
+  }), /*#__PURE__*/React.createElement("path", {
+    d: "M 10 10 L 10 18 A 8 8 0 0 1 2 10 Z",
+    fill: "#C87890",
+    stroke: "#D4B8AC",
+    strokeWidth: "0.5"
+  }), /*#__PURE__*/React.createElement("path", {
+    d: "M 10 10 L 2 10 A 8 8 0 0 1 10 2 Z",
+    fill: "#8B4558",
+    stroke: "#D4B8AC",
+    strokeWidth: "0.5"
+  }), /*#__PURE__*/React.createElement("path", {
+    d: "M 10 10 L 10 2 A 8 8 0 0 1 18 10 Z",
+    fill: "#E8C8B8",
+    stroke: "#D4B8AC",
+    strokeWidth: "0.5"
+  }))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
     style: {
-      fontFamily: 'Cormorant Garamond',
-      fontSize: 17,
-      fontStyle: 'italic',
+      fontFamily: 'DM Sans',
+      fontSize: 14,
+      fontWeight: 500,
+      color: 'var(--espresso)',
+      marginBottom: 2,
+      lineHeight: 1.3
+    }
+  }, "Color Wheel"), /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontFamily: 'DM Sans',
+      fontSize: 14,
       fontWeight: 400,
       color: 'var(--text-muted)',
-      lineHeight: 1.4
+      lineHeight: 1.5
     }
-  }, "Tap the heart on any product", /*#__PURE__*/React.createElement("br", null), "to save it to your list")), /*#__PURE__*/React.createElement("div", {
+  }, "Discover products by color family, then explore lighter and deeper shades."))), /*#__PURE__*/React.createElement("div", {
     style: {
       display: 'flex',
-      alignItems: 'center',
+      alignItems: 'flex-start',
       gap: 14,
       textAlign: 'left'
     }
   }, /*#__PURE__*/React.createElement("span", {
     style: {
-      fontSize: 18,
+      flexShrink: 0,
+      width: 40,
+      height: 40,
+      borderRadius: '50%',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      background: 'rgba(200,120,144,0.10)',
+      marginTop: 2
+    }
+  }, /*#__PURE__*/React.createElement("svg", {
+    width: "22",
+    height: "22",
+    viewBox: "0 0 20 20",
+    fill: "none"
+  }, /*#__PURE__*/React.createElement("rect", {
+    x: "2",
+    y: "7",
+    width: "16",
+    height: "10",
+    rx: "2",
+    fill: "#EDD8CE",
+    stroke: "#D4B8AC",
+    strokeWidth: "1"
+  }), /*#__PURE__*/React.createElement("rect", {
+    x: "6",
+    y: "5",
+    width: "7",
+    height: "3",
+    rx: "1",
+    fill: "#EDD8CE",
+    stroke: "#D4B8AC",
+    strokeWidth: "1"
+  }), /*#__PURE__*/React.createElement("circle", {
+    cx: "10",
+    cy: "12",
+    r: "3",
+    fill: "#F0D8D0",
+    stroke: "#C87890",
+    strokeWidth: "1.2"
+  }))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontFamily: 'DM Sans',
+      fontSize: 14,
+      fontWeight: 500,
+      color: 'var(--espresso)',
+      marginBottom: 2,
+      lineHeight: 1.3
+    }
+  }, "Upload Photo"), /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontFamily: 'DM Sans',
+      fontSize: 14,
+      fontWeight: 400,
+      color: 'var(--text-muted)',
+      lineHeight: 1.5
+    }
+  }, "Upload a photo and tap the exact shade you'd like to match."))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      alignItems: 'flex-start',
+      gap: 14,
+      textAlign: 'left'
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      flexShrink: 0,
+      width: 40,
+      height: 40,
+      borderRadius: '50%',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      background: 'rgba(200,120,144,0.10)',
+      marginTop: 2
+    }
+  }, /*#__PURE__*/React.createElement("svg", {
+    width: "22",
+    height: "22",
+    viewBox: "0 0 20 20",
+    fill: "none"
+  }, /*#__PURE__*/React.createElement("circle", {
+    cx: "14",
+    cy: "5",
+    r: "3.5",
+    fill: "#EDD8CE",
+    stroke: "#D4B8AC",
+    strokeWidth: "1"
+  }), /*#__PURE__*/React.createElement("line", {
+    x1: "12",
+    y1: "7.5",
+    x2: "5.5",
+    y2: "14",
+    stroke: "#D4B8AC",
+    strokeWidth: "2",
+    strokeLinecap: "round"
+  }), /*#__PURE__*/React.createElement("circle", {
+    cx: "4",
+    cy: "15.5",
+    r: "2",
+    fill: "#C87890"
+  }))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontFamily: 'DM Sans',
+      fontSize: 14,
+      fontWeight: 500,
+      color: 'var(--espresso)',
+      marginBottom: 2,
+      lineHeight: 1.3
+    }
+  }, "Custom Color"), /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontFamily: 'DM Sans',
+      fontSize: 14,
+      fontWeight: 400,
+      color: 'var(--text-muted)',
+      lineHeight: 1.5
+    }
+  }, "Choose from the color picker or enter a hex code when you know the exact color you're looking for."))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      alignItems: 'flex-start',
+      gap: 14,
+      textAlign: 'left'
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 20,
+      color: 'var(--blush)',
+      flexShrink: 0,
+      width: 40,
+      height: 40,
+      borderRadius: '50%',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      background: 'rgba(200,120,144,0.10)',
+      marginTop: 2
+    }
+  }, "\u2665"), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontFamily: 'DM Sans',
+      fontSize: 14,
+      fontWeight: 500,
+      color: 'var(--espresso)',
+      marginBottom: 2,
+      lineHeight: 1.3
+    }
+  }, "My Favorites"), /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontFamily: 'DM Sans',
+      fontSize: 14,
+      fontWeight: 400,
+      color: 'var(--text-muted)',
+      lineHeight: 1.5
+    }
+  }, "Heart products to save them, compare options, and explore similar shades later."))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      alignItems: 'flex-start',
+      gap: 14,
+      textAlign: 'left'
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 20,
       color: 'var(--espresso-mid)',
       flexShrink: 0,
-      width: 32,
-      height: 32,
+      width: 40,
+      height: 40,
       borderRadius: '50%',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
       background: 'var(--cream-dark)',
-      fontWeight: 300
+      fontWeight: 300,
+      marginTop: 2
     }
-  }, "+"), /*#__PURE__*/React.createElement("p", {
+  }, "+"), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
     style: {
-      fontFamily: 'Cormorant Garamond',
-      fontSize: 17,
-      fontStyle: 'italic',
+      fontFamily: 'DM Sans',
+      fontSize: 14,
+      fontWeight: 500,
+      color: 'var(--espresso)',
+      marginBottom: 2,
+      lineHeight: 1.3
+    }
+  }, "Shade Comparison"), /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontFamily: 'DM Sans',
+      fontSize: 14,
       fontWeight: 400,
       color: 'var(--text-muted)',
-      lineHeight: 1.4
+      lineHeight: 1.5
     }
-  }, "Pin up to four shades", /*#__PURE__*/React.createElement("br", null), "to compare them side by side"))));
+  }, "Pin up to four shades to compare them side by side.")))));
 
   // Toggle a finish on/off
   function toggleFinish(f) {
@@ -1328,7 +1460,7 @@ function ResultsTable({
         e.stopPropagation();
         toggleWishlist(p);
       },
-      title: isLiked ? 'Remove from My List' : 'Save to My List',
+      title: isLiked ? 'Remove from My Favorites' : 'Save to My Favorites',
       style: {
         width: 28,
         height: 28,
@@ -2126,7 +2258,7 @@ function WishlistPanel({
       fontSize: 26,
       color: 'var(--espresso)'
     }
-  }, "My List"), /*#__PURE__*/React.createElement("span", {
+  }, "My Favorites"), /*#__PURE__*/React.createElement("span", {
     style: {
       fontSize: 11,
       color: 'var(--text-muted)',
@@ -2770,7 +2902,7 @@ function PhotoPicker({
         fontStyle: 'italic',
         color: 'var(--espresso)'
       }
-    }, "Drop a photo here"), /*#__PURE__*/React.createElement("div", {
+    }, "Drop a photo or screenshot here"), /*#__PURE__*/React.createElement("div", {
       style: {
         fontFamily: 'DM Sans',
         fontSize: 12,
@@ -2786,7 +2918,7 @@ function PhotoPicker({
         marginTop: 8,
         lineHeight: 1.5
       }
-    }, "Best results from natural daylight. You'll click on the photo to pick the exact shade."), /*#__PURE__*/React.createElement("div", {
+    }, "Tap anywhere on the photo to pick a shade."), /*#__PURE__*/React.createElement("div", {
       style: {
         fontFamily: 'DM Sans',
         fontSize: 12,
@@ -3501,7 +3633,7 @@ function App() {
     if (photoHex) {
       setSelectedColor({
         id: '__photo__',
-        name: 'From photo',
+        name: 'Upload photo',
         hex: photoHex
       });
       window.gtag?.('event', 'select_color', {
@@ -3733,7 +3865,7 @@ function App() {
     style: {
       color: 'var(--blush)'
     }
-  }, "\u2665"), "My List", wishlist.length > 0 && /*#__PURE__*/React.createElement("span", {
+  }, "\u2665"), " My Favorites", wishlist.length > 0 && /*#__PURE__*/React.createElement("span", {
     style: {
       background: 'var(--blush)',
       color: '#fff',
@@ -3766,7 +3898,7 @@ function App() {
     label: 'Color wheel'
   }, {
     id: 'photo',
-    label: 'From photo'
+    label: 'Upload photo'
   }, {
     id: 'hex',
     label: 'From hex'
@@ -4035,7 +4167,7 @@ function App() {
       marginTop: 8,
       textAlign: 'center'
     }
-  }, "Click a segment to find your closest match"), !selectedColor && /*#__PURE__*/React.createElement("div", {
+  }, "Click a segment to browse matching lipstick shades"), !selectedColor && /*#__PURE__*/React.createElement("div", {
     className: "mobile-picker-tips"
   }, /*#__PURE__*/React.createElement("div", {
     style: {

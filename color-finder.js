@@ -790,7 +790,198 @@ function ResultsTable({
   }, /*#__PURE__*/React.createElement("div", {
     style: {
       display: 'flex',
+      alignItems: 'flex-start',
+      gap: 14,
+      textAlign: 'left'
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      flexShrink: 0,
+      width: 32,
+      height: 32,
+      borderRadius: '50%',
+      display: 'flex',
       alignItems: 'center',
+      justifyContent: 'center',
+      background: 'rgba(200,120,144,0.10)',
+      marginTop: 2
+    }
+  }, /*#__PURE__*/React.createElement("svg", {
+    width: "18",
+    height: "18",
+    viewBox: "0 0 20 20",
+    fill: "none"
+  }, /*#__PURE__*/React.createElement("path", {
+    d: "M 10 10 L 18 10 A 8 8 0 0 1 10 18 Z",
+    fill: "#F5C5C5",
+    stroke: "#D4B8AC",
+    strokeWidth: "0.5"
+  }), /*#__PURE__*/React.createElement("path", {
+    d: "M 10 10 L 10 18 A 8 8 0 0 1 2 10 Z",
+    fill: "#C87890",
+    stroke: "#D4B8AC",
+    strokeWidth: "0.5"
+  }), /*#__PURE__*/React.createElement("path", {
+    d: "M 10 10 L 2 10 A 8 8 0 0 1 10 2 Z",
+    fill: "#8B4558",
+    stroke: "#D4B8AC",
+    strokeWidth: "0.5"
+  }), /*#__PURE__*/React.createElement("path", {
+    d: "M 10 10 L 10 2 A 8 8 0 0 1 18 10 Z",
+    fill: "#E8C8B8",
+    stroke: "#D4B8AC",
+    strokeWidth: "0.5"
+  }))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontFamily: 'Cormorant Garamond',
+      fontSize: 15,
+      fontWeight: 500,
+      color: 'var(--espresso)',
+      marginBottom: 2,
+      lineHeight: 1.3
+    }
+  }, "Color Wheel"), /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontFamily: 'Cormorant Garamond',
+      fontSize: 14,
+      fontStyle: 'italic',
+      fontWeight: 300,
+      color: 'var(--text-muted)',
+      lineHeight: 1.4
+    }
+  }, "Discover products by color family, then explore lighter and deeper shades."))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      alignItems: 'flex-start',
+      gap: 14,
+      textAlign: 'left'
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      flexShrink: 0,
+      width: 32,
+      height: 32,
+      borderRadius: '50%',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      background: 'rgba(200,120,144,0.10)',
+      marginTop: 2
+    }
+  }, /*#__PURE__*/React.createElement("svg", {
+    width: "18",
+    height: "18",
+    viewBox: "0 0 20 20",
+    fill: "none"
+  }, /*#__PURE__*/React.createElement("rect", {
+    x: "2",
+    y: "7",
+    width: "16",
+    height: "10",
+    rx: "2",
+    fill: "#EDD8CE",
+    stroke: "#D4B8AC",
+    strokeWidth: "1"
+  }), /*#__PURE__*/React.createElement("rect", {
+    x: "6",
+    y: "5",
+    width: "7",
+    height: "3",
+    rx: "1",
+    fill: "#EDD8CE",
+    stroke: "#D4B8AC",
+    strokeWidth: "1"
+  }), /*#__PURE__*/React.createElement("circle", {
+    cx: "10",
+    cy: "12",
+    r: "3",
+    fill: "#F0D8D0",
+    stroke: "#C87890",
+    strokeWidth: "1.2"
+  }))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontFamily: 'Cormorant Garamond',
+      fontSize: 15,
+      fontWeight: 500,
+      color: 'var(--espresso)',
+      marginBottom: 2,
+      lineHeight: 1.3
+    }
+  }, "Upload Photo"), /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontFamily: 'Cormorant Garamond',
+      fontSize: 14,
+      fontStyle: 'italic',
+      fontWeight: 300,
+      color: 'var(--text-muted)',
+      lineHeight: 1.4
+    }
+  }, "Upload a photo and tap the exact shade you'd like to match."))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      alignItems: 'flex-start',
+      gap: 14,
+      textAlign: 'left'
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      flexShrink: 0,
+      width: 32,
+      height: 32,
+      borderRadius: '50%',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      background: 'rgba(200,120,144,0.10)',
+      marginTop: 2
+    }
+  }, /*#__PURE__*/React.createElement("svg", {
+    width: "18",
+    height: "18",
+    viewBox: "0 0 20 20",
+    fill: "none"
+  }, /*#__PURE__*/React.createElement("circle", {
+    cx: "14",
+    cy: "5",
+    r: "3.5",
+    fill: "#EDD8CE",
+    stroke: "#D4B8AC",
+    strokeWidth: "1"
+  }), /*#__PURE__*/React.createElement("line", {
+    x1: "12",
+    y1: "7.5",
+    x2: "5.5",
+    y2: "14",
+    stroke: "#D4B8AC",
+    strokeWidth: "2",
+    strokeLinecap: "round"
+  }), /*#__PURE__*/React.createElement("circle", {
+    cx: "4",
+    cy: "15.5",
+    r: "2",
+    fill: "#C87890"
+  }))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontFamily: 'Cormorant Garamond',
+      fontSize: 15,
+      fontWeight: 500,
+      color: 'var(--espresso)',
+      marginBottom: 2,
+      lineHeight: 1.3
+    }
+  }, "Custom Color"), /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontFamily: 'Cormorant Garamond',
+      fontSize: 14,
+      fontStyle: 'italic',
+      fontWeight: 300,
+      color: 'var(--text-muted)',
+      lineHeight: 1.4
+    }
+  }, "Choose from the color picker or enter a hex code when you know the exact color you're looking for."))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      alignItems: 'flex-start',
       gap: 14,
       textAlign: 'left'
     }
@@ -805,18 +996,28 @@ function ResultsTable({
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      background: 'rgba(200,120,144,0.10)'
+      background: 'rgba(200,120,144,0.10)',
+      marginTop: 2
     }
-  }, "\u2665"), /*#__PURE__*/React.createElement("p", {
+  }, "\u2665"), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
     style: {
       fontFamily: 'Cormorant Garamond',
-      fontSize: 17,
+      fontSize: 15,
+      fontWeight: 500,
+      color: 'var(--espresso)',
+      marginBottom: 2,
+      lineHeight: 1.3
+    }
+  }, "My Favorites"), /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontFamily: 'Cormorant Garamond',
+      fontSize: 14,
       fontStyle: 'italic',
-      fontWeight: 400,
+      fontWeight: 300,
       color: 'var(--text-muted)',
       lineHeight: 1.4
     }
-  }, "Tap the heart on any product", /*#__PURE__*/React.createElement("br", null), "to save it to your list")), /*#__PURE__*/React.createElement("div", {
+  }, "Heart products to save them, compare options, and explore similar shades later."))), /*#__PURE__*/React.createElement("div", {
     style: {
       display: 'flex',
       alignItems: 'center',
@@ -1277,7 +1478,7 @@ function ResultsTable({
         e.stopPropagation();
         toggleWishlist(p);
       },
-      title: isLiked ? 'Remove from My List' : 'Save to My List',
+      title: isLiked ? 'Remove from My Favorites' : 'Save to My Favorites',
       style: {
         width: 28,
         height: 28,
@@ -2057,7 +2258,7 @@ function WishlistPanel({
       fontSize: 26,
       color: 'var(--espresso)'
     }
-  }, "My List"), /*#__PURE__*/React.createElement("span", {
+  }, "My Favorites"), /*#__PURE__*/React.createElement("span", {
     style: {
       fontSize: 11,
       color: 'var(--text-muted)',
@@ -2700,7 +2901,7 @@ function PhotoPicker({
         fontStyle: 'italic',
         color: 'var(--espresso)'
       }
-    }, "Drop a photo here"), /*#__PURE__*/React.createElement("div", {
+    }, "Drop a photo or screenshot here"), /*#__PURE__*/React.createElement("div", {
       style: {
         fontFamily: 'DM Sans',
         fontSize: 12,
@@ -2716,7 +2917,7 @@ function PhotoPicker({
         marginTop: 8,
         lineHeight: 1.5
       }
-    }, "Best results from natural daylight. You'll click on the photo to pick the exact shade."), /*#__PURE__*/React.createElement("div", {
+    }, "Tap anywhere on the photo to pick a shade."), /*#__PURE__*/React.createElement("div", {
       style: {
         fontFamily: 'DM Sans',
         fontSize: 12,
@@ -3416,7 +3617,7 @@ function App() {
     if (photoHex) {
       setSelectedColor({
         id: '__photo__',
-        name: 'From photo',
+        name: 'Upload photo',
         hex: photoHex
       });
       setZoomAnchor(null);
@@ -3614,7 +3815,7 @@ function App() {
     style: {
       color: 'var(--blush)'
     }
-  }, "\u2665"), "My List", wishlist.length > 0 && /*#__PURE__*/React.createElement("span", {
+  }, "\u2665"), " My Favorites", wishlist.length > 0 && /*#__PURE__*/React.createElement("span", {
     style: {
       background: 'var(--blush)',
       color: '#fff',
@@ -3647,7 +3848,7 @@ function App() {
     label: 'Color wheel'
   }, {
     id: 'photo',
-    label: 'From photo'
+    label: 'Upload photo'
   }, {
     id: 'hex',
     label: 'From hex'
@@ -3898,7 +4099,7 @@ function App() {
       marginTop: 8,
       textAlign: 'center'
     }
-  }, "Click a segment to find your closest match")), /*#__PURE__*/React.createElement("div", {
+  }, "Click a segment to browse matching lipstick shades")), /*#__PURE__*/React.createElement("div", {
     className: "results-col"
   }, /*#__PURE__*/React.createElement(ResultsTable, {
     selectedColor: effectiveColor,

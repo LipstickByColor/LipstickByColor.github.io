@@ -488,52 +488,84 @@ function ResultsTable({ selectedColor, matches, totalProducts, pinnedItems, togg
       flex:1, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center',
       color:'var(--text-muted)', textAlign:'center', padding:40, gap:12,
     }}>
-      <div style={{ lineHeight:1 }}>
-        <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-          {/* Outer case / base */}
-          <rect x="28" y="48" width="24" height="24" rx="3" fill="#EDD8CE" stroke="#D4B8AC" strokeWidth="1.5"/>
-          {/* Case band detail */}
-          <rect x="28" y="54" width="24" height="5" fill="#E4C8BC" stroke="#D4B8AC" strokeWidth="1"/>
-          {/* Inner sleeve holding bullet */}
-          <rect x="31" y="34" width="18" height="18" rx="2" fill="#F0DED8" stroke="#D4B8AC" strokeWidth="1.5"/>
-          {/* Bullet body */}
-          <rect x="33" y="22" width="14" height="14" fill="#F2E2DC" stroke="#D4B8AC" strokeWidth="1.2"/>
-          {/* Bullet angled tip — domed, not phallic */}
-          <path d="M33 22 L33 18 Q33 8 36 6 Q38 5 40 5 Q42 5 44 6 Q47 8 47 18 L47 22 Z" fill="#F2E2DC" stroke="#D4B8AC" strokeWidth="1.2" strokeLinejoin="round"/>
-          {/* Flat angled cut across the top of the bullet */}
-          <line x1="33" y1="20" x2="47" y2="15" stroke="#D4B8AC" strokeWidth="1.2"/>
-          {/* Highlight on bullet */}
-          <path d="M36 20 Q35 14 37 8" stroke="rgba(255,255,255,0.6)" strokeWidth="1.5" strokeLinecap="round"/>
-        </svg>
-      </div>
-      <p style={{ fontFamily:'Cormorant Garamond', fontSize:20, fontStyle:'italic', fontWeight:300, lineHeight:1.5 }}>
-        Pick a color from the wheel, a photo,<br/>or a hex code palette
-      </p>
       <div className="results-empty-tips" style={{
-        marginTop:20, paddingTop:20, borderTop:'1px solid var(--border)',
-        display:'flex', flexDirection:'column', gap:14, maxWidth:320,
+        display:'flex', flexDirection:'column', gap:18,
       }}>
-        <div style={{ display:'flex', alignItems:'center', gap:14, textAlign:'left' }}>
+        <div style={{ display:'flex', alignItems:'flex-start', gap:14, textAlign:'left' }}>
           <span style={{
-            fontSize:18, color:'var(--blush)', flexShrink:0,
-            width:32, height:32, borderRadius:'50%',
+            flexShrink:0, width:40, height:40, borderRadius:'50%',
             display:'flex', alignItems:'center', justifyContent:'center',
-            background:'rgba(200,120,144,0.10)',
-          }}>♥</span>
-          <p style={{ fontFamily:'Cormorant Garamond', fontSize:17, fontStyle:'italic', fontWeight:400, color:'var(--text-muted)', lineHeight:1.4 }}>
-            Tap the heart on any product<br/>to save it to your list
-          </p>
+            background:'rgba(200,120,144,0.10)', marginTop:2,
+          }}>
+            <svg width="22" height="22" viewBox="0 0 20 20" fill="none">
+              <path d="M 10 10 L 18 10 A 8 8 0 0 1 10 18 Z" fill="#F5C5C5" stroke="#D4B8AC" strokeWidth="0.5"/>
+              <path d="M 10 10 L 10 18 A 8 8 0 0 1 2 10 Z" fill="#C87890" stroke="#D4B8AC" strokeWidth="0.5"/>
+              <path d="M 10 10 L 2 10 A 8 8 0 0 1 10 2 Z" fill="#8B4558" stroke="#D4B8AC" strokeWidth="0.5"/>
+              <path d="M 10 10 L 10 2 A 8 8 0 0 1 18 10 Z" fill="#E8C8B8" stroke="#D4B8AC" strokeWidth="0.5"/>
+            </svg>
+          </span>
+          <div>
+            <p style={{ fontFamily:'DM Sans', fontSize:14, fontWeight:500, color:'var(--espresso)', marginBottom:2, lineHeight:1.3 }}>Color Wheel</p>
+            <p style={{ fontFamily:'DM Sans', fontSize:14, fontWeight:400, color:'var(--text-muted)', lineHeight:1.5 }}>Discover products by color family, then explore lighter and deeper shades.</p>
+          </div>
         </div>
-        <div style={{ display:'flex', alignItems:'center', gap:14, textAlign:'left' }}>
+        <div style={{ display:'flex', alignItems:'flex-start', gap:14, textAlign:'left' }}>
           <span style={{
-            fontSize:18, color:'var(--espresso-mid)', flexShrink:0,
-            width:32, height:32, borderRadius:'50%',
+            flexShrink:0, width:40, height:40, borderRadius:'50%',
             display:'flex', alignItems:'center', justifyContent:'center',
-            background:'var(--cream-dark)', fontWeight:300,
+            background:'rgba(200,120,144,0.10)', marginTop:2,
+          }}>
+            <svg width="22" height="22" viewBox="0 0 20 20" fill="none">
+              <rect x="2" y="7" width="16" height="10" rx="2" fill="#EDD8CE" stroke="#D4B8AC" strokeWidth="1"/>
+              <rect x="6" y="5" width="7" height="3" rx="1" fill="#EDD8CE" stroke="#D4B8AC" strokeWidth="1"/>
+              <circle cx="10" cy="12" r="3" fill="#F0D8D0" stroke="#C87890" strokeWidth="1.2"/>
+            </svg>
+          </span>
+          <div>
+            <p style={{ fontFamily:'DM Sans', fontSize:14, fontWeight:500, color:'var(--espresso)', marginBottom:2, lineHeight:1.3 }}>Upload Photo</p>
+            <p style={{ fontFamily:'DM Sans', fontSize:14, fontWeight:400, color:'var(--text-muted)', lineHeight:1.5 }}>Upload a photo and tap the exact shade you'd like to match.</p>
+          </div>
+        </div>
+        <div style={{ display:'flex', alignItems:'flex-start', gap:14, textAlign:'left' }}>
+          <span style={{
+            flexShrink:0, width:40, height:40, borderRadius:'50%',
+            display:'flex', alignItems:'center', justifyContent:'center',
+            background:'rgba(200,120,144,0.10)', marginTop:2,
+          }}>
+            <svg width="22" height="22" viewBox="0 0 20 20" fill="none">
+              <circle cx="14" cy="5" r="3.5" fill="#EDD8CE" stroke="#D4B8AC" strokeWidth="1"/>
+              <line x1="12" y1="7.5" x2="5.5" y2="14" stroke="#D4B8AC" strokeWidth="2" strokeLinecap="round"/>
+              <circle cx="4" cy="15.5" r="2" fill="#C87890"/>
+            </svg>
+          </span>
+          <div>
+            <p style={{ fontFamily:'DM Sans', fontSize:14, fontWeight:500, color:'var(--espresso)', marginBottom:2, lineHeight:1.3 }}>Custom Color</p>
+            <p style={{ fontFamily:'DM Sans', fontSize:14, fontWeight:400, color:'var(--text-muted)', lineHeight:1.5 }}>Choose from the color picker or enter a hex code when you know the exact color you're looking for.</p>
+          </div>
+        </div>
+        <div style={{ display:'flex', alignItems:'flex-start', gap:14, textAlign:'left' }}>
+          <span style={{
+            fontSize:20, color:'var(--blush)', flexShrink:0,
+            width:40, height:40, borderRadius:'50%',
+            display:'flex', alignItems:'center', justifyContent:'center',
+            background:'rgba(200,120,144,0.10)', marginTop:2,
+          }}>♥</span>
+          <div>
+            <p style={{ fontFamily:'DM Sans', fontSize:14, fontWeight:500, color:'var(--espresso)', marginBottom:2, lineHeight:1.3 }}>My Favorites</p>
+            <p style={{ fontFamily:'DM Sans', fontSize:14, fontWeight:400, color:'var(--text-muted)', lineHeight:1.5 }}>Heart products to save them, compare options, and explore similar shades later.</p>
+          </div>
+        </div>
+        <div style={{ display:'flex', alignItems:'flex-start', gap:14, textAlign:'left' }}>
+          <span style={{
+            fontSize:20, color:'var(--espresso-mid)', flexShrink:0,
+            width:40, height:40, borderRadius:'50%',
+            display:'flex', alignItems:'center', justifyContent:'center',
+            background:'var(--cream-dark)', fontWeight:300, marginTop:2,
           }}>+</span>
-          <p style={{ fontFamily:'Cormorant Garamond', fontSize:17, fontStyle:'italic', fontWeight:400, color:'var(--text-muted)', lineHeight:1.4 }}>
-            Pin up to four shades<br/>to compare them side by side
-          </p>
+          <div>
+            <p style={{ fontFamily:'DM Sans', fontSize:14, fontWeight:500, color:'var(--espresso)', marginBottom:2, lineHeight:1.3 }}>Shade Comparison</p>
+            <p style={{ fontFamily:'DM Sans', fontSize:14, fontWeight:400, color:'var(--text-muted)', lineHeight:1.5 }}>Pin up to four shades to compare them side by side.</p>
+          </div>
         </div>
       </div>
     </div>
@@ -815,7 +847,7 @@ function ResultsTable({ selectedColor, matches, totalProducts, pinnedItems, togg
                     return (
                       <button
                         onClick={e => { e.stopPropagation(); toggleWishlist(p); }}
-                        title={isLiked ? 'Remove from My List' : 'Save to My List'}
+                        title={isLiked ? 'Remove from My Favorites' : 'Save to My Favorites'}
                         style={{
                           width:28, height:28, borderRadius:'50%', border:'none',
                           background:'transparent', cursor:'pointer',
@@ -1357,7 +1389,7 @@ function WishlistPanel({ wishlist, onClose, onRemove, onClear }) {
         }}>
           <span style={{ color:'var(--blush)', fontSize:22 }}>♥</span>
           <h2 style={{ fontFamily:'Cormorant Garamond', fontWeight:400, fontSize:26, color:'var(--espresso)' }}>
-            My List
+            My Favorites
           </h2>
           <span style={{ fontSize:11, color:'var(--text-muted)', letterSpacing:'0.06em' }}>
             {wishlist.length} {wishlist.length === 1 ? 'shade' : 'shades'} saved
@@ -1762,13 +1794,13 @@ function PhotoPicker({ sampledHex, onColor }) {
       >
         <div style={{ fontSize:36, lineHeight:1, color:'var(--blush)' }}>⤓</div>
         <div style={{ fontFamily:'Cormorant Garamond', fontSize:22, fontStyle:'italic', color:'var(--espresso)' }}>
-          Drop a photo here
+          Drop a photo or screenshot here
         </div>
         <div style={{ fontFamily:'DM Sans', fontSize:12, color:'var(--text-muted)', letterSpacing:'0.04em' }}>
           or click to upload · JPG, PNG, HEIC
         </div>
         <div style={{ fontFamily:'DM Sans', fontSize:12, color:'var(--text-muted)', maxWidth:260, marginTop:8, lineHeight:1.5 }}>
-          Best results from natural daylight. You'll click on the photo to pick the exact shade.
+          Tap anywhere on the photo to pick a shade.
         </div>
         <div style={{ fontFamily:'DM Sans', fontSize:12, color:'var(--text-muted)', maxWidth:260, marginTop:14, lineHeight:1.5, display:'flex', alignItems:'center', gap:6 }}>
           <span style={{ fontSize:11, fontStyle:'normal' }}>🔒</span>
@@ -2186,7 +2218,7 @@ function App() {
   React.useEffect(() => {
     if (mode !== 'photo') return;
     if (photoHex) {
-      setSelectedColor({ id:'__photo__', name:'From photo', hex: photoHex });
+      setSelectedColor({ id:'__photo__', name:'Upload photo', hex: photoHex });
       window.gtag?.('event', 'select_color', { method: 'photo', hex: photoHex });
       setZoomAnchor(null);
     } else {
@@ -2347,8 +2379,7 @@ function App() {
           onMouseEnter={e => { e.currentTarget.style.borderColor='var(--blush)'; e.currentTarget.style.color='var(--blush)'; }}
           onMouseLeave={e => { e.currentTarget.style.borderColor='var(--border)'; e.currentTarget.style.color='var(--espresso)'; }}
         >
-          <span style={{ color:'var(--blush)' }}>♥</span>
-          My List
+          <span style={{ color:'var(--blush)' }}>♥</span> My Favorites
           {wishlist.length > 0 && (
             <span style={{
               background:'var(--blush)', color:'#fff',
@@ -2371,7 +2402,7 @@ function App() {
             border:'1px solid var(--border)', borderRadius:18, padding:2,
             marginBottom:4, alignSelf:'center',
           }}>
-            {[{id:'wheel',label:'Color wheel'},{id:'photo',label:'From photo'},{id:'hex',label:'From hex'}, ...(wishlist.length > 0 ? [{id:'list',label:'From My List'}] : [])].map(t => (
+            {[{id:'wheel',label:'Color wheel'},{id:'photo',label:'Upload photo'},{id:'hex',label:'From hex'}, ...(wishlist.length > 0 ? [{id:'list',label:'From My List'}] : [])].map(t => (
               <button key={t.id}
                 onClick={() => {
                   setMode(t.id);
@@ -2522,7 +2553,7 @@ function App() {
               fontSize:11, color:'var(--text-muted)', letterSpacing:'0.05em',
               fontFamily:'DM Sans', marginTop:8, textAlign:'center',
             }}>
-              Click a segment to find your closest match
+              Click a segment to browse matching lipstick shades
             </p>
           )}
 

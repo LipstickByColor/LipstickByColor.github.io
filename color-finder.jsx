@@ -500,16 +500,69 @@ function ResultsTable({ selectedColor, matches, totalProducts, pinnedItems, togg
         marginTop:20, paddingTop:20, borderTop:'1px solid var(--border)',
         display:'flex', flexDirection:'column', gap:14, maxWidth:320,
       }}>
-        <div style={{ display:'flex', alignItems:'center', gap:14, textAlign:'left' }}>
+        <div style={{ display:'flex', alignItems:'flex-start', gap:14, textAlign:'left' }}>
+          <span style={{
+            flexShrink:0, width:32, height:32, borderRadius:'50%',
+            display:'flex', alignItems:'center', justifyContent:'center',
+            background:'rgba(200,120,144,0.10)', marginTop:2,
+          }}>
+            <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
+              <path d="M 10 10 L 18 10 A 8 8 0 0 1 10 18 Z" fill="#F5C5C5" stroke="#D4B8AC" strokeWidth="0.5"/>
+              <path d="M 10 10 L 10 18 A 8 8 0 0 1 2 10 Z" fill="#C87890" stroke="#D4B8AC" strokeWidth="0.5"/>
+              <path d="M 10 10 L 2 10 A 8 8 0 0 1 10 2 Z" fill="#8B4558" stroke="#D4B8AC" strokeWidth="0.5"/>
+              <path d="M 10 10 L 10 2 A 8 8 0 0 1 18 10 Z" fill="#E8C8B8" stroke="#D4B8AC" strokeWidth="0.5"/>
+            </svg>
+          </span>
+          <div>
+            <p style={{ fontFamily:'Cormorant Garamond', fontSize:15, fontWeight:500, color:'var(--espresso)', marginBottom:2, lineHeight:1.3 }}>Color Wheel</p>
+            <p style={{ fontFamily:'Cormorant Garamond', fontSize:14, fontStyle:'italic', fontWeight:300, color:'var(--text-muted)', lineHeight:1.4 }}>Discover products by color family, then explore lighter and deeper shades.</p>
+          </div>
+        </div>
+        <div style={{ display:'flex', alignItems:'flex-start', gap:14, textAlign:'left' }}>
+          <span style={{
+            flexShrink:0, width:32, height:32, borderRadius:'50%',
+            display:'flex', alignItems:'center', justifyContent:'center',
+            background:'rgba(200,120,144,0.10)', marginTop:2,
+          }}>
+            <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
+              <rect x="2" y="7" width="16" height="10" rx="2" fill="#EDD8CE" stroke="#D4B8AC" strokeWidth="1"/>
+              <rect x="6" y="5" width="7" height="3" rx="1" fill="#EDD8CE" stroke="#D4B8AC" strokeWidth="1"/>
+              <circle cx="10" cy="12" r="3" fill="#F0D8D0" stroke="#C87890" strokeWidth="1.2"/>
+            </svg>
+          </span>
+          <div>
+            <p style={{ fontFamily:'Cormorant Garamond', fontSize:15, fontWeight:500, color:'var(--espresso)', marginBottom:2, lineHeight:1.3 }}>Upload Photo</p>
+            <p style={{ fontFamily:'Cormorant Garamond', fontSize:14, fontStyle:'italic', fontWeight:300, color:'var(--text-muted)', lineHeight:1.4 }}>Upload a photo and tap the exact shade you'd like to match.</p>
+          </div>
+        </div>
+        <div style={{ display:'flex', alignItems:'flex-start', gap:14, textAlign:'left' }}>
+          <span style={{
+            flexShrink:0, width:32, height:32, borderRadius:'50%',
+            display:'flex', alignItems:'center', justifyContent:'center',
+            background:'rgba(200,120,144,0.10)', marginTop:2,
+          }}>
+            <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
+              <circle cx="14" cy="5" r="3.5" fill="#EDD8CE" stroke="#D4B8AC" strokeWidth="1"/>
+              <line x1="12" y1="7.5" x2="5.5" y2="14" stroke="#D4B8AC" strokeWidth="2" strokeLinecap="round"/>
+              <circle cx="4" cy="15.5" r="2" fill="#C87890"/>
+            </svg>
+          </span>
+          <div>
+            <p style={{ fontFamily:'Cormorant Garamond', fontSize:15, fontWeight:500, color:'var(--espresso)', marginBottom:2, lineHeight:1.3 }}>Custom Color</p>
+            <p style={{ fontFamily:'Cormorant Garamond', fontSize:14, fontStyle:'italic', fontWeight:300, color:'var(--text-muted)', lineHeight:1.4 }}>Choose from the color picker or enter a hex code when you know the exact color you're looking for.</p>
+          </div>
+        </div>
+        <div style={{ display:'flex', alignItems:'flex-start', gap:14, textAlign:'left' }}>
           <span style={{
             fontSize:18, color:'var(--blush)', flexShrink:0,
             width:32, height:32, borderRadius:'50%',
             display:'flex', alignItems:'center', justifyContent:'center',
-            background:'rgba(200,120,144,0.10)',
+            background:'rgba(200,120,144,0.10)', marginTop:2,
           }}>♥</span>
-          <p style={{ fontFamily:'Cormorant Garamond', fontSize:17, fontStyle:'italic', fontWeight:400, color:'var(--text-muted)', lineHeight:1.4 }}>
-            Tap the heart on any product<br/>to save it to your list
-          </p>
+          <div>
+            <p style={{ fontFamily:'Cormorant Garamond', fontSize:15, fontWeight:500, color:'var(--espresso)', marginBottom:2, lineHeight:1.3 }}>My Favorites</p>
+            <p style={{ fontFamily:'Cormorant Garamond', fontSize:14, fontStyle:'italic', fontWeight:300, color:'var(--text-muted)', lineHeight:1.4 }}>Heart products to save them, compare options, and explore similar shades later.</p>
+          </div>
         </div>
         <div style={{ display:'flex', alignItems:'center', gap:14, textAlign:'left' }}>
           <span style={{
@@ -798,7 +851,7 @@ function ResultsTable({ selectedColor, matches, totalProducts, pinnedItems, togg
                     return (
                       <button
                         onClick={e => { e.stopPropagation(); toggleWishlist(p); }}
-                        title={isLiked ? 'Remove from My List' : 'Save to My List'}
+                        title={isLiked ? 'Remove from My Favorites' : 'Save to My Favorites'}
                         style={{
                           width:28, height:28, borderRadius:'50%', border:'none',
                           background:'transparent', cursor:'pointer',
@@ -1339,7 +1392,7 @@ function WishlistPanel({ wishlist, onClose, onRemove, onClear }) {
         }}>
           <span style={{ color:'var(--blush)', fontSize:22 }}>♥</span>
           <h2 style={{ fontFamily:'Cormorant Garamond', fontWeight:400, fontSize:26, color:'var(--espresso)' }}>
-            My List
+            My Favorites
           </h2>
           <span style={{ fontSize:11, color:'var(--text-muted)', letterSpacing:'0.06em' }}>
             {wishlist.length} {wishlist.length === 1 ? 'shade' : 'shades'} saved
@@ -1743,13 +1796,13 @@ function PhotoPicker({ sampledHex, onColor }) {
       >
         <div style={{ fontSize:36, lineHeight:1, color:'var(--blush)' }}>⤓</div>
         <div style={{ fontFamily:'Cormorant Garamond', fontSize:22, fontStyle:'italic', color:'var(--espresso)' }}>
-          Drop a photo here
+          Drop a photo or screenshot here
         </div>
         <div style={{ fontFamily:'DM Sans', fontSize:12, color:'var(--text-muted)', letterSpacing:'0.04em' }}>
           or click to upload · JPG, PNG, HEIC
         </div>
         <div style={{ fontFamily:'DM Sans', fontSize:12, color:'var(--text-muted)', maxWidth:260, marginTop:8, lineHeight:1.5 }}>
-          Best results from natural daylight. You'll click on the photo to pick the exact shade.
+          Tap anywhere on the photo to pick a shade.
         </div>
         <div style={{ fontFamily:'DM Sans', fontSize:12, color:'var(--text-muted)', maxWidth:260, marginTop:14, lineHeight:1.5, display:'flex', alignItems:'center', gap:6 }}>
           <span style={{ fontSize:11, fontStyle:'normal' }}>🔒</span>
@@ -2165,7 +2218,7 @@ function App() {
   React.useEffect(() => {
     if (mode !== 'photo') return;
     if (photoHex) {
-      setSelectedColor({ id:'__photo__', name:'From photo', hex: photoHex });
+      setSelectedColor({ id:'__photo__', name:'Upload photo', hex: photoHex });
       setZoomAnchor(null);
     } else {
       setSelectedColor(null);
@@ -2312,8 +2365,7 @@ function App() {
           onMouseEnter={e => { e.currentTarget.style.borderColor='var(--blush)'; e.currentTarget.style.color='var(--blush)'; }}
           onMouseLeave={e => { e.currentTarget.style.borderColor='var(--border)'; e.currentTarget.style.color='var(--espresso)'; }}
         >
-          <span style={{ color:'var(--blush)' }}>♥</span>
-          My List
+          <span style={{ color:'var(--blush)' }}>♥</span> My Favorites
           {wishlist.length > 0 && (
             <span style={{
               background:'var(--blush)', color:'#fff',
@@ -2336,7 +2388,7 @@ function App() {
             border:'1px solid var(--border)', borderRadius:18, padding:2,
             marginBottom:4, alignSelf:'center',
           }}>
-            {[{id:'wheel',label:'Color wheel'},{id:'photo',label:'From photo'},{id:'hex',label:'From hex'}, ...(wishlist.length > 0 ? [{id:'list',label:'From My List'}] : [])].map(t => (
+            {[{id:'wheel',label:'Color wheel'},{id:'photo',label:'Upload photo'},{id:'hex',label:'From hex'}, ...(wishlist.length > 0 ? [{id:'list',label:'From My List'}] : [])].map(t => (
               <button key={t.id}
                 onClick={() => {
                   setMode(t.id);
@@ -2484,7 +2536,7 @@ function App() {
               fontSize:11, color:'var(--text-muted)', letterSpacing:'0.05em',
               fontFamily:'DM Sans', marginTop:8, textAlign:'center',
             }}>
-              Click a segment to find your closest match
+              Click a segment to browse matching lipstick shades
             </p>
           )}
         </div>
