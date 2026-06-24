@@ -2402,7 +2402,7 @@ function App() {
             border:'1px solid var(--border)', borderRadius:18, padding:2,
             marginBottom:4, alignSelf:'center',
           }}>
-            {[{id:'wheel',label:'Color wheel'},{id:'photo',label:'Upload photo'},{id:'hex',label:'From hex'}, ...(wishlist.length > 0 ? [{id:'list',label:'From My List'}] : [])].map(t => (
+            {[{id:'wheel',label:'Color wheel'},{id:'photo',label:'Upload photo'},{id:'hex',label:'Custom color'}, ...(wishlist.length > 0 ? [{id:'list',label:'From My List'}] : [])].map(t => (
               <button key={t.id}
                 onClick={() => {
                   setMode(t.id);

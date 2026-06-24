@@ -3901,7 +3901,7 @@ function App() {
     label: 'Upload photo'
   }, {
     id: 'hex',
-    label: 'From hex'
+    label: 'Custom color'
   }, ...(wishlist.length > 0 ? [{
     id: 'list',
     label: 'From My List'
