@@ -1,3 +1,4 @@
+function _extends() { return _extends = Object.assign ? Object.assign.bind() : function (n) { for (var e = 1; e < arguments.length; e++) { var t = arguments[e]; for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]); } return n; }, _extends.apply(null, arguments); }
 const {
   useState,
   useEffect
@@ -945,6 +946,141 @@ function ResultsTable({
     }
   }, /*#__PURE__*/React.createElement("span", {
     style: {
+      flexShrink: 0,
+      width: 40,
+      height: 40,
+      borderRadius: '50%',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      background: 'rgba(200,120,144,0.10)',
+      marginTop: 2
+    }
+  }, /*#__PURE__*/React.createElement("svg", {
+    width: "22",
+    height: "22",
+    viewBox: "0 0 20 20",
+    fill: "none"
+  }, /*#__PURE__*/React.createElement("rect", {
+    x: "2",
+    y: "13",
+    width: "6",
+    height: "6",
+    rx: "1",
+    fill: "#EDD8CE",
+    stroke: "#D4B8AC",
+    strokeWidth: "0.8"
+  }), /*#__PURE__*/React.createElement("rect", {
+    x: "2",
+    y: "15.5",
+    width: "6",
+    height: "2",
+    fill: "#E4C8BC",
+    stroke: "#D4B8AC",
+    strokeWidth: "0.5"
+  }), /*#__PURE__*/React.createElement("rect", {
+    x: "3",
+    y: "7.5",
+    width: "4",
+    height: "5.5",
+    rx: "0.5",
+    fill: "#F0DED8",
+    stroke: "#D4B8AC",
+    strokeWidth: "0.8"
+  }), /*#__PURE__*/React.createElement("rect", {
+    x: "3",
+    y: "4",
+    width: "4",
+    height: "3.5",
+    fill: "#C87890",
+    stroke: "#A86878",
+    strokeWidth: "0.6"
+  }), /*#__PURE__*/React.createElement("path", {
+    d: "M3 4 Q3.5 1 5 0.5 Q6.5 1 7 4 Z",
+    fill: "#C87890",
+    stroke: "#A86878",
+    strokeWidth: "0.6",
+    strokeLinejoin: "round"
+  }), /*#__PURE__*/React.createElement("line", {
+    x1: "3",
+    y1: "2.8",
+    x2: "7",
+    y2: "1.5",
+    stroke: "#A86878",
+    strokeWidth: "0.5"
+  }), /*#__PURE__*/React.createElement("rect", {
+    x: "12",
+    y: "13",
+    width: "6",
+    height: "6",
+    rx: "1",
+    fill: "#EDD8CE",
+    stroke: "#D4B8AC",
+    strokeWidth: "0.8"
+  }), /*#__PURE__*/React.createElement("rect", {
+    x: "12",
+    y: "15.5",
+    width: "6",
+    height: "2",
+    fill: "#E4C8BC",
+    stroke: "#D4B8AC",
+    strokeWidth: "0.5"
+  }), /*#__PURE__*/React.createElement("rect", {
+    x: "13",
+    y: "7.5",
+    width: "4",
+    height: "5.5",
+    rx: "0.5",
+    fill: "#F0DED8",
+    stroke: "#D4B8AC",
+    strokeWidth: "0.8"
+  }), /*#__PURE__*/React.createElement("rect", {
+    x: "13",
+    y: "4",
+    width: "4",
+    height: "3.5",
+    fill: "#C87890",
+    stroke: "#A86878",
+    strokeWidth: "0.6"
+  }), /*#__PURE__*/React.createElement("path", {
+    d: "M13 4 Q13.5 1 15 0.5 Q16.5 1 17 4 Z",
+    fill: "#C87890",
+    stroke: "#A86878",
+    strokeWidth: "0.6",
+    strokeLinejoin: "round"
+  }), /*#__PURE__*/React.createElement("line", {
+    x1: "13",
+    y1: "2.8",
+    x2: "17",
+    y2: "1.5",
+    stroke: "#A86878",
+    strokeWidth: "0.5"
+  }))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontFamily: 'DM Sans',
+      fontSize: 14,
+      fontWeight: 500,
+      color: 'var(--espresso)',
+      marginBottom: 2,
+      lineHeight: 1.3
+    }
+  }, "Dupe Finder"), /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontFamily: 'DM Sans',
+      fontSize: 14,
+      fontWeight: 400,
+      color: 'var(--text-muted)',
+      lineHeight: 1.5
+    }
+  }, "Search a lipstick you already own and find color-matched alternatives at any price point."))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      alignItems: 'flex-start',
+      gap: 14,
+      textAlign: 'left'
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
       fontSize: 20,
       color: 'var(--blush)',
       flexShrink: 0,
@@ -1219,66 +1355,7 @@ function ResultsTable({
       fontFamily: 'DM Sans',
       marginRight: 2
     }
-  }, "Filter"), allFinishes.length > 1 && /*#__PURE__*/React.createElement(FilterDropdown, {
-    label: "Finish",
-    count: activeFinishes.length,
-    isOpen: openFilter === 'Finish',
-    onOpen: setOpenFilter,
-    onClear: () => setActiveFinishes([])
-  }, allFinishes.map(f => {
-    const active = activeFinishes.includes(f);
-    const fc = finishColor(f);
-    return /*#__PURE__*/React.createElement("button", {
-      key: f,
-      onClick: () => toggleFinish(f),
-      style: {
-        fontSize: 11,
-        padding: '4px 12px',
-        borderRadius: 20,
-        border: `1.5px solid ${active ? fc : 'var(--border)'}`,
-        background: active ? fc + '22' : 'transparent',
-        color: active ? fc : 'var(--text-muted)',
-        cursor: 'pointer',
-        fontFamily: 'DM Sans',
-        fontWeight: active ? 500 : 400,
-        letterSpacing: '0.04em',
-        transition: 'all 0.15s',
-        whiteSpace: 'nowrap'
-      }
-    }, f, active && /*#__PURE__*/React.createElement("span", {
-      style: {
-        marginLeft: 5,
-        opacity: 0.6,
-        fontSize: 12
-      }
-    }, "\u2715"));
-  })), orderedTones.length >= 1 && /*#__PURE__*/React.createElement(FilterDropdown, {
-    label: "Undertone",
-    count: activeTones.length,
-    isOpen: openFilter === 'Undertone',
-    onOpen: setOpenFilter,
-    onClear: () => setActiveTones([])
-  }, orderedTones.map(t => {
-    const active = activeTones.includes(t);
-    return /*#__PURE__*/React.createElement("button", {
-      key: t,
-      onClick: () => toggleTone(t),
-      style: {
-        fontSize: 11,
-        padding: '4px 12px',
-        borderRadius: 20,
-        border: `1.5px solid ${active ? 'var(--espresso-mid)' : 'var(--border)'}`,
-        background: active ? 'rgba(92,61,48,0.10)' : 'transparent',
-        color: active ? 'var(--espresso-mid)' : 'var(--text-muted)',
-        cursor: 'pointer',
-        fontFamily: 'DM Sans',
-        letterSpacing: '0.04em',
-        textTransform: 'capitalize',
-        transition: 'all 0.15s',
-        whiteSpace: 'nowrap'
-      }
-    }, t);
-  })), allBrands.length > 1 && /*#__PURE__*/React.createElement(FilterDropdown, {
+  }, "Filter"), allBrands.length > 1 && /*#__PURE__*/React.createElement(FilterDropdown, {
     label: "Brand",
     count: activeBrands.length,
     isOpen: openFilter === 'Brand',
@@ -1342,6 +1419,65 @@ function ResultsTable({
         fontSize: 10
       }
     }, "\u2715"));
+  })), allFinishes.length > 1 && /*#__PURE__*/React.createElement(FilterDropdown, {
+    label: "Finish",
+    count: activeFinishes.length,
+    isOpen: openFilter === 'Finish',
+    onOpen: setOpenFilter,
+    onClear: () => setActiveFinishes([])
+  }, allFinishes.map(f => {
+    const active = activeFinishes.includes(f);
+    const fc = finishColor(f);
+    return /*#__PURE__*/React.createElement("button", {
+      key: f,
+      onClick: () => toggleFinish(f),
+      style: {
+        fontSize: 11,
+        padding: '4px 12px',
+        borderRadius: 20,
+        border: `1.5px solid ${active ? fc : 'var(--border)'}`,
+        background: active ? fc + '22' : 'transparent',
+        color: active ? fc : 'var(--text-muted)',
+        cursor: 'pointer',
+        fontFamily: 'DM Sans',
+        fontWeight: active ? 500 : 400,
+        letterSpacing: '0.04em',
+        transition: 'all 0.15s',
+        whiteSpace: 'nowrap'
+      }
+    }, f, active && /*#__PURE__*/React.createElement("span", {
+      style: {
+        marginLeft: 5,
+        opacity: 0.6,
+        fontSize: 12
+      }
+    }, "\u2715"));
+  })), orderedTones.length >= 1 && /*#__PURE__*/React.createElement(FilterDropdown, {
+    label: "Undertone",
+    count: activeTones.length,
+    isOpen: openFilter === 'Undertone',
+    onOpen: setOpenFilter,
+    onClear: () => setActiveTones([])
+  }, orderedTones.map(t => {
+    const active = activeTones.includes(t);
+    return /*#__PURE__*/React.createElement("button", {
+      key: t,
+      onClick: () => toggleTone(t),
+      style: {
+        fontSize: 11,
+        padding: '4px 12px',
+        borderRadius: 20,
+        border: `1.5px solid ${active ? 'var(--espresso-mid)' : 'var(--border)'}`,
+        background: active ? 'rgba(92,61,48,0.10)' : 'transparent',
+        color: active ? 'var(--espresso-mid)' : 'var(--text-muted)',
+        cursor: 'pointer',
+        fontFamily: 'DM Sans',
+        letterSpacing: '0.04em',
+        textTransform: 'capitalize',
+        transition: 'all 0.15s',
+        whiteSpace: 'nowrap'
+      }
+    }, t);
   })), (activeFinishes.length > 0 || activeBrands.length > 0 || activeTones.length > 0 || activeTiers.length > 0) && /*#__PURE__*/React.createElement("div", {
     style: {
       display: 'flex',
@@ -3551,6 +3687,563 @@ function Section({
   }, title), children);
 }
 
+// ── Dupe Finder ──────────────────────────────────────────────────────────────
+function DupeFinder({
+  product,
+  onSelect,
+  onUsePhoto
+}) {
+  const [brand, setBrand] = useState(null);
+  const [brandQuery, setBrandQuery] = useState('');
+  const [shadeQuery, setShadeQuery] = useState('');
+  const brands = React.useMemo(() => [...new Set(REAL_PRODUCTS.map(p => p.brand))].sort((a, b) => a.localeCompare(b)), []);
+  const brandCounts = React.useMemo(() => {
+    const m = {};
+    for (const p of REAL_PRODUCTS) m[p.brand] = (m[p.brand] || 0) + 1;
+    return m;
+  }, []);
+  const brandMatches = React.useMemo(() => {
+    const q = brandQuery.trim().toLowerCase();
+    if (!q) return [];
+    const starts = [],
+      incl = [];
+    for (const b of brands) {
+      const lb = b.toLowerCase();
+      if (lb.startsWith(q)) starts.push(b);else if (lb.includes(q)) incl.push(b);
+    }
+    return [...starts, ...incl].slice(0, 12);
+  }, [brandQuery, brands]);
+  const shadeMatches = React.useMemo(() => {
+    if (!brand) return [];
+    const q = shadeQuery.trim().toLowerCase();
+    if (!q) return [];
+    const list = REAL_PRODUCTS.filter(p => p.brand === brand && (p.shade.toLowerCase().includes(q) || (p.product || '').toLowerCase().includes(q)));
+    return list.sort((a, b) => a.shade.localeCompare(b.shade)).slice(0, 80);
+  }, [brand, shadeQuery]);
+  function pickBrand(b) {
+    window.gtag?.('event', 'dupe_brand_select', {
+      brand: b
+    });
+    setBrand(b);
+    setBrandQuery('');
+    setShadeQuery('');
+    onSelect(null);
+  }
+  function changeBrand() {
+    setBrand(null);
+    setBrandQuery('');
+    setShadeQuery('');
+    onSelect(null);
+  }
+  function pickShade(p) {
+    window.gtag?.('event', 'dupe_shade_select', {
+      brand: p.brand,
+      shade: p.shade,
+      hex: p.hex
+    });
+    onSelect(p);
+  }
+
+  // Fire no-results events after the user pauses typing (600ms debounce)
+  React.useEffect(() => {
+    if (!brandQuery.trim() || brandMatches.length > 0) return;
+    const t = setTimeout(() => {
+      window.gtag?.('event', 'dupe_brand_no_results', {
+        query: brandQuery.trim().toLowerCase()
+      });
+    }, 600);
+    return () => clearTimeout(t);
+  }, [brandQuery, brandMatches.length]);
+  React.useEffect(() => {
+    if (!shadeQuery.trim() || shadeMatches.length > 0) return;
+    const t = setTimeout(() => {
+      window.gtag?.('event', 'dupe_shade_no_results', {
+        brand,
+        query: shadeQuery.trim().toLowerCase()
+      });
+    }, 600);
+    return () => clearTimeout(t);
+  }, [shadeQuery, shadeMatches.length, brand]);
+  const stepNum = {
+    width: 22,
+    height: 22,
+    borderRadius: '50%',
+    background: 'var(--espresso)',
+    color: 'var(--cream)',
+    fontFamily: 'DM Sans',
+    fontSize: 11,
+    fontWeight: 500,
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0
+  };
+  const stepLabel = {
+    fontFamily: 'DM Sans',
+    fontSize: 10,
+    color: 'var(--text-muted)',
+    letterSpacing: '0.1em',
+    textTransform: 'uppercase'
+  };
+  const inputWrap = {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 10,
+    background: '#fff',
+    borderRadius: 14,
+    border: '1.5px solid var(--border)',
+    padding: '11px 14px',
+    boxShadow: '0 2px 8px var(--shadow)'
+  };
+  const inputStyle = {
+    flex: 1,
+    border: 'none',
+    outline: 'none',
+    background: 'transparent',
+    fontFamily: 'DM Sans',
+    fontSize: 15,
+    color: 'var(--espresso)',
+    minWidth: 0
+  };
+  const clearBtn = {
+    background: 'none',
+    border: 'none',
+    cursor: 'pointer',
+    color: 'var(--text-muted)',
+    fontSize: 16,
+    lineHeight: 1,
+    padding: '0 2px'
+  };
+  const suggestBox = {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 2,
+    maxHeight: 260,
+    overflowY: 'auto',
+    background: '#fff',
+    border: '1px solid var(--border)',
+    borderRadius: 12,
+    padding: 6,
+    boxShadow: '0 4px 16px var(--shadow)'
+  };
+  const chip = {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: 8,
+    padding: '7px 8px 7px 14px',
+    background: '#fff',
+    borderRadius: 40,
+    border: '1px solid var(--border)',
+    boxShadow: '0 2px 8px var(--shadow)'
+  };
+  const chipX = {
+    width: 20,
+    height: 20,
+    borderRadius: '50%',
+    border: 'none',
+    background: 'var(--cream-dark)',
+    color: 'var(--text-muted)',
+    cursor: 'pointer',
+    fontSize: 13,
+    lineHeight: 1,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0
+  };
+  const emptyNote = {
+    fontFamily: 'Cormorant Garamond',
+    fontStyle: 'italic',
+    fontSize: 14,
+    color: 'var(--text-muted)',
+    textAlign: 'center',
+    padding: '8px 0'
+  };
+  const photoFallbackBtn = {
+    marginTop: 6,
+    fontFamily: 'DM Sans',
+    fontSize: 11,
+    letterSpacing: '0.06em',
+    textTransform: 'uppercase',
+    color: 'var(--blush)',
+    background: 'transparent',
+    border: '1px solid var(--blush)',
+    borderRadius: 20,
+    padding: '6px 14px',
+    cursor: 'pointer'
+  };
+  const hov = () => ({
+    onMouseEnter: e => e.currentTarget.style.background = 'var(--cream)',
+    onMouseLeave: e => e.currentTarget.style.background = 'transparent'
+  });
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: '100%',
+      maxWidth: 440,
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 14,
+      padding: '4px 0'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      textAlign: 'center',
+      marginBottom: 2
+    }
+  }, /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontFamily: 'Cormorant Garamond',
+      fontStyle: 'italic',
+      fontSize: 19,
+      color: 'var(--espresso-mid)',
+      lineHeight: 1.4
+    }
+  }, "Find your lipstick's twin"), /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontFamily: 'DM Sans',
+      fontSize: 11,
+      color: 'var(--text-muted)',
+      letterSpacing: '0.04em',
+      marginTop: 4
+    }
+  }, "Search the brand, then the shade name"), /*#__PURE__*/React.createElement("button", {
+    onClick: () => {
+      window.gtag?.('event', 'dupe_photo_fallback', {
+        step: 'header'
+      });
+      onUsePhoto();
+    },
+    style: {
+      marginTop: 8,
+      fontFamily: 'DM Sans',
+      fontSize: 10.5,
+      letterSpacing: '0.05em',
+      color: 'var(--blush)',
+      background: 'transparent',
+      border: 'none',
+      borderBottom: '1px solid var(--blush)',
+      paddingBottom: 1,
+      cursor: 'pointer'
+    }
+  }, "Can't find your lipstick? Match it from a photo \u2192")), !brand ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 10
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: 8
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: stepNum
+  }, "1"), /*#__PURE__*/React.createElement("span", {
+    style: stepLabel
+  }, "Brand")), /*#__PURE__*/React.createElement("div", {
+    style: inputWrap
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: 'var(--text-muted)',
+      fontSize: 22,
+      lineHeight: 1
+    }
+  }, "\u2315"), /*#__PURE__*/React.createElement("input", {
+    autoFocus: true,
+    value: brandQuery,
+    onChange: e => setBrandQuery(e.target.value),
+    onKeyDown: e => {
+      if (e.key === 'Enter' && brandMatches[0]) pickBrand(brandMatches[0]);
+    },
+    placeholder: "MAC, Charlotte Tilbury\u2026",
+    style: inputStyle
+  }), brandQuery && /*#__PURE__*/React.createElement("button", {
+    onClick: () => setBrandQuery(''),
+    style: clearBtn
+  }, "\xD7")), brandQuery && brandMatches.length === 0 && /*#__PURE__*/React.createElement("p", {
+    style: emptyNote
+  }, "No brands match \"", brandQuery, "\"."), brandMatches.length > 0 && /*#__PURE__*/React.createElement("div", {
+    style: suggestBox
+  }, brandMatches.map(b => /*#__PURE__*/React.createElement("button", _extends({
+    key: b,
+    onClick: () => pickBrand(b)
+  }, hov(), {
+    style: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: 8,
+      width: '100%',
+      padding: '9px 12px',
+      borderRadius: 9,
+      border: 'none',
+      background: 'transparent',
+      cursor: 'pointer',
+      textAlign: 'left',
+      transition: 'background 0.12s'
+    }
+  }), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontFamily: 'DM Sans',
+      fontSize: 13,
+      fontWeight: 500,
+      color: 'var(--espresso)'
+    }
+  }, b), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontFamily: 'DM Sans',
+      fontSize: 11,
+      color: 'var(--text-muted)',
+      marginLeft: 'auto',
+      flexShrink: 0
+    }
+  }, brandCounts[b], " shade", brandCounts[b] !== 1 ? 's' : '')))), !brandQuery && /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontFamily: 'Cormorant Garamond',
+      fontStyle: 'italic',
+      fontSize: 13,
+      color: 'var(--text-muted)',
+      textAlign: 'center',
+      lineHeight: 1.5,
+      marginTop: 2
+    }
+  }, "Start typing a brand name \u2014 matches appear as you go.")) : /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 14
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: 10
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: stepNum
+  }, "1"), /*#__PURE__*/React.createElement("div", {
+    style: chip
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontFamily: 'DM Sans',
+      fontSize: 13,
+      fontWeight: 500,
+      color: 'var(--espresso)'
+    }
+  }, brand), /*#__PURE__*/React.createElement("button", {
+    onClick: changeBrand,
+    title: "Change brand",
+    style: chipX
+  }, "\xD7"))), !product ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 10
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: 8
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: stepNum
+  }, "2"), /*#__PURE__*/React.createElement("span", {
+    style: stepLabel
+  }, "Shade")), /*#__PURE__*/React.createElement("div", {
+    style: inputWrap
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: 'var(--text-muted)',
+      fontSize: 22,
+      lineHeight: 1
+    }
+  }, "\u2315"), /*#__PURE__*/React.createElement("input", {
+    autoFocus: true,
+    value: shadeQuery,
+    onChange: e => setShadeQuery(e.target.value),
+    onKeyDown: e => {
+      if (e.key === 'Enter' && shadeMatches[0]) pickShade(shadeMatches[0]);
+    },
+    placeholder: "Search a shade or product\u2026",
+    style: inputStyle
+  }), shadeQuery && /*#__PURE__*/React.createElement("button", {
+    onClick: () => setShadeQuery(''),
+    style: clearBtn
+  }, "\xD7")), !shadeQuery.trim() ? /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontFamily: 'Cormorant Garamond',
+      fontStyle: 'italic',
+      fontSize: 13,
+      color: 'var(--text-muted)',
+      textAlign: 'center',
+      lineHeight: 1.5,
+      marginTop: 2
+    }
+  }, "Start typing the shade name to see matches.") : shadeMatches.length === 0 ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      textAlign: 'center',
+      padding: '8px 0'
+    }
+  }, /*#__PURE__*/React.createElement("p", {
+    style: emptyNote
+  }, "No shades match \"", shadeQuery, "\"."), /*#__PURE__*/React.createElement("button", {
+    onClick: () => {
+      window.gtag?.('event', 'dupe_photo_fallback', {
+        step: 'shade_no_results',
+        brand,
+        query: shadeQuery.trim().toLowerCase()
+      });
+      onUsePhoto();
+    },
+    style: photoFallbackBtn
+  }, "Can't find it? Match from a photo \u2192")) : /*#__PURE__*/React.createElement("div", {
+    style: {
+      ...suggestBox,
+      maxHeight: 308
+    }
+  }, shadeMatches.map((p, i) => /*#__PURE__*/React.createElement("button", _extends({
+    key: i,
+    onClick: () => pickShade(p)
+  }, hov(), {
+    style: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: 11,
+      width: '100%',
+      padding: '8px 10px',
+      borderRadius: 9,
+      border: 'none',
+      background: 'transparent',
+      cursor: 'pointer',
+      transition: 'background 0.12s'
+    }
+  }), /*#__PURE__*/React.createElement("span", {
+    style: {
+      width: 24,
+      height: 24,
+      borderRadius: '50%',
+      background: p.hex,
+      flexShrink: 0,
+      boxShadow: `0 1px 4px ${p.hex}66`,
+      border: '1px solid rgba(42,26,20,0.08)'
+    }
+  }), /*#__PURE__*/React.createElement("span", {
+    style: {
+      display: 'flex',
+      flexDirection: 'column',
+      minWidth: 0,
+      textAlign: 'left'
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontFamily: 'Cormorant Garamond',
+      fontStyle: 'italic',
+      fontSize: 15,
+      color: 'var(--espresso)',
+      lineHeight: 1.2,
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      whiteSpace: 'nowrap'
+    }
+  }, p.shade), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontFamily: 'DM Sans',
+      fontSize: 10,
+      color: 'var(--text-muted)',
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      whiteSpace: 'nowrap'
+    }
+  }, p.product, " \xB7 ", p.finish)))))) : /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 12
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: 8
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: stepNum
+  }, "2"), /*#__PURE__*/React.createElement("span", {
+    style: stepLabel
+  }, "Matching this shade")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: 14,
+      padding: '14px 16px',
+      background: '#fff',
+      borderRadius: 16,
+      border: '1px solid var(--border)',
+      boxShadow: '0 2px 12px var(--shadow)'
+    }
+  }, /*#__PURE__*/React.createElement(ProductThumb, {
+    product: product,
+    size: 56
+  }), /*#__PURE__*/React.createElement(ShadeChip, {
+    hex: product.hex,
+    height: 56,
+    width: 9
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1,
+      minWidth: 0
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontFamily: 'DM Sans',
+      fontSize: 12,
+      fontWeight: 500,
+      color: 'var(--espresso)'
+    }
+  }, product.brand), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontFamily: 'Cormorant Garamond',
+      fontStyle: 'italic',
+      fontSize: 18,
+      color: 'var(--espresso-mid)',
+      lineHeight: 1.2
+    }
+  }, product.shade), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontFamily: 'DM Sans',
+      fontSize: 10,
+      color: 'var(--text-muted)',
+      marginTop: 2,
+      letterSpacing: '0.04em'
+    }
+  }, product.finish, " \xB7 ", product.hex.toUpperCase()))), /*#__PURE__*/React.createElement("button", {
+    onClick: () => onSelect(null),
+    style: {
+      alignSelf: 'flex-start',
+      fontSize: 11,
+      fontFamily: 'DM Sans',
+      letterSpacing: '0.06em',
+      textTransform: 'uppercase',
+      color: 'var(--blush)',
+      background: 'transparent',
+      border: '1px solid var(--blush)',
+      borderRadius: 20,
+      padding: '6px 14px',
+      cursor: 'pointer'
+    }
+  }, "\u2190 Pick another shade"), /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontFamily: 'Cormorant Garamond',
+      fontStyle: 'italic',
+      fontSize: 14,
+      color: 'var(--text-muted)',
+      textAlign: 'center',
+      marginTop: 2
+    }
+  }, "Closest dupes are ranked on the right \u2192"))));
+}
+
 // ── Main App ──────────────────────────────────────────────────────────────────
 function App() {
   const [selectedColor, setSelectedColor] = useState(null);
@@ -3560,9 +4253,10 @@ function App() {
   const suppressScrollRef = React.useRef(false);
   const resultsRef = React.useRef(null);
   const [toneIdx, setToneIdx] = useState(null);
-  const [mode, setMode] = useState('wheel'); // 'wheel' | 'photo' | 'hex' | 'list'
+  const [mode, setMode] = useState('wheel'); // 'wheel' | 'photo' | 'hex' | 'dupe' | 'list'
   const [photoHex, setPhotoHex] = useState(null);
   const [hexHex, setHexHex] = useState(null);
+  const [dupeProduct, setDupeProduct] = useState(null);
   const [pinnedItems, setPinnedItems] = useState([]);
   const [wishlist, setWishlist] = useState(() => {
     try {
@@ -3664,6 +4358,28 @@ function App() {
       setSelectedColor(null);
     }
   }, [hexHex, mode]);
+
+  // Dupe mode: seed selectedColor from a picked product, excluding that product from matches
+  React.useEffect(() => {
+    if (mode !== 'dupe') return;
+    if (dupeProduct) {
+      setSelectedColor({
+        id: '__dupe__',
+        name: `Similar to ${dupeProduct.shade}`,
+        hex: dupeProduct.hex,
+        sourceKey: `${dupeProduct.brand}|${dupeProduct.shade}`
+      });
+      window.gtag?.('event', 'select_color', {
+        method: 'dupe',
+        hex: dupeProduct.hex,
+        brand: dupeProduct.brand,
+        shade: dupeProduct.shade
+      });
+      setZoomAnchor(null);
+    } else {
+      setSelectedColor(null);
+    }
+  }, [dupeProduct, mode]);
   const colors = LIPSTICK_DATA;
 
   // ── Vibe profile (persistent shopper preferences) ───────────────────────
@@ -3902,6 +4618,9 @@ function App() {
   }, {
     id: 'hex',
     label: 'Custom color'
+  }, {
+    id: 'dupe',
+    label: 'Dupe finder'
   }, ...(wishlist.length > 0 ? [{
     id: 'list',
     label: 'From My List'
@@ -3916,19 +4635,29 @@ function App() {
         setSelectedColor(null);
         setPhotoHex(null);
         setHexHex(null);
+        setDupeProduct(null);
       } else if (t.id === 'photo') {
         setSelectedColor(null);
         setZoomAnchor(null);
         setHexHex(null);
+        setDupeProduct(null);
       } else if (t.id === 'hex') {
         setSelectedColor(null);
         setZoomAnchor(null);
         setPhotoHex(null);
+        setDupeProduct(null);
+      } else if (t.id === 'dupe') {
+        setSelectedColor(null);
+        setZoomAnchor(null);
+        setPhotoHex(null);
+        setHexHex(null);
+        setDupeProduct(null);
       } else {
         setSelectedColor(null);
         setZoomAnchor(null);
         setPhotoHex(null);
         setHexHex(null);
+        setDupeProduct(null);
       }
     },
     style: {
@@ -3969,6 +4698,13 @@ function App() {
   }) : mode === 'hex' ? /*#__PURE__*/React.createElement(HexPicker, {
     sampledHex: hexHex,
     onColor: setHexHex
+  }) : mode === 'dupe' ? /*#__PURE__*/React.createElement(DupeFinder, {
+    product: dupeProduct,
+    onSelect: setDupeProduct,
+    onUsePhoto: () => {
+      setMode('photo');
+      setDupeProduct(null);
+    }
   }) : /*#__PURE__*/React.createElement(ListPicker, {
     wishlist: wishlist,
     selectedKey: selectedColor?.sourceKey,
@@ -4167,148 +4903,261 @@ function App() {
       marginTop: 8,
       textAlign: 'center'
     }
-  }, "Click a segment to browse matching lipstick shades"), !selectedColor && /*#__PURE__*/React.createElement("div", {
+  }, "Click a segment to browse matching lipstick shades"), !selectedColor && mode !== 'dupe' && /*#__PURE__*/React.createElement("div", {
     className: "mobile-picker-tips"
-  }, /*#__PURE__*/React.createElement("div", {
+  }, [{
+    icon: /*#__PURE__*/React.createElement("svg", {
+      width: "20",
+      height: "20",
+      viewBox: "0 0 20 20",
+      fill: "none"
+    }, /*#__PURE__*/React.createElement("path", {
+      d: "M 10 10 L 18 10 A 8 8 0 0 1 10 18 Z",
+      fill: "#F5C5C5",
+      stroke: "#D4B8AC",
+      strokeWidth: "0.5"
+    }), /*#__PURE__*/React.createElement("path", {
+      d: "M 10 10 L 10 18 A 8 8 0 0 1 2 10 Z",
+      fill: "#C87890",
+      stroke: "#D4B8AC",
+      strokeWidth: "0.5"
+    }), /*#__PURE__*/React.createElement("path", {
+      d: "M 10 10 L 2 10 A 8 8 0 0 1 10 2 Z",
+      fill: "#8B4558",
+      stroke: "#D4B8AC",
+      strokeWidth: "0.5"
+    }), /*#__PURE__*/React.createElement("path", {
+      d: "M 10 10 L 10 2 A 8 8 0 0 1 18 10 Z",
+      fill: "#E8C8B8",
+      stroke: "#D4B8AC",
+      strokeWidth: "0.5"
+    })),
+    label: 'Color Wheel',
+    desc: 'Discover products by color family, then explore lighter and deeper shades.'
+  }, {
+    icon: /*#__PURE__*/React.createElement("svg", {
+      width: "20",
+      height: "20",
+      viewBox: "0 0 20 20",
+      fill: "none"
+    }, /*#__PURE__*/React.createElement("rect", {
+      x: "2",
+      y: "7",
+      width: "16",
+      height: "10",
+      rx: "2",
+      fill: "#EDD8CE",
+      stroke: "#D4B8AC",
+      strokeWidth: "1"
+    }), /*#__PURE__*/React.createElement("rect", {
+      x: "6",
+      y: "5",
+      width: "7",
+      height: "3",
+      rx: "1",
+      fill: "#EDD8CE",
+      stroke: "#D4B8AC",
+      strokeWidth: "1"
+    }), /*#__PURE__*/React.createElement("circle", {
+      cx: "10",
+      cy: "12",
+      r: "3",
+      fill: "#F0D8D0",
+      stroke: "#C87890",
+      strokeWidth: "1.2"
+    })),
+    label: 'Upload Photo',
+    desc: "Upload a photo and tap the exact shade you'd like to match."
+  }, {
+    icon: /*#__PURE__*/React.createElement("svg", {
+      width: "20",
+      height: "20",
+      viewBox: "0 0 20 20",
+      fill: "none"
+    }, /*#__PURE__*/React.createElement("circle", {
+      cx: "14",
+      cy: "5",
+      r: "3.5",
+      fill: "#EDD8CE",
+      stroke: "#D4B8AC",
+      strokeWidth: "1"
+    }), /*#__PURE__*/React.createElement("line", {
+      x1: "12",
+      y1: "7.5",
+      x2: "5.5",
+      y2: "14",
+      stroke: "#D4B8AC",
+      strokeWidth: "2",
+      strokeLinecap: "round"
+    }), /*#__PURE__*/React.createElement("circle", {
+      cx: "4",
+      cy: "15.5",
+      r: "2",
+      fill: "#C87890"
+    })),
+    label: 'Custom Color',
+    desc: 'Enter a hex code or pick from the color picker.'
+  }, {
+    icon: /*#__PURE__*/React.createElement("svg", {
+      width: "20",
+      height: "20",
+      viewBox: "0 0 20 20",
+      fill: "none"
+    }, /*#__PURE__*/React.createElement("rect", {
+      x: "2",
+      y: "13",
+      width: "6",
+      height: "6",
+      rx: "1",
+      fill: "#EDD8CE",
+      stroke: "#D4B8AC",
+      strokeWidth: "0.8"
+    }), /*#__PURE__*/React.createElement("rect", {
+      x: "2",
+      y: "15.5",
+      width: "6",
+      height: "2",
+      fill: "#E4C8BC",
+      stroke: "#D4B8AC",
+      strokeWidth: "0.5"
+    }), /*#__PURE__*/React.createElement("rect", {
+      x: "3",
+      y: "7.5",
+      width: "4",
+      height: "5.5",
+      rx: "0.5",
+      fill: "#F0DED8",
+      stroke: "#D4B8AC",
+      strokeWidth: "0.8"
+    }), /*#__PURE__*/React.createElement("rect", {
+      x: "3",
+      y: "4",
+      width: "4",
+      height: "3.5",
+      fill: "#C87890",
+      stroke: "#A86878",
+      strokeWidth: "0.6"
+    }), /*#__PURE__*/React.createElement("path", {
+      d: "M3 4 Q3.5 1 5 0.5 Q6.5 1 7 4 Z",
+      fill: "#C87890",
+      stroke: "#A86878",
+      strokeWidth: "0.6",
+      strokeLinejoin: "round"
+    }), /*#__PURE__*/React.createElement("line", {
+      x1: "3",
+      y1: "2.8",
+      x2: "7",
+      y2: "1.5",
+      stroke: "#A86878",
+      strokeWidth: "0.5"
+    }), /*#__PURE__*/React.createElement("rect", {
+      x: "12",
+      y: "13",
+      width: "6",
+      height: "6",
+      rx: "1",
+      fill: "#EDD8CE",
+      stroke: "#D4B8AC",
+      strokeWidth: "0.8"
+    }), /*#__PURE__*/React.createElement("rect", {
+      x: "12",
+      y: "15.5",
+      width: "6",
+      height: "2",
+      fill: "#E4C8BC",
+      stroke: "#D4B8AC",
+      strokeWidth: "0.5"
+    }), /*#__PURE__*/React.createElement("rect", {
+      x: "13",
+      y: "7.5",
+      width: "4",
+      height: "5.5",
+      rx: "0.5",
+      fill: "#F0DED8",
+      stroke: "#D4B8AC",
+      strokeWidth: "0.8"
+    }), /*#__PURE__*/React.createElement("rect", {
+      x: "13",
+      y: "4",
+      width: "4",
+      height: "3.5",
+      fill: "#C87890",
+      stroke: "#A86878",
+      strokeWidth: "0.6"
+    }), /*#__PURE__*/React.createElement("path", {
+      d: "M13 4 Q13.5 1 15 0.5 Q16.5 1 17 4 Z",
+      fill: "#C87890",
+      stroke: "#A86878",
+      strokeWidth: "0.6",
+      strokeLinejoin: "round"
+    }), /*#__PURE__*/React.createElement("line", {
+      x1: "13",
+      y1: "2.8",
+      x2: "17",
+      y2: "1.5",
+      stroke: "#A86878",
+      strokeWidth: "0.5"
+    })),
+    label: 'Dupe Finder',
+    desc: 'Search a lipstick you own and find color-matched alternatives.'
+  }, {
+    icon: /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 18,
+        color: 'var(--blush)'
+      }
+    }, "\u2665"),
+    label: 'My Favorites',
+    desc: 'Heart products to save and compare shades later.'
+  }, {
+    icon: /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 18,
+        color: 'var(--espresso-mid)',
+        fontWeight: 300
+      }
+    }, "+"),
+    label: 'Shade Comparison',
+    desc: 'Pin up to four shades to compare side by side.'
+  }].map(({
+    icon,
+    label,
+    desc
+  }) => /*#__PURE__*/React.createElement("div", {
+    key: label,
     style: {
       display: 'flex',
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 14,
-      paddingBottom: 12,
-      borderBottom: '1px solid var(--border)'
-    }
-  }, /*#__PURE__*/React.createElement("svg", {
-    width: "44",
-    height: "44",
-    viewBox: "0 0 80 80",
-    fill: "none",
-    xmlns: "http://www.w3.org/2000/svg",
-    style: {
-      flexShrink: 0
-    }
-  }, /*#__PURE__*/React.createElement("rect", {
-    x: "28",
-    y: "48",
-    width: "24",
-    height: "24",
-    rx: "3",
-    fill: "#EDD8CE",
-    stroke: "#D4B8AC",
-    strokeWidth: "1.5"
-  }), /*#__PURE__*/React.createElement("rect", {
-    x: "28",
-    y: "54",
-    width: "24",
-    height: "5",
-    fill: "#E4C8BC",
-    stroke: "#D4B8AC",
-    strokeWidth: "1"
-  }), /*#__PURE__*/React.createElement("rect", {
-    x: "31",
-    y: "34",
-    width: "18",
-    height: "18",
-    rx: "2",
-    fill: "#F0DED8",
-    stroke: "#D4B8AC",
-    strokeWidth: "1.5"
-  }), /*#__PURE__*/React.createElement("rect", {
-    x: "33",
-    y: "22",
-    width: "14",
-    height: "14",
-    fill: "#F2E2DC",
-    stroke: "#D4B8AC",
-    strokeWidth: "1.2"
-  }), /*#__PURE__*/React.createElement("path", {
-    d: "M33 22 L33 18 Q33 8 36 6 Q38 5 40 5 Q42 5 44 6 Q47 8 47 18 L47 22 Z",
-    fill: "#F2E2DC",
-    stroke: "#D4B8AC",
-    strokeWidth: "1.2",
-    strokeLinejoin: "round"
-  }), /*#__PURE__*/React.createElement("line", {
-    x1: "33",
-    y1: "20",
-    x2: "47",
-    y2: "15",
-    stroke: "#D4B8AC",
-    strokeWidth: "1.2"
-  }), /*#__PURE__*/React.createElement("path", {
-    d: "M36 20 Q35 14 37 8",
-    stroke: "rgba(255,255,255,0.6)",
-    strokeWidth: "1.5",
-    strokeLinecap: "round"
-  })), /*#__PURE__*/React.createElement("p", {
-    style: {
-      fontFamily: 'Cormorant Garamond',
-      fontSize: 18,
-      fontStyle: 'italic',
-      fontWeight: 300,
-      color: 'var(--text-muted)',
-      lineHeight: 1.5,
-      margin: 0
-    }
-  }, "Pick a color from the wheel, a photo, or a hex code palette")), /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: 'flex',
-      alignItems: 'center',
-      gap: 10
+      alignItems: 'flex-start',
+      gap: 12
     }
   }, /*#__PURE__*/React.createElement("span", {
     style: {
-      fontSize: 16,
-      color: 'var(--blush)',
       flexShrink: 0,
-      width: 28,
-      height: 28,
+      width: 34,
+      height: 34,
       borderRadius: '50%',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      background: 'rgba(200,120,144,0.10)'
+      background: 'rgba(200,120,144,0.10)',
+      marginTop: 1
     }
-  }, "\u2665"), /*#__PURE__*/React.createElement("p", {
+  }, icon), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
     style: {
-      fontFamily: 'Cormorant Garamond',
-      fontSize: 15,
-      fontStyle: 'italic',
-      fontWeight: 400,
+      fontFamily: 'DM Sans',
+      fontSize: 13,
+      fontWeight: 500,
+      color: 'var(--espresso)',
+      marginBottom: 2
+    }
+  }, label), /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontFamily: 'DM Sans',
+      fontSize: 12,
       color: 'var(--text-muted)',
-      lineHeight: 1.4,
-      margin: 0
+      lineHeight: 1.5
     }
-  }, "Tap the heart to save a shade")), /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: 'flex',
-      alignItems: 'center',
-      gap: 10
-    }
-  }, /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 16,
-      color: 'var(--espresso-mid)',
-      flexShrink: 0,
-      width: 28,
-      height: 28,
-      borderRadius: '50%',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      background: 'var(--cream-dark)',
-      fontWeight: 300
-    }
-  }, "+"), /*#__PURE__*/React.createElement("p", {
-    style: {
-      fontFamily: 'Cormorant Garamond',
-      fontSize: 15,
-      fontStyle: 'italic',
-      fontWeight: 400,
-      color: 'var(--text-muted)',
-      lineHeight: 1.4,
-      margin: 0
-    }
-  }, "Pin up to four shades to compare")))), /*#__PURE__*/React.createElement("div", {
+  }, desc)))))), /*#__PURE__*/React.createElement("div", {
     className: "results-col",
     ref: resultsRef
   }, /*#__PURE__*/React.createElement(ResultsTable, {
