@@ -4104,6 +4104,10 @@ function DupeFinder({
     }
   }, shadeMatches.map((p, i) => /*#__PURE__*/React.createElement("button", _extends({
     key: i,
+    onTouchEnd: e => {
+      e.preventDefault();
+      pickShade(p);
+    },
     onClick: () => pickShade(p)
   }, hov(), {
     style: {

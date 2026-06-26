@@ -2352,7 +2352,10 @@ function DupeFinder({ product, onSelect, onUsePhoto }) {
               ) : (
                 <div style={{ ...suggestBox, maxHeight:308 }}>
                   {shadeMatches.map((p, i) => (
-                    <button key={i} onClick={() => pickShade(p)} {...hov()} style={{
+                    <button key={i}
+                      onTouchEnd={e => { e.preventDefault(); pickShade(p); }}
+                      onClick={() => pickShade(p)}
+                      {...hov()} style={{
                       display:'flex', alignItems:'center', gap:11, width:'100%',
                       padding:'8px 10px', borderRadius:9, border:'none',
                       background:'transparent', cursor:'pointer', transition:'background 0.12s',
