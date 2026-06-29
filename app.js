@@ -3696,6 +3696,7 @@ function DupeFinder({
   const [brand, setBrand] = useState(null);
   const [brandQuery, setBrandQuery] = useState('');
   const [shadeQuery, setShadeQuery] = useState('');
+  const touchStartY = React.useRef(0);
   const brands = React.useMemo(() => [...new Set(REAL_PRODUCTS.map(p => p.brand))].sort((a, b) => a.localeCompare(b)), []);
   const brandCounts = React.useMemo(() => {
     const m = {};
@@ -4104,9 +4105,14 @@ function DupeFinder({
     }
   }, shadeMatches.map((p, i) => /*#__PURE__*/React.createElement("button", _extends({
     key: i,
+    onTouchStart: e => {
+      touchStartY.current = e.touches[0].clientY;
+    },
     onTouchEnd: e => {
-      e.preventDefault();
-      pickShade(p);
+      if (Math.abs(e.changedTouches[0].clientY - touchStartY.current) < 10) {
+        e.preventDefault();
+        pickShade(p);
+      }
     },
     onClick: () => pickShade(p)
   }, hov(), {

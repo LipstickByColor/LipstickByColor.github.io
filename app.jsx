@@ -2189,6 +2189,7 @@ function DupeFinder({ product, onSelect, onUsePhoto }) {
   const [brand, setBrand] = useState(null);
   const [brandQuery, setBrandQuery] = useState('');
   const [shadeQuery, setShadeQuery] = useState('');
+  const touchStartY = React.useRef(0);
 
   const brands = React.useMemo(
     () => [...new Set(REAL_PRODUCTS.map(p => p.brand))].sort((a, b) => a.localeCompare(b)),
@@ -2353,7 +2354,8 @@ function DupeFinder({ product, onSelect, onUsePhoto }) {
                 <div style={{ ...suggestBox, maxHeight:308 }}>
                   {shadeMatches.map((p, i) => (
                     <button key={i}
-                      onTouchEnd={e => { e.preventDefault(); pickShade(p); }}
+                      onTouchStart={e => { touchStartY.current = e.touches[0].clientY; }}
+                      onTouchEnd={e => { if (Math.abs(e.changedTouches[0].clientY - touchStartY.current) < 10) { e.preventDefault(); pickShade(p); } }}
                       onClick={() => pickShade(p)}
                       {...hov()} style={{
                       display:'flex', alignItems:'center', gap:11, width:'100%',
