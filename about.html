@@ -1149,14 +1149,16 @@
 
       <div class="pstage">
         <div class="pnode">2</div>
-        <div class="ptitle">Ground Truth</div>
+        <div class="ptitle">Training, Evaluation, Test Sets</div>
         <p class="pdesc">
-          No labeled dataset existed, so one was built. Stratified-sampled images and extracted
-          CIELAB values as ground truth.
+          No labeled dataset existed, so one was built. The training set uses a multi-step strategy
+          optimized for coverage, while a separate validation and test set is drawn for
+          representativeness, so reported metrics reflect overall performance.
         </p>
         <div class="pmetrics">
-          <span class="pmetric"><span class="v">200+</span><span class="l">labeled samples</span></span>
           <span class="pmetric"><span class="l">Human annotation</span></span>
+          <span class="pmetric"><span class="l">Label Studio</span></span>
+          <span class="pmetric"><span class="l">Segmentation masks</span></span>
         </div>
       </div>
 
