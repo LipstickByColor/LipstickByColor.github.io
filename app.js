@@ -3697,6 +3697,8 @@ function DupeFinder({
   const [brandQuery, setBrandQuery] = useState('');
   const [shadeQuery, setShadeQuery] = useState('');
   const touchStartY = React.useRef(0);
+  const brandNoResultFired = React.useRef(false);
+  const shadeNoResultFired = React.useRef(new Set());
   const brands = React.useMemo(() => [...new Set(REAL_PRODUCTS.map(p => p.brand))].sort((a, b) => a.localeCompare(b)), []);
   const brandCounts = React.useMemo(() => {
     const m = {};
@@ -3745,22 +3747,29 @@ function DupeFinder({
     onSelect(p);
   }
 
-  // Fire no-results events after the user pauses typing (600ms debounce)
+  // Fire no-results events after the user pauses typing (600ms debounce).
+  // Guarded by a minimum length (skip early, still-typing fragments) and
+  // deduped (fire at most once per session/brand) so retries and typos
+  // don't inflate the metric with repeats of the same dead-end search.
   React.useEffect(() => {
-    if (!brandQuery.trim() || brandMatches.length > 0) return;
+    const q = brandQuery.trim().toLowerCase();
+    if (q.length < 3 || brandMatches.length > 0 || brandNoResultFired.current) return;
     const t = setTimeout(() => {
+      brandNoResultFired.current = true;
       window.gtag?.('event', 'dupe_brand_no_results', {
-        query: brandQuery.trim().toLowerCase()
+        query: q
       });
     }, 600);
     return () => clearTimeout(t);
   }, [brandQuery, brandMatches.length]);
   React.useEffect(() => {
-    if (!shadeQuery.trim() || shadeMatches.length > 0) return;
+    const q = shadeQuery.trim().toLowerCase();
+    if (q.length < 3 || shadeMatches.length > 0 || !brand || shadeNoResultFired.current.has(brand)) return;
     const t = setTimeout(() => {
+      shadeNoResultFired.current.add(brand);
       window.gtag?.('event', 'dupe_shade_no_results', {
         brand,
-        query: shadeQuery.trim().toLowerCase()
+        query: q
       });
     }, 600);
     return () => clearTimeout(t);
