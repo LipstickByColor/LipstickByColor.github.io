@@ -2682,7 +2682,7 @@ function App() {
           onMouseEnter={e => { e.currentTarget.style.borderColor='var(--blush)'; e.currentTarget.style.color='var(--blush)'; }}
           onMouseLeave={e => { e.currentTarget.style.borderColor='var(--border)'; e.currentTarget.style.color='var(--espresso)'; }}
         >
-          About
+          How It Works
         </a>
         <button
           onClick={() => setShowWishlist(true)}
@@ -2966,7 +2966,7 @@ function App() {
           textDecoration:'none', borderBottom:'1px solid currentColor', paddingBottom:1,
           transition:'opacity 0.15s',
         }}>
-          About
+          How It Works
         </a>
         {selectedColor && matches.length > 0 && (
           <span style={{ fontSize:11, color:'var(--text-muted)' }}>

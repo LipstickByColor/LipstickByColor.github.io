@@ -4670,7 +4670,7 @@ function App() {
       e.currentTarget.style.borderColor = 'var(--border)';
       e.currentTarget.style.color = 'var(--espresso)';
     }
-  }, "About"), /*#__PURE__*/React.createElement("button", {
+  }, "How It Works"), /*#__PURE__*/React.createElement("button", {
     onClick: () => setShowWishlist(true),
     style: {
       display: 'flex',
@@ -5327,7 +5327,7 @@ function App() {
       paddingBottom: 1,
       transition: 'opacity 0.15s'
     }
-  }, "About"), selectedColor && matches.length > 0 && /*#__PURE__*/React.createElement("span", {
+  }, "How It Works"), selectedColor && matches.length > 0 && /*#__PURE__*/React.createElement("span", {
     style: {
       fontSize: 11,
       color: 'var(--text-muted)'
