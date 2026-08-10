@@ -2185,6 +2185,16 @@ function Section({ title, children }) {
 }
 
 // ── Dupe Finder ──────────────────────────────────────────────────────────────
+// Quick-start options shown under the dupe search for anyone who
+// doesn't have a specific lipstick in mind yet.
+const POPULAR_DUPE_PICKS = [
+  { brand: 'chanel', shade: '99 pirate' },
+  { brand: 'chanel', shade: '49 ever red' },
+  { brand: 'dior', shade: '100 forever nude look' },
+  { brand: 'dior', shade: '422 rose des vents' },
+  { brand: 'dior', shade: '670 rose blues' },
+];
+
 function DupeFinder({ product, onSelect, onUsePhoto }) {
   const [brand, setBrand] = useState(null);
   const [brandQuery, setBrandQuery] = useState('');
@@ -2231,6 +2241,17 @@ function DupeFinder({ product, onSelect, onUsePhoto }) {
   function changeBrand() { setBrand(null); setBrandQuery(''); setShadeQuery(''); onSelect(null); }
   function pickShade(p) {
     window.gtag?.('event', 'dupe_shade_select', { brand: p.brand, shade: p.shade, hex: p.hex });
+    onSelect(p);
+  }
+
+  const popularProducts = React.useMemo(() => (
+    POPULAR_DUPE_PICKS
+      .map(({ brand: b, shade: s }) => REAL_PRODUCTS.find(p => p.brand.toLowerCase() === b && p.shade.toLowerCase() === s))
+      .filter(Boolean)
+  ), []);
+  function pickPopular(p) {
+    window.gtag?.('event', 'dupe_popular_select', { brand: p.brand, shade: p.shade, hex: p.hex });
+    setBrand(p.brand); setBrandQuery(''); setShadeQuery('');
     onSelect(p);
   }
 
@@ -2407,6 +2428,30 @@ function DupeFinder({ product, onSelect, onUsePhoto }) {
               </p>
             </div>
           )}
+        </div>
+      )}
+
+      {!product && popularProducts.length > 0 && (
+        <div style={{ marginTop:26, display:'flex', flexDirection:'column', gap:10 }}>
+          <p style={{ fontFamily:'DM Sans', fontSize:10, color:'var(--text-muted)', letterSpacing:'0.1em', textTransform:'uppercase', textAlign:'center' }}>
+            Or try a popular shade
+          </p>
+          <div style={{ display:'flex', flexWrap:'wrap', gap:8, justifyContent:'center' }}>
+            {popularProducts.map((p, i) => (
+              <button key={i} onClick={() => pickPopular(p)} style={{
+                display:'flex', alignItems:'center', gap:8,
+                padding:'7px 12px 7px 8px', background:'#fff', borderRadius:40,
+                border:'1px solid var(--border)', boxShadow:'0 2px 8px var(--shadow)',
+                cursor:'pointer',
+              }}>
+                <span style={{ width:20, height:20, borderRadius:'50%', background:p.hex, flexShrink:0, boxShadow:`0 1px 4px ${p.hex}66`, border:'1px solid rgba(42,26,20,0.08)' }} />
+                <span style={{ display:'flex', flexDirection:'column', textAlign:'left' }}>
+                  <span style={{ fontFamily:'Cormorant Garamond', fontStyle:'italic', fontSize:13, color:'var(--espresso)', lineHeight:1.15 }}>{p.shade}</span>
+                  <span style={{ fontFamily:'DM Sans', fontSize:9, color:'var(--text-muted)', textTransform:'capitalize' }}>{p.brand}</span>
+                </span>
+              </button>
+            ))}
+          </div>
         </div>
       )}
     </div>
