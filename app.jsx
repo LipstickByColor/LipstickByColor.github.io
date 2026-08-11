@@ -116,8 +116,8 @@ const BRAND_TIER = {
   // everything else → '$$' (mid-range / prestige)
 };
 
-// Compact 5-step tonal ramp anchored to a specific shade (2 lighter, anchor, 2 deeper).
-// Used in the results-panel strip for photo/hex/list entry points.
+// Compact tonal ramp anchored to a specific shade (perSide lighter, anchor, perSide deeper).
+// Used in the results-panel strip for all entry points.
 function generateToneSteps(anchorHex, perSide = 2, stepL = 13, baseName = 'This shade') {
   const [L0, a0, b0] = hexToLab(anchorHex);
   const C0 = Math.sqrt(a0 * a0 + b0 * b0);
@@ -134,26 +134,21 @@ function generateToneSteps(anchorHex, perSide = 2, stepL = 13, baseName = 'This 
   return { ramp: out, anchorStep: out[perSide], anchorIdx: perSide };
 }
 
-// Generate a light→deep tonal ramp of 11 steps from an anchor hex.
-// Holds hue angle constant; tapers chroma at the lightest and deepest ends.
-function buildTonalRamp(anchorHex) {
-  const [, a, b] = hexToLab(anchorHex);
-  const hue = Math.atan2(b, a);
-  const chroma = Math.sqrt(a * a + b * b);
-  const STEPS = 11;
-  return Array.from({ length: STEPS }, (_, i) => {
-    const t = i / (STEPS - 1);
-    const L = 88 - t * 66; // 88 (lightest) → 22 (deepest)
-    // parabolic taper: 0.35 at both ends, 1.0 at t=0.5
-    const scale = 0.35 + 0.65 * (1 - Math.pow(2 * t - 1, 2));
-    const c = chroma * scale;
-    return {
-      id: `ramp_${i}`,
-      hex: labToHex(L, c * Math.cos(hue), c * Math.sin(hue)),
-      name: ['Lightest','Very Light','Light','Medium-Light','Medium-Light',
-             'Medium','Medium-Deep','Deep','Deep','Very Deep','Deepest'][i],
-    };
-  });
+// A ramp step counts as "no options" if even the closest real product is this
+// far away in ΔE76 — calibrated against the catalog so it only trips for the
+// hand-curated novelty wheel colors that are already known outliers, not for
+// ordinary shades. (Well beyond "just noticeable"; ΔE > 10 reads as a clearly
+// different color, not merely a slightly-off match.)
+const NO_MATCH_DELTA_E = 10;
+
+function nearestProductDistance(hex) {
+  const lab = hexToLab(hex);
+  let best = Infinity;
+  for (const p of REAL_PRODUCTS) {
+    const d = deltaE(lab, p.lab);
+    if (d < best) best = d;
+  }
+  return best;
 }
 
 // ── Color math helpers ─────────────────────────────────────────────────────────
@@ -188,7 +183,7 @@ function getHsl(hex) {
 // ── Segmented Color Wheel ──────────────────────────────────────────────────────
 // Each of the 40 colors gets its own arc segment — clear boundaries, labeled,
 // clickable. Colors sorted by hue; arranged in 2 rings (light outer, dark inner).
-function ColorWheel({ colors, selectedId, onSelect, hoveredId, onHover, preserveOrder }) {
+function ColorWheel({ colors, selectedId, onSelect, hoveredId, onHover }) {
   const SIZE = 440;
   const CX = SIZE / 2, CY = SIZE / 2;
 
@@ -212,25 +207,10 @@ function ColorWheel({ colors, selectedId, onSelect, hoveredId, onHover, preserve
   const DIVIDER_GAP = 0; // no visual gap — novelty block sits at bottom, GMM fills the rest
 
   // Build segments with explicit angle ranges.
+  // GMM colors hue-sorted across most of the wheel; novelty colors hue-sorted
+  // in a fixed block at the bottom (180°), separated by DIVIDER_GAP.
   const segments = [];
-  if (preserveOrder) {
-    // Zoom / ΔE mode: colors in passed order, evenly spaced across full 360°
-    const sliceDeg = 360 / HALF;
-    if (SINGLE_RING) {
-      colors.forEach((c, i) => segments.push({ outer: c, inner: null,
-        startDeg: i * sliceDeg + GAP_DEG / 2, endDeg: (i + 1) * sliceDeg - GAP_DEG / 2 }));
-    } else {
-      for (let i = 0; i < HALF; i++) {
-        const a = colors[i * 2], b = colors[i * 2 + 1];
-        const la = getHsl(a.hex).l, lb = getHsl(b.hex).l;
-        const outer = la >= lb ? a : b, inner = la >= lb ? b : a;
-        segments.push({ outer, inner,
-          startDeg: i * sliceDeg + GAP_DEG / 2, endDeg: (i + 1) * sliceDeg - GAP_DEG / 2 });
-      }
-    }
-  } else {
-    // Normal mode: GMM colors hue-sorted across most of the wheel; novelty colors
-    // hue-sorted in a fixed block at the bottom (180°), separated by DIVIDER_GAP.
+  {
     const sortByHue = arr => [...arr].sort((a, b) => getHsl(a.hex).h - getHsl(b.hex).h);
     const gmmColors = sortByHue(colors.filter(c => !c.novelty));
     const novColors = sortByHue(colors.filter(c =>  c.novelty));
@@ -574,7 +554,7 @@ function ResultsTable({ selectedColor, matches, totalProducts, pinnedItems, togg
         </div>
       </div>
 
-      {/* Tonal range strip — photo / hex / list entry points only */}
+      {/* Tonal range strip — wheel / photo / hex / dupe / list entry points */}
       {toneRamp && toneRamp.ramp.length > 1 && (
         <div style={{
           marginBottom:12, padding:'9px 12px 10px', background:'#fff',
@@ -585,17 +565,21 @@ function ResultsTable({ selectedColor, matches, totalProducts, pinnedItems, togg
             {toneRamp.ramp.map((step, i) => {
               const isAnchor = i === toneRamp.anchorIdx;
               const isActive = i === toneIdx;
+              const disabled = !step.hasMatch;
               return (
-                <button key={step.id} onClick={() => setToneIdx(i)}
-                  title={isAnchor ? `${step.name} (your shade)` : step.name}
+                <button key={step.id} onClick={() => { if (!disabled) setToneIdx(i); }}
+                  disabled={disabled}
+                  title={disabled ? 'No options available in this shade' : isAnchor ? `${step.name} (your shade)` : step.name}
                   style={{
-                    flex:1, height:32, borderRadius:7, cursor:'pointer', padding:0,
+                    flex:1, height:32, borderRadius:7, cursor: disabled ? 'not-allowed' : 'pointer', padding:0,
                     background: step.hex,
                     border: isActive ? '2.5px solid var(--espresso)' : '2px solid #fff',
                     outline: isAnchor && !isActive ? '1.5px dashed rgba(42,26,20,0.35)' : 'none',
                     outlineOffset: -5,
                     boxShadow: isActive ? '0 3px 10px rgba(42,26,20,0.28)' : '0 1px 3px rgba(42,26,20,0.12)',
                     transform: isActive ? 'translateY(-2px)' : 'none',
+                    opacity: disabled ? 0.35 : 1,
+                    filter: disabled ? 'grayscale(0.7)' : 'none',
                     transition:'all 0.15s',
                   }}
                 />
@@ -2491,9 +2475,6 @@ function Landing({ onPick }) {
 function App() {
   const [selectedColor, setSelectedColor] = useState(null);
   const [hoveredId, setHoveredId] = useState(null);
-  const [zoomAnchor, setZoomAnchor] = useState(null);
-  const preZoomRef = React.useRef(null); // original swatch before entering zoom
-  const suppressScrollRef = React.useRef(false);
   const resultsRef = React.useRef(null);
   const [toneIdx, setToneIdx] = useState(null);
   const [mode, setMode] = useState('landing'); // 'landing' | 'wheel' | 'photo' | 'hex' | 'dupe' | 'list'
@@ -2517,10 +2498,10 @@ function App() {
     setMode(id);
     window.gtag?.('event', 'select_mode', { mode: id, source });
     if (id === 'wheel') { setSelectedColor(null); setPhotoHex(null); setHexHex(null); setDupeProduct(null); }
-    else if (id === 'photo') { setSelectedColor(null); setZoomAnchor(null); setHexHex(null); setDupeProduct(null); }
-    else if (id === 'hex')   { setSelectedColor(null); setZoomAnchor(null); setPhotoHex(null); setDupeProduct(null); }
-    else if (id === 'dupe')  { setSelectedColor(null); setZoomAnchor(null); setPhotoHex(null); setHexHex(null); setDupeProduct(null); }
-    else { setSelectedColor(null); setZoomAnchor(null); setPhotoHex(null); setHexHex(null); setDupeProduct(null); }
+    else if (id === 'photo') { setSelectedColor(null); setHexHex(null); setDupeProduct(null); }
+    else if (id === 'hex')   { setSelectedColor(null); setPhotoHex(null); setDupeProduct(null); }
+    else if (id === 'dupe')  { setSelectedColor(null); setPhotoHex(null); setHexHex(null); setDupeProduct(null); }
+    else { setSelectedColor(null); setPhotoHex(null); setHexHex(null); setDupeProduct(null); }
   }
 
   function toggleWishlist(product) {
@@ -2560,7 +2541,6 @@ function App() {
     if (photoHex) {
       setSelectedColor({ id:'__photo__', name:'Upload photo', hex: photoHex });
       window.gtag?.('event', 'select_color', { method: 'photo', hex: photoHex });
-      setZoomAnchor(null);
     } else {
       setSelectedColor(null);
     }
@@ -2572,7 +2552,6 @@ function App() {
     if (hexHex) {
       setSelectedColor({ id:'__hex__', name:'From hex', hex: hexHex });
       window.gtag?.('event', 'select_color', { method: 'hex', hex: hexHex });
-      setZoomAnchor(null);
     } else {
       setSelectedColor(null);
     }
@@ -2589,7 +2568,6 @@ function App() {
         sourceKey: `${dupeProduct.brand}|${dupeProduct.shade}`,
       });
       window.gtag?.('event', 'select_color', { method: 'dupe', hex: dupeProduct.hex, brand: dupeProduct.brand, shade: dupeProduct.shade });
-      setZoomAnchor(null);
     } else {
       setSelectedColor(null);
     }
@@ -2637,19 +2615,16 @@ function App() {
     return true;
   }
 
-  // When zoomed, show a light→deep tonal ramp instead of nearest palette neighbors.
-  const wheelColors = React.useMemo(() => {
-    if (!zoomAnchor) return colors;
-    return buildTonalRamp(zoomAnchor.hex);
-  }, [colors, zoomAnchor]);
-
-  // Tonal strip for non-wheel entry points (photo / hex / list).
-  const toneRamp = React.useMemo(
-    () => selectedColor && mode !== 'wheel'
-      ? generateToneSteps(selectedColor.hex, 2, 13, selectedColor.name || 'This shade')
-      : null,
-    [selectedColor?.id, selectedColor?.hex, mode]
-  );
+  // Tonal strip — 5-step ramp (2 lighter, anchor, 2 deeper) for every entry point.
+  const toneRamp = React.useMemo(() => {
+    if (!selectedColor) return null;
+    const base = generateToneSteps(selectedColor.hex, 2, 13, selectedColor.name || 'This shade');
+    const ramp = base.ramp.map((step, i) => ({
+      ...step,
+      hasMatch: i === base.anchorIdx || nearestProductDistance(step.hex) <= NO_MATCH_DELTA_E,
+    }));
+    return { ...base, ramp };
+  }, [selectedColor?.id, selectedColor?.hex, mode]);
   React.useEffect(() => {
     setToneIdx(toneRamp ? toneRamp.anchorIdx : null);
   }, [toneRamp]);
@@ -2669,7 +2644,6 @@ function App() {
   React.useEffect(() => {
     if (!effectiveColor || !resultsRef.current) return;
     if (window.innerWidth > 900) return;
-    if (suppressScrollRef.current) { suppressScrollRef.current = false; return; }
     const timer = setTimeout(() => {
       resultsRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }, 80);
@@ -2808,12 +2782,11 @@ function App() {
           {mode === 'wheel' ? (
             <div style={{ position:'relative' }}>
               <ColorWheel
-                colors={wheelColors}
+                colors={colors}
                 selectedId={selectedColor?.id}
-                onSelect={c => { setSelectedColor(c); window.gtag?.('event', 'select_color', { method: 'wheel', zoomed: !!zoomAnchor, hex: c.hex, name: c.name }); }}
+                onSelect={c => { setSelectedColor(c); window.gtag?.('event', 'select_color', { method: 'wheel', hex: c.hex, name: c.name }); }}
                 hoveredId={hoveredId}
                 onHover={setHoveredId}
-                preserveOrder={!!zoomAnchor}
               />
             </div>
           ) : mode === 'photo' ? (
@@ -2842,77 +2815,6 @@ function App() {
             />
           )}
 
-          {/* Zoom control — sits under the wheel */}
-          <div style={{
-            display:'flex', flexDirection:'column', alignItems:'center', gap:6,
-            minHeight:32, marginTop:4,
-          }}>
-            {!zoomAnchor && selectedColor && mode === 'wheel' && (
-              <button
-                onClick={() => {
-                  const ramp = buildTonalRamp(selectedColor.hex);
-                  const anchorLab = hexToLab(selectedColor.hex);
-                  const nearest = ramp.reduce((best, step) => {
-                    const d = deltaE(anchorLab, hexToLab(step.hex));
-                    return d < best.d ? { step, d } : best;
-                  }, { step: ramp[5], d: Infinity }).step;
-                  preZoomRef.current = selectedColor;
-                  setZoomAnchor(selectedColor);
-                  suppressScrollRef.current = true;
-                  setSelectedColor(nearest);
-                  window.gtag?.('event', 'zoom_shades', { hex: selectedColor.hex, name: selectedColor.name });
-                }}
-                style={{
-                  padding:'8px 16px',
-                  fontSize:11, fontFamily:'DM Sans',
-                  letterSpacing:'0.08em', textTransform:'uppercase', fontWeight:500,
-                  background:'transparent', color:'var(--blush)',
-                  border:'1px solid var(--blush)', borderRadius:20,
-                  cursor:'pointer', transition:'all 0.15s ease',
-                  display:'inline-flex', alignItems:'center', gap:8,
-                }}
-                onMouseEnter={e => { e.currentTarget.style.background = 'var(--blush)'; e.currentTarget.style.color = '#fff'; }}
-                onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--blush)'; }}
-              >
-                <span>See lighter &amp; deeper shades</span>
-                <svg width="13" height="13" viewBox="0 0 16 16" fill="none" style={{ flexShrink:0 }}>
-                  <circle cx="7" cy="7" r="4.5" stroke="currentColor" strokeWidth="1.5"/>
-                  <line x1="10.5" y1="10.5" x2="14" y2="14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-                </svg>
-              </button>
-            )}
-            {zoomAnchor && (
-              <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:6 }}>
-                <div style={{ display:'flex', gap:8, flexWrap:'wrap', justifyContent:'center' }}>
-                  <button
-                    onClick={() => {
-                      setZoomAnchor(null);
-                      if (preZoomRef.current) { suppressScrollRef.current = true; setSelectedColor(preZoomRef.current); }
-                    }}
-                    style={{
-                      padding:'8px 16px',
-                      fontSize:11, fontFamily:'DM Sans',
-                      letterSpacing:'0.08em', textTransform:'uppercase', fontWeight:500,
-                      background:'var(--espresso)', color:'var(--cream)',
-                      border:'1px solid var(--espresso)', borderRadius:20,
-                      cursor:'pointer', transition:'all 0.15s ease',
-                      display:'inline-flex', alignItems:'center', gap:8,
-                    }}
-                  >
-                    <span style={{ fontSize:13, lineHeight:1 }}>←</span>
-                    <span>Show all shades</span>
-                  </button>
-                </div>
-                <span style={{
-                  fontSize:10, color:'var(--text-muted)', fontFamily:'DM Sans',
-                  letterSpacing:'0.05em', fontStyle:'italic',
-                }}>
-                  Lighter to deeper shades of this color
-                </span>
-              </div>
-            )}
-          </div>
-
           {/* Selected color pill */}
           {selectedColor && (
             <div style={{
@@ -2932,7 +2834,7 @@ function App() {
                 <div style={{ fontSize:12, fontWeight:500, color:'var(--espresso)', lineHeight:1.2 }}>{selectedColor.name}</div>
                 <div style={{ fontSize:10, color:'var(--text-muted)', letterSpacing:'0.06em' }}>{selectedColor.hex.toUpperCase()}</div>
               </div>
-              <button onClick={() => { setSelectedColor(null); setZoomAnchor(null); }} style={{
+              <button onClick={() => setSelectedColor(null)} style={{
                 marginLeft:4, background:'none', border:'none', cursor:'pointer',
                 color:'var(--text-muted)', fontSize:16, lineHeight:1, padding:'2px 4px',
               }}>×</button>
