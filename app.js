@@ -3966,6 +3966,206 @@ function DupeFinder({
     }
   }, p.brand)))))));
 }
+
+// Shared mode icons — used on the landing cards and the in-app mode bar
+// so a user sees the same glyph for "color wheel" etc. everywhere.
+const MODE_ICONS = {
+  wheel: (s = 26) => /*#__PURE__*/React.createElement("svg", {
+    width: s,
+    height: s,
+    viewBox: "0 0 20 20",
+    fill: "none"
+  }, /*#__PURE__*/React.createElement("path", {
+    d: "M 10 10 L 18 10 A 8 8 0 0 1 10 18 Z",
+    fill: "#F5C5C5",
+    stroke: "#D4B8AC",
+    strokeWidth: "0.5"
+  }), /*#__PURE__*/React.createElement("path", {
+    d: "M 10 10 L 10 18 A 8 8 0 0 1 2 10 Z",
+    fill: "#C87890",
+    stroke: "#D4B8AC",
+    strokeWidth: "0.5"
+  }), /*#__PURE__*/React.createElement("path", {
+    d: "M 10 10 L 2 10 A 8 8 0 0 1 10 2 Z",
+    fill: "#8B4558",
+    stroke: "#D4B8AC",
+    strokeWidth: "0.5"
+  }), /*#__PURE__*/React.createElement("path", {
+    d: "M 10 10 L 10 2 A 8 8 0 0 1 18 10 Z",
+    fill: "#E8C8B8",
+    stroke: "#D4B8AC",
+    strokeWidth: "0.5"
+  })),
+  photo: (s = 26) => /*#__PURE__*/React.createElement("svg", {
+    width: s,
+    height: s,
+    viewBox: "0 0 20 20",
+    fill: "none"
+  }, /*#__PURE__*/React.createElement("rect", {
+    x: "2",
+    y: "7",
+    width: "16",
+    height: "10",
+    rx: "2",
+    fill: "#EDD8CE",
+    stroke: "#D4B8AC",
+    strokeWidth: "1"
+  }), /*#__PURE__*/React.createElement("rect", {
+    x: "6",
+    y: "5",
+    width: "7",
+    height: "3",
+    rx: "1",
+    fill: "#EDD8CE",
+    stroke: "#D4B8AC",
+    strokeWidth: "1"
+  }), /*#__PURE__*/React.createElement("circle", {
+    cx: "10",
+    cy: "12",
+    r: "3",
+    fill: "#F0D8D0",
+    stroke: "#C87890",
+    strokeWidth: "1.2"
+  })),
+  dupe: (s = 26) => /*#__PURE__*/React.createElement("svg", {
+    width: s,
+    height: s,
+    viewBox: "0 0 20 20",
+    fill: "none"
+  }, /*#__PURE__*/React.createElement("rect", {
+    x: "2",
+    y: "13",
+    width: "6",
+    height: "6",
+    rx: "1",
+    fill: "#EDD8CE",
+    stroke: "#D4B8AC",
+    strokeWidth: "0.8"
+  }), /*#__PURE__*/React.createElement("rect", {
+    x: "2",
+    y: "15.5",
+    width: "6",
+    height: "2",
+    fill: "#E4C8BC",
+    stroke: "#D4B8AC",
+    strokeWidth: "0.5"
+  }), /*#__PURE__*/React.createElement("rect", {
+    x: "3",
+    y: "7.5",
+    width: "4",
+    height: "5.5",
+    rx: "0.5",
+    fill: "#F0DED8",
+    stroke: "#D4B8AC",
+    strokeWidth: "0.8"
+  }), /*#__PURE__*/React.createElement("rect", {
+    x: "3",
+    y: "4",
+    width: "4",
+    height: "3.5",
+    fill: "#C87890",
+    stroke: "#A86878",
+    strokeWidth: "0.6"
+  }), /*#__PURE__*/React.createElement("path", {
+    d: "M3 4 Q3.5 1 5 0.5 Q6.5 1 7 4 Z",
+    fill: "#C87890",
+    stroke: "#A86878",
+    strokeWidth: "0.6",
+    strokeLinejoin: "round"
+  }), /*#__PURE__*/React.createElement("line", {
+    x1: "3",
+    y1: "2.8",
+    x2: "7",
+    y2: "1.5",
+    stroke: "#A86878",
+    strokeWidth: "0.5"
+  }), /*#__PURE__*/React.createElement("rect", {
+    x: "12",
+    y: "13",
+    width: "6",
+    height: "6",
+    rx: "1",
+    fill: "#EDD8CE",
+    stroke: "#D4B8AC",
+    strokeWidth: "0.8"
+  }), /*#__PURE__*/React.createElement("rect", {
+    x: "12",
+    y: "15.5",
+    width: "6",
+    height: "2",
+    fill: "#E4C8BC",
+    stroke: "#D4B8AC",
+    strokeWidth: "0.5"
+  }), /*#__PURE__*/React.createElement("rect", {
+    x: "13",
+    y: "7.5",
+    width: "4",
+    height: "5.5",
+    rx: "0.5",
+    fill: "#F0DED8",
+    stroke: "#D4B8AC",
+    strokeWidth: "0.8"
+  }), /*#__PURE__*/React.createElement("rect", {
+    x: "13",
+    y: "4",
+    width: "4",
+    height: "3.5",
+    fill: "#C87890",
+    stroke: "#A86878",
+    strokeWidth: "0.6"
+  }), /*#__PURE__*/React.createElement("path", {
+    d: "M13 4 Q13.5 1 15 0.5 Q16.5 1 17 4 Z",
+    fill: "#C87890",
+    stroke: "#A86878",
+    strokeWidth: "0.6",
+    strokeLinejoin: "round"
+  }), /*#__PURE__*/React.createElement("line", {
+    x1: "13",
+    y1: "2.8",
+    x2: "17",
+    y2: "1.5",
+    stroke: "#A86878",
+    strokeWidth: "0.5"
+  })),
+  hex: (s = 26) => /*#__PURE__*/React.createElement("svg", {
+    width: s,
+    height: s,
+    viewBox: "0 0 20 20",
+    fill: "none"
+  }, /*#__PURE__*/React.createElement("circle", {
+    cx: "14",
+    cy: "5",
+    r: "3.5",
+    fill: "#EDD8CE",
+    stroke: "#D4B8AC",
+    strokeWidth: "1"
+  }), /*#__PURE__*/React.createElement("line", {
+    x1: "12",
+    y1: "7.5",
+    x2: "5.5",
+    y2: "14",
+    stroke: "#D4B8AC",
+    strokeWidth: "2",
+    strokeLinecap: "round"
+  }), /*#__PURE__*/React.createElement("circle", {
+    cx: "4",
+    cy: "15.5",
+    r: "2",
+    fill: "#C87890"
+  })),
+  list: (s = 26) => /*#__PURE__*/React.createElement("svg", {
+    width: s,
+    height: s,
+    viewBox: "0 0 20 20",
+    fill: "none"
+  }, /*#__PURE__*/React.createElement("path", {
+    d: "M10 17 C10 17 2.5 12.4 2.5 7.3 C2.5 4.7 4.5 3 6.7 3 C8.1 3 9.3 3.7 10 4.9 C10.7 3.7 11.9 3 13.3 3 C15.5 3 17.5 4.7 17.5 7.3 C17.5 12.4 10 17 10 17 Z",
+    fill: "#F0D8D0",
+    stroke: "#C87890",
+    strokeWidth: "1.2",
+    strokeLinejoin: "round"
+  }))
+};
 function LandingCard({
   icon,
   title,
@@ -4042,201 +4242,22 @@ function Landing({
     id: 'wheel',
     title: 'Explore by color',
     desc: 'Browse a color wheel of lipstick shades and zoom into lighter and deeper tones.',
-    icon: /*#__PURE__*/React.createElement("svg", {
-      width: "26",
-      height: "26",
-      viewBox: "0 0 20 20",
-      fill: "none"
-    }, /*#__PURE__*/React.createElement("path", {
-      d: "M 10 10 L 18 10 A 8 8 0 0 1 10 18 Z",
-      fill: "#F5C5C5",
-      stroke: "#D4B8AC",
-      strokeWidth: "0.5"
-    }), /*#__PURE__*/React.createElement("path", {
-      d: "M 10 10 L 10 18 A 8 8 0 0 1 2 10 Z",
-      fill: "#C87890",
-      stroke: "#D4B8AC",
-      strokeWidth: "0.5"
-    }), /*#__PURE__*/React.createElement("path", {
-      d: "M 10 10 L 2 10 A 8 8 0 0 1 10 2 Z",
-      fill: "#8B4558",
-      stroke: "#D4B8AC",
-      strokeWidth: "0.5"
-    }), /*#__PURE__*/React.createElement("path", {
-      d: "M 10 10 L 10 2 A 8 8 0 0 1 18 10 Z",
-      fill: "#E8C8B8",
-      stroke: "#D4B8AC",
-      strokeWidth: "0.5"
-    }))
+    icon: MODE_ICONS.wheel()
   }, {
     id: 'photo',
     title: 'Match a photo',
     desc: 'Upload any photo or screenshot and tap the lipstick shade you want.',
-    icon: /*#__PURE__*/React.createElement("svg", {
-      width: "26",
-      height: "26",
-      viewBox: "0 0 20 20",
-      fill: "none"
-    }, /*#__PURE__*/React.createElement("rect", {
-      x: "2",
-      y: "7",
-      width: "16",
-      height: "10",
-      rx: "2",
-      fill: "#EDD8CE",
-      stroke: "#D4B8AC",
-      strokeWidth: "1"
-    }), /*#__PURE__*/React.createElement("rect", {
-      x: "6",
-      y: "5",
-      width: "7",
-      height: "3",
-      rx: "1",
-      fill: "#EDD8CE",
-      stroke: "#D4B8AC",
-      strokeWidth: "1"
-    }), /*#__PURE__*/React.createElement("circle", {
-      cx: "10",
-      cy: "12",
-      r: "3",
-      fill: "#F0D8D0",
-      stroke: "#C87890",
-      strokeWidth: "1.2"
-    }))
+    icon: MODE_ICONS.photo()
   }, {
     id: 'dupe',
     title: 'Find a dupe',
     desc: 'Search a lipstick you own and find matches at any price.',
-    icon: /*#__PURE__*/React.createElement("svg", {
-      width: "26",
-      height: "26",
-      viewBox: "0 0 20 20",
-      fill: "none"
-    }, /*#__PURE__*/React.createElement("rect", {
-      x: "2",
-      y: "13",
-      width: "6",
-      height: "6",
-      rx: "1",
-      fill: "#EDD8CE",
-      stroke: "#D4B8AC",
-      strokeWidth: "0.8"
-    }), /*#__PURE__*/React.createElement("rect", {
-      x: "2",
-      y: "15.5",
-      width: "6",
-      height: "2",
-      fill: "#E4C8BC",
-      stroke: "#D4B8AC",
-      strokeWidth: "0.5"
-    }), /*#__PURE__*/React.createElement("rect", {
-      x: "3",
-      y: "7.5",
-      width: "4",
-      height: "5.5",
-      rx: "0.5",
-      fill: "#F0DED8",
-      stroke: "#D4B8AC",
-      strokeWidth: "0.8"
-    }), /*#__PURE__*/React.createElement("rect", {
-      x: "3",
-      y: "4",
-      width: "4",
-      height: "3.5",
-      fill: "#C87890",
-      stroke: "#A86878",
-      strokeWidth: "0.6"
-    }), /*#__PURE__*/React.createElement("path", {
-      d: "M3 4 Q3.5 1 5 0.5 Q6.5 1 7 4 Z",
-      fill: "#C87890",
-      stroke: "#A86878",
-      strokeWidth: "0.6",
-      strokeLinejoin: "round"
-    }), /*#__PURE__*/React.createElement("line", {
-      x1: "3",
-      y1: "2.8",
-      x2: "7",
-      y2: "1.5",
-      stroke: "#A86878",
-      strokeWidth: "0.5"
-    }), /*#__PURE__*/React.createElement("rect", {
-      x: "12",
-      y: "13",
-      width: "6",
-      height: "6",
-      rx: "1",
-      fill: "#EDD8CE",
-      stroke: "#D4B8AC",
-      strokeWidth: "0.8"
-    }), /*#__PURE__*/React.createElement("rect", {
-      x: "12",
-      y: "15.5",
-      width: "6",
-      height: "2",
-      fill: "#E4C8BC",
-      stroke: "#D4B8AC",
-      strokeWidth: "0.5"
-    }), /*#__PURE__*/React.createElement("rect", {
-      x: "13",
-      y: "7.5",
-      width: "4",
-      height: "5.5",
-      rx: "0.5",
-      fill: "#F0DED8",
-      stroke: "#D4B8AC",
-      strokeWidth: "0.8"
-    }), /*#__PURE__*/React.createElement("rect", {
-      x: "13",
-      y: "4",
-      width: "4",
-      height: "3.5",
-      fill: "#C87890",
-      stroke: "#A86878",
-      strokeWidth: "0.6"
-    }), /*#__PURE__*/React.createElement("path", {
-      d: "M13 4 Q13.5 1 15 0.5 Q16.5 1 17 4 Z",
-      fill: "#C87890",
-      stroke: "#A86878",
-      strokeWidth: "0.6",
-      strokeLinejoin: "round"
-    }), /*#__PURE__*/React.createElement("line", {
-      x1: "13",
-      y1: "2.8",
-      x2: "17",
-      y2: "1.5",
-      stroke: "#A86878",
-      strokeWidth: "0.5"
-    }))
+    icon: MODE_ICONS.dupe()
   }, {
     id: 'hex',
     title: 'Enter a hex code',
     desc: 'Paste it or use the picker for a precise lipstick match.',
-    icon: /*#__PURE__*/React.createElement("svg", {
-      width: "26",
-      height: "26",
-      viewBox: "0 0 20 20",
-      fill: "none"
-    }, /*#__PURE__*/React.createElement("circle", {
-      cx: "14",
-      cy: "5",
-      r: "3.5",
-      fill: "#EDD8CE",
-      stroke: "#D4B8AC",
-      strokeWidth: "1"
-    }), /*#__PURE__*/React.createElement("line", {
-      x1: "12",
-      y1: "7.5",
-      x2: "5.5",
-      y2: "14",
-      stroke: "#D4B8AC",
-      strokeWidth: "2",
-      strokeLinecap: "round"
-    }), /*#__PURE__*/React.createElement("circle", {
-      cx: "4",
-      cy: "15.5",
-      r: "2",
-      fill: "#C87890"
-    }))
+    icon: MODE_ICONS.hex()
   }];
   return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
     style: {
@@ -4647,7 +4668,87 @@ function App() {
     className: "landing-main"
   }, /*#__PURE__*/React.createElement(Landing, {
     onPick: id => switchMode(id, 'landing')
-  })) : /*#__PURE__*/React.createElement("main", {
+  })) : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+    className: "mode-bar",
+    style: {
+      display: 'flex',
+      flexWrap: 'wrap',
+      background: 'var(--cream-dark)',
+      borderBottom: '1px solid var(--border)'
+    }
+  }, [{
+    id: 'wheel',
+    label: 'Color wheel',
+    hint: 'Browse by hue'
+  }, {
+    id: 'photo',
+    label: 'Upload photo',
+    hint: 'Match from a photo'
+  }, {
+    id: 'hex',
+    label: 'Custom color',
+    hint: 'Hex code or picker'
+  }, {
+    id: 'dupe',
+    label: 'Dupe finder',
+    hint: 'Match a lipstick you own'
+  }, ...(wishlist.length > 0 ? [{
+    id: 'list',
+    label: 'From My List',
+    hint: 'Your saved shades'
+  }] : [])].map(t => {
+    const active = mode === t.id;
+    return /*#__PURE__*/React.createElement("button", {
+      key: t.id,
+      onClick: () => switchMode(t.id),
+      style: {
+        fontFamily: 'DM Sans',
+        display: 'flex',
+        alignItems: 'center',
+        gap: 11,
+        textAlign: 'left',
+        background: active ? '#fff' : 'transparent',
+        border: 'none',
+        borderBottom: `2px solid ${active ? 'var(--blush)' : 'transparent'}`,
+        padding: '14px 20px 12px',
+        cursor: 'pointer',
+        transition: 'background 0.15s'
+      },
+      onMouseEnter: e => {
+        if (!active) e.currentTarget.style.background = 'rgba(255,255,255,0.5)';
+      },
+      onMouseLeave: e => {
+        if (!active) e.currentTarget.style.background = 'transparent';
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        width: 30,
+        height: 30,
+        borderRadius: '50%',
+        flexShrink: 0,
+        background: 'rgba(200,120,144,0.10)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }
+    }, MODE_ICONS[t.id](16)), /*#__PURE__*/React.createElement("span", {
+      style: {
+        display: 'flex',
+        flexDirection: 'column'
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 12.5,
+        color: active ? 'var(--espresso)' : 'var(--text-body)'
+      }
+    }, t.label), /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 10.5,
+        color: 'var(--text-muted)',
+        marginTop: 2
+      }
+    }, t.hint)));
+  })), /*#__PURE__*/React.createElement("main", {
     className: "app-main",
     style: {
       paddingBottom: pinnedItems.length > 0 ? 140 : undefined,
@@ -4655,50 +4756,7 @@ function App() {
     }
   }, /*#__PURE__*/React.createElement("div", {
     className: "palette-col"
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: 'inline-flex',
-      gap: 0,
-      background: 'transparent',
-      border: '1px solid var(--border)',
-      borderRadius: 18,
-      padding: 2,
-      marginBottom: 4,
-      alignSelf: 'center'
-    }
-  }, [{
-    id: 'wheel',
-    label: 'Color wheel'
-  }, {
-    id: 'photo',
-    label: 'Upload photo'
-  }, {
-    id: 'hex',
-    label: 'Custom color'
-  }, {
-    id: 'dupe',
-    label: 'Dupe finder'
-  }, ...(wishlist.length > 0 ? [{
-    id: 'list',
-    label: 'From My List'
-  }] : [])].map(t => /*#__PURE__*/React.createElement("button", {
-    key: t.id,
-    onClick: () => switchMode(t.id),
-    style: {
-      padding: '5px 14px',
-      borderRadius: 16,
-      fontFamily: 'DM Sans',
-      fontSize: 10,
-      fontWeight: 500,
-      letterSpacing: '0.08em',
-      textTransform: 'uppercase',
-      background: mode === t.id ? 'var(--espresso)' : 'transparent',
-      color: mode === t.id ? 'var(--cream)' : 'var(--text-muted)',
-      border: 'none',
-      cursor: 'pointer',
-      transition: 'all 0.15s'
-    }
-  }, t.label))), mode === 'wheel' ? /*#__PURE__*/React.createElement("div", {
+  }, mode === 'wheel' ? /*#__PURE__*/React.createElement("div", {
     style: {
       position: 'relative'
     }
@@ -4954,7 +5012,7 @@ function App() {
     toneRamp: toneRamp,
     toneIdx: toneIdx,
     setToneIdx: setToneIdx
-  }))), /*#__PURE__*/React.createElement("footer", {
+  })))), /*#__PURE__*/React.createElement("footer", {
     className: "app-footer",
     style: {
       borderTop: '1px solid var(--border)',
