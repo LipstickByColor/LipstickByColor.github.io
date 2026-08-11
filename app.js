@@ -4521,6 +4521,19 @@ function App() {
   React.useEffect(() => {
     setToneIdx(toneRamp ? toneRamp.anchorIdx : null);
   }, [toneRamp]);
+  function handleToneIdxChange(i) {
+    setToneIdx(prev => {
+      if (prev === i || !toneRamp) return i;
+      const step = toneRamp.ramp[i];
+      window.gtag?.('event', 'select_color', {
+        method: 'tone_adjust',
+        source: mode,
+        hex: step.hex,
+        name: step.name
+      });
+      return i;
+    });
+  }
   const onAnchor = !toneRamp || toneIdx == null || toneIdx === toneRamp.anchorIdx;
   const effectiveColor = selectedColor && toneRamp && !onAnchor ? {
     ...selectedColor,
@@ -4767,6 +4780,7 @@ function App() {
       setSelectedColor(c);
       window.gtag?.('event', 'select_color', {
         method: 'wheel',
+        zoomed: !!zoomAnchor,
         hex: c.hex,
         name: c.name
       });
@@ -4790,12 +4804,19 @@ function App() {
   }) : /*#__PURE__*/React.createElement(ListPicker, {
     wishlist: wishlist,
     selectedKey: selectedColor?.sourceKey,
-    onPick: p => setSelectedColor({
-      id: '__list__',
-      name: `Similar to ${p.shade}`,
-      hex: p.hex,
-      sourceKey: `${p.brand}|${p.shade}`
-    })
+    onPick: p => {
+      setSelectedColor({
+        id: '__list__',
+        name: `Similar to ${p.shade}`,
+        hex: p.hex,
+        sourceKey: `${p.brand}|${p.shade}`
+      });
+      window.gtag?.('event', 'select_color', {
+        method: 'list',
+        hex: p.hex,
+        name: p.shade
+      });
+    }
   }), /*#__PURE__*/React.createElement("div", {
     style: {
       display: 'flex',
@@ -5011,7 +5032,7 @@ function App() {
     toggleWishlist: toggleWishlist,
     toneRamp: toneRamp,
     toneIdx: toneIdx,
-    setToneIdx: setToneIdx
+    setToneIdx: handleToneIdxChange
   })))), /*#__PURE__*/React.createElement("footer", {
     className: "app-footer",
     style: {

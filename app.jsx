@@ -2653,6 +2653,14 @@ function App() {
   React.useEffect(() => {
     setToneIdx(toneRamp ? toneRamp.anchorIdx : null);
   }, [toneRamp]);
+  function handleToneIdxChange(i) {
+    setToneIdx(prev => {
+      if (prev === i || !toneRamp) return i;
+      const step = toneRamp.ramp[i];
+      window.gtag?.('event', 'select_color', { method: 'tone_adjust', source: mode, hex: step.hex, name: step.name });
+      return i;
+    });
+  }
   const onAnchor = !toneRamp || toneIdx == null || toneIdx === toneRamp.anchorIdx;
   const effectiveColor = selectedColor && toneRamp && !onAnchor
     ? { ...selectedColor, hex: toneRamp.ramp[toneIdx].hex, name: toneRamp.ramp[toneIdx].name }
@@ -2802,7 +2810,7 @@ function App() {
               <ColorWheel
                 colors={wheelColors}
                 selectedId={selectedColor?.id}
-                onSelect={c => { setSelectedColor(c); window.gtag?.('event', 'select_color', { method: 'wheel', hex: c.hex, name: c.name }); }}
+                onSelect={c => { setSelectedColor(c); window.gtag?.('event', 'select_color', { method: 'wheel', zoomed: !!zoomAnchor, hex: c.hex, name: c.name }); }}
                 hoveredId={hoveredId}
                 onHover={setHoveredId}
                 preserveOrder={!!zoomAnchor}
@@ -2822,12 +2830,15 @@ function App() {
             <ListPicker
               wishlist={wishlist}
               selectedKey={selectedColor?.sourceKey}
-              onPick={p => setSelectedColor({
-                id:'__list__',
-                name:`Similar to ${p.shade}`,
-                hex: p.hex,
-                sourceKey: `${p.brand}|${p.shade}`,
-              })}
+              onPick={p => {
+                setSelectedColor({
+                  id:'__list__',
+                  name:`Similar to ${p.shade}`,
+                  hex: p.hex,
+                  sourceKey: `${p.brand}|${p.shade}`,
+                });
+                window.gtag?.('event', 'select_color', { method: 'list', hex: p.hex, name: p.shade });
+              }}
             />
           )}
 
@@ -2951,7 +2962,7 @@ function App() {
 
         {/* Right: Results */}
         <div className="results-col" ref={resultsRef}>
-          <ResultsTable selectedColor={effectiveColor} matches={matches} totalProducts={REAL_PRODUCTS.length} pinnedItems={pinnedItems} togglePin={togglePin} wishlist={wishlist} toggleWishlist={toggleWishlist} toneRamp={toneRamp} toneIdx={toneIdx} setToneIdx={setToneIdx} />
+          <ResultsTable selectedColor={effectiveColor} matches={matches} totalProducts={REAL_PRODUCTS.length} pinnedItems={pinnedItems} togglePin={togglePin} wishlist={wishlist} toggleWishlist={toggleWishlist} toneRamp={toneRamp} toneIdx={toneIdx} setToneIdx={handleToneIdxChange} />
         </div>
       </main>
       </>
