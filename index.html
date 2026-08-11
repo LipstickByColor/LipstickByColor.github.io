@@ -62,7 +62,7 @@
   }
 
   /* Responsive layout */
-  .app-header { padding: 28px 48px 20px; }
+  .app-header { padding: 20px 48px; }
   .app-main {
     flex: 1; display: flex; gap: 0;
     padding: 40px 48px 40px;
@@ -79,14 +79,29 @@
 
   .mobile-picker-tips { display: none; }
 
+  .landing-main {
+    flex: 1; display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    padding: 48px 48px 56px; gap: 38px;
+  }
+  .landing-lede {
+    font-family: 'Cormorant Garamond', serif; font-weight: 300; font-size: 52px;
+    line-height: 1.1; letter-spacing: -0.015em; text-align: center;
+  }
+  .landing-grid {
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;
+    width: 100%; max-width: 820px;
+  }
+
   @media (max-width: 900px) {
+    .landing-main { padding: 32px 24px 40px; gap: 28px; }
+    .landing-lede { font-size: 36px; }
     .mobile-picker-tips {
       display: flex; flex-direction: column; gap: 16px;
       padding: 16px; border: 1px solid var(--border);
       border-radius: 12px; background: #fff;
       max-width: 380px; width: 100%;
     }
-    .results-empty-tips { display: none !important; }
     .results-empty-state { display: none !important; }
     .app-header { padding: 20px 24px 16px; flex-wrap: wrap; }
     .app-main {
@@ -104,9 +119,9 @@
   }
 
   @media (max-width: 540px) {
+    .landing-grid { grid-template-columns: 1fr; }
+    .landing-lede { font-size: 28px; }
     .app-header { padding: 14px 16px 10px; gap: 6px 8px; }
-    .app-header h1 { flex-basis: 100%; font-size: 28px !important; margin-bottom: -2px; }
-    .app-header > span { flex-basis: 100%; }
     .app-main { padding: 16px 12px 24px; }
     .col-hide-mobile { display: none !important; }
     table { font-size: 12px !important; }
@@ -145,9 +160,20 @@
   "@type": "WebApplication",
   "name": "Lipstick Color Finder",
   "url": "https://lipstickbycolor.github.io/",
-  "description": "Search 9,000+ lip products by exact color using CIELAB perceptual color matching — across brands, finishes, and price points.",
+  "description": "Search 9,000+ lip products by exact color rather than brand shade names or inconsistent retailer color filters. Built on a from-scratch machine learning pipeline: a CNN classifies each product image, a segmentation model isolates the true product color from packaging, and CIELAB color extraction with ΔE (perceptual color distance) powers color-wheel, hex-code, and photo-based search across brands, finishes, and price points.",
   "applicationCategory": "LifestyleApplication",
-  "operatingSystem": "Web"
+  "operatingSystem": "Web",
+  "codeRepository": "https://github.com/ConstanzaSchibber/lipstick_color_extraction",
+  "author": {
+    "@type": "Person",
+    "name": "Connie Schibber",
+    "jobTitle": "Data Scientist",
+    "description": "Data Scientist who builds the measurement systems, experiments, and ML pipelines behind AI products: what to build, why they fail, how to improve them, and when to launch.",
+    "sameAs": [
+      "https://www.linkedin.com/in/cschibber/",
+      "https://github.com/ConstanzaSchibber"
+    ]
+  }
 }
 </script>
 </head>

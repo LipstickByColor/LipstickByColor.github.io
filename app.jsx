@@ -485,115 +485,12 @@ function ResultsTable({ selectedColor, matches, totalProducts, pinnedItems, togg
 
   if (!selectedColor) return (
     <div className="results-empty-state" style={{
-      flex:1, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center',
-      color:'var(--text-muted)', textAlign:'center', padding:40, gap:12,
+      flex:1, display:'flex', alignItems:'center', justifyContent:'center',
+      color:'var(--text-muted)', textAlign:'center', padding:40,
     }}>
-      <div className="results-empty-tips" style={{
-        display:'flex', flexDirection:'column', gap:18,
-      }}>
-        <div style={{ display:'flex', alignItems:'flex-start', gap:14, textAlign:'left' }}>
-          <span style={{
-            flexShrink:0, width:40, height:40, borderRadius:'50%',
-            display:'flex', alignItems:'center', justifyContent:'center',
-            background:'rgba(200,120,144,0.10)', marginTop:2,
-          }}>
-            <svg width="22" height="22" viewBox="0 0 20 20" fill="none">
-              <path d="M 10 10 L 18 10 A 8 8 0 0 1 10 18 Z" fill="#F5C5C5" stroke="#D4B8AC" strokeWidth="0.5"/>
-              <path d="M 10 10 L 10 18 A 8 8 0 0 1 2 10 Z" fill="#C87890" stroke="#D4B8AC" strokeWidth="0.5"/>
-              <path d="M 10 10 L 2 10 A 8 8 0 0 1 10 2 Z" fill="#8B4558" stroke="#D4B8AC" strokeWidth="0.5"/>
-              <path d="M 10 10 L 10 2 A 8 8 0 0 1 18 10 Z" fill="#E8C8B8" stroke="#D4B8AC" strokeWidth="0.5"/>
-            </svg>
-          </span>
-          <div>
-            <p style={{ fontFamily:'DM Sans', fontSize:14, fontWeight:500, color:'var(--espresso)', marginBottom:2, lineHeight:1.3 }}>Color Wheel</p>
-            <p style={{ fontFamily:'DM Sans', fontSize:14, fontWeight:400, color:'var(--text-muted)', lineHeight:1.5 }}>Discover products by color family, then explore lighter and deeper shades.</p>
-          </div>
-        </div>
-        <div style={{ display:'flex', alignItems:'flex-start', gap:14, textAlign:'left' }}>
-          <span style={{
-            flexShrink:0, width:40, height:40, borderRadius:'50%',
-            display:'flex', alignItems:'center', justifyContent:'center',
-            background:'rgba(200,120,144,0.10)', marginTop:2,
-          }}>
-            <svg width="22" height="22" viewBox="0 0 20 20" fill="none">
-              <rect x="2" y="7" width="16" height="10" rx="2" fill="#EDD8CE" stroke="#D4B8AC" strokeWidth="1"/>
-              <rect x="6" y="5" width="7" height="3" rx="1" fill="#EDD8CE" stroke="#D4B8AC" strokeWidth="1"/>
-              <circle cx="10" cy="12" r="3" fill="#F0D8D0" stroke="#C87890" strokeWidth="1.2"/>
-            </svg>
-          </span>
-          <div>
-            <p style={{ fontFamily:'DM Sans', fontSize:14, fontWeight:500, color:'var(--espresso)', marginBottom:2, lineHeight:1.3 }}>Upload Photo</p>
-            <p style={{ fontFamily:'DM Sans', fontSize:14, fontWeight:400, color:'var(--text-muted)', lineHeight:1.5 }}>Upload a photo and tap the exact shade you'd like to match.</p>
-          </div>
-        </div>
-        <div style={{ display:'flex', alignItems:'flex-start', gap:14, textAlign:'left' }}>
-          <span style={{
-            flexShrink:0, width:40, height:40, borderRadius:'50%',
-            display:'flex', alignItems:'center', justifyContent:'center',
-            background:'rgba(200,120,144,0.10)', marginTop:2,
-          }}>
-            <svg width="22" height="22" viewBox="0 0 20 20" fill="none">
-              <circle cx="14" cy="5" r="3.5" fill="#EDD8CE" stroke="#D4B8AC" strokeWidth="1"/>
-              <line x1="12" y1="7.5" x2="5.5" y2="14" stroke="#D4B8AC" strokeWidth="2" strokeLinecap="round"/>
-              <circle cx="4" cy="15.5" r="2" fill="#C87890"/>
-            </svg>
-          </span>
-          <div>
-            <p style={{ fontFamily:'DM Sans', fontSize:14, fontWeight:500, color:'var(--espresso)', marginBottom:2, lineHeight:1.3 }}>Custom Color</p>
-            <p style={{ fontFamily:'DM Sans', fontSize:14, fontWeight:400, color:'var(--text-muted)', lineHeight:1.5 }}>Choose from the color picker or enter a hex code when you know the exact color you're looking for.</p>
-          </div>
-        </div>
-        <div style={{ display:'flex', alignItems:'flex-start', gap:14, textAlign:'left' }}>
-          <span style={{
-            flexShrink:0, width:40, height:40, borderRadius:'50%',
-            display:'flex', alignItems:'center', justifyContent:'center',
-            background:'rgba(200,120,144,0.10)', marginTop:2,
-          }}>
-            <svg width="22" height="22" viewBox="0 0 20 20" fill="none">
-              <rect x="2" y="13" width="6" height="6" rx="1" fill="#EDD8CE" stroke="#D4B8AC" strokeWidth="0.8"/>
-              <rect x="2" y="15.5" width="6" height="2" fill="#E4C8BC" stroke="#D4B8AC" strokeWidth="0.5"/>
-              <rect x="3" y="7.5" width="4" height="5.5" rx="0.5" fill="#F0DED8" stroke="#D4B8AC" strokeWidth="0.8"/>
-              <rect x="3" y="4" width="4" height="3.5" fill="#C87890" stroke="#A86878" strokeWidth="0.6"/>
-              <path d="M3 4 Q3.5 1 5 0.5 Q6.5 1 7 4 Z" fill="#C87890" stroke="#A86878" strokeWidth="0.6" strokeLinejoin="round"/>
-              <line x1="3" y1="2.8" x2="7" y2="1.5" stroke="#A86878" strokeWidth="0.5"/>
-              <rect x="12" y="13" width="6" height="6" rx="1" fill="#EDD8CE" stroke="#D4B8AC" strokeWidth="0.8"/>
-              <rect x="12" y="15.5" width="6" height="2" fill="#E4C8BC" stroke="#D4B8AC" strokeWidth="0.5"/>
-              <rect x="13" y="7.5" width="4" height="5.5" rx="0.5" fill="#F0DED8" stroke="#D4B8AC" strokeWidth="0.8"/>
-              <rect x="13" y="4" width="4" height="3.5" fill="#C87890" stroke="#A86878" strokeWidth="0.6"/>
-              <path d="M13 4 Q13.5 1 15 0.5 Q16.5 1 17 4 Z" fill="#C87890" stroke="#A86878" strokeWidth="0.6" strokeLinejoin="round"/>
-              <line x1="13" y1="2.8" x2="17" y2="1.5" stroke="#A86878" strokeWidth="0.5"/>
-            </svg>
-          </span>
-          <div>
-            <p style={{ fontFamily:'DM Sans', fontSize:14, fontWeight:500, color:'var(--espresso)', marginBottom:2, lineHeight:1.3 }}>Dupe Finder</p>
-            <p style={{ fontFamily:'DM Sans', fontSize:14, fontWeight:400, color:'var(--text-muted)', lineHeight:1.5 }}>Search a lipstick you already own and find color-matched alternatives at any price point.</p>
-          </div>
-        </div>
-        <div style={{ display:'flex', alignItems:'flex-start', gap:14, textAlign:'left' }}>
-          <span style={{
-            fontSize:20, color:'var(--blush)', flexShrink:0,
-            width:40, height:40, borderRadius:'50%',
-            display:'flex', alignItems:'center', justifyContent:'center',
-            background:'rgba(200,120,144,0.10)', marginTop:2,
-          }}>♥</span>
-          <div>
-            <p style={{ fontFamily:'DM Sans', fontSize:14, fontWeight:500, color:'var(--espresso)', marginBottom:2, lineHeight:1.3 }}>My Favorites</p>
-            <p style={{ fontFamily:'DM Sans', fontSize:14, fontWeight:400, color:'var(--text-muted)', lineHeight:1.5 }}>Heart products to save them, compare options, and explore similar shades later.</p>
-          </div>
-        </div>
-        <div style={{ display:'flex', alignItems:'flex-start', gap:14, textAlign:'left' }}>
-          <span style={{
-            fontSize:20, color:'var(--espresso-mid)', flexShrink:0,
-            width:40, height:40, borderRadius:'50%',
-            display:'flex', alignItems:'center', justifyContent:'center',
-            background:'var(--cream-dark)', fontWeight:300, marginTop:2,
-          }}>+</span>
-          <div>
-            <p style={{ fontFamily:'DM Sans', fontSize:14, fontWeight:500, color:'var(--espresso)', marginBottom:2, lineHeight:1.3 }}>Shade Comparison</p>
-            <p style={{ fontFamily:'DM Sans', fontSize:14, fontWeight:400, color:'var(--text-muted)', lineHeight:1.5 }}>Pin up to four shades to compare them side by side.</p>
-          </div>
-        </div>
-      </div>
+      <p style={{ fontFamily:'DM Sans', fontSize:13, letterSpacing:'0.02em' }}>
+        Your matches will appear here
+      </p>
     </div>
   );
 
@@ -2148,7 +2045,9 @@ function VibePanel({ vibe, setVibe, onClose }) {
           <span style={{ fontSize:11, color:'var(--text-muted)', fontFamily:'DM Sans', letterSpacing:'0.04em' }}>
             {active === 0 ? 'No filters — showing all shades' : `${active} filter${active===1?'':'s'} active`}
           </span>
-          <a href="color-guide.html#undertone" style={{
+          <a href="color-guide.html#undertone"
+            onClick={() => window.gtag?.('event', 'nav_link_click', { target: 'color_guide', location: 'undertone_panel' })}
+            style={{
             fontSize:11, color:'var(--blush)', fontFamily:'DM Sans',
             letterSpacing:'0.04em', textDecoration:'none',
             borderBottom:'1px solid var(--blush)',
@@ -2458,6 +2357,122 @@ function DupeFinder({ product, onSelect, onUsePhoto }) {
   );
 }
 
+function LandingCard({ icon, title, desc, onClick }) {
+  const [hovered, setHovered] = useState(false);
+  return (
+    <div
+      onClick={onClick}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        display:'flex', flexDirection:'column', gap:14,
+        padding:'28px 26px 24px', background:'#fff',
+        border:'1px solid', borderColor: hovered ? 'var(--blush)' : 'var(--border)',
+        borderRadius:16, cursor:'pointer',
+        transform: hovered ? 'translateY(-4px)' : 'none',
+        boxShadow: hovered ? '0 14px 34px var(--shadow)' : 'none',
+        transition:'transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease',
+      }}
+    >
+      <span style={{
+        width:52, height:52, borderRadius:'50%', display:'flex',
+        alignItems:'center', justifyContent:'center', flexShrink:0,
+        background:'rgba(200,120,144,0.10)',
+      }}>{icon}</span>
+      <h2 style={{ fontFamily:'Cormorant Garamond', fontWeight:400, fontSize:24, letterSpacing:'-0.01em', color:'var(--espresso)' }}>{title}</h2>
+      <p style={{ fontSize:14, lineHeight:1.6, color:'var(--text-muted)', flex:1 }}>{desc}</p>
+      <span style={{
+        display:'flex', alignItems:'center', gap:8,
+        fontSize:11, letterSpacing:'0.12em', textTransform:'uppercase',
+        color:'var(--blush)', fontWeight:500,
+      }}>
+        Start here
+        <span style={{ transition:'transform 0.18s ease', transform: hovered ? 'translateX(5px)' : 'none' }}>→</span>
+      </span>
+    </div>
+  );
+}
+
+function Landing({ onPick }) {
+  const cards = [
+    {
+      id:'wheel', title:'Explore by color',
+      desc:'Browse a color wheel and zoom into lighter and deeper shades.',
+      icon: (
+        <svg width="26" height="26" viewBox="0 0 20 20" fill="none">
+          <path d="M 10 10 L 18 10 A 8 8 0 0 1 10 18 Z" fill="#F5C5C5" stroke="#D4B8AC" strokeWidth="0.5"/>
+          <path d="M 10 10 L 10 18 A 8 8 0 0 1 2 10 Z" fill="#C87890" stroke="#D4B8AC" strokeWidth="0.5"/>
+          <path d="M 10 10 L 2 10 A 8 8 0 0 1 10 2 Z" fill="#8B4558" stroke="#D4B8AC" strokeWidth="0.5"/>
+          <path d="M 10 10 L 10 2 A 8 8 0 0 1 18 10 Z" fill="#E8C8B8" stroke="#D4B8AC" strokeWidth="0.5"/>
+        </svg>
+      ),
+    },
+    {
+      id:'photo', title:'Match a photo',
+      desc:'Upload any photo or screenshot and tap the shade you want.',
+      icon: (
+        <svg width="26" height="26" viewBox="0 0 20 20" fill="none">
+          <rect x="2" y="7" width="16" height="10" rx="2" fill="#EDD8CE" stroke="#D4B8AC" strokeWidth="1"/>
+          <rect x="6" y="5" width="7" height="3" rx="1" fill="#EDD8CE" stroke="#D4B8AC" strokeWidth="1"/>
+          <circle cx="10" cy="12" r="3" fill="#F0D8D0" stroke="#C87890" strokeWidth="1.2"/>
+        </svg>
+      ),
+    },
+    {
+      id:'dupe', title:'Find a dupe',
+      desc:'Search a lipstick you own and find matches at any price.',
+      icon: (
+        <svg width="26" height="26" viewBox="0 0 20 20" fill="none">
+          <rect x="2" y="13" width="6" height="6" rx="1" fill="#EDD8CE" stroke="#D4B8AC" strokeWidth="0.8"/>
+          <rect x="2" y="15.5" width="6" height="2" fill="#E4C8BC" stroke="#D4B8AC" strokeWidth="0.5"/>
+          <rect x="3" y="7.5" width="4" height="5.5" rx="0.5" fill="#F0DED8" stroke="#D4B8AC" strokeWidth="0.8"/>
+          <rect x="3" y="4" width="4" height="3.5" fill="#C87890" stroke="#A86878" strokeWidth="0.6"/>
+          <path d="M3 4 Q3.5 1 5 0.5 Q6.5 1 7 4 Z" fill="#C87890" stroke="#A86878" strokeWidth="0.6" strokeLinejoin="round"/>
+          <line x1="3" y1="2.8" x2="7" y2="1.5" stroke="#A86878" strokeWidth="0.5"/>
+          <rect x="12" y="13" width="6" height="6" rx="1" fill="#EDD8CE" stroke="#D4B8AC" strokeWidth="0.8"/>
+          <rect x="12" y="15.5" width="6" height="2" fill="#E4C8BC" stroke="#D4B8AC" strokeWidth="0.5"/>
+          <rect x="13" y="7.5" width="4" height="5.5" rx="0.5" fill="#F0DED8" stroke="#D4B8AC" strokeWidth="0.8"/>
+          <rect x="13" y="4" width="4" height="3.5" fill="#C87890" stroke="#A86878" strokeWidth="0.6"/>
+          <path d="M13 4 Q13.5 1 15 0.5 Q16.5 1 17 4 Z" fill="#C87890" stroke="#A86878" strokeWidth="0.6" strokeLinejoin="round"/>
+          <line x1="13" y1="2.8" x2="17" y2="1.5" stroke="#A86878" strokeWidth="0.5"/>
+        </svg>
+      ),
+    },
+    {
+      id:'hex', title:'Enter a hex code',
+      desc:'Paste it or use the picker for a precise match.',
+      icon: (
+        <svg width="26" height="26" viewBox="0 0 20 20" fill="none">
+          <circle cx="14" cy="5" r="3.5" fill="#EDD8CE" stroke="#D4B8AC" strokeWidth="1"/>
+          <line x1="12" y1="7.5" x2="5.5" y2="14" stroke="#D4B8AC" strokeWidth="2" strokeLinecap="round"/>
+          <circle cx="4" cy="15.5" r="2" fill="#C87890"/>
+        </svg>
+      ),
+    },
+  ];
+
+  return (
+    <>
+      <div>
+        <p style={{
+          fontSize:11, letterSpacing:'0.18em', textTransform:'uppercase',
+          color:'var(--text-muted)', textAlign:'center', marginBottom:14,
+        }}>
+          Perceptual color matching · 9,000+ lip products
+        </p>
+        <h2 className="landing-lede">
+          Let's find your <em style={{ fontStyle:'italic', color:'var(--espresso-mid)' }}>shade</em>.
+        </h2>
+      </div>
+      <div className="landing-grid">
+        {cards.map(c => (
+          <LandingCard key={c.id} icon={c.icon} title={c.title} desc={c.desc} onClick={() => onPick(c.id)} />
+        ))}
+      </div>
+    </>
+  );
+}
+
 // ── Main App ──────────────────────────────────────────────────────────────────
 function App() {
   const [selectedColor, setSelectedColor] = useState(null);
@@ -2467,7 +2482,7 @@ function App() {
   const suppressScrollRef = React.useRef(false);
   const resultsRef = React.useRef(null);
   const [toneIdx, setToneIdx] = useState(null);
-  const [mode, setMode] = useState('wheel'); // 'wheel' | 'photo' | 'hex' | 'dupe' | 'list'
+  const [mode, setMode] = useState('landing'); // 'landing' | 'wheel' | 'photo' | 'hex' | 'dupe' | 'list'
   const [photoHex, setPhotoHex] = useState(null);
   const [hexHex, setHexHex] = useState(null);
   const [dupeProduct, setDupeProduct] = useState(null);
@@ -2483,6 +2498,16 @@ function App() {
   useEffect(() => {
     localStorage.setItem('lipstick-wishlist', JSON.stringify(wishlist));
   }, [wishlist]);
+
+  function switchMode(id, source = 'tabs') {
+    setMode(id);
+    window.gtag?.('event', 'select_mode', { mode: id, source });
+    if (id === 'wheel') { setSelectedColor(null); setPhotoHex(null); setHexHex(null); setDupeProduct(null); }
+    else if (id === 'photo') { setSelectedColor(null); setZoomAnchor(null); setHexHex(null); setDupeProduct(null); }
+    else if (id === 'hex')   { setSelectedColor(null); setZoomAnchor(null); setPhotoHex(null); setDupeProduct(null); }
+    else if (id === 'dupe')  { setSelectedColor(null); setZoomAnchor(null); setPhotoHex(null); setHexHex(null); setDupeProduct(null); }
+    else { setSelectedColor(null); setZoomAnchor(null); setPhotoHex(null); setHexHex(null); setDupeProduct(null); }
+  }
 
   function toggleWishlist(product) {
     setWishlist(prev => {
@@ -2658,19 +2683,19 @@ function App() {
 
       {/* Header */}
       <header className="app-header" style={{
-        display:'flex', alignItems:'baseline', gap:16,
+        display:'flex', alignItems:'center', gap:16,
         borderBottom:'1px solid var(--border)',
       }}>
         <h1 style={{
-          fontFamily:'Cormorant Garamond', fontWeight:300, fontSize:32,
-          color:'var(--espresso)', letterSpacing:'-0.01em',
+          fontFamily:'DM Sans', fontWeight:500, fontSize:13,
+          letterSpacing:'0.16em', textTransform:'uppercase',
+          color:'var(--espresso)',
         }}>
           Lipstick Color Finder
         </h1>
-        <span style={{ fontFamily:'DM Sans', fontSize:12, color:'var(--text-muted)', letterSpacing:'0.1em', textTransform:'uppercase' }}>
-          Explore 9,000+ shades
-        </span>
-        <a href="about.html" style={{
+        <a href="about.html"
+          onClick={() => window.gtag?.('event', 'nav_link_click', { target: 'about', location: 'header' })}
+          style={{
             marginLeft:'auto', display:'flex', alignItems:'center', gap:8,
             padding:'8px 16px', borderRadius:24,
             border:'1.5px solid var(--border)',
@@ -2708,6 +2733,11 @@ function App() {
       </header>
 
       {/* Main layout */}
+      {mode === 'landing' ? (
+        <main className="landing-main">
+          <Landing onPick={id => switchMode(id, 'landing')} />
+        </main>
+      ) : (
       <main className="app-main" style={{
         paddingBottom: pinnedItems.length > 0 ? 140 : undefined,
         transition:'padding-bottom 0.35s ease',
@@ -2722,15 +2752,7 @@ function App() {
           }}>
             {[{id:'wheel',label:'Color wheel'},{id:'photo',label:'Upload photo'},{id:'hex',label:'Custom color'},{id:'dupe',label:'Dupe finder'}, ...(wishlist.length > 0 ? [{id:'list',label:'From My List'}] : [])].map(t => (
               <button key={t.id}
-                onClick={() => {
-                  setMode(t.id);
-                  window.gtag?.('event', 'select_mode', { mode: t.id });
-                  if (t.id === 'wheel') { setSelectedColor(null); setPhotoHex(null); setHexHex(null); setDupeProduct(null); }
-                  else if (t.id === 'photo') { setSelectedColor(null); setZoomAnchor(null); setHexHex(null); setDupeProduct(null); }
-                  else if (t.id === 'hex')   { setSelectedColor(null); setZoomAnchor(null); setPhotoHex(null); setDupeProduct(null); }
-                  else if (t.id === 'dupe')  { setSelectedColor(null); setZoomAnchor(null); setPhotoHex(null); setHexHex(null); setDupeProduct(null); }
-                  else { setSelectedColor(null); setZoomAnchor(null); setPhotoHex(null); setHexHex(null); setDupeProduct(null); }
-                }}
+                onClick={() => switchMode(t.id)}
                 style={{
                   padding:'5px 14px', borderRadius:16,
                   fontFamily:'DM Sans', fontSize:10, fontWeight:500,
@@ -2882,59 +2904,12 @@ function App() {
             </p>
           )}
 
-          {/* Mobile-only: full how-it-works tips shown below picker before a color is picked */}
+          {/* Mobile-only: quiet placeholder shown below picker before a color is picked */}
           {!selectedColor && mode !== 'dupe' && (
-            <div className="mobile-picker-tips">
-              {[
-                { icon: (
-                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                      <path d="M 10 10 L 18 10 A 8 8 0 0 1 10 18 Z" fill="#F5C5C5" stroke="#D4B8AC" strokeWidth="0.5"/>
-                      <path d="M 10 10 L 10 18 A 8 8 0 0 1 2 10 Z" fill="#C87890" stroke="#D4B8AC" strokeWidth="0.5"/>
-                      <path d="M 10 10 L 2 10 A 8 8 0 0 1 10 2 Z" fill="#8B4558" stroke="#D4B8AC" strokeWidth="0.5"/>
-                      <path d="M 10 10 L 10 2 A 8 8 0 0 1 18 10 Z" fill="#E8C8B8" stroke="#D4B8AC" strokeWidth="0.5"/>
-                    </svg>
-                  ), label:'Color Wheel', desc:'Discover products by color family, then explore lighter and deeper shades.' },
-                { icon: (
-                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                      <rect x="2" y="7" width="16" height="10" rx="2" fill="#EDD8CE" stroke="#D4B8AC" strokeWidth="1"/>
-                      <rect x="6" y="5" width="7" height="3" rx="1" fill="#EDD8CE" stroke="#D4B8AC" strokeWidth="1"/>
-                      <circle cx="10" cy="12" r="3" fill="#F0D8D0" stroke="#C87890" strokeWidth="1.2"/>
-                    </svg>
-                  ), label:'Upload Photo', desc:"Upload a photo and tap the exact shade you'd like to match." },
-                { icon: (
-                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                      <circle cx="14" cy="5" r="3.5" fill="#EDD8CE" stroke="#D4B8AC" strokeWidth="1"/>
-                      <line x1="12" y1="7.5" x2="5.5" y2="14" stroke="#D4B8AC" strokeWidth="2" strokeLinecap="round"/>
-                      <circle cx="4" cy="15.5" r="2" fill="#C87890"/>
-                    </svg>
-                  ), label:'Custom Color', desc:'Enter a hex code or pick from the color picker.' },
-                { icon: (
-                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                      <rect x="2" y="13" width="6" height="6" rx="1" fill="#EDD8CE" stroke="#D4B8AC" strokeWidth="0.8"/>
-                      <rect x="2" y="15.5" width="6" height="2" fill="#E4C8BC" stroke="#D4B8AC" strokeWidth="0.5"/>
-                      <rect x="3" y="7.5" width="4" height="5.5" rx="0.5" fill="#F0DED8" stroke="#D4B8AC" strokeWidth="0.8"/>
-                      <rect x="3" y="4" width="4" height="3.5" fill="#C87890" stroke="#A86878" strokeWidth="0.6"/>
-                      <path d="M3 4 Q3.5 1 5 0.5 Q6.5 1 7 4 Z" fill="#C87890" stroke="#A86878" strokeWidth="0.6" strokeLinejoin="round"/>
-                      <line x1="3" y1="2.8" x2="7" y2="1.5" stroke="#A86878" strokeWidth="0.5"/>
-                      <rect x="12" y="13" width="6" height="6" rx="1" fill="#EDD8CE" stroke="#D4B8AC" strokeWidth="0.8"/>
-                      <rect x="12" y="15.5" width="6" height="2" fill="#E4C8BC" stroke="#D4B8AC" strokeWidth="0.5"/>
-                      <rect x="13" y="7.5" width="4" height="5.5" rx="0.5" fill="#F0DED8" stroke="#D4B8AC" strokeWidth="0.8"/>
-                      <rect x="13" y="4" width="4" height="3.5" fill="#C87890" stroke="#A86878" strokeWidth="0.6"/>
-                      <path d="M13 4 Q13.5 1 15 0.5 Q16.5 1 17 4 Z" fill="#C87890" stroke="#A86878" strokeWidth="0.6" strokeLinejoin="round"/>
-                      <line x1="13" y1="2.8" x2="17" y2="1.5" stroke="#A86878" strokeWidth="0.5"/>
-                    </svg>
-                  ), label:'Dupe Finder', desc:'Search a lipstick you own and find color-matched alternatives.' },
-                { icon: <span style={{ fontSize:18, color:'var(--blush)' }}>♥</span>, label:'My Favorites', desc:'Heart products to save and compare shades later.' },
-                { icon: <span style={{ fontSize:18, color:'var(--espresso-mid)', fontWeight:300 }}>+</span>, label:'Shade Comparison', desc:'Pin up to four shades to compare side by side.' },
-              ].map(({ icon, label, desc }) => (
-                <div key={label} style={{ display:'flex', alignItems:'flex-start', gap:12 }}>
-                  <span style={{ flexShrink:0, width:34, height:34, borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', background:'rgba(200,120,144,0.10)', marginTop:1 }}>{icon}</span>
-                  <div>
-                    <p style={{ fontFamily:'DM Sans', fontSize:13, fontWeight:500, color:'var(--espresso)', marginBottom:2 }}>{label}</p>
-                    <p style={{ fontFamily:'DM Sans', fontSize:12, color:'var(--text-muted)', lineHeight:1.5 }}>{desc}</p>
-                  </div>
-                </div>
-              ))}
+            <div className="mobile-picker-tips" style={{ justifyContent:'center', textAlign:'center' }}>
+              <p style={{ fontFamily:'DM Sans', fontSize:13, color:'var(--text-muted)', letterSpacing:'0.02em' }}>
+                Your matches will appear here
+              </p>
             </div>
           )}
 
@@ -2945,6 +2920,7 @@ function App() {
           <ResultsTable selectedColor={effectiveColor} matches={matches} totalProducts={REAL_PRODUCTS.length} pinnedItems={pinnedItems} togglePin={togglePin} wishlist={wishlist} toggleWishlist={toggleWishlist} toneRamp={toneRamp} toneIdx={toneIdx} setToneIdx={setToneIdx} />
         </div>
       </main>
+      )}
 
       {/* Footer */}
       <footer className="app-footer" style={{
@@ -2954,14 +2930,18 @@ function App() {
         <span style={{ fontSize:11, color:'var(--text-muted)', letterSpacing:'0.05em' }}>
           Showing closest matches by color distance (ΔE)
         </span>
-        <a href="color-guide.html" style={{
+        <a href="color-guide.html"
+          onClick={() => window.gtag?.('event', 'nav_link_click', { target: 'color_guide', location: 'footer' })}
+          style={{
           fontSize:11, color:'var(--blush)', letterSpacing:'0.05em',
           textDecoration:'none', borderBottom:'1px solid currentColor', paddingBottom:1,
           transition:'opacity 0.15s',
         }}>
           What is ΔE?
         </a>
-        <a href="about.html" style={{
+        <a href="about.html"
+          onClick={() => window.gtag?.('event', 'nav_link_click', { target: 'about', location: 'footer' })}
+          style={{
           fontSize:11, color:'var(--blush)', letterSpacing:'0.05em',
           textDecoration:'none', borderBottom:'1px solid currentColor', paddingBottom:1,
           transition:'opacity 0.15s',
