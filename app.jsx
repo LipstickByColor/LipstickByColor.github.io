@@ -1890,7 +1890,7 @@ function HexPicker({ sampledHex, onColor }) {
           type="color"
           value={valid ? previewHex : '#C04E62'}
           onChange={e => handlePickerChange(e.target.value)}
-          style={{ position:'absolute', width:0, height:0, opacity:0, border:'none', padding:0 }}
+          style={{ position:'absolute', inset:0, width:'100%', height:'100%', opacity:0, border:'none', padding:0, cursor:'pointer' }}
           aria-label="Pick a color"
         />
       </div>

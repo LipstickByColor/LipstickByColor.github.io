@@ -2945,11 +2945,13 @@ function HexPicker({
     onChange: e => handlePickerChange(e.target.value),
     style: {
       position: 'absolute',
-      width: 0,
-      height: 0,
+      inset: 0,
+      width: '100%',
+      height: '100%',
       opacity: 0,
       border: 'none',
-      padding: 0
+      padding: 0,
+      cursor: 'pointer'
     },
     "aria-label": "Pick a color"
   })), /*#__PURE__*/React.createElement("div", {
