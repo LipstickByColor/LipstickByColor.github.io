@@ -4039,7 +4039,7 @@ function Landing({
   const cards = [{
     id: 'wheel',
     title: 'Explore by color',
-    desc: 'Browse a color wheel and zoom into lighter and deeper shades.',
+    desc: 'Browse a color wheel of lipstick shades and zoom into lighter and deeper tones.',
     icon: /*#__PURE__*/React.createElement("svg", {
       width: "26",
       height: "26",
@@ -4069,7 +4069,7 @@ function Landing({
   }, {
     id: 'photo',
     title: 'Match a photo',
-    desc: 'Upload any photo or screenshot and tap the shade you want.',
+    desc: 'Upload any photo or screenshot and tap the lipstick shade you want.',
     icon: /*#__PURE__*/React.createElement("svg", {
       width: "26",
       height: "26",
@@ -4208,7 +4208,7 @@ function Landing({
   }, {
     id: 'hex',
     title: 'Enter a hex code',
-    desc: 'Paste it or use the picker for a precise match.',
+    desc: 'Paste it or use the picker for a precise lipstick match.',
     icon: /*#__PURE__*/React.createElement("svg", {
       width: "26",
       height: "26",

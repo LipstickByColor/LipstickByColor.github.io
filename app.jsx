@@ -2397,7 +2397,7 @@ function Landing({ onPick }) {
   const cards = [
     {
       id:'wheel', title:'Explore by color',
-      desc:'Browse a color wheel and zoom into lighter and deeper shades.',
+      desc:'Browse a color wheel of lipstick shades and zoom into lighter and deeper tones.',
       icon: (
         <svg width="26" height="26" viewBox="0 0 20 20" fill="none">
           <path d="M 10 10 L 18 10 A 8 8 0 0 1 10 18 Z" fill="#F5C5C5" stroke="#D4B8AC" strokeWidth="0.5"/>
@@ -2409,7 +2409,7 @@ function Landing({ onPick }) {
     },
     {
       id:'photo', title:'Match a photo',
-      desc:'Upload any photo or screenshot and tap the shade you want.',
+      desc:'Upload any photo or screenshot and tap the lipstick shade you want.',
       icon: (
         <svg width="26" height="26" viewBox="0 0 20 20" fill="none">
           <rect x="2" y="7" width="16" height="10" rx="2" fill="#EDD8CE" stroke="#D4B8AC" strokeWidth="1"/>
@@ -2440,7 +2440,7 @@ function Landing({ onPick }) {
     },
     {
       id:'hex', title:'Enter a hex code',
-      desc:'Paste it or use the picker for a precise match.',
+      desc:'Paste it or use the picker for a precise lipstick match.',
       icon: (
         <svg width="26" height="26" viewBox="0 0 20 20" fill="none">
           <circle cx="14" cy="5" r="3.5" fill="#EDD8CE" stroke="#D4B8AC" strokeWidth="1"/>
