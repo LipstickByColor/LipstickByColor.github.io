@@ -967,7 +967,7 @@ function ResultsTable({
     style: {
       width: 38,
       height: 38,
-      borderRadius: '50%',
+      borderRadius: 7,
       background: selectedColor.hex,
       boxShadow: `0 3px 10px ${selectedColor.hex}80, inset 0 -2px 4px rgba(0,0,0,0.15)`,
       flexShrink: 0
@@ -987,27 +987,7 @@ function ResultsTable({
       fontFamily: 'DM Sans',
       letterSpacing: '0.05em'
     }
-  }, selectedColor.hex.toUpperCase(), " \xB7 Closest lip matches by \u0394E")), /*#__PURE__*/React.createElement("div", {
-    style: {
-      marginLeft: 'auto',
-      display: 'flex',
-      alignItems: 'center'
-    }
-  }, matches.slice(0, 5).map((m, i) => /*#__PURE__*/React.createElement("div", {
-    key: i,
-    style: {
-      width: 20,
-      height: 20,
-      borderRadius: '50%',
-      background: m.hex,
-      border: '2px solid #fff',
-      marginLeft: i > 0 ? -10 : 0,
-      boxShadow: '0 1px 4px rgba(42,26,20,0.18)',
-      zIndex: 5 - i,
-      position: 'relative'
-    },
-    title: `${m.brand} — ${m.shade}`
-  })))), toneRamp && toneRamp.ramp.length > 1 && /*#__PURE__*/React.createElement("div", {
+  }, selectedColor.hex.toUpperCase(), " \xB7 Closest lip matches by \u0394E"))), toneRamp && toneRamp.ramp.length > 1 && /*#__PURE__*/React.createElement("div", {
     style: {
       marginBottom: 12,
       padding: '9px 12px 10px',
