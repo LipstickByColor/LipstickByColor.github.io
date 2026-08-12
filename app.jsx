@@ -10,21 +10,22 @@ function getProductImage(p) {
 
 // Product thumb: real swatch/bullet photo. The extracted color shows immediately
 // as a placeholder; the photo crossfades in once loaded.
-function ProductThumb({ product, size = 56, zoom = 1.18 }) {
+function ProductThumb({ product, size = 56, width, height, zoom = 1.18, fit = 'cover', radius = 10, ring = true, tint = true }) {
   const url = getProductImage(product);
   const [loaded, setLoaded] = useState(false);
   const [failed, setFailed] = useState(false);
+  const w = width ?? size, h = height ?? size;
 
   useEffect(() => { setLoaded(false); setFailed(false); }, [url]);
 
   const showImg = url && !failed;
   return (
     <div style={{
-      width:size, height:size, flexShrink:0,
-      borderRadius:10, overflow:'hidden',
-      background: product.hex,
-      boxShadow: showImg && loaded ? 'none' : `inset 0 2px 8px ${product.hex}70`,
-      border:'1px solid rgba(42,26,20,0.08)',
+      width:w, height:h, flexShrink:0,
+      borderRadius:radius, overflow:'hidden',
+      background: tint ? product.hex : 'transparent',
+      boxShadow: ring && (!showImg || !loaded) ? `inset 0 2px 8px ${product.hex}70` : 'none',
+      border: ring ? '1px solid rgba(42,26,20,0.08)' : 'none',
       position:'relative',
     }}>
       {showImg && (
@@ -37,8 +38,9 @@ function ProductThumb({ product, size = 56, zoom = 1.18 }) {
           onLoad={() => setLoaded(true)}
           onError={() => setFailed(true)}
           style={{
-            width:'100%', height:'100%', objectFit:'cover',
-            transform:`scale(${zoom})`, transformOrigin:'center',
+            width:'100%', height:'100%', objectFit:fit,
+            transform: fit === 'cover' ? `scale(${zoom})` : 'none',
+            transformOrigin:'center',
             display:'block',
             opacity: loaded ? 1 : 0,
             transition:'opacity 0.2s ease',
@@ -65,18 +67,94 @@ function ShadeChip({ hex, height = 56, width = 10 }) {
   );
 }
 
+// Visually-hidden text — screen readers only
+const srOnly = { position:'absolute', width:1, height:1, overflow:'hidden', clip:'rect(0 0 0 0)', whiteSpace:'nowrap' };
+
+// Single result card — image, save/compare overlay, ΔE + % match
+function MatchCard({ p, wishlist, toggleWishlist, pinnedItems, togglePin }) {
+  const isLiked = wishlist.some(x => x.brand === p.brand && x.shade === p.shade);
+  const isPinned = pinnedItems.some(x => x.brand === p.brand && x.shade === p.shade);
+  const isFull = pinnedItems.length >= 4 && !isPinned;
+  const pct = Math.max(0, Math.round(100 - p.distance));
+
+  return (
+    <div style={{
+      background:'#fff', border:'1px solid var(--border)', borderRadius:14,
+      overflow:'hidden', display:'flex', flexDirection:'column', height:'100%',
+      transition:'box-shadow 0.18s, transform 0.18s',
+    }}
+    onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 8px 22px var(--shadow)'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
+    onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'none'; }}
+    >
+      <div style={{ position:'relative', height:106, background:'var(--cream-dark)' }}>
+        <span role="img" aria-label={`Swatch ${p.hex}`} title={p.hex} style={{
+          position:'absolute', left:0, top:0, bottom:0, width:18, background:p.hex,
+        }} />
+        <div style={{ position:'absolute', inset:0, display:'flex', alignItems:'center', justifyContent:'center', paddingLeft:18 }}>
+          <ProductThumb product={p} width="100%" height="100%" fit="contain" radius={0} ring={false} tint={false} />
+        </div>
+        <div style={{ position:'absolute', right:5, top:5, bottom:5, display:'flex', flexDirection:'column', justifyContent:'center', gap:8 }}>
+          <button
+            onClick={e => { e.stopPropagation(); toggleWishlist(p); }}
+            aria-pressed={isLiked}
+            aria-label={`${isLiked ? 'Remove' : 'Save'} ${p.brand} ${p.shade} ${isLiked ? 'from' : 'to'} My Favorites`}
+            title={isLiked ? 'Remove from My Favorites' : 'Save to My Favorites'}
+            style={{
+              width:40, height:40, display:'flex', alignItems:'center', justifyContent:'center',
+              fontSize:16, lineHeight:1, fontFamily:'DM Sans',
+              background: isLiked ? 'rgba(232,180,192,0.55)' : 'rgba(255,255,255,0.82)',
+              color: isLiked ? 'var(--blush)' : 'var(--text-muted)',
+              border:'1px solid rgba(42,26,20,0.08)', borderRadius:'50%', cursor:'pointer',
+              transition:'background 0.15s, color 0.15s',
+            }}
+          >{isLiked ? '♥' : '♡'}</button>
+          <button
+            onClick={e => { e.stopPropagation(); togglePin(p); }}
+            aria-label={`${isPinned ? 'Remove' : 'Add'} ${p.brand} ${p.shade} ${isPinned ? 'from' : 'to'} comparison`}
+            title={isPinned ? 'Remove from comparison' : isFull ? 'Max 4 items' : 'Add to comparison'}
+            disabled={isFull}
+            style={{
+              width:40, height:40, display:'flex', alignItems:'center', justifyContent:'center',
+              fontSize:16, lineHeight:1, fontFamily:'DM Sans',
+              background: isPinned ? 'var(--espresso)' : 'rgba(255,255,255,0.82)',
+              color: isPinned ? '#FAF6F1' : 'var(--text-muted)',
+              border:'1px solid rgba(42,26,20,0.08)', borderRadius:'50%',
+              cursor: isFull ? 'not-allowed' : 'pointer', opacity: isFull ? 0.4 : 1,
+            }}
+          >{isPinned ? '✕' : '+'}</button>
+        </div>
+      </div>
+      <div style={{ padding:'8px 9px 9px', display:'flex', flexDirection:'column', gap:3, flex:1 }}>
+        <div style={{ fontSize:11, letterSpacing:'0.08em', textTransform:'uppercase', color:'var(--text-muted)', fontFamily:'DM Sans', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
+          <span style={srOnly}>Brand: </span>{p.brand}
+        </div>
+        <div title={p.product} style={{ fontSize:13, color:'var(--espresso)', fontFamily:'DM Sans', lineHeight:1.3, display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical', overflow:'hidden' }}>
+          {p.product}
+        </div>
+        <div style={{ fontSize:12, fontFamily:'DM Sans', color:'var(--text-muted)', lineHeight:1.35 }}>
+          <span style={srOnly}>Shade: </span>{p.shade}
+        </div>
+        <div style={{ display:'flex', alignItems:'center', gap:7, marginTop:4 }} title={`Color distance ΔE ${p.distance.toFixed(1)} — lower is closer`}>
+          <span style={{ fontFamily:'ui-monospace, Menlo, monospace', fontSize:10.5, color:'var(--text-muted)' }}>
+            ΔE {p.distance.toFixed(1)}
+          </span>
+          <span style={{ marginLeft:'auto', display:'flex', alignItems:'baseline', gap:3, color:'var(--blush)' }}>
+            <span style={srOnly}>Match: </span>
+            <span style={{ fontSize:12.5, fontWeight:500 }}>{pct}%</span>
+            <span style={{ fontSize:10.5, color:'var(--text-muted)' }}>match</span>
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // Utility: luminance for text contrast
 function luminance(hex) {
   const r = parseInt(hex.slice(1,3),16)/255;
   const g = parseInt(hex.slice(3,5),16)/255;
   const b = parseInt(hex.slice(5,7),16)/255;
   return 0.2126*r + 0.7152*g + 0.0722*b;
-}
-
-// finish badge color
-function finishColor(finish) {
-  const map = { Matte:'#8C6858', Satin:'#C4A060', Cream:'#C87890', Gloss:'#7090A0', Lustre:'#9080A8', Amplified:'#C05870', Frost:'#80A0B0', Sheer:'#B0A090' };
-  return map[finish] || '#8C6858';
 }
 
 // Brand → price tier heuristics. Unlisted brands default to '$$'.
@@ -431,14 +509,13 @@ function FilterDropdown({ label, count, onClear, isOpen, onOpen, children }) {
 
 // ── Results Table ─────────────────────────────────────────────────────────────
 function ResultsTable({ selectedColor, matches, totalProducts, pinnedItems, togglePin, wishlist, toggleWishlist, toneRamp, toneIdx, setToneIdx }) {
-  const [activeFinishes, setActiveFinishes] = React.useState([]);
   const [activeBrands, setActiveBrands] = React.useState([]);
   const [activeTones, setActiveTones] = React.useState([]);
   const [activeTiers, setActiveTiers] = React.useState([]);
   const [openFilter, setOpenFilter] = React.useState(null);
 
   // Reset filters when selection changes
-  React.useEffect(() => { setActiveFinishes([]); setActiveBrands([]); setActiveTones([]); setActiveTiers([]); setOpenFilter(null); }, [selectedColor?.id]);
+  React.useEffect(() => { setActiveBrands([]); setActiveTones([]); setActiveTiers([]); setOpenFilter(null); }, [selectedColor?.id]);
 
   // Classify undertone from LAB hue angle (matches Vibe panel logic)
   function toneOf(p) {
@@ -455,7 +532,6 @@ function ResultsTable({ selectedColor, matches, totalProducts, pinnedItems, togg
   function tierOf(p) { return BRAND_TIER[p.brand] || '$$'; }
 
   // Derive available options from matches
-  const allFinishes = [...new Set(matches.map(p => p.finish))].sort();
   const allBrands   = [...new Set(matches.map(p => p.brand))].sort();
   const allTones    = [...new Set(matches.map(toneOf))];
   const TONE_ORDER  = ['cool','neutral','warm'];
@@ -473,14 +549,6 @@ function ResultsTable({ selectedColor, matches, totalProducts, pinnedItems, togg
       </p>
     </div>
   );
-
-  // Toggle a finish on/off
-  function toggleFinish(f) {
-    if (!activeFinishes.includes(f)) window.gtag?.('event', 'apply_filter', { filter_type: 'finish', filter_value: f });
-    setActiveFinishes(prev =>
-      prev.includes(f) ? prev.filter(x => x !== f) : [...prev, f]
-    );
-  }
 
   // Toggle a brand on/off
   function toggleBrand(b) {
@@ -507,13 +575,10 @@ function ResultsTable({ selectedColor, matches, totalProducts, pinnedItems, togg
   }
 
   const filtered = matches.filter(p =>
-    (activeFinishes.length === 0 || activeFinishes.includes(p.finish)) &&
     (activeBrands.length === 0   || activeBrands.includes(p.brand))   &&
     (activeTones.length === 0    || activeTones.includes(toneOf(p)))   &&
     (activeTiers.length === 0    || activeTiers.includes(tierOf(p)))
   );
-
-  const maxDist = filtered.length > 0 ? Math.max(...filtered.map(p=>p.distance)) : 1;
 
   return (
     <div style={{ flex:1, display:'flex', flexDirection:'column', minHeight:0 }}>
@@ -605,7 +670,7 @@ function ResultsTable({ selectedColor, matches, totalProducts, pinnedItems, togg
       )}
 
       {/* Compact filter bar */}
-      {(allFinishes.length > 1 || orderedTones.length >= 1 || allBrands.length > 1 || allTiers.length > 1) && (
+      {(orderedTones.length >= 1 || allBrands.length > 1 || allTiers.length > 1) && (
         <div style={{ display:'flex', flexWrap:'wrap', alignItems:'center', gap:8, marginBottom:14 }}>
           <span style={{ fontSize:11, color:'var(--text-muted)', letterSpacing:'0.1em', textTransform:'uppercase', fontFamily:'DM Sans', marginRight:2 }}>
             Filter
@@ -651,27 +716,6 @@ function ResultsTable({ selectedColor, matches, totalProducts, pinnedItems, togg
             </FilterDropdown>
           )}
 
-          {allFinishes.length > 1 && (
-            <FilterDropdown label="Finish" count={activeFinishes.length}
-              isOpen={openFilter==='Finish'} onOpen={setOpenFilter}
-              onClear={() => setActiveFinishes([])}>
-              {allFinishes.map(f => {
-                const active = activeFinishes.includes(f);
-                const fc = finishColor(f);
-                return (
-                  <button key={f} onClick={() => toggleFinish(f)} style={{
-                    fontSize:11, padding:'4px 12px', borderRadius:20,
-                    border:`1.5px solid ${active ? fc : 'var(--border)'}`,
-                    background: active ? fc + '22' : 'transparent',
-                    color: active ? fc : 'var(--text-muted)',
-                    cursor:'pointer', fontFamily:'DM Sans', fontWeight: active ? 500 : 400,
-                    letterSpacing:'0.04em', transition:'all 0.15s', whiteSpace:'nowrap',
-                  }}>{f}{active && <span style={{ marginLeft:5, opacity:0.6, fontSize:12 }}>✕</span>}</button>
-                );
-              })}
-            </FilterDropdown>
-          )}
-
           {orderedTones.length >= 1 && (
             <FilterDropdown label="Undertone" count={activeTones.length}
               isOpen={openFilter==='Undertone'} onOpen={setOpenFilter}
@@ -692,12 +736,12 @@ function ResultsTable({ selectedColor, matches, totalProducts, pinnedItems, togg
             </FilterDropdown>
           )}
 
-          {(activeFinishes.length > 0 || activeBrands.length > 0 || activeTones.length > 0 || activeTiers.length > 0) && (
+          {(activeBrands.length > 0 || activeTones.length > 0 || activeTiers.length > 0) && (
             <div style={{ display:'flex', alignItems:'center', gap:10, marginLeft:'auto' }}>
               <span style={{ fontSize:11, color:'var(--text-muted)', fontFamily:'DM Sans' }}>
                 {filtered.length} of {matches.length} shown
               </span>
-              <button onClick={() => { setActiveFinishes([]); setActiveBrands([]); setActiveTones([]); setActiveTiers([]); }} style={{
+              <button onClick={() => { setActiveBrands([]); setActiveTones([]); setActiveTiers([]); }} style={{
                 fontSize:11, padding:'3px 10px', borderRadius:20, border:'1px solid var(--border)',
                 background:'transparent', color:'var(--blush)', cursor:'pointer',
                 fontFamily:'DM Sans', letterSpacing:'0.04em',
@@ -707,143 +751,24 @@ function ResultsTable({ selectedColor, matches, totalProducts, pinnedItems, togg
         </div>
       )}
 
-      {/* Table */}
-      <div style={{ flex:1, overflowY:'auto', borderRadius:16, border:'1px solid var(--border)', background:'#fff', boxShadow:'0 2px 12px var(--shadow)' }}>
-        <table style={{ width:'100%', borderCollapse:'collapse' }}>
-          <thead>
-            <tr style={{ background:'var(--cream-dark)', borderBottom:'1.5px solid var(--border)' }}>
-              {[
-                {h:'', cls:''},
-                {h:'Color', cls:''},
-                {h:'Brand', cls:''},
-                {h:'Product', cls:'col-hide-narrow'},
-                {h:'Shade', cls:''},
-                {h:'Finish', cls:'col-hide-mobile'},
-                {h:'ΔE', cls:''},
-                {h:'', cls:''},
-              ].map((c, idx) => (
-                <th key={idx} className={c.cls} style={{
-                  padding:'12px 16px', textAlign:'left',
-                  fontSize:11, letterSpacing:'0.1em', textTransform:'uppercase',
-                  color:'var(--text-muted)', fontWeight:500, fontFamily:'DM Sans',
-                  whiteSpace:'nowrap',
-                }}>
-                  {c.h}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {filtered.length === 0 && (
-              <tr><td colSpan={8} style={{ padding:'32px 16px', textAlign:'center', color:'var(--text-muted)', fontFamily:'Cormorant Garamond', fontSize:16, fontStyle:'italic' }}>
-                No matches for the selected filters — try clearing a filter
-              </td></tr>
-            )}
+      {/* Results grid */}
+      <div style={{ flex:1, overflowY:'auto' }}>
+        {filtered.length === 0 ? (
+          <p style={{ padding:'32px 16px', textAlign:'center', color:'var(--text-muted)', fontFamily:'Cormorant Garamond', fontSize:16, fontStyle:'italic' }}>
+            No matches for the selected filters — try clearing a filter
+          </p>
+        ) : (
+          <ul aria-label={`${filtered.length} closest lipstick matches, ordered by closeness`} style={{
+            listStyle:'none', margin:0, padding:0,
+            display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(158px, 1fr))', gap:10,
+          }}>
             {filtered.map((p, i) => (
-              <tr key={i} style={{
-                borderBottom: i < filtered.length-1 ? '1px solid var(--cream-dark)' : 'none',
-                background: 'transparent',
-              }}
-              onMouseEnter={e => e.currentTarget.style.background='var(--cream)'}
-              onMouseLeave={e => e.currentTarget.style.background='transparent'}
-              >
-                {/* Heart / wishlist button */}
-                <td style={{ padding:'14px 4px 14px 16px', width:36 }}>
-                  {(() => {
-                    const isLiked = wishlist.some(x => x.brand === p.brand && x.shade === p.shade);
-                    return (
-                      <button
-                        onClick={e => { e.stopPropagation(); toggleWishlist(p); }}
-                        title={isLiked ? 'Remove from My Favorites' : 'Save to My Favorites'}
-                        style={{
-                          width:28, height:28, borderRadius:'50%', border:'none',
-                          background:'transparent', cursor:'pointer',
-                          fontSize:20, color: isLiked ? 'var(--blush)' : 'var(--border)',
-                          display:'flex', alignItems:'center', justifyContent:'center',
-                          transition:'transform 0.15s, color 0.15s',
-                        }}
-                        onMouseEnter={e => { e.currentTarget.style.transform='scale(1.2)'; if (!isLiked) e.currentTarget.style.color='var(--blush-light)'; }}
-                        onMouseLeave={e => { e.currentTarget.style.transform='scale(1)'; if (!isLiked) e.currentTarget.style.color='var(--border)'; }}
-                      >
-                        {isLiked ? '♥' : '♡'}
-                      </button>
-                    );
-                  })()}
-                </td>
-                {/* Product photo + extracted CIELAB swatch */}
-                <td style={{ padding:'10px 16px' }}>
-                  <div style={{ display:'flex', alignItems:'center', gap:6 }}>
-                    <ProductThumb product={p} size={40} />
-                    <ShadeChip hex={p.hex} height={40} width={7} />
-                  </div>
-                </td>
-                <td style={{ padding:'14px 16px', fontSize:13, fontWeight:500, color:'var(--espresso)', fontFamily:'DM Sans', whiteSpace:'nowrap' }}>
-                  {p.brand}
-                </td>
-                <td className="col-hide-narrow" style={{ padding:'14px 16px', fontSize:12, color:'var(--text-body)', fontFamily:'DM Sans' }}>
-                  {p.product}
-                </td>
-                <td style={{ padding:'14px 16px', fontStyle:'italic', fontFamily:'Cormorant Garamond', fontSize:15, color:'var(--espresso-mid)' }}>
-                  {p.shade}
-                </td>
-                <td className="col-hide-mobile" style={{ padding:'14px 16px' }}>
-                  <span style={{
-                    fontSize:11, padding:'3px 10px', borderRadius:20,
-                    background: finishColor(p.finish) + '18',
-                    color: finishColor(p.finish),
-                    fontWeight:500, letterSpacing:'0.04em',
-                    fontFamily:'DM Sans',
-                  }}>
-                    {p.finish}
-                  </span>
-                </td>
-                {/* ΔE distance — lower is closer */}
-                <td style={{ padding:'14px 16px' }}>
-                  <div style={{ display:'flex', alignItems:'center', gap:8 }}>
-                    <div style={{
-                      width:40, height:4, borderRadius:2,
-                      background:'var(--cream-dark)', overflow:'hidden',
-                    }}>
-                      <div style={{
-                        height:'100%', borderRadius:2,
-                        width:`${Math.max(8, 100 - (p.distance / (maxDist+1)) * 100)}%`,
-                        background:'var(--blush)',
-                        transition:'width 0.3s',
-                      }} />
-                    </div>
-                    <span style={{ fontSize:11, color:'var(--text-muted)', fontFamily:'DM Sans', minWidth:28 }}>
-                      {p.distance.toFixed(1)}
-                    </span>
-                  </div>
-                </td>
-                {/* Pin button */}
-                <td style={{ padding:'14px 12px' }}>
-                  {(() => {
-                    const isPinned = pinnedItems.some(x => x.brand === p.brand && x.shade === p.shade);
-                    const isFull = pinnedItems.length >= 4 && !isPinned;
-                    return (
-                      <button
-                        onClick={e => { e.stopPropagation(); togglePin(p); }}
-                        title={isPinned ? 'Remove from comparison' : isFull ? 'Max 4 items' : 'Add to comparison'}
-                        style={{
-                          width:28, height:28, borderRadius:'50%', border:'none',
-                          background: isPinned ? 'var(--espresso)' : 'var(--cream-dark)',
-                          color: isPinned ? '#FAF6F1' : 'var(--text-muted)',
-                          cursor: isFull ? 'not-allowed' : 'pointer',
-                          fontSize:13, display:'flex', alignItems:'center', justifyContent:'center',
-                          opacity: isFull ? 0.35 : 1,
-                          transition:'all 0.15s', flexShrink:0,
-                        }}
-                      >
-                        {isPinned ? '✕' : '+'}
-                      </button>
-                    );
-                  })()}
-                </td>
-              </tr>
+              <li key={i}>
+                <MatchCard p={p} wishlist={wishlist} toggleWishlist={toggleWishlist} pinnedItems={pinnedItems} togglePin={togglePin} />
+              </li>
             ))}
-          </tbody>
-        </table>
+          </ul>
+        )}
       </div>
     </div>
   );
@@ -1508,13 +1433,7 @@ function ComparisonTray({ pinnedItems, onRemove, onClear }) {
                   <div style={{ fontSize:11, color:'var(--text-muted)', fontFamily:'DM Sans', marginBottom:4 }}>
                     {p.brand}
                   </div>
-                  <span style={{
-                    fontSize:10, padding:'2px 8px', borderRadius:20,
-                    background: finishColor(p.finish) + '18',
-                    color: finishColor(p.finish),
-                    fontWeight:500, fontFamily:'DM Sans',
-                  }}>{p.finish}</span>
-                  <div style={{ fontSize:10, color:'var(--text-muted)', marginTop:4, fontFamily:'DM Sans' }}>
+                  <div style={{ fontSize:10, color:'var(--text-muted)', fontFamily:'DM Sans' }}>
                     ΔE {p.distance.toFixed(1)}
                   </div>
                 </div>
@@ -2297,7 +2216,7 @@ function DupeFinder({ product, onSelect, onUsePhoto }) {
                 <div style={{ flex:1, minWidth:0 }}>
                   <div style={{ fontFamily:'DM Sans', fontSize:12, fontWeight:500, color:'var(--espresso)' }}>{product.brand}</div>
                   <div style={{ fontFamily:'Cormorant Garamond', fontStyle:'italic', fontSize:18, color:'var(--espresso-mid)', lineHeight:1.2 }}>{product.shade}</div>
-                  <div style={{ fontFamily:'DM Sans', fontSize:10, color:'var(--text-muted)', marginTop:2, letterSpacing:'0.04em' }}>{product.finish} · {product.hex.toUpperCase()}</div>
+                  <div style={{ fontFamily:'DM Sans', fontSize:10, color:'var(--text-muted)', marginTop:2, letterSpacing:'0.04em' }}>{product.hex.toUpperCase()}</div>
                 </div>
               </div>
               <button onClick={() => onSelect(null)} style={{
