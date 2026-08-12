@@ -4517,14 +4517,21 @@ function App() {
       textTransform: 'uppercase',
       color: 'var(--espresso)'
     }
-  }, "Lipstick Color Finder"), /*#__PURE__*/React.createElement("a", {
+  }, "Lipstick Color Finder"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginLeft: 'auto',
+      display: 'flex',
+      alignItems: 'center',
+      gap: 16
+    }
+  }, /*#__PURE__*/React.createElement("a", {
     href: "about.html",
+    className: "header-how-it-works",
     onClick: () => window.gtag?.('event', 'nav_link_click', {
       target: 'about',
       location: 'header'
     }),
     style: {
-      marginLeft: 'auto',
       display: 'flex',
       alignItems: 'center',
       gap: 8,
@@ -4589,7 +4596,7 @@ function App() {
       borderRadius: 20,
       marginLeft: 2
     }
-  }, wishlist.length))), mode === 'landing' ? /*#__PURE__*/React.createElement("main", {
+  }, wishlist.length)))), mode === 'landing' ? /*#__PURE__*/React.createElement("main", {
     className: "landing-main"
   }, /*#__PURE__*/React.createElement(Landing, {
     onPick: id => switchMode(id, 'landing')
