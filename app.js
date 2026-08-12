@@ -4632,12 +4632,14 @@ function App() {
     const active = mode === t.id;
     return /*#__PURE__*/React.createElement("button", {
       key: t.id,
+      className: "mode-tab",
       onClick: () => switchMode(t.id),
       style: {
         fontFamily: 'DM Sans',
         display: 'flex',
         alignItems: 'center',
         gap: 11,
+        flexShrink: 0,
         textAlign: 'left',
         background: active ? '#fff' : 'transparent',
         border: 'none',
@@ -4653,6 +4655,7 @@ function App() {
         if (!active) e.currentTarget.style.background = 'transparent';
       }
     }, /*#__PURE__*/React.createElement("span", {
+      className: "mode-tab-icon",
       style: {
         width: 30,
         height: 30,
@@ -4671,9 +4674,11 @@ function App() {
     }, /*#__PURE__*/React.createElement("span", {
       style: {
         fontSize: 12.5,
-        color: active ? 'var(--espresso)' : 'var(--text-body)'
+        color: active ? 'var(--espresso)' : 'var(--text-body)',
+        whiteSpace: 'nowrap'
       }
     }, t.label), /*#__PURE__*/React.createElement("span", {
+      className: "mode-tab-hint",
       style: {
         fontSize: 10.5,
         color: 'var(--text-muted)',

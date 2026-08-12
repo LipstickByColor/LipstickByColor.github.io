@@ -2670,25 +2670,25 @@ function App() {
         ].map(t => {
           const active = mode === t.id;
           return (
-            <button key={t.id}
+            <button key={t.id} className="mode-tab"
               onClick={() => switchMode(t.id)}
               style={{
                 fontFamily:'DM Sans', display:'flex', alignItems:'center', gap:11,
-                textAlign:'left', background: active ? '#fff' : 'transparent',
+                flexShrink:0, textAlign:'left', background: active ? '#fff' : 'transparent',
                 border:'none', borderBottom:`2px solid ${active ? 'var(--blush)' : 'transparent'}`,
                 padding:'14px 20px 12px', cursor:'pointer', transition:'background 0.15s',
               }}
               onMouseEnter={e => { if (!active) e.currentTarget.style.background = 'rgba(255,255,255,0.5)'; }}
               onMouseLeave={e => { if (!active) e.currentTarget.style.background = 'transparent'; }}
             >
-              <span style={{
+              <span className="mode-tab-icon" style={{
                 width:30, height:30, borderRadius:'50%', flexShrink:0,
                 background:'rgba(200,120,144,0.10)',
                 display:'flex', alignItems:'center', justifyContent:'center',
               }}>{MODE_ICONS[t.id](16)}</span>
               <span style={{ display:'flex', flexDirection:'column' }}>
-                <span style={{ fontSize:12.5, color: active ? 'var(--espresso)' : 'var(--text-body)' }}>{t.label}</span>
-                <span style={{ fontSize:10.5, color:'var(--text-muted)', marginTop:2 }}>{t.hint}</span>
+                <span style={{ fontSize:12.5, color: active ? 'var(--espresso)' : 'var(--text-body)', whiteSpace:'nowrap' }}>{t.label}</span>
+                <span className="mode-tab-hint" style={{ fontSize:10.5, color:'var(--text-muted)', marginTop:2 }}>{t.hint}</span>
               </span>
             </button>
           );
