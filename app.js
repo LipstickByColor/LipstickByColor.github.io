@@ -4690,7 +4690,8 @@ function App() {
     className: "palette-col"
   }, mode === 'wheel' ? /*#__PURE__*/React.createElement("div", {
     style: {
-      position: 'relative'
+      position: 'relative',
+      width: '100%'
     }
   }, /*#__PURE__*/React.createElement(ColorWheel, {
     colors: colors,

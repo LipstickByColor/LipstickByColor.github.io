@@ -2701,7 +2701,7 @@ function App() {
         {/* Left: Palette */}
         <div className="palette-col">
           {mode === 'wheel' ? (
-            <div style={{ position:'relative' }}>
+            <div style={{ position:'relative', width:'100%' }}>
               <ColorWheel
                 colors={colors}
                 selectedId={selectedColor?.id}
