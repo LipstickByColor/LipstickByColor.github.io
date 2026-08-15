@@ -185,16 +185,16 @@ function MatchCard({
     "aria-label": `${isLiked ? 'Remove' : 'Save'} ${p.brand} ${p.shade} ${isLiked ? 'from' : 'to'} My Favorites`,
     title: isLiked ? 'Remove from My Favorites' : 'Save to My Favorites',
     style: {
-      width: 40,
-      height: 40,
+      width: 30,
+      height: 30,
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      fontSize: 16,
+      fontSize: 15,
       lineHeight: 1,
       fontFamily: 'DM Sans',
       background: isLiked ? 'rgba(232,180,192,0.55)' : 'rgba(255,255,255,0.82)',
-      color: isLiked ? 'var(--blush)' : 'var(--text-muted)',
+      color: 'var(--blush)',
       border: '1px solid rgba(42,26,20,0.08)',
       borderRadius: '50%',
       cursor: 'pointer',
@@ -209,16 +209,16 @@ function MatchCard({
     title: isPinned ? 'Remove from comparison' : isFull ? 'Max 4 items' : 'Add to comparison',
     disabled: isFull,
     style: {
-      width: 40,
-      height: 40,
+      width: 30,
+      height: 30,
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      fontSize: 16,
+      fontSize: 15,
       lineHeight: 1,
       fontFamily: 'DM Sans',
       background: isPinned ? 'var(--espresso)' : 'rgba(255,255,255,0.82)',
-      color: isPinned ? '#FAF6F1' : 'var(--text-muted)',
+      color: isPinned ? '#FAF6F1' : 'var(--blush)',
       border: '1px solid rgba(42,26,20,0.08)',
       borderRadius: '50%',
       cursor: isFull ? 'not-allowed' : 'pointer',
@@ -297,8 +297,7 @@ function MatchCard({
     }
   }, pct, "%"), /*#__PURE__*/React.createElement("span", {
     style: {
-      fontSize: 10.5,
-      color: 'var(--text-muted)'
+      fontSize: 10.5
     }
   }, "match")))));
 }

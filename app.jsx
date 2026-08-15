@@ -100,10 +100,10 @@ function MatchCard({ p, wishlist, toggleWishlist, pinnedItems, togglePin }) {
             aria-label={`${isLiked ? 'Remove' : 'Save'} ${p.brand} ${p.shade} ${isLiked ? 'from' : 'to'} My Favorites`}
             title={isLiked ? 'Remove from My Favorites' : 'Save to My Favorites'}
             style={{
-              width:40, height:40, display:'flex', alignItems:'center', justifyContent:'center',
-              fontSize:16, lineHeight:1, fontFamily:'DM Sans',
+              width:30, height:30, display:'flex', alignItems:'center', justifyContent:'center',
+              fontSize:15, lineHeight:1, fontFamily:'DM Sans',
               background: isLiked ? 'rgba(232,180,192,0.55)' : 'rgba(255,255,255,0.82)',
-              color: isLiked ? 'var(--blush)' : 'var(--text-muted)',
+              color: 'var(--blush)',
               border:'1px solid rgba(42,26,20,0.08)', borderRadius:'50%', cursor:'pointer',
               transition:'background 0.15s, color 0.15s',
             }}
@@ -114,10 +114,10 @@ function MatchCard({ p, wishlist, toggleWishlist, pinnedItems, togglePin }) {
             title={isPinned ? 'Remove from comparison' : isFull ? 'Max 4 items' : 'Add to comparison'}
             disabled={isFull}
             style={{
-              width:40, height:40, display:'flex', alignItems:'center', justifyContent:'center',
-              fontSize:16, lineHeight:1, fontFamily:'DM Sans',
+              width:30, height:30, display:'flex', alignItems:'center', justifyContent:'center',
+              fontSize:15, lineHeight:1, fontFamily:'DM Sans',
               background: isPinned ? 'var(--espresso)' : 'rgba(255,255,255,0.82)',
-              color: isPinned ? '#FAF6F1' : 'var(--text-muted)',
+              color: isPinned ? '#FAF6F1' : 'var(--blush)',
               border:'1px solid rgba(42,26,20,0.08)', borderRadius:'50%',
               cursor: isFull ? 'not-allowed' : 'pointer', opacity: isFull ? 0.4 : 1,
             }}
@@ -141,7 +141,7 @@ function MatchCard({ p, wishlist, toggleWishlist, pinnedItems, togglePin }) {
           <span style={{ marginLeft:'auto', display:'flex', alignItems:'baseline', gap:3, color:'var(--blush)' }}>
             <span style={srOnly}>Match: </span>
             <span style={{ fontSize:12.5, fontWeight:500 }}>{pct}%</span>
-            <span style={{ fontSize:10.5, color:'var(--text-muted)' }}>match</span>
+            <span style={{ fontSize:10.5 }}>match</span>
           </span>
         </div>
       </div>
