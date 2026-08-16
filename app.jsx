@@ -2648,11 +2648,11 @@ function App() {
         background:'var(--cream-dark)', borderBottom:'1px solid var(--border)',
       }}>
         {[
-          {id:'wheel', label:'Color wheel', hint:'Browse by hue'},
-          {id:'photo', label:'Upload photo', hint:'Match from a photo'},
-          {id:'hex', label:'Custom color', hint:'Hex code or picker'},
-          {id:'dupe', label:'Dupe finder', hint:'Match a lipstick you own'},
-          ...(wishlist.length > 0 ? [{id:'list', label:'From My List', hint:'Your saved shades'}] : []),
+          {id:'wheel', label:'Color wheel'},
+          {id:'photo', label:'Upload photo'},
+          {id:'hex', label:'Custom color'},
+          {id:'dupe', label:'Dupe finder'},
+          ...(wishlist.length > 0 ? [{id:'list', label:'From My List'}] : []),
         ].map(t => {
           const active = mode === t.id;
           return (
@@ -2672,10 +2672,7 @@ function App() {
                 background:'rgba(200,120,144,0.10)',
                 display:'flex', alignItems:'center', justifyContent:'center',
               }}>{MODE_ICONS[t.id](16)}</span>
-              <span style={{ display:'flex', flexDirection:'column' }}>
-                <span style={{ fontSize:12.5, color: active ? 'var(--espresso)' : 'var(--text-body)', whiteSpace:'nowrap' }}>{t.label}</span>
-                <span className="mode-tab-hint" style={{ fontSize:10.5, color:'var(--text-muted)', marginTop:2 }}>{t.hint}</span>
-              </span>
+              <span style={{ fontSize:14.5, color: active ? 'var(--espresso)' : 'var(--text-body)', whiteSpace:'nowrap' }}>{t.label}</span>
             </button>
           );
         })}

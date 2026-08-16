@@ -4589,24 +4589,19 @@ function App() {
     }
   }, [{
     id: 'wheel',
-    label: 'Color wheel',
-    hint: 'Browse by hue'
+    label: 'Color wheel'
   }, {
     id: 'photo',
-    label: 'Upload photo',
-    hint: 'Match from a photo'
+    label: 'Upload photo'
   }, {
     id: 'hex',
-    label: 'Custom color',
-    hint: 'Hex code or picker'
+    label: 'Custom color'
   }, {
     id: 'dupe',
-    label: 'Dupe finder',
-    hint: 'Match a lipstick you own'
+    label: 'Dupe finder'
   }, ...(wishlist.length > 0 ? [{
     id: 'list',
-    label: 'From My List',
-    hint: 'Your saved shades'
+    label: 'From My List'
   }] : [])].map(t => {
     const active = mode === t.id;
     return /*#__PURE__*/React.createElement("button", {
@@ -4647,23 +4642,11 @@ function App() {
       }
     }, MODE_ICONS[t.id](16)), /*#__PURE__*/React.createElement("span", {
       style: {
-        display: 'flex',
-        flexDirection: 'column'
-      }
-    }, /*#__PURE__*/React.createElement("span", {
-      style: {
-        fontSize: 12.5,
+        fontSize: 14.5,
         color: active ? 'var(--espresso)' : 'var(--text-body)',
         whiteSpace: 'nowrap'
       }
-    }, t.label), /*#__PURE__*/React.createElement("span", {
-      className: "mode-tab-hint",
-      style: {
-        fontSize: 10.5,
-        color: 'var(--text-muted)',
-        marginTop: 2
-      }
-    }, t.hint)));
+    }, t.label));
   })), /*#__PURE__*/React.createElement("main", {
     className: "app-main",
     style: {
