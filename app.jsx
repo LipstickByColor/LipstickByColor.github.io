@@ -2083,7 +2083,7 @@ function DupeFinder({ product, onSelect, onUsePhoto }) {
     <div style={{ width:'100%', maxWidth:440, display:'flex', flexDirection:'column', gap:14, padding:'4px 0' }}>
       <div style={{ textAlign:'center', marginBottom:2 }}>
         <p style={{ fontFamily:'Cormorant Garamond', fontStyle:'italic', fontSize:19, color:'var(--espresso-mid)', lineHeight:1.4 }}>
-          Find your lipstick's twin
+          Find a color match for a lipstick you like
         </p>
         <p style={{ fontFamily:'DM Sans', fontSize:11, color:'var(--text-muted)', letterSpacing:'0.04em', marginTop:4 }}>
           Search the brand, then the shade name

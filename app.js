@@ -3444,7 +3444,7 @@ function DupeFinder({
       color: 'var(--espresso-mid)',
       lineHeight: 1.4
     }
-  }, "Find your lipstick's twin"), /*#__PURE__*/React.createElement("p", {
+  }, "Find a color match for a lipstick you like"), /*#__PURE__*/React.createElement("p", {
     style: {
       fontFamily: 'DM Sans',
       fontSize: 11,
