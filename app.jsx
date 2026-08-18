@@ -1752,6 +1752,13 @@ function HexPicker({ sampledHex, onColor }) {
       display:'flex', flexDirection:'column', alignItems:'center', gap:20,
       padding:'8px 0 4px',
     }}>
+      <p style={{
+        fontFamily:'Cormorant Garamond', fontStyle:'italic', fontSize:21,
+        color:'var(--espresso-mid)', textAlign:'center', maxWidth:340, lineHeight:1.4,
+      }}>
+        Pick any color you love or paste a hex, and we'll find the lipsticks closest to it.
+      </p>
+
       {/* Big preview swatch */}
       <div style={{
         position:'relative',
@@ -1818,13 +1825,6 @@ function HexPicker({ sampledHex, onColor }) {
           }}
         >🎨</label>
       </div>
-
-      <p style={{
-        fontFamily:'Cormorant Garamond', fontStyle:'italic', fontSize:15,
-        color:'var(--text-muted)', textAlign:'center', maxWidth:300, lineHeight:1.5,
-      }}>
-        Pick any color you love or paste a hex, and we'll find the lipsticks closest to it.
-      </p>
     </div>
   );
 }
@@ -2067,28 +2067,38 @@ function DupeFinder({ product, onSelect, onUsePhoto }) {
     return () => clearTimeout(t);
   }, [shadeQuery, shadeMatches.length, brand]);
 
-  const stepNum = { width:22, height:22, borderRadius:'50%', background:'var(--espresso)', color:'var(--cream)', fontFamily:'DM Sans', fontSize:11, fontWeight:500, display:'inline-flex', alignItems:'center', justifyContent:'center', flexShrink:0 };
-  const stepLabel = { fontFamily:'DM Sans', fontSize:10, color:'var(--text-muted)', letterSpacing:'0.1em', textTransform:'uppercase' };
+  // Type scale for this panel — each size has one job. Don't add a one-off
+  // size for a new label; pick the closest existing role instead.
+  //   eyebrow  11px  uppercase micro-labels (step labels, section dividers)
+  //   micro    11px  secondary meta riding alongside primary text (counts, finish tags)
+  //   caption  14px  helper/hint sentences (italic serif, under inputs)
+  //   link     12px  clickable CTA text ("match from a photo")
+  //   body     13px  regular UI text (chips, list primary text)
+  //   lede     21px  panel intro headline
+  const TYPE = { eyebrow:11, micro:11, caption:14, link:12, body:13, lede:21 };
+
+  const stepNum = { width:22, height:22, borderRadius:'50%', background:'var(--espresso)', color:'var(--cream)', fontFamily:'DM Sans', fontSize:TYPE.eyebrow, fontWeight:500, display:'inline-flex', alignItems:'center', justifyContent:'center', flexShrink:0 };
+  const stepLabel = { fontFamily:'DM Sans', fontSize:TYPE.eyebrow, color:'var(--text-muted)', letterSpacing:'0.1em', textTransform:'uppercase' };
   const inputWrap = { display:'flex', alignItems:'center', gap:10, background:'#fff', borderRadius:14, border:'1.5px solid var(--border)', padding:'11px 14px', boxShadow:'0 2px 8px var(--shadow)' };
   const inputStyle = { flex:1, border:'none', outline:'none', background:'transparent', fontFamily:'DM Sans', fontSize:15, color:'var(--espresso)', minWidth:0 };
   const clearBtn = { background:'none', border:'none', cursor:'pointer', color:'var(--text-muted)', fontSize:16, lineHeight:1, padding:'0 2px' };
   const suggestBox = { display:'flex', flexDirection:'column', gap:2, maxHeight:260, overflowY:'auto', background:'#fff', border:'1px solid var(--border)', borderRadius:12, padding:6, boxShadow:'0 4px 16px var(--shadow)' };
   const chip = { display:'inline-flex', alignItems:'center', gap:8, padding:'7px 8px 7px 14px', background:'#fff', borderRadius:40, border:'1px solid var(--border)', boxShadow:'0 2px 8px var(--shadow)' };
   const chipX = { width:20, height:20, borderRadius:'50%', border:'none', background:'var(--cream-dark)', color:'var(--text-muted)', cursor:'pointer', fontSize:13, lineHeight:1, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 };
-  const emptyNote = { fontFamily:'Cormorant Garamond', fontStyle:'italic', fontSize:14, color:'var(--text-muted)', textAlign:'center', padding:'8px 0' };
-  const photoFallbackBtn = { marginTop:6, fontFamily:'DM Sans', fontSize:11, letterSpacing:'0.06em', textTransform:'uppercase', color:'var(--blush)', background:'transparent', border:'1px solid var(--blush)', borderRadius:20, padding:'6px 14px', cursor:'pointer' };
+  const emptyNote = { fontFamily:'Cormorant Garamond', fontStyle:'italic', fontSize:TYPE.caption, color:'var(--text-muted)', textAlign:'center', padding:'8px 0' };
+  const photoFallbackBtn = { marginTop:6, fontFamily:'DM Sans', fontSize:TYPE.link, letterSpacing:'0.06em', textTransform:'uppercase', color:'var(--blush)', background:'transparent', border:'1px solid var(--blush)', borderRadius:20, padding:'6px 14px', cursor:'pointer' };
   const hov = () => ({ onMouseEnter: e => e.currentTarget.style.background = 'var(--cream)', onMouseLeave: e => e.currentTarget.style.background = 'transparent' });
 
   return (
     <div style={{ width:'100%', maxWidth:440, display:'flex', flexDirection:'column', gap:14, padding:'4px 0' }}>
       <div style={{ textAlign:'center', marginBottom:2 }}>
-        <p style={{ fontFamily:'Cormorant Garamond', fontStyle:'italic', fontSize:19, color:'var(--espresso-mid)', lineHeight:1.4 }}>
+        <p style={{ fontFamily:'Cormorant Garamond', fontStyle:'italic', fontSize:TYPE.lede, color:'var(--espresso-mid)', lineHeight:1.4 }}>
           Find a color match for a lipstick you like
         </p>
-        <p style={{ fontFamily:'DM Sans', fontSize:11, color:'var(--text-muted)', letterSpacing:'0.04em', marginTop:4 }}>
+        <p style={{ fontFamily:'DM Sans', fontSize:TYPE.body, color:'var(--text-muted)', letterSpacing:'0.02em', marginTop:4 }}>
           Search the brand, then the shade name
         </p>
-        <button onClick={() => { window.gtag?.('event', 'dupe_photo_fallback', { step: 'header' }); onUsePhoto(); }} style={{ marginTop:8, fontFamily:'DM Sans', fontSize:10.5, letterSpacing:'0.05em', color:'var(--blush)', background:'transparent', border:'none', borderBottom:'1px solid var(--blush)', paddingBottom:1, cursor:'pointer' }}>
+        <button onClick={() => { window.gtag?.('event', 'dupe_photo_fallback', { step: 'header' }); onUsePhoto(); }} style={{ marginTop:8, fontFamily:'DM Sans', fontSize:TYPE.link, letterSpacing:'0.05em', color:'var(--blush)', background:'transparent', border:'none', borderBottom:'1px solid var(--blush)', paddingBottom:1, cursor:'pointer' }}>
           Can't find your lipstick? Match it from a photo →
         </button>
       </div>
@@ -2128,7 +2138,7 @@ function DupeFinder({ product, onSelect, onUsePhoto }) {
             </div>
           )}
           {!brandQuery && (
-            <p style={{ fontFamily:'Cormorant Garamond', fontStyle:'italic', fontSize:13, color:'var(--text-muted)', textAlign:'center', lineHeight:1.5, marginTop:2 }}>
+            <p style={{ fontFamily:'Cormorant Garamond', fontStyle:'italic', fontSize:TYPE.caption, color:'var(--text-muted)', textAlign:'center', lineHeight:1.5, marginTop:2 }}>
               Start typing a brand name — matches appear as you go.
             </p>
           )}
@@ -2158,7 +2168,7 @@ function DupeFinder({ product, onSelect, onUsePhoto }) {
                 {shadeQuery && <button onClick={() => setShadeQuery('')} style={clearBtn}>×</button>}
               </div>
               {!shadeQuery.trim() ? (
-                <p style={{ fontFamily:'Cormorant Garamond', fontStyle:'italic', fontSize:13, color:'var(--text-muted)', textAlign:'center', lineHeight:1.5, marginTop:2 }}>
+                <p style={{ fontFamily:'Cormorant Garamond', fontStyle:'italic', fontSize:TYPE.caption, color:'var(--text-muted)', textAlign:'center', lineHeight:1.5, marginTop:2 }}>
                   Start typing the shade name to see matches.
                 </p>
               ) : shadeMatches.length === 0 ? (
@@ -2183,7 +2193,7 @@ function DupeFinder({ product, onSelect, onUsePhoto }) {
                       <span style={{ width:24, height:24, borderRadius:'50%', background:p.hex, flexShrink:0, boxShadow:`0 1px 4px ${p.hex}66`, border:'1px solid rgba(42,26,20,0.08)' }} />
                       <span style={{ display:'flex', flexDirection:'column', minWidth:0, textAlign:'left' }}>
                         <span style={{ fontFamily:'Cormorant Garamond', fontStyle:'italic', fontSize:15, color:'var(--espresso)', lineHeight:1.2, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{p.shade}</span>
-                        <span style={{ fontFamily:'DM Sans', fontSize:10, color:'var(--text-muted)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{p.product} · {p.finish}</span>
+                        <span style={{ fontFamily:'DM Sans', fontSize:TYPE.micro, color:'var(--text-muted)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{p.product} · {p.finish}</span>
                       </span>
                     </button>
                   ))}
@@ -2221,7 +2231,7 @@ function DupeFinder({ product, onSelect, onUsePhoto }) {
 
       {!product && popularProducts.length > 0 && (
         <div style={{ marginTop:26, display:'flex', flexDirection:'column', gap:10 }}>
-          <p style={{ fontFamily:'DM Sans', fontSize:10, color:'var(--text-muted)', letterSpacing:'0.1em', textTransform:'uppercase', textAlign:'center' }}>
+          <p style={{ fontFamily:'DM Sans', fontSize:TYPE.eyebrow, color:'var(--text-muted)', letterSpacing:'0.1em', textTransform:'uppercase', textAlign:'center' }}>
             Or try a popular shade
           </p>
           <div style={{ display:'flex', flexWrap:'wrap', gap:8, justifyContent:'center' }}>
@@ -2235,7 +2245,7 @@ function DupeFinder({ product, onSelect, onUsePhoto }) {
                 <span style={{ width:20, height:20, borderRadius:'50%', background:p.hex, flexShrink:0, boxShadow:`0 1px 4px ${p.hex}66`, border:'1px solid rgba(42,26,20,0.08)' }} />
                 <span style={{ display:'flex', flexDirection:'column', textAlign:'left' }}>
                   <span style={{ fontFamily:'Cormorant Garamond', fontStyle:'italic', fontSize:13, color:'var(--espresso)', lineHeight:1.15 }}>{p.shade}</span>
-                  <span style={{ fontFamily:'DM Sans', fontSize:9, color:'var(--text-muted)', textTransform:'capitalize' }}>{p.brand}</span>
+                  <span style={{ fontFamily:'DM Sans', fontSize:TYPE.micro, color:'var(--text-muted)', textTransform:'capitalize' }}>{p.brand}</span>
                 </span>
               </button>
             ))}

@@ -2805,7 +2805,17 @@ function HexPicker({
       gap: 20,
       padding: '8px 0 4px'
     }
-  }, /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontFamily: 'Cormorant Garamond',
+      fontStyle: 'italic',
+      fontSize: 21,
+      color: 'var(--espresso-mid)',
+      textAlign: 'center',
+      maxWidth: 340,
+      lineHeight: 1.4
+    }
+  }, "Pick any color you love or paste a hex, and we'll find the lipsticks closest to it."), /*#__PURE__*/React.createElement("div", {
     style: {
       position: 'relative',
       width: 200,
@@ -2908,17 +2918,7 @@ function HexPicker({
       color: 'var(--espresso-mid)',
       fontSize: 13
     }
-  }, "\uD83C\uDFA8")), /*#__PURE__*/React.createElement("p", {
-    style: {
-      fontFamily: 'Cormorant Garamond',
-      fontStyle: 'italic',
-      fontSize: 15,
-      color: 'var(--text-muted)',
-      textAlign: 'center',
-      maxWidth: 300,
-      lineHeight: 1.5
-    }
-  }, "Pick any color you love or paste a hex, and we'll find the lipsticks closest to it."));
+  }, "\uD83C\uDFA8")));
 }
 
 // ── Vibe Panel ──────────────────────────────────────────────────────────
@@ -3310,6 +3310,23 @@ function DupeFinder({
     }, 600);
     return () => clearTimeout(t);
   }, [shadeQuery, shadeMatches.length, brand]);
+
+  // Type scale for this panel — each size has one job. Don't add a one-off
+  // size for a new label; pick the closest existing role instead.
+  //   eyebrow  11px  uppercase micro-labels (step labels, section dividers)
+  //   micro    11px  secondary meta riding alongside primary text (counts, finish tags)
+  //   caption  14px  helper/hint sentences (italic serif, under inputs)
+  //   link     12px  clickable CTA text ("match from a photo")
+  //   body     13px  regular UI text (chips, list primary text)
+  //   lede     21px  panel intro headline
+  const TYPE = {
+    eyebrow: 11,
+    micro: 11,
+    caption: 14,
+    link: 12,
+    body: 13,
+    lede: 21
+  };
   const stepNum = {
     width: 22,
     height: 22,
@@ -3317,7 +3334,7 @@ function DupeFinder({
     background: 'var(--espresso)',
     color: 'var(--cream)',
     fontFamily: 'DM Sans',
-    fontSize: 11,
+    fontSize: TYPE.eyebrow,
     fontWeight: 500,
     display: 'inline-flex',
     alignItems: 'center',
@@ -3326,7 +3343,7 @@ function DupeFinder({
   };
   const stepLabel = {
     fontFamily: 'DM Sans',
-    fontSize: 10,
+    fontSize: TYPE.eyebrow,
     color: 'var(--text-muted)',
     letterSpacing: '0.1em',
     textTransform: 'uppercase'
@@ -3400,7 +3417,7 @@ function DupeFinder({
   const emptyNote = {
     fontFamily: 'Cormorant Garamond',
     fontStyle: 'italic',
-    fontSize: 14,
+    fontSize: TYPE.caption,
     color: 'var(--text-muted)',
     textAlign: 'center',
     padding: '8px 0'
@@ -3408,7 +3425,7 @@ function DupeFinder({
   const photoFallbackBtn = {
     marginTop: 6,
     fontFamily: 'DM Sans',
-    fontSize: 11,
+    fontSize: TYPE.link,
     letterSpacing: '0.06em',
     textTransform: 'uppercase',
     color: 'var(--blush)',
@@ -3440,16 +3457,16 @@ function DupeFinder({
     style: {
       fontFamily: 'Cormorant Garamond',
       fontStyle: 'italic',
-      fontSize: 19,
+      fontSize: TYPE.lede,
       color: 'var(--espresso-mid)',
       lineHeight: 1.4
     }
   }, "Find a color match for a lipstick you like"), /*#__PURE__*/React.createElement("p", {
     style: {
       fontFamily: 'DM Sans',
-      fontSize: 11,
+      fontSize: TYPE.body,
       color: 'var(--text-muted)',
-      letterSpacing: '0.04em',
+      letterSpacing: '0.02em',
       marginTop: 4
     }
   }, "Search the brand, then the shade name"), /*#__PURE__*/React.createElement("button", {
@@ -3462,7 +3479,7 @@ function DupeFinder({
     style: {
       marginTop: 8,
       fontFamily: 'DM Sans',
-      fontSize: 10.5,
+      fontSize: TYPE.link,
       letterSpacing: '0.05em',
       color: 'var(--blush)',
       background: 'transparent',
@@ -3547,7 +3564,7 @@ function DupeFinder({
     style: {
       fontFamily: 'Cormorant Garamond',
       fontStyle: 'italic',
-      fontSize: 13,
+      fontSize: TYPE.caption,
       color: 'var(--text-muted)',
       textAlign: 'center',
       lineHeight: 1.5,
@@ -3620,7 +3637,7 @@ function DupeFinder({
     style: {
       fontFamily: 'Cormorant Garamond',
       fontStyle: 'italic',
-      fontSize: 13,
+      fontSize: TYPE.caption,
       color: 'var(--text-muted)',
       textAlign: 'center',
       lineHeight: 1.5,
@@ -3704,7 +3721,7 @@ function DupeFinder({
   }, p.shade), /*#__PURE__*/React.createElement("span", {
     style: {
       fontFamily: 'DM Sans',
-      fontSize: 10,
+      fontSize: TYPE.micro,
       color: 'var(--text-muted)',
       overflow: 'hidden',
       textOverflow: 'ellipsis',
@@ -3806,7 +3823,7 @@ function DupeFinder({
   }, /*#__PURE__*/React.createElement("p", {
     style: {
       fontFamily: 'DM Sans',
-      fontSize: 10,
+      fontSize: TYPE.eyebrow,
       color: 'var(--text-muted)',
       letterSpacing: '0.1em',
       textTransform: 'uppercase',
@@ -3860,7 +3877,7 @@ function DupeFinder({
   }, p.shade), /*#__PURE__*/React.createElement("span", {
     style: {
       fontFamily: 'DM Sans',
-      fontSize: 9,
+      fontSize: TYPE.micro,
       color: 'var(--text-muted)',
       textTransform: 'capitalize'
     }
