@@ -1359,9 +1359,62 @@ function TweaksPanel({
 }
 
 // ── Shareable Image (Instagram-friendly) ──────────────────────────────────────
+// Site URL printed on the shared card so it can be scanned / typed back in.
+const SITE_URL = 'lipstickbycolor.github.io';
+
+// Route a URL through a CORS-friendly image proxy. Many retailer CDNs (Sephora,
+// ilmakiage, …) serve product photos without an Access-Control-Allow-Origin
+// header, so they can't be drawn onto an exportable canvas directly. wsrv.nl
+// re-serves the same image with permissive CORS.
+function corsProxy(url) {
+  return 'https://wsrv.nl/?url=' + encodeURIComponent(url) + '&output=jpg';
+}
+
+// Load one image cross-origin so it can be painted onto a canvas without
+// tainting it. Tries the source directly first, then falls back to the proxy;
+// resolves to null (never rejects) if neither works or it takes too long.
+function loadCorsImage(url) {
+  return new Promise(resolve => {
+    if (!url) {
+      resolve(null);
+      return;
+    }
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.decoding = 'async';
+    let settled = false,
+      triedProxy = false;
+    const done = v => {
+      if (!settled) {
+        settled = true;
+        clearTimeout(timer);
+        resolve(v);
+      }
+    };
+    const timer = setTimeout(() => done(null), 5000);
+    img.onload = () => done(img);
+    img.onerror = () => {
+      if (triedProxy) {
+        done(null);
+        return;
+      }
+      triedProxy = true;
+      img.src = corsProxy(url);
+    };
+    img.src = url;
+  });
+}
+
+// Preload every wishlist product photo. Returns an array aligned with `wishlist`
+// (null where there's no image or the host blocked cross-origin use).
+function loadWishlistImages(wishlist) {
+  return Promise.all(wishlist.map(p => loadCorsImage(getProductImage(p))));
+}
+
 // Draws a clean 4:5 portrait card (1080×1350) of the user's wishlist to a
 // canvas, then lets them preview, download, or copy it to clipboard.
-function drawShareImage(canvas, wishlist) {
+// `images` is the aligned array from loadWishlistImages (optional).
+function drawShareImage(canvas, wishlist, images) {
   const W = 1080,
     H = 1350;
   canvas.width = W;
@@ -1402,44 +1455,67 @@ function drawShareImage(canvas, wishlist) {
   const eyebrow = 'L I P  ·  C O L O R  ·  F I N D E R';
   ctx.fillText(eyebrow, W / 2, 105);
 
-  // Title — Cormorant Garamond italic
+  // Title — Cormorant Garamond italic, one line, shrunk to fit the card width
   ctx.fillStyle = '#2A1A14';
-  ctx.font = '300 italic 86px "Cormorant Garamond", serif';
-  ctx.fillText('my lipstick', W / 2, 230);
-  ctx.font = '400 italic 86px "Cormorant Garamond", serif';
-  ctx.fillText('shortlist', W / 2, 320);
+  const titleText = 'my lipstick shortlist';
+  const titleMaxW = W - 180;
+  let titleSize = 86;
+  do {
+    ctx.font = `400 italic ${titleSize}px "Cormorant Garamond", serif`;
+    if (ctx.measureText(titleText).width <= titleMaxW) break;
+    titleSize -= 2;
+  } while (titleSize > 44);
+  ctx.fillText(titleText, W / 2, 235);
 
   // Date / count subtitle
   ctx.fillStyle = '#8C6858';
-  ctx.font = '400 17px "DM Sans", sans-serif';
+  ctx.font = '400 20px "DM Sans", sans-serif';
   const subtitle = `${wishlist.length} ${wishlist.length === 1 ? 'shade' : 'shades'}  ·  ${new Date().toLocaleDateString('en-US', {
     month: 'long',
     day: 'numeric',
     year: 'numeric'
   })}`;
-  ctx.fillText(subtitle, W / 2, 370);
+  ctx.fillText(subtitle, W / 2, 300);
 
   // ── Shade list ───────────────────────────────────────────────────────────
-  const LIST_TOP = 440;
-  const LIST_BOTTOM = H - 130;
+  const LIST_TOP = 360;
+  const LIST_BOTTOM = H - 150;
   const LIST_LEFT = 110;
   const LIST_RIGHT = W - 110;
   const listW = LIST_RIGHT - LIST_LEFT;
+  const listSpan = LIST_BOTTOM - LIST_TOP;
 
   // Layout: single column up to 8 items, two columns otherwise
   const twoCol = wishlist.length > 8;
   const cols = twoCol ? 2 : 1;
   const rows = Math.ceil(wishlist.length / cols);
   const colW = listW / cols;
-  const rowH = Math.min(120, (LIST_BOTTOM - LIST_TOP) / Math.max(rows, 1));
-  const swatchR = Math.min(36, rowH * 0.32);
+  // Let rows grow to fill the card when the list is short (keeps the blank gap
+  // above the footer small), capped so a 1–2 item list doesn't look enormous.
+  // Two-column lists are already near-full, so they barely grow — and their
+  // narrow columns can't take much bigger type without clipping brand names.
+  const rowHMax = twoCol ? 150 : 200;
+  const rowH = Math.min(rowHMax, listSpan / Math.max(rows, 1));
+  // Scale swatch, photo and type off the final row height (1 = the old 120px row).
+  const k = Math.max(1, Math.min(twoCol ? 1.06 : 1.45, rowH / 120));
+  const swatchR = Math.min(twoCol ? 38 : 48, rowH * 0.30);
+  // Product photo sits between the shade circle and the text. Reserve the slot
+  // whenever any shade *has* a photo (not just the ones that loaded in time),
+  // so text stays put if a slow image fills in on a later redraw.
+  const anyImg = wishlist.some(p => getProductImage(p));
+  const photoS = anyImg ? swatchR * 2 : 0;
+  const photoGap = anyImg ? 18 : 0;
+  // Anchor the list near the top of the available span with only a small top
+  // inset, so any leftover slack on a short list pools above the footer instead
+  // of opening a gap between the header and the first row.
+  const listY = LIST_TOP + Math.min(40, Math.max(0, listSpan - rows * rowH) * 0.25);
   ctx.textBaseline = 'middle';
   for (let i = 0; i < wishlist.length; i++) {
     const p = wishlist[i];
     const col = twoCol ? i % 2 : 0;
     const row = twoCol ? Math.floor(i / 2) : i;
     const cx = LIST_LEFT + col * colW + 16;
-    const cy = LIST_TOP + row * rowH + rowH / 2;
+    const cy = listY + row * rowH + rowH / 2;
 
     // Color swatch — circle with soft shadow
     ctx.save();
@@ -1458,55 +1534,93 @@ function drawShareImage(canvas, wishlist) {
     ctx.arc(cx + swatchR, cy, swatchR, 0, Math.PI * 2);
     ctx.stroke();
 
+    // Product photo — rounded square, tinted with the shade underneath
+    const photoImg = images && images[i];
+    if (photoImg) {
+      const px = cx + swatchR * 2 + photoGap;
+      const py = cy - photoS / 2;
+      ctx.save();
+      ctx.beginPath();
+      ctx.roundRect(px, py, photoS, photoS, 10);
+      ctx.clip();
+      ctx.fillStyle = p.hex;
+      ctx.fillRect(px, py, photoS, photoS);
+      const s = Math.max(photoS / photoImg.naturalWidth, photoS / photoImg.naturalHeight) * 1.12;
+      const dw = photoImg.naturalWidth * s,
+        dh = photoImg.naturalHeight * s;
+      ctx.drawImage(photoImg, px + (photoS - dw) / 2, cy - dh / 2, dw, dh);
+      ctx.restore();
+      ctx.strokeStyle = 'rgba(42,26,20,0.10)';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.roundRect(px, py, photoS, photoS, 10);
+      ctx.stroke();
+    }
+
     // Text block
-    const tx = cx + swatchR * 2 + 22;
-    const textMaxW = colW - swatchR * 2 - 50;
+    const tx = cx + swatchR * 2 + photoGap + photoS + 22;
+    const textMaxW = colW - swatchR * 2 - photoGap - photoS - 50;
 
     // Brand
     ctx.fillStyle = '#2A1A14';
     ctx.textAlign = 'left';
-    ctx.font = `500 ${twoCol ? 17 : 22}px "DM Sans", sans-serif`;
-    ctx.fillText(clipToWidth(ctx, p.brand, textMaxW), tx, cy - (twoCol ? 16 : 20));
+    ctx.font = `500 ${Math.round((twoCol ? 17 : 23) * k)}px "DM Sans", sans-serif`;
+    ctx.fillText(clipToWidth(ctx, p.brand, textMaxW), tx, cy - (twoCol ? 16 : 22) * k);
 
     // Shade — italic serif
     ctx.fillStyle = '#5C3D30';
-    ctx.font = `400 italic ${twoCol ? 21 : 28}px "Cormorant Garamond", serif`;
-    ctx.fillText(clipToWidth(ctx, p.shade, textMaxW), tx, cy + (twoCol ? 7 : 10));
+    ctx.font = `400 italic ${Math.round((twoCol ? 21 : 29) * k)}px "Cormorant Garamond", serif`;
+    ctx.fillText(clipToWidth(ctx, p.shade, textMaxW), tx, cy + (twoCol ? 7 : 10) * k);
 
     // Finish + hex meta
     ctx.fillStyle = '#A08878';
-    ctx.font = `400 ${twoCol ? 12 : 13}px "DM Sans", sans-serif`;
+    ctx.font = `400 ${Math.round((twoCol ? 12 : 15) * k)}px "DM Sans", sans-serif`;
     const meta = `${(p.finish || '').toUpperCase()}  ·  ${p.hex.toUpperCase()}`;
-    ctx.fillText(meta, tx, cy + (twoCol ? 28 : 38));
+    ctx.fillText(meta, tx, cy + (twoCol ? 28 : 40) * k);
   }
 
   // ── Footer ────────────────────────────────────────────────────────────────
   ctx.strokeStyle = '#E0D0C4';
   ctx.beginPath();
-  ctx.moveTo(80, H - 95);
-  ctx.lineTo(W - 80, H - 95);
+  ctx.moveTo(80, H - 118);
+  ctx.lineTo(W - 80, H - 118);
   ctx.stroke();
 
-  // Tiny lipstick bullet icon
-  const fx = W / 2 - 130,
-    fy = H - 55;
+  // Credit + site link, centered as one group. Sized for legibility on the card.
+  const fy = H - 74;
+  const creditFont = '500 23px "DM Sans", sans-serif';
+  const urlFont = '600 22px "DM Sans", sans-serif';
+  const iconSlot = 44;
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'alphabetic';
+  ctx.font = creditFont;
+  const creditText = 'made with Lipstick Color Finder';
+  const groupW = iconSlot + ctx.measureText(creditText).width;
+  const gx = (W - groupW) / 2;
+
+  // Lipstick icon (1.5× the old bullet), vertically centered on the two lines
+  ctx.save();
+  ctx.translate(gx, fy + 4);
+  ctx.scale(1.5, 1.5);
   ctx.fillStyle = '#C87890';
   ctx.beginPath();
-  ctx.moveTo(fx, fy + 6);
-  ctx.lineTo(fx, fy - 8);
-  ctx.quadraticCurveTo(fx, fy - 20, fx + 8, fy - 22);
-  ctx.quadraticCurveTo(fx + 16, fy - 20, fx + 16, fy - 8);
-  ctx.lineTo(fx + 16, fy + 6);
+  ctx.moveTo(0, 6);
+  ctx.lineTo(0, -8);
+  ctx.quadraticCurveTo(0, -20, 8, -22);
+  ctx.quadraticCurveTo(16, -20, 16, -8);
+  ctx.lineTo(16, 6);
   ctx.closePath();
   ctx.fill();
   ctx.fillStyle = '#2A1A14';
-  ctx.fillRect(fx - 2, fy + 6, 20, 5);
-
-  // Footer text
+  ctx.fillRect(-2, 6, 20, 5);
+  ctx.restore();
+  const textX = gx + iconSlot;
   ctx.fillStyle = '#5C3D30';
-  ctx.textAlign = 'left';
-  ctx.font = '500 14px "DM Sans", sans-serif';
-  ctx.fillText('made with Lipstick Color Finder', fx + 30, fy - 5);
+  ctx.font = creditFont;
+  ctx.fillText(creditText, textX, fy);
+  ctx.fillStyle = '#8C6858';
+  ctx.font = urlFont;
+  ctx.fillText(SITE_URL, textX, fy + 30);
 }
 
 // Truncate text with an ellipsis to fit a max width.
@@ -1529,10 +1643,20 @@ function ShareImageModal({
     let cancelled = false;
     // Make sure custom fonts are loaded before drawing
     const ready = document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve();
-    ready.then(() => {
+    const imagesP = loadWishlistImages(wishlist);
+    const paint = images => {
       if (cancelled || !canvasRef.current) return;
-      drawShareImage(canvasRef.current, wishlist);
+      drawShareImage(canvasRef.current, wishlist, images);
       setBusy(false);
+    };
+    ready.then(async () => {
+      // Draw once fonts + photos are ready, but don't wait forever on a slow
+      // proxied image — show the card after a short grace period and redraw
+      // with the full set when the stragglers arrive.
+      const grace = new Promise(res => setTimeout(() => res('grace'), 2500));
+      const first = await Promise.race([imagesP, grace]);
+      paint(first === 'grace' ? [] : first);
+      if (first === 'grace') paint(await imagesP);
     });
     return () => {
       cancelled = true;
@@ -1646,7 +1770,7 @@ function ShareImageModal({
       lineHeight: 1.5,
       marginTop: -4
     }
-  }, "A portrait card sized for Instagram (4:5). Save it and post it to your story, feed, or send it to a friend."), /*#__PURE__*/React.createElement("div", {
+  }, "A portrait card sized for Instagram (4:5), with each lipstick photo, its shade, and a link back to ", SITE_URL, ". Save it and post it to your story, feed, or send it to a friend."), /*#__PURE__*/React.createElement("div", {
     style: {
       background: '#2A1A14',
       borderRadius: 14,
