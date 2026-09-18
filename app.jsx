@@ -2521,9 +2521,9 @@ function App() {
     localStorage.setItem('lipstick-wishlist', JSON.stringify(wishlist));
   }, [wishlist]);
 
-  function switchMode(id, source = 'tabs') {
+  function switchMode(id, ui_source = 'tabs') {
     setMode(id);
-    window.gtag?.('event', 'select_mode', { mode: id, source });
+    window.gtag?.('event', 'select_mode', { mode: id, ui_source });
     if (id === 'wheel') { setSelectedColor(null); setPhotoHex(null); setHexHex(null); setDupeProduct(null); }
     else if (id === 'photo') { setSelectedColor(null); setHexHex(null); setDupeProduct(null); }
     else if (id === 'hex')   { setSelectedColor(null); setPhotoHex(null); setDupeProduct(null); }
@@ -2659,7 +2659,7 @@ function App() {
     setToneIdx(prev => {
       if (prev === i || !toneRamp) return i;
       const step = toneRamp.ramp[i];
-      window.gtag?.('event', 'select_color', { method: 'tone_adjust', source: mode, hex: step.hex, name: step.name });
+      window.gtag?.('event', 'select_color', { method: 'tone_adjust', ui_source: mode, hex: step.hex, name: step.name });
       return i;
     });
   }

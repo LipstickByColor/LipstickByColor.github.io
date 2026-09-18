@@ -4352,11 +4352,11 @@ function App() {
   useEffect(() => {
     localStorage.setItem('lipstick-wishlist', JSON.stringify(wishlist));
   }, [wishlist]);
-  function switchMode(id, source = 'tabs') {
+  function switchMode(id, ui_source = 'tabs') {
     setMode(id);
     window.gtag?.('event', 'select_mode', {
       mode: id,
-      source
+      ui_source
     });
     if (id === 'wheel') {
       setSelectedColor(null);
@@ -4563,7 +4563,7 @@ function App() {
       const step = toneRamp.ramp[i];
       window.gtag?.('event', 'select_color', {
         method: 'tone_adjust',
-        source: mode,
+        ui_source: mode,
         hex: step.hex,
         name: step.name
       });
