@@ -2336,7 +2336,7 @@ function App() {
           Lipstick Color Finder
         </h1>
         <span style={{ fontFamily:'DM Sans', fontSize:12, color:'var(--text-muted)', letterSpacing:'0.1em', textTransform:'uppercase' }}>
-          9,000+ lip products · closest match
+          Nearly 20,000 lip products · closest match
         </span>
         <a href="about.html" style={{
             marginLeft:'auto', display:'flex', alignItems:'center', gap:8,

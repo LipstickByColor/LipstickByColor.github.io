@@ -2483,7 +2483,7 @@ function Landing({ onPick }) {
           fontSize:11, letterSpacing:'0.18em', textTransform:'uppercase',
           color:'var(--text-muted)', textAlign:'center', marginBottom:14,
         }}>
-          Perceptual color matching · 9,000+ lip products
+          Perceptual color matching · Nearly 20,000 lip products
         </p>
         <h2 className="landing-lede">
           Let's find your <em style={{ fontStyle:'italic', color:'var(--espresso-mid)' }}>shade</em>.

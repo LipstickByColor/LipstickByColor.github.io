@@ -4309,7 +4309,7 @@ function Landing({
       textAlign: 'center',
       marginBottom: 14
     }
-  }, "Perceptual color matching \xB7 9,000+ lip products"), /*#__PURE__*/React.createElement("h2", {
+  }, "Perceptual color matching \xB7 Nearly 20,000 lip products"), /*#__PURE__*/React.createElement("h2", {
     className: "landing-lede"
   }, "Let's find your ", /*#__PURE__*/React.createElement("em", {
     style: {

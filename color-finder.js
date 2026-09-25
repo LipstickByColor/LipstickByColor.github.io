@@ -3756,7 +3756,7 @@ function App() {
       letterSpacing: '0.1em',
       textTransform: 'uppercase'
     }
-  }, "9,000+ lip products \xB7 closest match"), /*#__PURE__*/React.createElement("a", {
+  }, "Nearly 20,000 lip products \xB7 closest match"), /*#__PURE__*/React.createElement("a", {
     href: "about.html",
     style: {
       marginLeft: 'auto',
