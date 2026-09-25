@@ -77,7 +77,7 @@ const LIPSTICK_DATA = [
   {id:32, hex:"#a34233", name:"Cayenne"},
   {id:33, hex:"#c48c7f", name:"Rose Dawn"},
   {id:38, hex:"#2f3760", name:"Midnight", novelty:true},
-  {id:39, hex:"#c9579c", name:"Magenta"},
+  {id:39, hex:"#dc5391", name:"Magenta"},
   {id:40, hex:"#a3487a", name:"Dahlia Mauve"},
   {id:49, hex:"#F89FB5", name:"Flamingo"},
   {id:42, hex:"#6c3348", name:"Burgundy"},
