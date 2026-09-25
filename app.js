@@ -4333,7 +4333,14 @@ function App() {
   const [hoveredId, setHoveredId] = useState(null);
   const resultsRef = React.useRef(null);
   const [toneIdx, setToneIdx] = useState(null);
-  const [mode, setMode] = useState('landing'); // 'landing' | 'wheel' | 'photo' | 'hex' | 'dupe' | 'list'
+  const [mode, setMode] = useState(() => {
+    // 'landing' | 'wheel' | 'photo' | 'hex' | 'dupe' | 'list'
+    try {
+      return localStorage.getItem('lipstick-visited') ? 'wheel' : 'landing';
+    } catch {
+      return 'landing';
+    }
+  });
   const [photoHex, setPhotoHex] = useState(null);
   const [hexHex, setHexHex] = useState(null);
   const [dupeProduct, setDupeProduct] = useState(null);
@@ -4354,6 +4361,7 @@ function App() {
   }, [wishlist]);
   function switchMode(id, ui_source = 'tabs') {
     setMode(id);
+    localStorage.setItem('lipstick-visited', '1');
     window.gtag?.('event', 'select_mode', {
       mode: id,
       ui_source
