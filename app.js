@@ -310,127 +310,6 @@ function luminance(hex) {
   return 0.2126 * r + 0.7152 * g + 0.0722 * b;
 }
 
-// Brand → price tier heuristics. Unlisted brands default to '$$'.
-const BRAND_TIER = {
-  // $ — Drugstore / mass-market
-  "a'pieu": '$',
-  'almay': '$',
-  'ardell': '$',
-  'australis cosmetics': '$',
-  'avon': '$',
-  'barry m cosmetics': '$',
-  'beauty care naturals': '$',
-  'blk/opl': '$',
-  'bourjois': '$',
-  "burt's bees": '$',
-  'catrice': '$',
-  'chapstick': '$',
-  'colourpop': '$',
-  'covergirl': '$',
-  'e.l.f. cosmetics': '$',
-  'essence': '$',
-  'etude': '$',
-  'flower beauty': '$',
-  'flormar': '$',
-  'holika holika': '$',
-  'i heart revolution': '$',
-  "i'm meme": '$',
-  'iman cosmetics': '$',
-  'inc.redible': '$',
-  'j.cat beauty': '$',
-  'kay beauty': '$',
-  "l'oréal": '$',
-  'l.a. colors': '$',
-  'l.a. girl': '$',
-  'makeup revolution': '$',
-  'mango people': '$',
-  'max factor': '$',
-  'maybelline': '$',
-  'milani': '$',
-  'morphe 2': '$',
-  'mua makeup academy': '$',
-  'nature republic': '$',
-  'neutrogena': '$',
-  'no7': '$',
-  'nykaa': '$',
-  'nyx professional makeup': '$',
-  'pacifica': '$',
-  'peripera': '$',
-  'physicians formula': '$',
-  'revolution pro': '$',
-  'revlon': '$',
-  'rimmel': '$',
-  'sleek makeup': '$',
-  'soap & glory': '$',
-  'the balm cosmetics': '$',
-  'the creme shop': '$',
-  'the lip bar': '$',
-  'the saem': '$',
-  'w7': '$',
-  'wet n wild': '$',
-  'xx revolution': '$',
-  // $$$ — Luxury / designer
-  'addiction tokyo': '$$$',
-  'aj crimson': '$$$',
-  'armani beauty': '$$$',
-  'augustinus bader': '$$$',
-  'bassam fattouh': '$$$',
-  'burberry': '$$$',
-  'by terry': '$$$',
-  'byredo': '$$$',
-  'carolina herrera': '$$$',
-  'chanel': '$$$',
-  'chantecaille': '$$$',
-  'charlotte tilbury': '$$$',
-  'christian louboutin': '$$$',
-  'clé de peau beauté': '$$$',
-  'decorté': '$$$',
-  'dior': '$$$',
-  'dolce & gabbana': '$$$',
-  'edward bess': '$$$',
-  'emilie heathe': '$$$',
-  'estée lauder': '$$$',
-  'fara homidi': '$$$',
-  'florasis': '$$$',
-  'givenchy': '$$$',
-  'gucci': '$$$',
-  'guerlain': '$$$',
-  'hermès': '$$$',
-  'house of sillage': '$$$',
-  'isamaya': '$$$',
-  'jung saem mool': '$$$',
-  'kjaer weis': '$$$',
-  'koh gen do': '$$$',
-  'la bouche rouge, paris': '$$$',
-  'la perla': '$$$',
-  'lancôme': '$$$',
-  'lunasol': '$$$',
-  'mara': '$$$',
-  'marc jacobs beauty': '$$$',
-  'monika blunder': '$$$',
-  'pat mcgrath labs': '$$$',
-  'prada beauty': '$$$',
-  'rabanne': '$$$',
-  'rodin olio lusso': '$$$',
-  'sarah creal': '$$$',
-  'sensai': '$$$',
-  'serge lutens': '$$$',
-  'shiseido': '$$$',
-  'shu uemura': '$$$',
-  'sisley paris': '$$$',
-  'skkn by kim': '$$$',
-  'suqqu': '$$$',
-  'surratt beauty': '$$$',
-  'tata harper': '$$$',
-  'tatcha': '$$$',
-  'tom ford': '$$$',
-  'valentino': '$$$',
-  'victoria beckham beauty': '$$$',
-  'westman atelier': '$$$',
-  'yves saint laurent': '$$$'
-  // everything else → '$$' (mid-range / prestige)
-};
-
 // Compact tonal ramp anchored to a specific shade (perSide lighter, anchor, perSide deeper).
 // Used in the results-panel strip for all entry points.
 function generateToneSteps(anchorHex, perSide = 2, stepL = 13, baseName = 'This shade') {
@@ -866,13 +745,18 @@ function ResultsTable({
   const [activeBrands, setActiveBrands] = React.useState([]);
   const [activeTones, setActiveTones] = React.useState([]);
   const [activeTiers, setActiveTiers] = React.useState([]);
+  const [activeFinishes, setActiveFinishes] = React.useState([]);
+  const [activeFormats, setActiveFormats] = React.useState([]);
+  const [hideDiscontinued, setHideDiscontinued] = React.useState(true);
   const [openFilter, setOpenFilter] = React.useState(null);
 
-  // Reset filters when selection changes
+  // Reset filters when selection changes (hideDiscontinued persists as a standing preference)
   React.useEffect(() => {
     setActiveBrands([]);
     setActiveTones([]);
     setActiveTiers([]);
+    setActiveFinishes([]);
+    setActiveFormats([]);
     setOpenFilter(null);
   }, [selectedColor?.id]);
 
@@ -888,7 +772,10 @@ function ResultsTable({
     return 'neutral';
   }
   function tierOf(p) {
-    return BRAND_TIER[p.brand] || '$$';
+    return p.price_tier || '$$';
+  }
+  function finishOf(p) {
+    return (p.finish || '').trim() || 'Unlisted';
   }
 
   // Derive available options from matches
@@ -898,6 +785,14 @@ function ResultsTable({
   const orderedTones = TONE_ORDER.filter(t => allTones.includes(t));
   const TIER_ORDER = ['$', '$$', '$$$'];
   const allTiers = TIER_ORDER.filter(t => matches.some(p => tierOf(p) === t));
+  const FINISH_ORDER = ['Matte', 'Satin', 'Gloss', 'Sheer', 'Shimmer', 'Unlisted'];
+  const allFinishes = FINISH_ORDER.filter(f => matches.some(p => finishOf(p) === f));
+  const FORMAT_ORDER = ['Bullet Lipstick', 'Liquid Lipstick', 'Lip Gloss', 'Lip Stain & Tint', 'Lip Liner & Pencil', 'Lip Oil', 'Lip Balm & Care'];
+  const FORMAT_LABELS = {
+    'Lip Liner & Pencil': 'Lip Crayon, Liner, & Pencil'
+  };
+  const allFormats = FORMAT_ORDER.filter(f => matches.some(p => p.format === f));
+  const hasDiscontinued = matches.some(p => p.discontinued);
   if (!selectedColor) return /*#__PURE__*/React.createElement("div", {
     className: "results-empty-state",
     style: {
@@ -942,7 +837,21 @@ function ResultsTable({
     });
     setActiveTiers(prev => prev.includes(t) ? prev.filter(x => x !== t) : [...prev, t]);
   }
-  const filtered = matches.filter(p => (activeBrands.length === 0 || activeBrands.includes(p.brand)) && (activeTones.length === 0 || activeTones.includes(toneOf(p))) && (activeTiers.length === 0 || activeTiers.includes(tierOf(p))));
+  function toggleFinish(f) {
+    if (!activeFinishes.includes(f)) window.gtag?.('event', 'apply_filter', {
+      filter_type: 'finish',
+      filter_value: f
+    });
+    setActiveFinishes(prev => prev.includes(f) ? prev.filter(x => x !== f) : [...prev, f]);
+  }
+  function toggleFormat(f) {
+    if (!activeFormats.includes(f)) window.gtag?.('event', 'apply_filter', {
+      filter_type: 'format',
+      filter_value: f
+    });
+    setActiveFormats(prev => prev.includes(f) ? prev.filter(x => x !== f) : [...prev, f]);
+  }
+  const filtered = matches.filter(p => (activeBrands.length === 0 || activeBrands.includes(p.brand)) && (activeTones.length === 0 || activeTones.includes(toneOf(p))) && (activeTiers.length === 0 || activeTiers.includes(tierOf(p))) && (activeFinishes.length === 0 || activeFinishes.includes(finishOf(p))) && (activeFormats.length === 0 || activeFormats.includes(p.format)) && (!hideDiscontinued || !p.discontinued));
   return /*#__PURE__*/React.createElement("div", {
     style: {
       flex: 1,
@@ -1080,7 +989,7 @@ function ResultsTable({
       flexShrink: 0,
       marginLeft: 10
     }
-  }, "Reset to my shade"))), (orderedTones.length >= 1 || allBrands.length > 1 || allTiers.length > 1) && /*#__PURE__*/React.createElement("div", {
+  }, "Reset to my shade"))), (orderedTones.length >= 1 || allBrands.length > 1 || allTiers.length > 1 || allFormats.length > 1 || hasDiscontinued) && /*#__PURE__*/React.createElement("div", {
     style: {
       display: 'flex',
       flexWrap: 'wrap',
@@ -1097,7 +1006,39 @@ function ResultsTable({
       fontFamily: 'DM Sans',
       marginRight: 2
     }
-  }, "Filter"), allBrands.length > 1 && /*#__PURE__*/React.createElement(FilterDropdown, {
+  }, "Filter"), allTiers.length > 1 && /*#__PURE__*/React.createElement(FilterDropdown, {
+    label: "Price",
+    count: activeTiers.length,
+    isOpen: openFilter === 'Price',
+    onOpen: setOpenFilter,
+    onClear: () => setActiveTiers([])
+  }, allTiers.map(t => {
+    const active = activeTiers.includes(t);
+    return /*#__PURE__*/React.createElement("button", {
+      key: t,
+      onClick: () => toggleTier(t),
+      style: {
+        fontSize: 11,
+        padding: '4px 12px',
+        borderRadius: 20,
+        border: `1.5px solid ${active ? '#8a6e2e' : 'var(--border)'}`,
+        background: active ? 'rgba(138,110,46,0.12)' : 'transparent',
+        color: active ? '#8a6e2e' : 'var(--text-muted)',
+        cursor: 'pointer',
+        fontFamily: 'DM Sans',
+        fontWeight: active ? 600 : 400,
+        letterSpacing: '0.04em',
+        transition: 'all 0.15s',
+        whiteSpace: 'nowrap'
+      }
+    }, t, active && /*#__PURE__*/React.createElement("span", {
+      style: {
+        marginLeft: 5,
+        opacity: 0.6,
+        fontSize: 10
+      }
+    }, "\u2715"));
+  })), allBrands.length > 1 && /*#__PURE__*/React.createElement(FilterDropdown, {
     label: "Brand",
     count: activeBrands.length,
     isOpen: openFilter === 'Brand',
@@ -1129,32 +1070,75 @@ function ResultsTable({
         fontSize: 10
       }
     }, "\u2715"));
-  })), allTiers.length > 1 && /*#__PURE__*/React.createElement(FilterDropdown, {
-    label: "Price",
-    count: activeTiers.length,
-    isOpen: openFilter === 'Price',
+  })), allFormats.length > 1 && /*#__PURE__*/React.createElement(FilterDropdown, {
+    label: "Format",
+    count: activeFormats.length,
+    isOpen: openFilter === 'Format',
     onOpen: setOpenFilter,
-    onClear: () => setActiveTiers([])
-  }, allTiers.map(t => {
-    const active = activeTiers.includes(t);
+    onClear: () => setActiveFormats([])
+  }, allFormats.map(f => {
+    const active = activeFormats.includes(f);
     return /*#__PURE__*/React.createElement("button", {
-      key: t,
-      onClick: () => toggleTier(t),
+      key: f,
+      onClick: () => toggleFormat(f),
       style: {
         fontSize: 11,
         padding: '4px 12px',
         borderRadius: 20,
-        border: `1.5px solid ${active ? '#8a6e2e' : 'var(--border)'}`,
-        background: active ? 'rgba(138,110,46,0.12)' : 'transparent',
-        color: active ? '#8a6e2e' : 'var(--text-muted)',
+        border: `1.5px solid ${active ? 'var(--espresso-mid)' : 'var(--border)'}`,
+        background: active ? 'rgba(92,61,48,0.10)' : 'transparent',
+        color: active ? 'var(--espresso-mid)' : 'var(--text-muted)',
         cursor: 'pointer',
         fontFamily: 'DM Sans',
-        fontWeight: active ? 600 : 400,
+        fontWeight: active ? 500 : 400,
         letterSpacing: '0.04em',
         transition: 'all 0.15s',
         whiteSpace: 'nowrap'
       }
-    }, t, active && /*#__PURE__*/React.createElement("span", {
+    }, FORMAT_LABELS[f] || f, active && /*#__PURE__*/React.createElement("span", {
+      style: {
+        marginLeft: 5,
+        opacity: 0.6,
+        fontSize: 10
+      }
+    }, "\u2715"));
+  })), allFinishes.length > 1 && /*#__PURE__*/React.createElement(FilterDropdown, {
+    label: "Finish",
+    count: activeFinishes.length,
+    isOpen: openFilter === 'Finish',
+    onOpen: setOpenFilter,
+    onClear: () => setActiveFinishes([])
+  }, allFinishes.includes('Unlisted') && /*#__PURE__*/React.createElement("p", {
+    style: {
+      width: '100%',
+      margin: '0 0 2px',
+      fontFamily: 'Cormorant Garamond',
+      fontStyle: 'italic',
+      fontSize: 14,
+      color: 'var(--text-muted)',
+      lineHeight: 1.35
+    }
+  }, "Finish isn't listed for every product \u2014 \"Unlisted\" includes those."), allFinishes.map(f => {
+    const active = activeFinishes.includes(f);
+    const unlisted = f === 'Unlisted';
+    return /*#__PURE__*/React.createElement("button", {
+      key: f,
+      onClick: () => toggleFinish(f),
+      style: {
+        fontSize: 11,
+        padding: '4px 12px',
+        borderRadius: 20,
+        border: `1.5px ${unlisted ? 'dashed' : 'solid'} ${active ? 'var(--espresso-mid)' : 'var(--border)'}`,
+        background: active ? 'rgba(92,61,48,0.10)' : 'transparent',
+        color: active ? 'var(--espresso-mid)' : 'var(--text-muted)',
+        cursor: 'pointer',
+        fontFamily: 'DM Sans',
+        fontWeight: active ? 500 : 400,
+        letterSpacing: '0.04em',
+        transition: 'all 0.15s',
+        whiteSpace: 'nowrap'
+      }
+    }, f, active && /*#__PURE__*/React.createElement("span", {
       style: {
         marginLeft: 5,
         opacity: 0.6,
@@ -1187,7 +1171,23 @@ function ResultsTable({
         whiteSpace: 'nowrap'
       }
     }, t);
-  })), (activeBrands.length > 0 || activeTones.length > 0 || activeTiers.length > 0) && /*#__PURE__*/React.createElement("div", {
+  })), hasDiscontinued && /*#__PURE__*/React.createElement("button", {
+    onClick: () => setHideDiscontinued(v => !v),
+    style: {
+      fontSize: 11,
+      padding: '4px 12px',
+      borderRadius: 20,
+      border: `1.5px solid ${hideDiscontinued ? 'var(--espresso-mid)' : 'var(--border)'}`,
+      background: hideDiscontinued ? 'rgba(92,61,48,0.10)' : 'transparent',
+      color: hideDiscontinued ? 'var(--espresso-mid)' : 'var(--text-muted)',
+      cursor: 'pointer',
+      fontFamily: 'DM Sans',
+      fontWeight: hideDiscontinued ? 500 : 400,
+      letterSpacing: '0.04em',
+      transition: 'all 0.15s',
+      whiteSpace: 'nowrap'
+    }
+  }, "Still Made"), (activeBrands.length > 0 || activeTones.length > 0 || activeTiers.length > 0 || activeFinishes.length > 0 || activeFormats.length > 0) && /*#__PURE__*/React.createElement("div", {
     style: {
       display: 'flex',
       alignItems: 'center',
@@ -1205,6 +1205,8 @@ function ResultsTable({
       setActiveBrands([]);
       setActiveTones([]);
       setActiveTiers([]);
+      setActiveFinishes([]);
+      setActiveFormats([]);
     },
     style: {
       fontSize: 11,
@@ -3066,7 +3068,7 @@ function VibePanel({
     temps: [],
     depths: []
   });
-  const FINISHES = ['Matte', 'Satin', 'Sheer', 'Gloss', 'Cream'];
+  const FINISHES = ['Matte', 'Satin', 'Gloss', 'Sheer', 'Shimmer', 'Unlisted'];
   const TEMPS = [{
     id: 'cool',
     label: 'Cool'
@@ -3192,7 +3194,16 @@ function VibePanel({
     }
   }, "Tell us what you love \u2014 we'll quietly filter every search to shades that fit. Pick any combination, or skip a row for \"anything goes.\""), /*#__PURE__*/React.createElement(Section, {
     title: "Finish"
-  }, /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("p", {
+    style: {
+      margin: '0 0 10px',
+      fontFamily: 'Cormorant Garamond',
+      fontStyle: 'italic',
+      fontSize: 14,
+      color: 'var(--text-muted)',
+      lineHeight: 1.35
+    }
+  }, "Finish isn't listed for every product \u2014 pick \"Unlisted\" to still include those."), /*#__PURE__*/React.createElement("div", {
     style: {
       display: 'flex',
       flexWrap: 'wrap',
@@ -4542,7 +4553,7 @@ function App() {
     return 'medium';
   }
   function matchesVibe(p) {
-    if (vibe.finishes?.length && !vibe.finishes.includes(p.finish)) return false;
+    if (vibe.finishes?.length && !vibe.finishes.includes((p.finish || '').trim() || 'Unlisted')) return false;
     const lab = p.cielab || p.lab;
     if (vibe.temps?.length && !vibe.temps.includes(classifyTemp(lab))) return false;
     if (vibe.depths?.length && !vibe.depths.includes(classifyDepth(lab))) return false;
@@ -4645,7 +4656,15 @@ function App() {
       textTransform: 'uppercase',
       color: 'var(--espresso)'
     }
-  }, "Lipstick Color Finder"), /*#__PURE__*/React.createElement("div", {
+  }, "Lipstick Color Finder"), /*#__PURE__*/React.createElement("span", {
+    className: "header-product-count",
+    style: {
+      fontFamily: 'DM Sans',
+      fontSize: 11,
+      color: 'var(--text-muted)',
+      letterSpacing: '0.02em'
+    }
+  }, "\xB7 Nearly 20,000 lip products"), /*#__PURE__*/React.createElement("div", {
     style: {
       marginLeft: 'auto',
       display: 'flex',
