@@ -7,13 +7,13 @@ const _SUPABASE_KEY = 'sb_publishable_2RQlqm5VuZaTBZ7qrd5V1A_eSjFIpaB';
   const PAGE = 1000;
 
   const { count } = await client
-    .from('lipstick-data')
+    .from('lipstick-data-update')
     .select('*', { count: 'exact', head: true });
 
   const numPages = Math.ceil(count / PAGE);
   const results = await Promise.all(
     Array.from({ length: numPages }, (_, i) =>
-      client.from('lipstick-data')
+      client.from('lipstick-data-update')
         .select(COLS)
         .range(i * PAGE, (i + 1) * PAGE - 1)
     )
