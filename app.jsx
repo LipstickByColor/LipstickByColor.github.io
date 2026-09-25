@@ -1575,8 +1575,8 @@ function ListPicker({ wishlist, selectedKey, onPick }) {
   return (
     <div style={{ width:'100%', maxWidth:440, padding:'4px 0 8px' }}>
       <div style={{
-        fontFamily:'DM Sans', fontSize:11, color:'var(--text-muted)',
-        letterSpacing:'0.1em', textTransform:'uppercase', textAlign:'center',
+        fontFamily:'Cormorant Garamond', fontStyle:'italic', fontSize:21,
+        color:'var(--espresso-mid)', lineHeight:1.4, textAlign:'center',
         marginBottom:14,
       }}>
         Pick a saved shade to find similar ones

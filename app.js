@@ -2439,11 +2439,11 @@ function ListPicker({
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
-      fontFamily: 'DM Sans',
-      fontSize: 11,
-      color: 'var(--text-muted)',
-      letterSpacing: '0.1em',
-      textTransform: 'uppercase',
+      fontFamily: 'Cormorant Garamond',
+      fontStyle: 'italic',
+      fontSize: 21,
+      color: 'var(--espresso-mid)',
+      lineHeight: 1.4,
       textAlign: 'center',
       marginBottom: 14
     }
