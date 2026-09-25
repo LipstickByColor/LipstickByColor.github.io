@@ -129,7 +129,13 @@
     .app-header { padding: 14px 16px 10px; gap: 6px 8px; }
     .header-how-it-works { display: none !important; }
     .header-product-count { display: none !important; }
-    .mode-bar { padding: 0 12px; }
+    .mode-bar {
+      display: grid !important; grid-template-columns: 1fr 1fr;
+      padding: 0 12px; overflow-x: visible;
+    }
+    .mode-tab { justify-content: center; min-width: 0; }
+    /* Odd tab out (e.g. "From My List") spans the full row */
+    .mode-tab:last-child:nth-child(odd) { grid-column: 1 / -1; }
     .app-main { padding: 16px 12px 24px; }
     .app-footer { padding: 10px 16px; font-size: 10px; }
     .compare-tray-body { padding-left: 16px !important; padding-right: 16px !important; }
