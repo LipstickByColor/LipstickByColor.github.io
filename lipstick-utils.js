@@ -39,7 +39,7 @@ function deltaE(lab1, lab2) {
   );
 }
 
-// ── Wheel palette: 42 GMM cluster centers + 6 novelty entry points ────────────
+// ── Wheel palette: 43 GMM cluster centers + 3 novelty entry points ────────────
 const LIPSTICK_DATA = [
   // ── GMM clusters (data-driven from 8684 real products, hue-ordered) ─────────
   {id:1,  hex:"#a22956", name:"Deep Raspberry"},
@@ -48,6 +48,7 @@ const LIPSTICK_DATA = [
   {id:4,  hex:"#883042", name:"Dark Rose"},
   {id:5,  hex:"#92515a", name:"Rose Wine"},
   {id:6,  hex:"#d23658", name:"Azalea"},
+  {id:51, hex:"#cc4c63", name:"Cerise"},
   {id:7,  hex:"#ca7780", name:"Rosy Pink"},
   {id:8,  hex:"#b24f5c", name:"Holly Berry"},
   {id:9,  hex:"#af5f64", name:"Dusty Cedar"},
@@ -69,8 +70,10 @@ const LIPSTICK_DATA = [
   {id:25, hex:"#945c55", name:"Nude Rose"},
   {id:26, hex:"#76433d", name:"Sable"},
   {id:27, hex:"#bd1722", name:"Classic Red"},
+  {id:52, hex:"#da0f18", name:"Vermilion"},
   {id:28, hex:"#a02523", name:"Ruby"},
   {id:29, hex:"#cb8579", name:"Canyon Clay"},
+  {id:53, hex:"#d9a083", name:"Apricot"},
   {id:30, hex:"#aa6155", name:"Terracotta"},
   {id:31, hex:"#e33830", name:"Grenadine"},
   {id:50, hex:"#e02040", name:"Scarlet"},
@@ -85,10 +88,7 @@ const LIPSTICK_DATA = [
   {id:44, hex:"#4A1820", name:"Oxblood"},
   // ── Novelty entry points (hand-curated for outlier zones) ─────────────────
   {id:41, hex:"#170e12", name:"Onyx",     novelty:true}, // GMM cluster — moved here; near-neutral hue sorts poorly
-  {id:45, hex:"#2C7E94", name:"Aqua",     novelty:true},
-  {id:46, hex:"#2D6850", name:"Teal",     novelty:true},
   {id:47, hex:"#454048", name:"Charcoal", novelty:true},
-  {id:48, hex:"#C0A038", name:"Mustard",  novelty:true},
 ];
 
 // ── Convert wheel hex to CIELAB for matching ─────────────────────────────────
