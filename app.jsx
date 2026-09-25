@@ -11,6 +11,14 @@ function getProductImage(p) {
 // Product thumb: real swatch/bullet photo. The extracted color shows immediately
 // as a placeholder; the photo crossfades in once loaded.
 function ProductThumb({ product, size = 56, width, height, zoom = 1.18, fit = 'cover', radius = 10, ring = true, tint = true }) {
+  // Image URLs arrive after the catalogue (see supabase-data.js); re-render when they do
+  const [, setImagesVersion] = useState(0);
+  useEffect(() => {
+    if (window.LIPSTICK_IMAGES_READY) return;
+    const onImages = () => setImagesVersion(v => v + 1);
+    window.addEventListener('lipstick-images', onImages);
+    return () => window.removeEventListener('lipstick-images', onImages);
+  }, []);
   const url = getProductImage(product);
   const [loaded, setLoaded] = useState(false);
   const [failed, setFailed] = useState(false);
@@ -2583,7 +2591,52 @@ function Landing({ onPick }) {
 }
 
 // ── Main App ──────────────────────────────────────────────────────────────────
+// Shown where results or the dupe search would be while the catalogue is still
+// arriving (supabase-data.js loads it in parallel with the app).
+function CatalogueLoading() {
+  return (
+    <div role="status" style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:14, padding:'48px 16px', textAlign:'center' }}>
+      <div className="preload-spinner" />
+      <p style={{ fontFamily:'Cormorant Garamond, serif', fontStyle:'italic', fontSize:18, color:'var(--text-muted)' }}>
+        Loading nearly 20,000 shades…
+      </p>
+    </div>
+  );
+}
+
+// Replaces the whole app when the catalogue can't be loaded, so visitors don't
+// get a working-looking UI where every search says "no matches".
+function DataLoadError() {
+  return (
+    <div style={{ minHeight:'100vh', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:18, padding:24, textAlign:'center' }}>
+      <p style={{ fontFamily:'Cormorant Garamond, serif', fontStyle:'italic', fontSize:28, color:'var(--espresso)' }}>
+        We couldn't load the lipstick catalogue.
+      </p>
+      <p style={{ fontSize:14, color:'var(--text-muted)', maxWidth:380, lineHeight:1.6 }}>
+        This is usually a brief connection hiccup. Please try again in a moment.
+      </p>
+      <button onClick={() => location.reload()} style={{
+        padding:'10px 22px', borderRadius:24, border:'1.5px solid var(--border)', background:'#fff',
+        color:'var(--espresso)', cursor:'pointer', fontFamily:'DM Sans, sans-serif', fontSize:12,
+        fontWeight:500, letterSpacing:'0.06em', textTransform:'uppercase',
+      }}>
+        Refresh
+      </button>
+    </div>
+  );
+}
+
 function App() {
+  // 'loading' | 'ready' | 'error' — see supabase-data.js
+  const [dataStatus, setDataStatus] = useState(() => window.LIPSTICK_DATA_STATUS);
+  useEffect(() => {
+    const onData = () => setDataStatus(window.LIPSTICK_DATA_STATUS);
+    window.addEventListener('lipstick-data', onData);
+    onData(); // in case it settled between the first render and this effect
+    return () => window.removeEventListener('lipstick-data', onData);
+  }, []);
+  const dataReady = dataStatus === 'ready';
+
   const [selectedColor, setSelectedColor] = useState(null);
   const [hoveredId, setHoveredId] = useState(null);
   const resultsRef = React.useRef(null);
@@ -2741,7 +2794,7 @@ function App() {
       hasMatch: i === base.anchorIdx || nearestProductDistance(step.hex) <= NO_MATCH_DELTA_E,
     }));
     return { ...base, ramp };
-  }, [selectedColor?.id, selectedColor?.hex, mode]);
+  }, [selectedColor?.id, selectedColor?.hex, mode, dataReady]);
   React.useEffect(() => {
     setToneIdx(toneRamp ? toneRamp.anchorIdx : null);
   }, [toneRamp]);
@@ -2768,7 +2821,7 @@ function App() {
   }, [effectiveColor?.id, effectiveColor?.hex]);
 
   const matches = React.useMemo(() => {
-    if (!selectedColor) return [];
+    if (!selectedColor || !dataReady) return [];
     const hex = toneRamp && toneIdx != null && !onAnchor ? toneRamp.ramp[toneIdx].hex : selectedColor.hex;
     const candidates = getClosestColors(hex, 500)
       .filter(p => !selectedColor.sourceKey || `${p.brand}|${p.shade}` !== selectedColor.sourceKey)
@@ -2776,7 +2829,7 @@ function App() {
     const bestDist = candidates[0]?.distance ?? 0;
     const inBand = candidates.filter(p => p.distance <= bestDist + tweaks.maxDeltaE);
     return inBand.length >= 5 ? inBand : candidates.slice(0, 5);
-  }, [selectedColor, toneRamp, toneIdx, tweaks.maxDeltaE, matchesVibe]);
+  }, [selectedColor, toneRamp, toneIdx, tweaks.maxDeltaE, matchesVibe, dataReady]);
   // matches: array of real products with .hex .brand .product .shade .finish .retailer .distance
   function togglePin(product) {
     setPinnedItems(prev => {
@@ -2790,6 +2843,8 @@ function App() {
   }
 
   // Color wheel is now the only palette style
+
+  if (dataStatus === 'error') return <DataLoadError />;
 
   return (
     <div style={{ minHeight:'100vh', display:'flex', flexDirection:'column', position:'relative', zIndex:1 }}>
@@ -2914,6 +2969,8 @@ function App() {
             <PhotoPicker sampledHex={photoHex} onColor={setPhotoHex} />
           ) : mode === 'hex' ? (
             <HexPicker sampledHex={hexHex} onColor={setHexHex} />
+          ) : mode === 'dupe' && !dataReady ? (
+            <CatalogueLoading />
           ) : mode === 'dupe' ? (
             <DupeFinder
               product={dupeProduct}
@@ -2985,7 +3042,7 @@ function App() {
 
         {/* Right: Results */}
         <div className="results-col" ref={resultsRef}>
-          <ResultsTable selectedColor={effectiveColor} matches={matches} totalProducts={REAL_PRODUCTS.length} pinnedItems={pinnedItems} togglePin={togglePin} wishlist={wishlist} toggleWishlist={toggleWishlist} toneRamp={toneRamp} toneIdx={toneIdx} setToneIdx={handleToneIdxChange} />
+          {selectedColor && !dataReady ? <CatalogueLoading /> : <ResultsTable selectedColor={effectiveColor} matches={matches} totalProducts={REAL_PRODUCTS.length} pinnedItems={pinnedItems} togglePin={togglePin} wishlist={wishlist} toggleWishlist={toggleWishlist} toneRamp={toneRamp} toneIdx={toneIdx} setToneIdx={handleToneIdxChange} />}
         </div>
       </main>
       </>

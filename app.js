@@ -25,6 +25,14 @@ function ProductThumb({
   ring = true,
   tint = true
 }) {
+  // Image URLs arrive after the catalogue (see supabase-data.js); re-render when they do
+  const [, setImagesVersion] = useState(0);
+  useEffect(() => {
+    if (window.LIPSTICK_IMAGES_READY) return;
+    const onImages = () => setImagesVersion(v => v + 1);
+    window.addEventListener('lipstick-images', onImages);
+    return () => window.removeEventListener('lipstick-images', onImages);
+  }, []);
   const url = getProductImage(product);
   const [loaded, setLoaded] = useState(false);
   const [failed, setFailed] = useState(false);
@@ -4377,7 +4385,86 @@ function Landing({
 }
 
 // ── Main App ──────────────────────────────────────────────────────────────────
+// Shown where results or the dupe search would be while the catalogue is still
+// arriving (supabase-data.js loads it in parallel with the app).
+function CatalogueLoading() {
+  return /*#__PURE__*/React.createElement("div", {
+    role: "status",
+    style: {
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      gap: 14,
+      padding: '48px 16px',
+      textAlign: 'center'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "preload-spinner"
+  }), /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontFamily: 'Cormorant Garamond, serif',
+      fontStyle: 'italic',
+      fontSize: 18,
+      color: 'var(--text-muted)'
+    }
+  }, "Loading nearly 20,000 shades\u2026"));
+}
+
+// Replaces the whole app when the catalogue can't be loaded, so visitors don't
+// get a working-looking UI where every search says "no matches".
+function DataLoadError() {
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      minHeight: '100vh',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 18,
+      padding: 24,
+      textAlign: 'center'
+    }
+  }, /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontFamily: 'Cormorant Garamond, serif',
+      fontStyle: 'italic',
+      fontSize: 28,
+      color: 'var(--espresso)'
+    }
+  }, "We couldn't load the lipstick catalogue."), /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontSize: 14,
+      color: 'var(--text-muted)',
+      maxWidth: 380,
+      lineHeight: 1.6
+    }
+  }, "This is usually a brief connection hiccup. Please try again in a moment."), /*#__PURE__*/React.createElement("button", {
+    onClick: () => location.reload(),
+    style: {
+      padding: '10px 22px',
+      borderRadius: 24,
+      border: '1.5px solid var(--border)',
+      background: '#fff',
+      color: 'var(--espresso)',
+      cursor: 'pointer',
+      fontFamily: 'DM Sans, sans-serif',
+      fontSize: 12,
+      fontWeight: 500,
+      letterSpacing: '0.06em',
+      textTransform: 'uppercase'
+    }
+  }, "Refresh"));
+}
 function App() {
+  // 'loading' | 'ready' | 'error' — see supabase-data.js
+  const [dataStatus, setDataStatus] = useState(() => window.LIPSTICK_DATA_STATUS);
+  useEffect(() => {
+    const onData = () => setDataStatus(window.LIPSTICK_DATA_STATUS);
+    window.addEventListener('lipstick-data', onData);
+    onData(); // in case it settled between the first render and this effect
+    return () => window.removeEventListener('lipstick-data', onData);
+  }, []);
+  const dataReady = dataStatus === 'ready';
   const [selectedColor, setSelectedColor] = useState(null);
   const [hoveredId, setHoveredId] = useState(null);
   const resultsRef = React.useRef(null);
@@ -4612,7 +4699,7 @@ function App() {
       ...base,
       ramp
     };
-  }, [selectedColor?.id, selectedColor?.hex, mode]);
+  }, [selectedColor?.id, selectedColor?.hex, mode, dataReady]);
   React.useEffect(() => {
     setToneIdx(toneRamp ? toneRamp.anchorIdx : null);
   }, [toneRamp]);
@@ -4647,13 +4734,13 @@ function App() {
     return () => clearTimeout(timer);
   }, [effectiveColor?.id, effectiveColor?.hex]);
   const matches = React.useMemo(() => {
-    if (!selectedColor) return [];
+    if (!selectedColor || !dataReady) return [];
     const hex = toneRamp && toneIdx != null && !onAnchor ? toneRamp.ramp[toneIdx].hex : selectedColor.hex;
     const candidates = getClosestColors(hex, 500).filter(p => !selectedColor.sourceKey || `${p.brand}|${p.shade}` !== selectedColor.sourceKey).filter(matchesVibe);
     const bestDist = candidates[0]?.distance ?? 0;
     const inBand = candidates.filter(p => p.distance <= bestDist + tweaks.maxDeltaE);
     return inBand.length >= 5 ? inBand : candidates.slice(0, 5);
-  }, [selectedColor, toneRamp, toneIdx, tweaks.maxDeltaE, matchesVibe]);
+  }, [selectedColor, toneRamp, toneIdx, tweaks.maxDeltaE, matchesVibe, dataReady]);
   // matches: array of real products with .hex .brand .product .shade .finish .retailer .distance
   function togglePin(product) {
     setPinnedItems(prev => {
@@ -4671,6 +4758,7 @@ function App() {
 
   // Color wheel is now the only palette style
 
+  if (dataStatus === 'error') return /*#__PURE__*/React.createElement(DataLoadError, null);
   return /*#__PURE__*/React.createElement("div", {
     style: {
       minHeight: '100vh',
@@ -4887,7 +4975,7 @@ function App() {
   }) : mode === 'hex' ? /*#__PURE__*/React.createElement(HexPicker, {
     sampledHex: hexHex,
     onColor: setHexHex
-  }) : mode === 'dupe' ? /*#__PURE__*/React.createElement(DupeFinder, {
+  }) : mode === 'dupe' && !dataReady ? /*#__PURE__*/React.createElement(CatalogueLoading, null) : mode === 'dupe' ? /*#__PURE__*/React.createElement(DupeFinder, {
     product: dupeProduct,
     onSelect: setDupeProduct,
     onUsePhoto: () => {
@@ -4981,7 +5069,7 @@ function App() {
   }, "Your matches will appear here"))), /*#__PURE__*/React.createElement("div", {
     className: "results-col",
     ref: resultsRef
-  }, /*#__PURE__*/React.createElement(ResultsTable, {
+  }, selectedColor && !dataReady ? /*#__PURE__*/React.createElement(CatalogueLoading, null) : /*#__PURE__*/React.createElement(ResultsTable, {
     selectedColor: effectiveColor,
     matches: matches,
     totalProducts: REAL_PRODUCTS.length,
