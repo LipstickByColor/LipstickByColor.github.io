@@ -1190,7 +1190,7 @@
           packaging or multi-product shots, are flagged as unclassifiable and skip extraction.
         </p>
         <div class="pmetrics">
-          <span class="pmetric"><span class="v">87%</span><span class="l">accuracy</span></span>
+          <span class="pmetric"><span class="v">88%</span><span class="l">accuracy</span></span>
           <span class="pmetric"><span class="l">CNN · ResNet-18</span></span>
           <span class="pmetric"><span class="l">PyTorch</span></span>
         </div>
@@ -1201,10 +1201,14 @@
         <div class="ptitle">Segment</div>
         <p class="pdesc">
           Four segmentation models, one per image-type family, identify the color region — the bullet
-          tip, the wand — isolating the actual product color from packaging and background.
+          tip, the wand, lips on a model — isolating the actual product color from packaging and background.
+          Each is scored by IoU (intersection over union), the overlap between the predicted
+          mask and a hand-drawn one, where 1.0 is a perfect match.
         </p>
         <div class="pmetrics">
+          <span class="pmetric"><span class="v">0.70–0.88</span><span class="l">validation IoU</span></span>
           <span class="pmetric"><span class="l">CNN · U-Net</span></span>
+          <span class="pmetric"><span class="l">Transfer learning</span></span>
           <span class="pmetric"><span class="l">PyTorch</span></span>
         </div>
       </div>

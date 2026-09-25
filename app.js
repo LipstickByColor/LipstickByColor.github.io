@@ -514,10 +514,10 @@ function ColorWheel({
   }, /*#__PURE__*/React.createElement("svg", {
     viewBox: `0 0 ${SIZE} ${SIZE}`,
     width: "100%",
-    height: "auto",
     style: {
       filter: 'drop-shadow(0 6px 24px rgba(42,26,20,0.14))',
       maxWidth: SIZE,
+      height: 'auto',
       display: 'block'
     }
   }, /*#__PURE__*/React.createElement("circle", {
@@ -793,6 +793,21 @@ function ResultsTable({
   };
   const allFormats = FORMAT_ORDER.filter(f => matches.some(p => p.format === f));
   const hasDiscontinued = matches.some(p => p.discontinued);
+  const filtered = matches.filter(p => (activeBrands.length === 0 || activeBrands.includes(p.brand)) && (activeTones.length === 0 || activeTones.includes(toneOf(p))) && (activeTiers.length === 0 || activeTiers.includes(tierOf(p))) && (activeFinishes.length === 0 || activeFinishes.includes(finishOf(p))) && (activeFormats.length === 0 || activeFormats.includes(p.format)) && (!hideDiscontinued || !p.discontinued));
+
+  // Fire once each time a filter combination empties the results
+  const filtersEmptied = matches.length > 0 && filtered.length === 0;
+  React.useEffect(() => {
+    if (!filtersEmptied) return;
+    window.gtag?.('event', 'filter_no_results', {
+      brand: activeBrands.join(','),
+      undertone: activeTones.join(','),
+      price_tier: activeTiers.join(','),
+      finish: activeFinishes.join(','),
+      format: activeFormats.join(','),
+      still_made: hideDiscontinued
+    });
+  }, [filtersEmptied]);
   if (!selectedColor) return /*#__PURE__*/React.createElement("div", {
     className: "results-empty-state",
     style: {
@@ -851,7 +866,6 @@ function ResultsTable({
     });
     setActiveFormats(prev => prev.includes(f) ? prev.filter(x => x !== f) : [...prev, f]);
   }
-  const filtered = matches.filter(p => (activeBrands.length === 0 || activeBrands.includes(p.brand)) && (activeTones.length === 0 || activeTones.includes(toneOf(p))) && (activeTiers.length === 0 || activeTiers.includes(tierOf(p))) && (activeFinishes.length === 0 || activeFinishes.includes(finishOf(p))) && (activeFormats.length === 0 || activeFormats.includes(p.format)) && (!hideDiscontinued || !p.discontinued));
   return /*#__PURE__*/React.createElement("div", {
     style: {
       flex: 1,
@@ -1172,7 +1186,13 @@ function ResultsTable({
       }
     }, t);
   })), hasDiscontinued && /*#__PURE__*/React.createElement("button", {
-    onClick: () => setHideDiscontinued(v => !v),
+    onClick: () => {
+      window.gtag?.('event', 'apply_filter', {
+        filter_type: 'still_made',
+        filter_value: hideDiscontinued ? 'include_discontinued' : 'still_made_only'
+      });
+      setHideDiscontinued(v => !v);
+    },
     style: {
       fontSize: 11,
       padding: '4px 12px',
@@ -1202,6 +1222,9 @@ function ResultsTable({
     }
   }, filtered.length, " of ", matches.length, " shown"), /*#__PURE__*/React.createElement("button", {
     onClick: () => {
+      window.gtag?.('event', 'clear_filters', {
+        filter_count: activeBrands.length + activeTones.length + activeTiers.length + activeFinishes.length + activeFormats.length
+      });
       setActiveBrands([]);
       setActiveTones([]);
       setActiveTiers([]);
@@ -1368,13 +1391,21 @@ const SITE_URL = 'lipstickbycolor.github.io';
 // ilmakiage, …) serve product photos without an Access-Control-Allow-Origin
 // header, so they can't be drawn onto an exportable canvas directly. wsrv.nl
 // re-serves the same image with permissive CORS.
-function corsProxy(url) {
-  return 'https://wsrv.nl/?url=' + encodeURIComponent(url) + '&output=jpg';
+// CORS-enabled mirrors to try when a host doesn't send CORS headers itself.
+// wsrv.nl covers most hosts; Sephora blocks it, but i0.wp.com (Jetpack's image
+// CDN) can fetch Sephora. It takes a bare host+path, without the source query.
+function corsProxies(url) {
+  const proxies = ['https://wsrv.nl/?url=' + encodeURIComponent(url) + '&output=jpg'];
+  try {
+    const u = new URL(url);
+    proxies.push('https://i0.wp.com/' + u.host + u.pathname);
+  } catch {}
+  return proxies;
 }
 
 // Load one image cross-origin so it can be painted onto a canvas without
-// tainting it. Tries the source directly first, then falls back to the proxy;
-// resolves to null (never rejects) if neither works or it takes too long.
+// tainting it. Tries the source directly first, then each proxy in turn;
+// resolves to null (never rejects) if none work or it takes too long.
 function loadCorsImage(url) {
   return new Promise(resolve => {
     if (!url) {
@@ -1384,8 +1415,8 @@ function loadCorsImage(url) {
     const img = new Image();
     img.crossOrigin = 'anonymous';
     img.decoding = 'async';
-    let settled = false,
-      triedProxy = false;
+    const fallbacks = corsProxies(url);
+    let settled = false;
     const done = v => {
       if (!settled) {
         settled = true;
@@ -1393,15 +1424,14 @@ function loadCorsImage(url) {
         resolve(v);
       }
     };
-    const timer = setTimeout(() => done(null), 5000);
+    const timer = setTimeout(() => done(null), 8000);
     img.onload = () => done(img);
     img.onerror = () => {
-      if (triedProxy) {
+      if (!fallbacks.length) {
         done(null);
         return;
       }
-      triedProxy = true;
-      img.src = corsProxy(url);
+      img.src = fallbacks.shift();
     };
     img.src = url;
   });
@@ -1675,6 +1705,10 @@ function ShareImageModal({
       a.download = `my-lipstick-shortlist-${new Date().toISOString().slice(0, 10)}.png`;
       a.click();
       URL.revokeObjectURL(url);
+      window.gtag?.('event', 'share_wishlist', {
+        method: 'image_save',
+        item_count: wishlist.length
+      });
       setStatus('Saved!');
       setTimeout(() => setStatus(null), 2200);
     }, 'image/png');
@@ -1692,6 +1726,10 @@ function ShareImageModal({
       await navigator.clipboard.write([new window.ClipboardItem({
         'image/png': blob
       })]);
+      window.gtag?.('event', 'share_wishlist', {
+        method: 'image_copy',
+        item_count: wishlist.length
+      });
       setStatus('Image copied!');
       setTimeout(() => setStatus(null), 2200);
     } catch (e) {
@@ -4478,10 +4516,12 @@ function App() {
         name: 'From hex',
         hex: hexHex
       });
-      window.gtag?.('event', 'select_color', {
+      // The native color picker fires on every drag step; only log where it settles
+      const t = setTimeout(() => window.gtag?.('event', 'select_color', {
         method: 'hex',
         hex: hexHex
-      });
+      }), 800);
+      return () => clearTimeout(t);
     } else {
       setSelectedColor(null);
     }
