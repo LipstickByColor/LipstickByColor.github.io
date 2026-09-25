@@ -39,7 +39,7 @@ function deltaE(lab1, lab2) {
   );
 }
 
-// ── Wheel palette: 43 GMM cluster centers + 3 novelty entry points ────────────
+// ── Wheel palette: 44 GMM cluster centers + 2 novelty entry points ────────────
 const LIPSTICK_DATA = [
   // ── GMM clusters (data-driven from 8684 real products, hue-ordered) ─────────
   {id:1,  hex:"#a22956", name:"Deep Raspberry"},
@@ -69,6 +69,7 @@ const LIPSTICK_DATA = [
   {id:34, hex:"#c47159", name:"Carnelian"},
   {id:25, hex:"#945c55", name:"Nude Rose"},
   {id:26, hex:"#76433d", name:"Sable"},
+  {id:54, hex:"#50332c", name:"Espresso"},
   {id:27, hex:"#bd1722", name:"Classic Red"},
   {id:52, hex:"#da0f18", name:"Vermilion"},
   {id:28, hex:"#a02523", name:"Ruby"},
@@ -79,7 +80,6 @@ const LIPSTICK_DATA = [
   {id:50, hex:"#e02040", name:"Scarlet"},
   {id:32, hex:"#a34233", name:"Cayenne"},
   {id:33, hex:"#c48c7f", name:"Rose Dawn"},
-  {id:38, hex:"#2f3760", name:"Midnight", novelty:true},
   {id:39, hex:"#dc5391", name:"Magenta"},
   {id:40, hex:"#a3487a", name:"Dahlia Mauve"},
   {id:49, hex:"#F89FB5", name:"Flamingo"},
