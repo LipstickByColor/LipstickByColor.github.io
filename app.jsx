@@ -2584,16 +2584,16 @@ function DupeFinder({ product, onSelect, onUsePhoto }) {
           </p>
           <div style={{ display:'flex', flexWrap:'wrap', gap:8, justifyContent:'center' }}>
             {popularProducts.map((p, i) => (
-              <button key={i} onClick={() => pickPopular(p)} style={{
+              <button key={i} className="popular-pick" onClick={() => pickPopular(p)} style={{
                 display:'flex', alignItems:'center', gap:8,
                 padding:'7px 12px 7px 8px', background:'#fff', borderRadius:40,
                 border:'1px solid var(--border)', boxShadow:'0 2px 8px var(--shadow)',
                 cursor:'pointer',
               }}>
-                <span style={{ width:20, height:20, borderRadius:'50%', background:p.hex, flexShrink:0, boxShadow:`0 1px 4px ${p.hex}66`, border:'1px solid rgba(42,26,20,0.08)' }} />
+                <span className="popular-pick-swatch" style={{ width:20, height:20, borderRadius:'50%', background:p.hex, flexShrink:0, boxShadow:`0 1px 4px ${p.hex}66`, border:'1px solid rgba(42,26,20,0.08)' }} />
                 <span style={{ display:'flex', flexDirection:'column', textAlign:'left' }}>
-                  <span style={{ fontFamily:'Cormorant Garamond', fontStyle:'italic', fontSize:13, color:'var(--espresso)', lineHeight:1.15 }}>{p.shade}</span>
-                  <span style={{ fontFamily:'DM Sans', fontSize:TYPE.micro, color:'var(--text-muted)', textTransform:'capitalize' }}>{p.brand}</span>
+                  <span className="popular-pick-shade" style={{ fontFamily:'Cormorant Garamond', fontStyle:'italic', fontSize:TYPE.body, color:'var(--espresso)', lineHeight:1.15 }}>{p.shade}</span>
+                  <span className="popular-pick-brand" style={{ fontFamily:'DM Sans', fontSize:TYPE.micro, color:'var(--text-muted)', textTransform:'capitalize' }}>{p.brand}</span>
                 </span>
               </button>
             ))}

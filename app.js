@@ -4237,6 +4237,7 @@ function DupeFinder({
     }
   }, popularProducts.map((p, i) => /*#__PURE__*/React.createElement("button", {
     key: i,
+    className: "popular-pick",
     onClick: () => pickPopular(p),
     style: {
       display: 'flex',
@@ -4250,6 +4251,7 @@ function DupeFinder({
       cursor: 'pointer'
     }
   }, /*#__PURE__*/React.createElement("span", {
+    className: "popular-pick-swatch",
     style: {
       width: 20,
       height: 20,
@@ -4266,14 +4268,16 @@ function DupeFinder({
       textAlign: 'left'
     }
   }, /*#__PURE__*/React.createElement("span", {
+    className: "popular-pick-shade",
     style: {
       fontFamily: 'Cormorant Garamond',
       fontStyle: 'italic',
-      fontSize: 13,
+      fontSize: TYPE.body,
       color: 'var(--espresso)',
       lineHeight: 1.15
     }
   }, p.shade), /*#__PURE__*/React.createElement("span", {
+    className: "popular-pick-brand",
     style: {
       fontFamily: 'DM Sans',
       fontSize: TYPE.micro,
