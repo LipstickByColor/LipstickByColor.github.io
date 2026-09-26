@@ -1846,7 +1846,7 @@ function ListPicker({ wishlist, selectedKey, onPick }) {
 }
 
 // ── Photo Picker ───────────────────────────────────────────────────────────
-// Upload an image, click anywhere on it to sample a color (averaged over an
+// Upload an image, click anywhere on it to sample a color (trimmed median over an
 // adjustable radius). The sampled hex is passed up via onColor.
 // The photo canvas is read as Display P3 so iPhone photos keep their full
 // gamut, but hexes (and hexToLab) are sRGB — convert before matching, or
@@ -1896,10 +1896,24 @@ function PhotoPicker({ sampledHex, onColor }) {
     const h  = Math.min(canvas.height - y0, r * 2);
     if (w <= 0 || h <= 0) return;
     const data = ctx.getImageData(x0, y0, w, h).data;
-    let R=0,G=0,B=0,n=0;
-    for (let i = 0; i < data.length; i += 4) { R+=data[i]; G+=data[i+1]; B+=data[i+2]; n++; }
-    const hex = '#' + p3ToSrgb([R/n, G/n, B/n]).map(v => v.toString(16).padStart(2,'0')).join('');
-    onColor(hex);
+
+    // A plain average blends in shine, lip-line shadows, and skin at the edges.
+    // Instead: keep pixels inside the circle, convert to LAB, drop the lightest
+    // and darkest 15% (highlights / creases), and take the per-channel median.
+    const labs = [];
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+      const dx = x0 + x + 0.5 - px, dy = y0 + y + 0.5 - py;
+      if (dx*dx + dy*dy > r*r) continue;
+      const i = (y * w + x) * 4;
+      const hex = '#' + p3ToSrgb([data[i], data[i+1], data[i+2]]).map(v => v.toString(16).padStart(2,'0')).join('');
+      labs.push(hexToLab(hex));
+    }
+    if (!labs.length) return;
+    labs.sort((p, q) => p[0] - q[0]);
+    const trim = Math.floor(labs.length * 0.15);
+    const kept = labs.slice(trim, labs.length - trim);
+    const median = ch => { const v = kept.map(l => l[ch]).sort((p, q) => p - q); const m = v.length >> 1; return v.length % 2 ? v[m] : (v[m-1] + v[m]) / 2; };
+    onColor(labToHex(median(0), median(1), median(2)));
   }
 
   function onImgClick(e) {
