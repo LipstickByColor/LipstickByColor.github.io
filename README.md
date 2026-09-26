@@ -27,7 +27,11 @@ The ML pipeline behind the color clustering and product data is described in the
 
 ## UX Improvements
 
-**In-store camera photos were getting darker on iPhone.** When a user takes a photo directly in the app (common when color-matching at a store), the image appeared darker than reality, making accurate color matching harder. The cause was a color space mismatch: iPhone cameras shoot in Display P3 (wide gamut), but the HTML canvas used for pixel sampling defaulted to sRGB. Drawing a P3 image onto an sRGB canvas silently clips the color data, shifting the image darker. Fixed by setting `colorSpace: 'display-p3'` on the canvas context, which also improves the accuracy of the sampled hex color.
+**In-store photos gave the wrong colors.** Taking a photo in the store is a common way to match a lipstick, but the colors picked from iPhone photos came out darker or duller than the real thing. iPhones capture a wider range of color than the site was reading, so some color was lost. The site now keeps the full color from the photo and translates it the same way the product colors are stored, so they're compared fairly. It also ignores shine and shadows in the spot you tap, so the pick reflects the lipstick's true color.
+
+**The site was slow to open.** Visitors had to wait for every product to download before they could do anything. Now the site opens right away and the products load while you browse. Product photos come last, and each result shows its shade color until its photo arrives. If the products can't load, the site says so and asks you to refresh, instead of looking normal but finding no matches.
+
+**Lighter and deeper options could lead nowhere.** Each shade offers lighter and deeper versions to explore, but for some very light or very deep colors, no lipstick came close. Picking one of those showed poor matches. These options are now grayed out, so every option you can pick leads to real matches.
 
 ---
 
