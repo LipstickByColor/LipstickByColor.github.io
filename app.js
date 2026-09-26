@@ -3121,10 +3121,14 @@ function HexPicker({
   sampledHex,
   onColor
 }) {
-  const [draft, setDraft] = React.useState(sampledHex || '#C04E62');
+  // Starts empty like the other modes — nothing is searched until the user picks.
+  const [draft, setDraft] = React.useState(sampledHex || '');
   const colorInputRef = React.useRef(null);
+
+  // Don't overwrite what the user is typing when it already resolves to this
+  // color — otherwise "C04" (valid shorthand) snaps to "CC0044" mid-typing.
   React.useEffect(() => {
-    if (sampledHex && sampledHex !== draft) setDraft(sampledHex);
+    if (sampledHex && normalize(draft) !== sampledHex.toLowerCase()) setDraft(sampledHex);
   }, [sampledHex]);
   function normalize(v) {
     if (!v) return null;
@@ -3136,7 +3140,7 @@ function HexPicker({
   function handleTextChange(v) {
     setDraft(v);
     const hex = normalize(v);
-    if (hex) onColor(hex);
+    if (hex) onColor(hex);else if (!v.trim()) onColor(null);
   }
   function handlePickerChange(v) {
     setDraft(v);
@@ -3167,6 +3171,7 @@ function HexPicker({
     hex: '#2D6850',
     label: 'Teal'
   }];
+  const empty = !draft.trim();
   const valid = !!normalize(draft);
   const previewHex = valid ? normalize(draft) : '#FAF6F1';
   return /*#__PURE__*/React.createElement("div", {
@@ -3192,18 +3197,22 @@ function HexPicker({
   }, "Pick any color you love or paste a hex, and we'll find the lipsticks closest to it."), /*#__PURE__*/React.createElement("div", {
     style: {
       position: 'relative',
-      width: 200,
-      height: 200,
+      width: 192,
+      height: 192,
+      margin: 4,
       borderRadius: '50%',
       background: previewHex,
-      boxShadow: valid ? `0 6px 28px ${previewHex}80, inset 0 -4px 12px rgba(0,0,0,0.10)` : '0 4px 16px rgba(42,26,20,0.10)',
-      border: '4px solid #fff',
-      outline: '1.5px solid var(--border)',
+      // White ring + hairline drawn as box-shadows instead of border + outline:
+      // Chrome on Android anti-aliases a rounded border over its own background
+      // and a fractional outline separately, leaving visible seams/lines.
+      boxShadow: ['inset 0 -4px 12px rgba(0,0,0,0.10)', '0 0 0 4px #fff', '0 0 0 5.5px var(--border)', valid ? `0 6px 28px ${previewHex}80` : '0 4px 16px rgba(42,26,20,0.10)'].join(', '),
+      overflow: 'hidden',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
       transition: 'background 0.2s, box-shadow 0.2s',
-      cursor: 'pointer'
+      cursor: 'pointer',
+      WebkitTapHighlightColor: 'transparent'
     }
   }, !valid && /*#__PURE__*/React.createElement("span", {
     style: {
@@ -3213,7 +3222,7 @@ function HexPicker({
       fontSize: 18,
       pointerEvents: 'none'
     }
-  }, "Invalid hex"), /*#__PURE__*/React.createElement("label", {
+  }, empty ? 'Tap to pick a color' : 'Invalid hex'), /*#__PURE__*/React.createElement("label", {
     htmlFor: "hex-color-picker",
     style: {
       position: 'absolute',
@@ -3235,7 +3244,10 @@ function HexPicker({
       opacity: 0,
       border: 'none',
       padding: 0,
-      cursor: 'pointer'
+      borderRadius: '50%',
+      cursor: 'pointer',
+      WebkitAppearance: 'none',
+      appearance: 'none'
     },
     "aria-label": "Pick a color"
   })), /*#__PURE__*/React.createElement("div", {
@@ -3245,7 +3257,7 @@ function HexPicker({
       gap: 6,
       background: '#fff',
       borderRadius: 10,
-      border: `1.5px solid ${valid ? 'var(--border)' : 'var(--blush)'}`,
+      border: `1.5px solid ${valid || empty ? 'var(--border)' : 'var(--blush)'}`,
       padding: '6px 10px',
       boxShadow: '0 2px 8px var(--shadow)',
       minWidth: 180

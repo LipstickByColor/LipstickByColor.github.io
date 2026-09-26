@@ -2035,11 +2035,14 @@ function PhotoPicker({ sampledHex, onColor }) {
 // Pick or paste a hex code directly. Useful for matching a specific color
 // (an outfit, a paint chip, a screen color) when the wheel doesn't cover it.
 function HexPicker({ sampledHex, onColor }) {
-  const [draft, setDraft] = React.useState(sampledHex || '#C04E62');
+  // Starts empty like the other modes — nothing is searched until the user picks.
+  const [draft, setDraft] = React.useState(sampledHex || '');
   const colorInputRef = React.useRef(null);
 
+  // Don't overwrite what the user is typing when it already resolves to this
+  // color — otherwise "C04" (valid shorthand) snaps to "CC0044" mid-typing.
   React.useEffect(() => {
-    if (sampledHex && sampledHex !== draft) setDraft(sampledHex);
+    if (sampledHex && normalize(draft) !== sampledHex.toLowerCase()) setDraft(sampledHex);
   }, [sampledHex]);
 
   function normalize(v) {
@@ -2054,6 +2057,7 @@ function HexPicker({ sampledHex, onColor }) {
     setDraft(v);
     const hex = normalize(v);
     if (hex) onColor(hex);
+    else if (!v.trim()) onColor(null);
   }
 
   function handlePickerChange(v) {
@@ -2072,6 +2076,7 @@ function HexPicker({ sampledHex, onColor }) {
     {hex:'#2D6850', label:'Teal'},
   ];
 
+  const empty = !draft.trim();
   const valid = !!normalize(draft);
   const previewHex = valid ? normalize(draft) : '#FAF6F1';
 
@@ -2091,20 +2096,26 @@ function HexPicker({ sampledHex, onColor }) {
       {/* Big preview swatch */}
       <div style={{
         position:'relative',
-        width:200, height:200, borderRadius:'50%',
+        width:192, height:192, margin:4, borderRadius:'50%',
         background: previewHex,
-        boxShadow: valid
-          ? `0 6px 28px ${previewHex}80, inset 0 -4px 12px rgba(0,0,0,0.10)`
-          : '0 4px 16px rgba(42,26,20,0.10)',
-        border:'4px solid #fff',
-        outline:'1.5px solid var(--border)',
+        // White ring + hairline drawn as box-shadows instead of border + outline:
+        // Chrome on Android anti-aliases a rounded border over its own background
+        // and a fractional outline separately, leaving visible seams/lines.
+        boxShadow: [
+          'inset 0 -4px 12px rgba(0,0,0,0.10)',
+          '0 0 0 4px #fff',
+          '0 0 0 5.5px var(--border)',
+          valid ? `0 6px 28px ${previewHex}80` : '0 4px 16px rgba(42,26,20,0.10)',
+        ].join(', '),
+        overflow:'hidden',
         display:'flex', alignItems:'center', justifyContent:'center',
         transition:'background 0.2s, box-shadow 0.2s',
         cursor: 'pointer',
+        WebkitTapHighlightColor:'transparent',
       }}>
         {!valid && (
           <span style={{ fontFamily:'Cormorant Garamond', fontStyle:'italic', color:'var(--text-muted)', fontSize:18, pointerEvents:'none' }}>
-            Invalid hex
+            {empty ? 'Tap to pick a color' : 'Invalid hex'}
           </span>
         )}
         {/* Label overlay — most reliable cross-platform way to trigger the color picker */}
@@ -2115,7 +2126,7 @@ function HexPicker({ sampledHex, onColor }) {
           type="color"
           value={valid ? previewHex : '#C04E62'}
           onChange={e => handlePickerChange(e.target.value)}
-          style={{ position:'absolute', inset:0, width:'100%', height:'100%', opacity:0, border:'none', padding:0, cursor:'pointer' }}
+          style={{ position:'absolute', inset:0, width:'100%', height:'100%', opacity:0, border:'none', padding:0, borderRadius:'50%', cursor:'pointer', WebkitAppearance:'none', appearance:'none' }}
           aria-label="Pick a color"
         />
       </div>
@@ -2124,7 +2135,7 @@ function HexPicker({ sampledHex, onColor }) {
       <div style={{
         display:'flex', alignItems:'center', gap:6,
         background:'#fff', borderRadius:10,
-        border:`1.5px solid ${valid ? 'var(--border)' : 'var(--blush)'}`,
+        border:`1.5px solid ${valid || empty ? 'var(--border)' : 'var(--blush)'}`,
         padding:'6px 10px',
         boxShadow:'0 2px 8px var(--shadow)',
         minWidth:180,
