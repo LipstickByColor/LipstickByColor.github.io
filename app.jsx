@@ -1848,6 +1848,21 @@ function ListPicker({ wishlist, selectedKey, onPick }) {
 // ── Photo Picker ───────────────────────────────────────────────────────────
 // Upload an image, click anywhere on it to sample a color (averaged over an
 // adjustable radius). The sampled hex is passed up via onColor.
+// The photo canvas is read as Display P3 so iPhone photos keep their full
+// gamut, but hexes (and hexToLab) are sRGB — convert before matching, or
+// every sampled color reads as less saturated than it really is.
+// Takes 0–255 P3 channels; returns clamped 0–255 sRGB integers.
+function p3ToSrgb([r, g, b]) {
+  const lin = v => { v /= 255; return v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); };
+  const enc = v => { v = Math.min(1, Math.max(0, v)); return Math.round(255 * (v <= 0.0031308 ? 12.92 * v : 1.055 * Math.pow(v, 1 / 2.4) - 0.055)); };
+  const lr = lin(r), lg = lin(g), lb = lin(b);
+  return [
+    enc( 1.2249401 * lr - 0.2249404 * lg),
+    enc(-0.0420569 * lr + 1.0420571 * lg),
+    enc(-0.0196376 * lr - 0.0786361 * lg + 1.0982735 * lb),
+  ];
+}
+
 function PhotoPicker({ sampledHex, onColor }) {
   const [src, setSrc] = React.useState(null);
   const [point, setPoint] = React.useState(null); // {x,y} in image pixel space
@@ -1883,8 +1898,7 @@ function PhotoPicker({ sampledHex, onColor }) {
     const data = ctx.getImageData(x0, y0, w, h).data;
     let R=0,G=0,B=0,n=0;
     for (let i = 0; i < data.length; i += 4) { R+=data[i]; G+=data[i+1]; B+=data[i+2]; n++; }
-    R = Math.round(R/n); G = Math.round(G/n); B = Math.round(B/n);
-    const hex = '#' + [R,G,B].map(v => v.toString(16).padStart(2,'0')).join('');
+    const hex = '#' + p3ToSrgb([R/n, G/n, B/n]).map(v => v.toString(16).padStart(2,'0')).join('');
     onColor(hex);
   }
 
