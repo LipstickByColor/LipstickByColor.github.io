@@ -20,7 +20,7 @@ The ML pipeline behind the color clustering and product data is described in the
 
 - React via CDN (pre-compiled JSX, no bundler or build pipeline)
 - Supabase (product database)
-- CIELAB color space + ΔE76 for perceptual color matching
+- CIELAB color space + CIEDE2000 for perceptual color matching
 - GitHub Pages
 
 ---

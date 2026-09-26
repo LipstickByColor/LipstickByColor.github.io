@@ -343,11 +343,11 @@ function generateToneSteps(anchorHex, perSide = 2, stepL = 13, baseName = 'This 
 }
 
 // A ramp step counts as "no options" if even the closest real product is this
-// far away in ΔE76 — calibrated against the catalog so it only trips for the
+// far away in CIEDE2000 — calibrated against the catalog so it only trips for the
 // hand-curated novelty wheel colors that are already known outliers, not for
-// ordinary shades. (Well beyond "just noticeable"; ΔE > 10 reads as a clearly
-// different color, not merely a slightly-off match.)
-const NO_MATCH_DELTA_E = 10;
+// ordinary shades. (Well beyond "just noticeable"; equivalent to the old ΔE76
+// cutoff of 10, which reads as a clearly different color, not a slightly-off match.)
+const NO_MATCH_DELTA_E = 6.5;
 function nearestProductDistance(hex) {
   const lab = hexToLab(hex);
   let best = Infinity;
@@ -1346,9 +1346,9 @@ function TweaksPanel({
     }
   }, /*#__PURE__*/React.createElement("input", {
     type: "range",
-    min: 2,
-    max: 20,
-    step: 1,
+    min: 0.5,
+    max: 10,
+    step: 0.25,
     value: tweaks.maxDeltaE,
     onChange: e => setTweak('maxDeltaE', +e.target.value),
     style: {
@@ -1357,7 +1357,7 @@ function TweaksPanel({
     }
   }), /*#__PURE__*/React.createElement("span", {
     style: {
-      width: 20,
+      width: 32,
       textAlign: 'center',
       color: 'var(--espresso)',
       fontWeight: 500
@@ -4811,7 +4811,7 @@ function App() {
     });
   }
   const [tweaks, setTweaksState] = useState(/*EDITMODE-BEGIN*/{
-    "maxDeltaE": 3,
+    "maxDeltaE": 1.75,
     "accentColor": "#C87890"
   } /*EDITMODE-END*/);
   function setTweak(key, val) {

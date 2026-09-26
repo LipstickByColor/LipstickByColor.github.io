@@ -344,12 +344,20 @@
     <div class="formula">
       ΔE = √(ΔL*² + Δa*² + Δb*²)
     </div>
-    <p class="formula-desc">
-      Straight from Pythagoras: <strong>ΔE</strong> is the straight-line distance between two
+    <div class="formula-desc">
+    <p>
+      Straight from Pythagoras: at its simplest, <strong>ΔE</strong> is the straight-line distance between two
       points in CIELAB space: the differences in <strong>L*</strong>, <strong>a*</strong>, and
       <strong>b*</strong>, squared, summed, and rooted. Same math as measuring the distance
       between two pins on a map, just in three dimensions.
     </p>
+    <p style="margin-top: 10px;">
+      This tool uses the refined version, <strong>CIEDE2000</strong>. It starts from the same idea but
+      re-weights lightness, saturation, and hue to match how the eye actually judges them. For
+      example, the eye is less sensitive to small differences between very vivid colors than the
+      straight-line formula assumes, so CIEDE2000 counts those differences for less.
+    </p>
+    </div>
   </div>
 
   <!-- Scale -->

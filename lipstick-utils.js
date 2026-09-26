@@ -30,13 +30,38 @@ function labToHex(L, a, b) {
   return '#' + [r,g,bv].map(v=>v.toString(16).padStart(2,'0')).join('');
 }
 
-// ── CIELAB ΔE76 distance ──────────────────────────────────────────────────────
+// ── CIEDE2000 color distance ─────────────────────────────────────────────────
+// Unlike plain straight-line ΔE76, CIEDE2000 corrects for how the eye actually
+// judges differences — e.g. ΔE76 overstates gaps between vivid colors and
+// understates them near neutrals. Numbers run smaller than ΔE76 (~1.75 here
+// covers what 3 did), so thresholds in app.jsx are calibrated to this scale.
+// Sharma, Wu & Dalal (2005); test pair ([50,2.6772,-79.7751] vs [50,0,-82.7485]) = 2.0425.
 function deltaE(lab1, lab2) {
-  return Math.sqrt(
-    (lab1[0]-lab2[0])**2 +
-    (lab1[1]-lab2[1])**2 +
-    (lab1[2]-lab2[2])**2
-  );
+  const [L1, a1, b1] = lab1, [L2, a2, b2] = lab2;
+  const rad = Math.PI / 180, p25 = 25 ** 7;
+  const Cbar = (Math.hypot(a1, b1) + Math.hypot(a2, b2)) / 2;
+  const G = 0.5 * (1 - Math.sqrt(Cbar ** 7 / (Cbar ** 7 + p25)));
+  const ap1 = (1 + G) * a1, ap2 = (1 + G) * a2;
+  const C1 = Math.hypot(ap1, b1), C2 = Math.hypot(ap2, b2);
+  const hue = (b, a) => { const h = Math.atan2(b, a) / rad; return h < 0 ? h + 360 : h; };
+  const h1 = hue(b1, ap1), h2 = hue(b2, ap2);
+
+  const dL = L2 - L1, dC = C2 - C1;
+  let dh = 0;
+  if (C1 * C2 !== 0) { dh = h2 - h1; if (dh > 180) dh -= 360; else if (dh < -180) dh += 360; }
+  const dH = 2 * Math.sqrt(C1 * C2) * Math.sin(dh / 2 * rad);
+
+  const Lbar = (L1 + L2) / 2, Cpbar = (C1 + C2) / 2;
+  let hbar = h1 + h2;
+  if (C1 * C2 !== 0) hbar = Math.abs(h1 - h2) > 180 ? (h1 + h2 + (h1 + h2 < 360 ? 360 : -360)) / 2 : (h1 + h2) / 2;
+  const T = 1 - 0.17 * Math.cos((hbar - 30) * rad) + 0.24 * Math.cos(2 * hbar * rad)
+              + 0.32 * Math.cos((3 * hbar + 6) * rad) - 0.20 * Math.cos((4 * hbar - 63) * rad);
+  const SL = 1 + 0.015 * (Lbar - 50) ** 2 / Math.sqrt(20 + (Lbar - 50) ** 2);
+  const SC = 1 + 0.045 * Cpbar;
+  const SH = 1 + 0.015 * Cpbar * T;
+  const RT = -2 * Math.sqrt(Cpbar ** 7 / (Cpbar ** 7 + p25)) * Math.sin(60 * Math.exp(-(((hbar - 275) / 25) ** 2)) * rad);
+
+  return Math.sqrt((dL / SL) ** 2 + (dC / SC) ** 2 + (dH / SH) ** 2 + RT * (dC / SC) * (dH / SH));
 }
 
 // ── Wheel palette: 44 GMM cluster centers + 2 novelty entry points ────────────
