@@ -465,12 +465,22 @@ function FilterDropdown({ label, count, onClear, isOpen, onOpen, children }) {
             {children}
           </div>
           {count > 0 && (
-            <button onClick={onClear} style={{
-              marginTop:10, fontSize:11, padding:'4px 10px', borderRadius:20,
-              border:'1px solid var(--border)', background:'transparent',
-              color:'var(--text-muted)', cursor:'pointer', fontFamily:'DM Sans',
-              letterSpacing:'0.04em',
-            }}>Clear {label.toLowerCase()}</button>
+            <div style={{
+              display:'flex', alignItems:'center', justifyContent:'space-between',
+              marginTop:12, paddingTop:10, borderTop:'1px solid var(--border)',
+            }}>
+              <span style={{ fontSize:11, color:'var(--text-muted)', fontFamily:'DM Sans', letterSpacing:'0.04em' }}>
+                {count} selected
+              </span>
+              <button onClick={onClear}
+                onMouseEnter={e => { e.currentTarget.style.textDecoration = 'underline'; }}
+                onMouseLeave={e => { e.currentTarget.style.textDecoration = 'none'; }}
+                style={{
+                  fontSize:12, padding:0, border:'none', background:'transparent',
+                  color:'var(--blush)', cursor:'pointer', fontFamily:'DM Sans', fontWeight:500,
+                  letterSpacing:'0.04em', textUnderlineOffset:3,
+                }}>Clear ✕</button>
+            </div>
           )}
         </div>
       )}

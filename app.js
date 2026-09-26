@@ -720,21 +720,43 @@ function FilterDropdown({
       flexWrap: 'wrap',
       gap: 6
     }
-  }, children), count > 0 && /*#__PURE__*/React.createElement("button", {
-    onClick: onClear,
+  }, children), count > 0 && /*#__PURE__*/React.createElement("div", {
     style: {
-      marginTop: 10,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      marginTop: 12,
+      paddingTop: 10,
+      borderTop: '1px solid var(--border)'
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
       fontSize: 11,
-      padding: '4px 10px',
-      borderRadius: 20,
-      border: '1px solid var(--border)',
-      background: 'transparent',
       color: 'var(--text-muted)',
-      cursor: 'pointer',
       fontFamily: 'DM Sans',
       letterSpacing: '0.04em'
     }
-  }, "Clear ", label.toLowerCase())));
+  }, count, " selected"), /*#__PURE__*/React.createElement("button", {
+    onClick: onClear,
+    onMouseEnter: e => {
+      e.currentTarget.style.textDecoration = 'underline';
+    },
+    onMouseLeave: e => {
+      e.currentTarget.style.textDecoration = 'none';
+    },
+    style: {
+      fontSize: 12,
+      padding: 0,
+      border: 'none',
+      background: 'transparent',
+      color: 'var(--blush)',
+      cursor: 'pointer',
+      fontFamily: 'DM Sans',
+      fontWeight: 500,
+      letterSpacing: '0.04em',
+      textUnderlineOffset: 3
+    }
+  }, "Clear \u2715"))));
 }
 
 // ── Results Table ─────────────────────────────────────────────────────────────
