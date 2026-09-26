@@ -1906,6 +1906,106 @@ function ShareImageModal({
   }, "Tip: on mobile, long-press the saved image to share it directly to Instagram or other apps."))));
 }
 
+// ── Shared links ──────────────────────────────────────────────────────────────
+// The URL mirrors what's on screen so it can be copied and sent:
+//   ?color=a02523                 matches for a color (wheel, photo, hex, list)
+//   ?brand=chanel&dupe=99+pirate  dupes for a product
+//   ?item=brand|shade&item=…      a shared favorites list
+// Brands never contain '|' (shades can), so items split on the first one.
+function parseSharedLink(search) {
+  const q = new URLSearchParams(search);
+  const color = q.get('color'),
+    brand = q.get('brand'),
+    dupe = q.get('dupe');
+  if (color && /^[0-9a-f]{6}$/i.test(color)) return {
+    type: 'color',
+    hex: '#' + color.toLowerCase()
+  };
+  if (brand && dupe) return {
+    type: 'dupe',
+    brand,
+    shade: dupe
+  };
+  // Older links packed the list as ?list=brand|shade,brand|shade — best effort,
+  // since a few names contain commas
+  const items = q.getAll('item').length ? q.getAll('item') : (q.get('list') || '').split(',').filter(Boolean);
+  const keys = items.map(it => {
+    const i = it.indexOf('|');
+    return i > 0 ? {
+      brand: it.slice(0, i),
+      shade: it.slice(i + 1)
+    } : null;
+  }).filter(Boolean);
+  if (keys.length) return {
+    type: 'list',
+    keys
+  };
+  return null;
+}
+function findProduct(brand, shade) {
+  const b = brand.toLowerCase(),
+    s = shade.toLowerCase();
+  return REAL_PRODUCTS.find(p => p.brand.toLowerCase() === b && p.shade.toLowerCase() === s) || null;
+}
+function sharedListUrl(wishlist) {
+  const q = new URLSearchParams();
+  wishlist.forEach(p => q.append('item', `${p.brand}|${p.shade}`));
+  return `${window.location.origin}${window.location.pathname}?${q}`;
+}
+
+// One saved shade — used by My Favorites and the shared-list panel
+function ShadeListItem({
+  p,
+  action
+}) {
+  return /*#__PURE__*/React.createElement("li", {
+    style: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: 12,
+      padding: '12px 14px',
+      background: '#fff',
+      borderRadius: 14,
+      border: '1px solid var(--border)'
+    }
+  }, /*#__PURE__*/React.createElement(ProductThumb, {
+    product: p,
+    size: 60
+  }), /*#__PURE__*/React.createElement(ShadeChip, {
+    hex: p.hex,
+    height: 60,
+    width: 10
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1,
+      minWidth: 0
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 13,
+      fontWeight: 500,
+      color: 'var(--espresso)',
+      fontFamily: 'DM Sans'
+    }
+  }, p.brand), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontFamily: 'Cormorant Garamond',
+      fontSize: 15,
+      fontStyle: 'italic',
+      color: 'var(--espresso-mid)',
+      lineHeight: 1.2,
+      marginTop: 2
+    }
+  }, p.shade), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: 'var(--text-muted)',
+      marginTop: 3,
+      fontFamily: 'DM Sans'
+    }
+  }, p.product, p.finish ? ` · ${p.finish}` : '')), action);
+}
+
 // ── Wishlist Panel ────────────────────────────────────────────────────────────
 function WishlistPanel({
   wishlist,
@@ -1987,8 +2087,7 @@ function WishlistPanel({
     window.gtag?.('event', 'share_wishlist', {
       method: 'copy_link'
     });
-    const slugs = wishlist.map(p => `${p.brand}|${p.shade}`).join(',');
-    const url = `${window.location.origin}${window.location.pathname}?list=${encodeURIComponent(slugs)}`;
+    const url = sharedListUrl(wishlist);
     const done = () => {
       setCopied('link');
       setTimeout(() => setCopied(null), 2000);
@@ -2131,67 +2230,25 @@ function WishlistPanel({
       flexDirection: 'column',
       gap: 10
     }
-  }, wishlist.map((p, i) => /*#__PURE__*/React.createElement("li", {
+  }, wishlist.map((p, i) => /*#__PURE__*/React.createElement(ShadeListItem, {
     key: i,
-    style: {
-      display: 'flex',
-      alignItems: 'center',
-      gap: 12,
-      padding: '12px 14px',
-      background: '#fff',
-      borderRadius: 14,
-      border: '1px solid var(--border)'
-    }
-  }, /*#__PURE__*/React.createElement(ProductThumb, {
-    product: p,
-    size: 60
-  }), /*#__PURE__*/React.createElement(ShadeChip, {
-    hex: p.hex,
-    height: 60,
-    width: 10
-  }), /*#__PURE__*/React.createElement("div", {
-    style: {
-      flex: 1,
-      minWidth: 0
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 13,
-      fontWeight: 500,
-      color: 'var(--espresso)',
-      fontFamily: 'DM Sans'
-    }
-  }, p.brand), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontFamily: 'Cormorant Garamond',
-      fontSize: 15,
-      fontStyle: 'italic',
-      color: 'var(--espresso-mid)',
-      lineHeight: 1.2,
-      marginTop: 2
-    }
-  }, p.shade), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 11,
-      color: 'var(--text-muted)',
-      marginTop: 3,
-      fontFamily: 'DM Sans'
-    }
-  }, p.product, " \xB7 ", p.finish)), /*#__PURE__*/React.createElement("button", {
-    onClick: () => onRemove(p),
-    title: "Remove",
-    style: {
-      width: 28,
-      height: 28,
-      borderRadius: '50%',
-      border: 'none',
-      background: 'transparent',
-      cursor: 'pointer',
-      color: 'var(--blush)',
-      fontSize: 18,
-      flexShrink: 0
-    }
-  }, "\u2665"))))), wishlist.length > 0 && /*#__PURE__*/React.createElement("div", {
+    p: p,
+    action: /*#__PURE__*/React.createElement("button", {
+      onClick: () => onRemove(p),
+      title: "Remove",
+      style: {
+        width: 28,
+        height: 28,
+        borderRadius: '50%',
+        border: 'none',
+        background: 'transparent',
+        cursor: 'pointer',
+        color: 'var(--blush)',
+        fontSize: 18,
+        flexShrink: 0
+      }
+    }, "\u2665")
+  })))), wishlist.length > 0 && /*#__PURE__*/React.createElement("div", {
     style: {
       borderTop: '1px solid var(--border)',
       padding: '20px 32px 24px',
@@ -2263,6 +2320,151 @@ function WishlistPanel({
     wishlist: wishlist,
     onClose: () => setShowShareImage(false)
   }));
+}
+
+// ── Shared List Panel ─────────────────────────────────────────────────────────
+// Someone else's favorites, opened from a ?item=… link. Kept apart from the
+// viewer's own list; they can save shades one by one or all at once.
+function SharedListPanel({
+  items,
+  missing,
+  loading,
+  wishlist,
+  toggleWishlist,
+  onSaveAll,
+  onClose
+}) {
+  const key = p => `${p.brand}|${p.shade}`;
+  const saved = new Set(wishlist.map(key));
+  const unsaved = (items || []).filter(p => !saved.has(key(p)));
+  return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+    onClick: onClose,
+    style: {
+      position: 'fixed',
+      inset: 0,
+      background: 'rgba(42,26,20,0.35)',
+      zIndex: 200,
+      backdropFilter: 'blur(2px)'
+    }
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: 'fixed',
+      top: 0,
+      right: 0,
+      bottom: 0,
+      width: 'min(480px, 100%)',
+      background: 'var(--cream)',
+      zIndex: 201,
+      boxShadow: '-8px 0 32px rgba(42,26,20,0.18)',
+      display: 'flex',
+      flexDirection: 'column',
+      animation: 'slideInRight 0.3s ease-out'
+    }
+  }, /*#__PURE__*/React.createElement("style", null, `@keyframes slideInRight { from { transform: translateX(100%); } to { transform: translateX(0); } }`), /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: '24px 32px 20px',
+      borderBottom: '1px solid var(--border)',
+      display: 'flex',
+      alignItems: 'center',
+      gap: 12
+    }
+  }, /*#__PURE__*/React.createElement("h2", {
+    style: {
+      fontFamily: 'Cormorant Garamond',
+      fontWeight: 400,
+      fontSize: 26,
+      color: 'var(--espresso)'
+    }
+  }, "Shared list"), items && /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 11,
+      color: 'var(--text-muted)',
+      letterSpacing: '0.06em'
+    }
+  }, items.length, " ", items.length === 1 ? 'shade' : 'shades'), /*#__PURE__*/React.createElement("button", {
+    onClick: onClose,
+    style: {
+      marginLeft: 'auto',
+      width: 32,
+      height: 32,
+      borderRadius: '50%',
+      border: '1px solid var(--border)',
+      background: '#fff',
+      cursor: 'pointer',
+      color: 'var(--text-muted)',
+      fontSize: 14
+    }
+  }, "\u2715")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1,
+      overflowY: 'auto',
+      padding: '20px 32px'
+    }
+  }, loading ? /*#__PURE__*/React.createElement(CatalogueLoading, null) : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontFamily: 'Cormorant Garamond',
+      fontStyle: 'italic',
+      fontSize: 16,
+      color: 'var(--text-muted)',
+      marginBottom: 14
+    }
+  }, "Someone shared these shades with you. Tap a heart to save one to your favorites."), /*#__PURE__*/React.createElement("ul", {
+    style: {
+      listStyle: 'none',
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 10
+    }
+  }, items.map(p => {
+    const isSaved = saved.has(key(p));
+    return /*#__PURE__*/React.createElement(ShadeListItem, {
+      key: key(p),
+      p: p,
+      action: /*#__PURE__*/React.createElement("button", {
+        onClick: () => toggleWishlist(p),
+        title: isSaved ? 'Remove from favorites' : 'Save to favorites',
+        style: {
+          width: 28,
+          height: 28,
+          borderRadius: '50%',
+          border: 'none',
+          background: 'transparent',
+          cursor: 'pointer',
+          color: 'var(--blush)',
+          fontSize: 18,
+          flexShrink: 0
+        }
+      }, isSaved ? '♥' : '♡')
+    });
+  })), missing > 0 && /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontSize: 11,
+      color: 'var(--text-muted)',
+      marginTop: 14,
+      fontFamily: 'DM Sans'
+    }
+  }, missing, " ", missing === 1 ? 'shade is' : 'shades are', " no longer in the catalogue."))), !loading && items.length > 0 && /*#__PURE__*/React.createElement("div", {
+    style: {
+      borderTop: '1px solid var(--border)',
+      padding: '20px 32px 24px',
+      background: '#fff'
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: onSaveAll,
+    disabled: !unsaved.length,
+    style: {
+      width: '100%',
+      padding: '12px 14px',
+      borderRadius: 12,
+      border: '1.5px solid var(--blush)',
+      background: unsaved.length ? 'var(--blush)' : 'transparent',
+      color: unsaved.length ? '#fff' : 'var(--blush)',
+      cursor: unsaved.length ? 'pointer' : 'default',
+      fontFamily: 'DM Sans',
+      fontSize: 13,
+      fontWeight: 500
+    }
+  }, unsaved.length ? `♥ Save ${unsaved.length === items.length ? 'all' : unsaved.length} to my favorites` : '♥ All saved to your favorites'))));
 }
 
 // ── Comparison Tray ────────────────────────────────────────────────────────────
@@ -3395,8 +3597,12 @@ function DupeFinder({
   onSelect,
   onUsePhoto
 }) {
-  const [brand, setBrand] = useState(null);
+  const [brand, setBrand] = useState(product?.brand ?? null);
   const [brandQuery, setBrandQuery] = useState('');
+  // A product set from outside (e.g. a shared dupe link) opens its brand too
+  useEffect(() => {
+    if (product) setBrand(product.brand);
+  }, [product]);
   const [shadeQuery, setShadeQuery] = useState('');
   const touchStartY = React.useRef(0);
   const brandNoResultFired = React.useRef(false);
@@ -4465,12 +4671,22 @@ function App() {
     return () => window.removeEventListener('lipstick-data', onData);
   }, []);
   const dataReady = dataStatus === 'ready';
+
+  // Link this page was opened with, if any — see parseSharedLink
+  const [initialLink] = useState(() => parseSharedLink(window.location.search));
+  useEffect(() => {
+    if (initialLink) window.gtag?.('event', 'open_shared_link', {
+      link_type: initialLink.type
+    });
+  }, []);
   const [selectedColor, setSelectedColor] = useState(null);
   const [hoveredId, setHoveredId] = useState(null);
   const resultsRef = React.useRef(null);
   const [toneIdx, setToneIdx] = useState(null);
   const [mode, setMode] = useState(() => {
     // 'landing' | 'wheel' | 'photo' | 'hex' | 'dupe' | 'list'
+    if (initialLink?.type === 'color') return 'hex';
+    if (initialLink?.type === 'dupe') return 'dupe';
     try {
       return localStorage.getItem('lipstick-visited') ? 'wheel' : 'landing';
     } catch {
@@ -4478,7 +4694,7 @@ function App() {
     }
   });
   const [photoHex, setPhotoHex] = useState(null);
-  const [hexHex, setHexHex] = useState(null);
+  const [hexHex, setHexHex] = useState(initialLink?.type === 'color' ? initialLink.hex : null);
   const [dupeProduct, setDupeProduct] = useState(null);
   const [pinnedItems, setPinnedItems] = useState([]);
   const [wishlist, setWishlist] = useState(() => {
@@ -4489,6 +4705,7 @@ function App() {
     }
   });
   const [showWishlist, setShowWishlist] = useState(false);
+  const [sharedListKeys, setSharedListKeys] = useState(initialLink?.type === 'list' ? initialLink.keys : null);
   const [showTweaks, setShowTweaks] = useState(false);
 
   // Persist wishlist
@@ -4636,6 +4853,48 @@ function App() {
   }, [dupeProduct, mode]);
   const colors = LIPSTICK_DATA;
 
+  // Shared dupe link: the product can only be looked up once the catalogue is in
+  useEffect(() => {
+    if (!dataReady || initialLink?.type !== 'dupe' || mode !== 'dupe') return;
+    const p = findProduct(initialLink.brand, initialLink.shade);
+    if (p) setDupeProduct(p);else window.gtag?.('event', 'shared_link_not_found', {
+      link_type: 'dupe',
+      brand: initialLink.brand,
+      shade: initialLink.shade
+    });
+  }, [dataReady]);
+  const sharedList = React.useMemo(() => {
+    if (!sharedListKeys || !dataReady) return null;
+    const items = [];
+    for (const k of sharedListKeys) {
+      const p = findProduct(k.brand, k.shade);
+      if (p && !items.some(q => q.brand === p.brand && q.shade === p.shade)) {
+        items.push({
+          brand: p.brand,
+          product: p.product,
+          shade: p.shade,
+          finish: p.finish,
+          hex: p.hex
+        });
+      }
+    }
+    return {
+      items,
+      missing: sharedListKeys.length - items.length
+    };
+  }, [sharedListKeys, dataReady]);
+  function saveSharedList() {
+    const key = p => `${p.brand}|${p.shade}`;
+    setWishlist(prev => {
+      const have = new Set(prev.map(key));
+      const add = sharedList.items.filter(p => !have.has(key(p)));
+      window.gtag?.('event', 'save_shared_list', {
+        item_count: add.length
+      });
+      return [...prev, ...add];
+    });
+  }
+
   // ── Vibe profile (persistent shopper preferences) ───────────────────────
   const [vibe, setVibe] = useState(() => {
     try {
@@ -4733,6 +4992,22 @@ function App() {
     }, 80);
     return () => clearTimeout(timer);
   }, [effectiveColor?.id, effectiveColor?.hex]);
+
+  // Mirror what's on screen in the URL so it can be copied and shared
+  useEffect(() => {
+    const q = new URLSearchParams();
+    if (sharedListKeys) sharedListKeys.forEach(k => q.append('item', `${k.brand}|${k.shade}`));else if (mode === 'dupe' && dupeProduct) {
+      q.set('brand', dupeProduct.brand);
+      q.set('dupe', dupeProduct.shade);
+    } else if (mode === 'dupe' && !dataReady && initialLink?.type === 'dupe') {
+      q.set('brand', initialLink.brand);
+      q.set('dupe', initialLink.shade);
+    } else if (mode !== 'dupe' && effectiveColor) q.set('color', effectiveColor.hex.slice(1).toLowerCase());
+    const search = q.toString() ? `?${q}` : '';
+    if (search !== window.location.search) {
+      history.replaceState(null, '', window.location.pathname + search + window.location.hash);
+    }
+  }, [sharedListKeys, mode, dupeProduct, effectiveColor?.hex, dataReady]);
   const matches = React.useMemo(() => {
     if (!selectedColor || !dataReady) return [];
     const hex = toneRamp && toneIdx != null && !onAnchor ? toneRamp.ramp[toneIdx].hex : selectedColor.hex;
@@ -5146,6 +5421,14 @@ function App() {
     vibe: vibe,
     setVibe: setVibe,
     onClose: () => setShowVibe(false)
+  }), sharedListKeys && /*#__PURE__*/React.createElement(SharedListPanel, {
+    items: sharedList?.items,
+    missing: sharedList?.missing || 0,
+    loading: !sharedList,
+    wishlist: wishlist,
+    toggleWishlist: toggleWishlist,
+    onSaveAll: saveSharedList,
+    onClose: () => setSharedListKeys(null)
   }), showWishlist && /*#__PURE__*/React.createElement(WishlistPanel, {
     wishlist: wishlist,
     onClose: () => setShowWishlist(false),
