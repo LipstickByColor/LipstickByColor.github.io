@@ -78,6 +78,19 @@
     flex: 1; display: flex; flex-direction: column; min-height: 0; min-width: 0;
   }
   .mobile-picker-tips { display: none; }
+  /* Result cards: on hover, softly ring the save (♥) and compare (+) buttons.
+     Hover-capable pointers only, so touch screens never get a stuck ring. */
+  @media (hover: hover) {
+    .match-card-action { transition: box-shadow 0.18s ease, background 0.15s, color 0.15s; }
+    .match-card:hover .match-card-action:not(:disabled) { box-shadow: 0 0 0 2px rgba(200,120,144,0.28); }
+  }
+  /* Dupe finder selected-shade card: large image layout on desktop only */
+  .dupe-card-desktop { display: flex; }
+  .dupe-card-mobile { display: none; }
+  @media (max-width: 900px) {
+    .dupe-card-desktop { display: none; }
+    .dupe-card-mobile { display: flex; }
+  }
 
   .landing-main {
     flex: 1; display: flex; flex-direction: column;

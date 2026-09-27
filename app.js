@@ -14,6 +14,26 @@ function getProductImage(p) {
 
 // Product thumb: real swatch/bullet photo. The extracted color shows immediately
 // as a placeholder; the photo crossfades in once loaded.
+// Round heart toggle — shared by result cards, My Favorites, and shared lists
+function heartBtnStyle(isLiked) {
+  return {
+    width: 30,
+    height: 30,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontSize: 15,
+    lineHeight: 1,
+    fontFamily: 'DM Sans',
+    flexShrink: 0,
+    background: isLiked ? 'rgba(232,180,192,0.55)' : 'rgba(255,255,255,0.82)',
+    color: 'var(--blush)',
+    border: '1px solid rgba(42,26,20,0.08)',
+    borderRadius: '50%',
+    cursor: 'pointer',
+    transition: 'background 0.15s, color 0.15s, box-shadow 0.18s'
+  };
+}
 function ProductThumb({
   product,
   size = 56,
@@ -107,6 +127,9 @@ const srOnly = {
   whiteSpace: 'nowrap'
 };
 
+// How many shades the comparison tray holds
+const MAX_COMPARE = 6;
+
 // Single result card — image, save/compare overlay, ΔE + % match
 function MatchCard({
   p,
@@ -117,9 +140,10 @@ function MatchCard({
 }) {
   const isLiked = wishlist.some(x => x.brand === p.brand && x.shade === p.shade);
   const isPinned = pinnedItems.some(x => x.brand === p.brand && x.shade === p.shade);
-  const isFull = pinnedItems.length >= 4 && !isPinned;
+  const isFull = pinnedItems.length >= MAX_COMPARE && !isPinned;
   const pct = Math.max(0, Math.round(100 - p.distance));
   return /*#__PURE__*/React.createElement("div", {
+    className: "match-card",
     style: {
       background: '#fff',
       border: '1px solid var(--border)',
@@ -192,30 +216,17 @@ function MatchCard({
     "aria-pressed": isLiked,
     "aria-label": `${isLiked ? 'Remove' : 'Save'} ${p.brand} ${p.shade} ${isLiked ? 'from' : 'to'} My Favorites`,
     title: isLiked ? 'Remove from My Favorites' : 'Save to My Favorites',
-    style: {
-      width: 30,
-      height: 30,
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      fontSize: 15,
-      lineHeight: 1,
-      fontFamily: 'DM Sans',
-      background: isLiked ? 'rgba(232,180,192,0.55)' : 'rgba(255,255,255,0.82)',
-      color: 'var(--blush)',
-      border: '1px solid rgba(42,26,20,0.08)',
-      borderRadius: '50%',
-      cursor: 'pointer',
-      transition: 'background 0.15s, color 0.15s'
-    }
+    className: "match-card-action",
+    style: heartBtnStyle(isLiked)
   }, isLiked ? '♥' : '♡'), /*#__PURE__*/React.createElement("button", {
     onClick: e => {
       e.stopPropagation();
       togglePin(p);
     },
     "aria-label": `${isPinned ? 'Remove' : 'Add'} ${p.brand} ${p.shade} ${isPinned ? 'from' : 'to'} comparison`,
-    title: isPinned ? 'Remove from comparison' : isFull ? 'Max 4 items' : 'Add to comparison',
+    title: isPinned ? 'Remove from comparison' : isFull ? `Max ${MAX_COMPARE} items` : 'Add to comparison',
     disabled: isFull,
+    className: "match-card-action",
     style: {
       width: 30,
       height: 30,
@@ -1983,24 +1994,56 @@ function ShadeListItem({
   return /*#__PURE__*/React.createElement("li", {
     style: {
       display: 'flex',
-      alignItems: 'center',
-      gap: 12,
-      padding: '12px 14px',
+      alignItems: 'stretch',
+      gap: 14,
+      padding: '0 14px 0 0',
       background: '#fff',
       borderRadius: 14,
-      border: '1px solid var(--border)'
+      border: '1px solid var(--border)',
+      overflow: 'hidden'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: 'relative',
+      width: 112,
+      minHeight: 108,
+      flexShrink: 0,
+      background: 'var(--cream-dark)'
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    role: "img",
+    "aria-label": `Swatch ${p.hex}`,
+    title: p.hex,
+    style: {
+      position: 'absolute',
+      left: 0,
+      top: 0,
+      bottom: 0,
+      width: 14,
+      background: p.hex
+    }
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: 'absolute',
+      top: 8,
+      right: 8,
+      bottom: 8,
+      left: 22
     }
   }, /*#__PURE__*/React.createElement(ProductThumb, {
     product: p,
-    size: 60
-  }), /*#__PURE__*/React.createElement(ShadeChip, {
-    hex: p.hex,
-    height: 60,
-    width: 10
-  }), /*#__PURE__*/React.createElement("div", {
+    width: "100%",
+    height: "100%",
+    fit: "contain",
+    radius: 0,
+    ring: false,
+    tint: false
+  }))), /*#__PURE__*/React.createElement("div", {
     style: {
       flex: 1,
-      minWidth: 0
+      minWidth: 0,
+      alignSelf: 'center',
+      padding: '12px 0'
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
@@ -2025,7 +2068,11 @@ function ShadeListItem({
       marginTop: 3,
       fontFamily: 'DM Sans'
     }
-  }, p.product, p.finish ? ` · ${p.finish}` : '')), action);
+  }, p.product, p.finish ? ` · ${p.finish}` : '')), /*#__PURE__*/React.createElement("div", {
+    style: {
+      alignSelf: 'center'
+    }
+  }, action));
 }
 
 // ── Wishlist Panel ────────────────────────────────────────────────────────────
@@ -2257,18 +2304,9 @@ function WishlistPanel({
     p: p,
     action: /*#__PURE__*/React.createElement("button", {
       onClick: () => onRemove(p),
-      title: "Remove",
-      style: {
-        width: 28,
-        height: 28,
-        borderRadius: '50%',
-        border: 'none',
-        background: 'transparent',
-        cursor: 'pointer',
-        color: 'var(--blush)',
-        fontSize: 18,
-        flexShrink: 0
-      }
+      title: "Remove from My Favorites",
+      "aria-label": `Remove ${p.brand} ${p.shade} from My Favorites`,
+      style: heartBtnStyle(true)
     }, "\u2665")
   })))), wishlist.length > 0 && /*#__PURE__*/React.createElement("div", {
     style: {
@@ -2445,17 +2483,8 @@ function SharedListPanel({
       action: /*#__PURE__*/React.createElement("button", {
         onClick: () => toggleWishlist(p),
         title: isSaved ? 'Remove from favorites' : 'Save to favorites',
-        style: {
-          width: 28,
-          height: 28,
-          borderRadius: '50%',
-          border: 'none',
-          background: 'transparent',
-          cursor: 'pointer',
-          color: 'var(--blush)',
-          fontSize: 18,
-          flexShrink: 0
-        }
+        "aria-pressed": isSaved,
+        style: heartBtnStyle(isSaved)
       }, isSaved ? '♥' : '♡')
     });
   })), missing > 0 && /*#__PURE__*/React.createElement("p", {
@@ -2554,7 +2583,7 @@ function ComparisonTray({
       color: 'var(--text-muted)',
       letterSpacing: '0.05em'
     }
-  }, "\xB7 up to 4 \xB7 click a row to pin"), /*#__PURE__*/React.createElement("div", {
+  }, "\xB7 up to ", MAX_COMPARE, " \xB7 click a row to pin"), /*#__PURE__*/React.createElement("div", {
     style: {
       marginLeft: 'auto',
       display: 'flex',
@@ -2677,7 +2706,7 @@ function ComparisonTray({
         lineHeight: 1.3
       }
     }, p.shade)))), Array.from({
-      length: Math.max(0, 4 - pinnedItems.length)
+      length: Math.max(0, MAX_COMPARE - pinnedItems.length)
     }).map((_, i) => /*#__PURE__*/React.createElement("div", {
       key: `empty-${i}`,
       style: {
@@ -4191,8 +4220,88 @@ function DupeFinder({
   }, "2"), /*#__PURE__*/React.createElement("span", {
     style: stepLabel
   }, "Matching this shade")), /*#__PURE__*/React.createElement("div", {
+    className: "dupe-card-desktop",
     style: {
-      display: 'flex',
+      flexDirection: 'column',
+      background: '#fff',
+      borderRadius: 16,
+      border: '1px solid var(--border)',
+      boxShadow: '0 2px 12px var(--shadow)',
+      overflow: 'hidden'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: 'relative',
+      height: 252,
+      background: 'var(--cream-dark)'
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    role: "img",
+    "aria-label": `Swatch ${product.hex}`,
+    title: product.hex,
+    style: {
+      position: 'absolute',
+      left: 0,
+      top: 0,
+      bottom: 0,
+      width: 22,
+      background: product.hex
+    }
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: 'absolute',
+      top: 16,
+      right: 16,
+      bottom: 16,
+      left: 38
+    }
+  }, /*#__PURE__*/React.createElement(ProductThumb, {
+    product: product,
+    width: "100%",
+    height: "100%",
+    fit: "contain",
+    radius: 0,
+    ring: false,
+    tint: false
+  }))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: '16px 20px 18px',
+      borderTop: '1px solid var(--border)'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontFamily: 'DM Sans',
+      fontSize: TYPE.body,
+      fontWeight: 500,
+      color: 'var(--espresso)'
+    }
+  }, product.brand), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontFamily: 'Cormorant Garamond',
+      fontStyle: 'italic',
+      fontSize: TYPE.lede,
+      color: 'var(--espresso-mid)',
+      lineHeight: 1.2,
+      marginTop: 2
+    }
+  }, product.shade), product.product && /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontFamily: 'DM Sans',
+      fontSize: TYPE.body,
+      color: 'var(--text-muted)',
+      marginTop: 4
+    }
+  }, product.product), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontFamily: 'DM Sans',
+      fontSize: TYPE.micro,
+      color: 'var(--text-muted)',
+      marginTop: 6,
+      letterSpacing: '0.04em'
+    }
+  }, product.hex.toUpperCase()))), /*#__PURE__*/React.createElement("div", {
+    className: "dupe-card-mobile",
+    style: {
       alignItems: 'center',
       gap: 14,
       padding: '14px 16px',
@@ -4760,6 +4869,8 @@ function App() {
   const [photoHex, setPhotoHex] = useState(null);
   const [hexHex, setHexHex] = useState(initialLink?.type === 'color' ? initialLink.hex : null);
   const [dupeProduct, setDupeProduct] = useState(null);
+  // Bumped to remount DupeFinder, clearing its brand/shade search back to step 1
+  const [dupeResetKey, setDupeResetKey] = useState(0);
   const [pinnedItems, setPinnedItems] = useState([]);
   const [wishlist, setWishlist] = useState(() => {
     try {
@@ -5086,7 +5197,7 @@ function App() {
       const key = p => `${p.brand}|${p.shade}`;
       const exists = prev.some(p => key(p) === key(product));
       if (exists) return prev.filter(p => key(p) !== key(product));
-      if (prev.length >= 4) return prev; // max 4
+      if (prev.length >= MAX_COMPARE) return prev;
       window.gtag?.('event', 'pin_item', {
         brand: product.brand,
         shade: product.shade
@@ -5315,6 +5426,7 @@ function App() {
     sampledHex: hexHex,
     onColor: setHexHex
   }) : mode === 'dupe' && !dataReady ? /*#__PURE__*/React.createElement(CatalogueLoading, null) : mode === 'dupe' ? /*#__PURE__*/React.createElement(DupeFinder, {
+    key: dupeResetKey,
     product: dupeProduct,
     onSelect: setDupeProduct,
     onUsePhoto: () => {
@@ -5372,7 +5484,13 @@ function App() {
       letterSpacing: '0.06em'
     }
   }, selectedColor.hex.toUpperCase())), /*#__PURE__*/React.createElement("button", {
-    onClick: () => setSelectedColor(null),
+    onClick: () => {
+      // In dupe mode, clearing the pill starts the search over (brand included)
+      if (mode === 'dupe') {
+        setDupeProduct(null);
+        setDupeResetKey(k => k + 1);
+      } else setSelectedColor(null);
+    },
     style: {
       marginLeft: 4,
       background: 'none',

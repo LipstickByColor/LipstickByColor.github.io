@@ -10,6 +10,18 @@ function getProductImage(p) {
 
 // Product thumb: real swatch/bullet photo. The extracted color shows immediately
 // as a placeholder; the photo crossfades in once loaded.
+// Round heart toggle — shared by result cards, My Favorites, and shared lists
+function heartBtnStyle(isLiked) {
+  return {
+    width:30, height:30, display:'flex', alignItems:'center', justifyContent:'center',
+    fontSize:15, lineHeight:1, fontFamily:'DM Sans', flexShrink:0,
+    background: isLiked ? 'rgba(232,180,192,0.55)' : 'rgba(255,255,255,0.82)',
+    color: 'var(--blush)',
+    border:'1px solid rgba(42,26,20,0.08)', borderRadius:'50%', cursor:'pointer',
+    transition:'background 0.15s, color 0.15s, box-shadow 0.18s',
+  };
+}
+
 function ProductThumb({ product, size = 56, width, height, zoom = 1.18, fit = 'cover', radius = 10, ring = true, tint = true }) {
   // Image URLs arrive after the catalogue (see supabase-data.js); re-render when they do
   const [, setImagesVersion] = useState(0);
@@ -78,15 +90,18 @@ function ShadeChip({ hex, height = 56, width = 10 }) {
 // Visually-hidden text — screen readers only
 const srOnly = { position:'absolute', width:1, height:1, overflow:'hidden', clip:'rect(0 0 0 0)', whiteSpace:'nowrap' };
 
+// How many shades the comparison tray holds
+const MAX_COMPARE = 6;
+
 // Single result card — image, save/compare overlay, ΔE + % match
 function MatchCard({ p, wishlist, toggleWishlist, pinnedItems, togglePin }) {
   const isLiked = wishlist.some(x => x.brand === p.brand && x.shade === p.shade);
   const isPinned = pinnedItems.some(x => x.brand === p.brand && x.shade === p.shade);
-  const isFull = pinnedItems.length >= 4 && !isPinned;
+  const isFull = pinnedItems.length >= MAX_COMPARE && !isPinned;
   const pct = Math.max(0, Math.round(100 - p.distance));
 
   return (
-    <div style={{
+    <div className="match-card" style={{
       background:'#fff', border:'1px solid var(--border)', borderRadius:14,
       overflow:'hidden', display:'flex', flexDirection:'column', height:'100%',
       transition:'box-shadow 0.18s, transform 0.18s',
@@ -107,20 +122,15 @@ function MatchCard({ p, wishlist, toggleWishlist, pinnedItems, togglePin }) {
             aria-pressed={isLiked}
             aria-label={`${isLiked ? 'Remove' : 'Save'} ${p.brand} ${p.shade} ${isLiked ? 'from' : 'to'} My Favorites`}
             title={isLiked ? 'Remove from My Favorites' : 'Save to My Favorites'}
-            style={{
-              width:30, height:30, display:'flex', alignItems:'center', justifyContent:'center',
-              fontSize:15, lineHeight:1, fontFamily:'DM Sans',
-              background: isLiked ? 'rgba(232,180,192,0.55)' : 'rgba(255,255,255,0.82)',
-              color: 'var(--blush)',
-              border:'1px solid rgba(42,26,20,0.08)', borderRadius:'50%', cursor:'pointer',
-              transition:'background 0.15s, color 0.15s',
-            }}
+            className="match-card-action"
+            style={heartBtnStyle(isLiked)}
           >{isLiked ? '♥' : '♡'}</button>
           <button
             onClick={e => { e.stopPropagation(); togglePin(p); }}
             aria-label={`${isPinned ? 'Remove' : 'Add'} ${p.brand} ${p.shade} ${isPinned ? 'from' : 'to'} comparison`}
-            title={isPinned ? 'Remove from comparison' : isFull ? 'Max 4 items' : 'Add to comparison'}
+            title={isPinned ? 'Remove from comparison' : isFull ? `Max ${MAX_COMPARE} items` : 'Add to comparison'}
             disabled={isFull}
+            className="match-card-action"
             style={{
               width:30, height:30, display:'flex', alignItems:'center', justifyContent:'center',
               fontSize:15, lineHeight:1, fontFamily:'DM Sans',
@@ -1345,13 +1355,18 @@ function sharedListUrl(wishlist) {
 function ShadeListItem({ p, action }) {
   return (
     <li style={{
-      display:'flex', alignItems:'center', gap:12,
-      padding:'12px 14px', background:'#fff',
-      borderRadius:14, border:'1px solid var(--border)',
+      display:'flex', alignItems:'stretch', gap:14,
+      padding:'0 14px 0 0', background:'#fff',
+      borderRadius:14, border:'1px solid var(--border)', overflow:'hidden',
     }}>
-      <ProductThumb product={p} size={60} />
-      <ShadeChip hex={p.hex} height={60} width={10} />
-      <div style={{ flex:1, minWidth:0 }}>
+      {/* Full, uncropped image beside a swatch strip — same treatment as result cards */}
+      <div style={{ position:'relative', width:112, minHeight:108, flexShrink:0, background:'var(--cream-dark)' }}>
+        <span role="img" aria-label={`Swatch ${p.hex}`} title={p.hex} style={{ position:'absolute', left:0, top:0, bottom:0, width:14, background:p.hex }} />
+        <div style={{ position:'absolute', top:8, right:8, bottom:8, left:22 }}>
+          <ProductThumb product={p} width="100%" height="100%" fit="contain" radius={0} ring={false} tint={false} />
+        </div>
+      </div>
+      <div style={{ flex:1, minWidth:0, alignSelf:'center', padding:'12px 0' }}>
         <div style={{ fontSize:13, fontWeight:500, color:'var(--espresso)', fontFamily:'DM Sans' }}>
           {p.brand}
         </div>
@@ -1365,7 +1380,7 @@ function ShadeListItem({ p, action }) {
           {p.product}{p.finish ? ` · ${p.finish}` : ''}
         </div>
       </div>
-      {action}
+      <div style={{ alignSelf:'center' }}>{action}</div>
     </li>
   );
 }
@@ -1504,11 +1519,7 @@ function WishlistPanel({ wishlist, onClose, onRemove, onClear }) {
             <ul style={{ listStyle:'none', display:'flex', flexDirection:'column', gap:10 }}>
               {wishlist.map((p, i) => (
                 <ShadeListItem key={i} p={p} action={
-                  <button onClick={() => onRemove(p)} title="Remove" style={{
-                    width:28, height:28, borderRadius:'50%', border:'none',
-                    background:'transparent', cursor:'pointer',
-                    color:'var(--blush)', fontSize:18, flexShrink:0,
-                  }}>♥</button>
+                  <button onClick={() => onRemove(p)} title="Remove from My Favorites" aria-label={`Remove ${p.brand} ${p.shade} from My Favorites`} style={heartBtnStyle(true)}>♥</button>
                 } />
               ))}
             </ul>
@@ -1620,11 +1631,7 @@ function SharedListPanel({ items, missing, loading, wishlist, toggleWishlist, on
                   const isSaved = saved.has(key(p));
                   return (
                     <ShadeListItem key={key(p)} p={p} action={
-                      <button onClick={() => toggleWishlist(p)} title={isSaved ? 'Remove from favorites' : 'Save to favorites'} style={{
-                        width:28, height:28, borderRadius:'50%', border:'none',
-                        background:'transparent', cursor:'pointer',
-                        color:'var(--blush)', fontSize:18, flexShrink:0,
-                      }}>{isSaved ? '♥' : '♡'}</button>
+                      <button onClick={() => toggleWishlist(p)} title={isSaved ? 'Remove from favorites' : 'Save to favorites'} aria-pressed={isSaved} style={heartBtnStyle(isSaved)}>{isSaved ? '♥' : '♡'}</button>
                     } />
                   );
                 })}
@@ -1697,7 +1704,7 @@ function ComparisonTray({ pinnedItems, onRemove, onClear }) {
             Comparing {pinnedItems.length} shade{pinnedItems.length !== 1 ? 's' : ''}
           </span>
           <span style={{ fontSize:11, color:'var(--text-muted)', letterSpacing:'0.05em' }}>
-            · up to 4 · click a row to pin
+            · up to {MAX_COMPARE} · click a row to pin
           </span>
           <div style={{ marginLeft:'auto', display:'flex', gap:10, alignItems:'center' }}>
             <button onClick={() => setExpanded(e => !e)} style={{
@@ -1773,7 +1780,7 @@ function ComparisonTray({ pinnedItems, onRemove, onClear }) {
           ))}
 
           {/* Empty slots */}
-          {Array.from({ length: Math.max(0, 4 - pinnedItems.length) }).map((_, i) => (
+          {Array.from({ length: Math.max(0, MAX_COMPARE - pinnedItems.length) }).map((_, i) => (
             <div key={`empty-${i}`} style={{
               width: expanded ? 80 : 52,
               height: expanded ? 80 : 52,
@@ -2592,7 +2599,24 @@ function DupeFinder({ product, onSelect, onUsePhoto }) {
                 <span style={stepNum}>2</span>
                 <span style={stepLabel}>Matching this shade</span>
               </div>
-              <div style={{ display:'flex', alignItems:'center', gap:14, padding:'14px 16px', background:'#fff', borderRadius:16, border:'1px solid var(--border)', boxShadow:'0 2px 12px var(--shadow)' }}>
+              {/* Desktop: tall card with the full, uncropped product image */}
+              <div className="dupe-card-desktop" style={{ flexDirection:'column', background:'#fff', borderRadius:16, border:'1px solid var(--border)', boxShadow:'0 2px 12px var(--shadow)', overflow:'hidden' }}>
+                <div style={{ position:'relative', height:252, background:'var(--cream-dark)' }}>
+                  <span role="img" aria-label={`Swatch ${product.hex}`} title={product.hex} style={{ position:'absolute', left:0, top:0, bottom:0, width:22, background:product.hex }} />
+                  <div style={{ position:'absolute', top:16, right:16, bottom:16, left:38 }}>
+                    <ProductThumb product={product} width="100%" height="100%" fit="contain" radius={0} ring={false} tint={false} />
+                  </div>
+                </div>
+                <div style={{ padding:'16px 20px 18px', borderTop:'1px solid var(--border)' }}>
+                  <div style={{ fontFamily:'DM Sans', fontSize:TYPE.body, fontWeight:500, color:'var(--espresso)' }}>{product.brand}</div>
+                  <div style={{ fontFamily:'Cormorant Garamond', fontStyle:'italic', fontSize:TYPE.lede, color:'var(--espresso-mid)', lineHeight:1.2, marginTop:2 }}>{product.shade}</div>
+                  {product.product && (
+                    <div style={{ fontFamily:'DM Sans', fontSize:TYPE.body, color:'var(--text-muted)', marginTop:4 }}>{product.product}</div>
+                  )}
+                  <div style={{ fontFamily:'DM Sans', fontSize:TYPE.micro, color:'var(--text-muted)', marginTop:6, letterSpacing:'0.04em' }}>{product.hex.toUpperCase()}</div>
+                </div>
+              </div>
+              <div className="dupe-card-mobile" style={{ alignItems:'center', gap:14, padding:'14px 16px', background:'#fff', borderRadius:16, border:'1px solid var(--border)', boxShadow:'0 2px 12px var(--shadow)' }}>
                 <ProductThumb product={product} size={56} />
                 <ShadeChip hex={product.hex} height={56} width={9} />
                 <div style={{ flex:1, minWidth:0 }}>
@@ -2838,6 +2862,8 @@ function App() {
   const [photoHex, setPhotoHex] = useState(null);
   const [hexHex, setHexHex] = useState(initialLink?.type === 'color' ? initialLink.hex : null);
   const [dupeProduct, setDupeProduct] = useState(null);
+  // Bumped to remount DupeFinder, clearing its brand/shade search back to step 1
+  const [dupeResetKey, setDupeResetKey] = useState(0);
   const [pinnedItems, setPinnedItems] = useState([]);
   const [wishlist, setWishlist] = useState(() => {
     try { return JSON.parse(localStorage.getItem('lipstick-wishlist') || '[]'); }
@@ -3070,7 +3096,7 @@ function App() {
       const key = p => `${p.brand}|${p.shade}`;
       const exists = prev.some(p => key(p) === key(product));
       if (exists) return prev.filter(p => key(p) !== key(product));
-      if (prev.length >= 4) return prev; // max 4
+      if (prev.length >= MAX_COMPARE) return prev;
       window.gtag?.('event', 'pin_item', { brand: product.brand, shade: product.shade });
       return [...prev, product];
     });
@@ -3207,6 +3233,7 @@ function App() {
             <CatalogueLoading />
           ) : mode === 'dupe' ? (
             <DupeFinder
+              key={dupeResetKey}
               product={dupeProduct}
               onSelect={setDupeProduct}
               onUsePhoto={() => { setMode('photo'); setDupeProduct(null); }}
@@ -3246,7 +3273,11 @@ function App() {
                 <div style={{ fontSize:12, fontWeight:500, color:'var(--espresso)', lineHeight:1.2 }}>{selectedColor.name}</div>
                 <div style={{ fontSize:10, color:'var(--text-muted)', letterSpacing:'0.06em' }}>{selectedColor.hex.toUpperCase()}</div>
               </div>
-              <button onClick={() => setSelectedColor(null)} style={{
+              <button onClick={() => {
+                // In dupe mode, clearing the pill starts the search over (brand included)
+                if (mode === 'dupe') { setDupeProduct(null); setDupeResetKey(k => k + 1); }
+                else setSelectedColor(null);
+              }} style={{
                 marginLeft:4, background:'none', border:'none', cursor:'pointer',
                 color:'var(--text-muted)', fontSize:16, lineHeight:1, padding:'2px 4px',
               }}>×</button>
