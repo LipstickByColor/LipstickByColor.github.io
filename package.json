@@ -2,7 +2,7 @@
   "name": "lipstick-website",
   "private": true,
   "scripts": {
-    "build": "babel app.jsx -o app.js && babel color-finder.jsx -o color-finder.js"
+    "build": "babel app.jsx -o app.js"
   },
   "devDependencies": {
     "@babel/cli": "^7.24.0",
