@@ -5331,7 +5331,7 @@ function App() {
       e.currentTarget.style.borderColor = 'var(--border)';
       e.currentTarget.style.color = 'var(--espresso)';
     }
-  }, "How It Works"), /*#__PURE__*/React.createElement("button", {
+  }, "Behind the Project"), /*#__PURE__*/React.createElement("button", {
     onClick: () => setShowWishlist(true),
     style: {
       display: 'flex',
@@ -5631,7 +5631,7 @@ function App() {
       paddingBottom: 1,
       transition: 'opacity 0.15s'
     }
-  }, "How It Works"), /*#__PURE__*/React.createElement("a", {
+  }, "Behind the Project"), /*#__PURE__*/React.createElement("a", {
     href: "guides/",
     onClick: () => window.gtag?.('event', 'nav_link_click', {
       target: 'guides',
