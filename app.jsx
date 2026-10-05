@@ -523,6 +523,10 @@ function ResultsTable({ selectedColor, matches, totalProducts, pinnedItems, togg
     return 'neutral';
   }
 
+  // Tone words as the red guide uses them
+  const RED_TONES = { blue:'blue-red', true:'true red', orange:'orange-red' };
+  const red = selectedColor ? redKind(selectedColor.hex) : null;
+
   function tierOf(p) { return p.price_tier || '$$'; }
   function finishOf(p) { return (p.finish || '').trim() || 'Unlisted'; }
 
@@ -630,6 +634,15 @@ function ResultsTable({ selectedColor, matches, totalProducts, pinnedItems, togg
           <p style={{ fontSize:11, color:'var(--text-muted)', marginTop:2, fontFamily:'DM Sans', letterSpacing:'0.05em' }}>
             {selectedColor.hex.toUpperCase()} · Closest lip matches by ΔE
           </p>
+          {/* Reds only: tone and depth, by the red guide's rules */}
+          {red && (
+            <p style={{
+              marginTop:6, fontFamily:'DM Sans', fontSize:11, fontWeight:500,
+              letterSpacing:'0.12em', textTransform:'uppercase', color:'var(--blush)',
+            }}>
+              {red.depth} {RED_TONES[red.tone]}
+            </p>
+          )}
         </div>
       </div>
 

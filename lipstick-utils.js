@@ -131,6 +131,22 @@ function hexToLab(hex) {
   return [116*fy-16, 500*(fx-fy), 200*(fy-fz)];
 }
 
+// ── Is this color a red, and which kind? ─────────────────────────────────────
+// Same rules as the red guide (guides/red-lipstick/red-lipstick.js: redCheck,
+// toneOf, depthOf) — keep the two in step. Red is hue 18–42°, L* 20–55, with
+// enough chroma; tone comes from hue and depth from lightness.
+// Returns null for anything that isn't a red.
+function redKind(hex) {
+  const [L, a, b] = hexToLab(hex);
+  const C = Math.hypot(a, b), h = Math.atan2(b, a) * 180 / Math.PI;
+  const minC = Math.max(45 + Math.max(0, h - 34) * 13 / 8, 45 + 1.5 * Math.max(0, L - 40));
+  if (h < 18 || h > 42 || L < 20 || L > 55 || C < minC) return null;
+  return {
+    tone: h < 26 ? 'blue' : h < 34 ? 'true' : 'orange',
+    depth: L >= 45 ? 'bright' : L >= 35 ? 'classic' : 'deep',
+  };
+}
+
 // ── Find closest real products to a wheel color by ΔE ────────────────────────
 function getClosestColors(wheelHex, count = 5) {
   const targetLab = hexToLab(wheelHex);

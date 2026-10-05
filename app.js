@@ -812,6 +812,14 @@ function ResultsTable({
     if (h > 28) return 'warm';
     return 'neutral';
   }
+
+  // Tone words as the red guide uses them
+  const RED_TONES = {
+    blue: 'blue-red',
+    true: 'true red',
+    orange: 'orange-red'
+  };
+  const red = selectedColor ? redKind(selectedColor.hex) : null;
   function tierOf(p) {
     return p.price_tier || '$$';
   }
@@ -950,7 +958,17 @@ function ResultsTable({
       fontFamily: 'DM Sans',
       letterSpacing: '0.05em'
     }
-  }, selectedColor.hex.toUpperCase(), " \xB7 Closest lip matches by \u0394E"))), toneRamp && toneRamp.ramp.length > 1 && /*#__PURE__*/React.createElement("div", {
+  }, selectedColor.hex.toUpperCase(), " \xB7 Closest lip matches by \u0394E"), red && /*#__PURE__*/React.createElement("p", {
+    style: {
+      marginTop: 6,
+      fontFamily: 'DM Sans',
+      fontSize: 11,
+      fontWeight: 500,
+      letterSpacing: '0.12em',
+      textTransform: 'uppercase',
+      color: 'var(--blush)'
+    }
+  }, red.depth, " ", RED_TONES[red.tone]))), toneRamp && toneRamp.ramp.length > 1 && /*#__PURE__*/React.createElement("div", {
     style: {
       marginBottom: 12,
       padding: '9px 12px 10px',
