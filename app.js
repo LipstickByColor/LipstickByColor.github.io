@@ -812,14 +812,7 @@ function ResultsTable({
     if (h > 28) return 'warm';
     return 'neutral';
   }
-
-  // Tone words as the red guide uses them
-  const RED_TONES = {
-    blue: 'blue-red',
-    true: 'true red',
-    orange: 'orange-red'
-  };
-  const red = selectedColor ? redKind(selectedColor.hex) : null;
+  const redName = selectedColor ? redLabel(selectedColor.hex) : null;
   function tierOf(p) {
     return p.price_tier || '$$';
   }
@@ -958,17 +951,12 @@ function ResultsTable({
       fontFamily: 'DM Sans',
       letterSpacing: '0.05em'
     }
-  }, selectedColor.hex.toUpperCase(), " \xB7 Closest lip matches by \u0394E"), red && /*#__PURE__*/React.createElement("p", {
+  }, selectedColor.hex.toUpperCase(), " \xB7 Closest lip matches by \u0394E"), redName && /*#__PURE__*/React.createElement("p", {
     style: {
-      marginTop: 6,
-      fontFamily: 'DM Sans',
-      fontSize: 11,
-      fontWeight: 500,
-      letterSpacing: '0.12em',
-      textTransform: 'uppercase',
-      color: 'var(--blush-deep)'
+      ...RED_LABEL_STYLE,
+      marginTop: 6
     }
-  }, red.depth, " ", RED_TONES[red.tone]))), toneRamp && toneRamp.ramp.length > 1 && /*#__PURE__*/React.createElement("div", {
+  }, redName))), toneRamp && toneRamp.ramp.length > 1 && /*#__PURE__*/React.createElement("div", {
     style: {
       marginBottom: 12,
       padding: '9px 12px 10px',
@@ -2048,17 +2036,63 @@ function sharedListUrl(wishlist) {
   return `${window.location.origin}${window.location.pathname}?${q}`;
 }
 
-// One saved shade — used by My Favorites and the shared-list panel
+// ── Red label ─────────────────────────────────────────────────────────────────
+// "bright orange-red", "deep blue-red"… for any color the red guide counts as a
+// red (tone words as the guide uses them); null for everything else.
+const RED_TONES = {
+  blue: 'blue-red',
+  true: 'true red',
+  orange: 'orange-red'
+};
+function redLabel(hex) {
+  const red = hex ? redKind(hex) : null;
+  return red ? `${red.depth} ${RED_TONES[red.tone]}` : null;
+}
+const RED_LABEL_STYLE = {
+  fontFamily: 'DM Sans',
+  fontSize: 11,
+  fontWeight: 500,
+  letterSpacing: '0.12em',
+  textTransform: 'uppercase',
+  color: 'var(--blush-deep)'
+};
+
+// Words on a band of color `hex`: white or the dark brown, whichever contrasts
+// more (WCAG contrast ratio). Deep shades get white; pinks, corals and nudes get brown.
+function bandInk(hex) {
+  const lum = h => {
+    const [r, g, b] = [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16) / 255).map(v => v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4);
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  };
+  const ESPRESSO = '#2A1A14',
+    L = lum(hex);
+  return 1.05 / (L + 0.05) >= (L + 0.05) / (lum(ESPRESSO) + 0.05) ? '#fff' : 'var(--espresso)';
+}
+
+// One saved shade — used by My Favorites and the shared-list panel.
+// Photo on the left at full height; to its right, a band in the shade's own
+// color carries "Brand · shade" (after the back of the "nine kinds" cards in the
+// red guide), with everything else below it.
+// Sizes, each with one job: title 18 for the brand, shade 15 for the shade name,
+// body 13 for the product, micro 11 for facts and the red label.
+const SHADE_ITEM_TYPE = {
+  micro: 11,
+  body: 13,
+  shade: 15,
+  title: 18
+};
 function ShadeListItem({
   p,
   action
 }) {
+  const TYPE = SHADE_ITEM_TYPE;
+  const redName = redLabel(p.hex);
+  const facts = [(p.finish || '').trim(), p.price_tier, p.hex.toUpperCase(), p.discontinued && 'Discontinued'].filter(Boolean);
+  const ink = bandInk(p.hex);
   return /*#__PURE__*/React.createElement("li", {
     style: {
       display: 'flex',
       alignItems: 'stretch',
-      gap: 14,
-      padding: '0 14px 0 0',
       background: '#fff',
       borderRadius: 14,
       border: '1px solid var(--border)',
@@ -2068,29 +2102,14 @@ function ShadeListItem({
     style: {
       position: 'relative',
       width: 112,
-      minHeight: 108,
+      minHeight: 112,
       flexShrink: 0,
       background: 'var(--cream-dark)'
     }
-  }, /*#__PURE__*/React.createElement("span", {
-    role: "img",
-    "aria-label": `Swatch ${p.hex}`,
-    title: p.hex,
+  }, /*#__PURE__*/React.createElement("div", {
     style: {
       position: 'absolute',
-      left: 0,
-      top: 0,
-      bottom: 0,
-      width: 14,
-      background: p.hex
-    }
-  }), /*#__PURE__*/React.createElement("div", {
-    style: {
-      position: 'absolute',
-      top: 8,
-      right: 8,
-      bottom: 8,
-      left: 22
+      inset: 8
     }
   }, /*#__PURE__*/React.createElement(ProductThumb, {
     product: p,
@@ -2104,37 +2123,73 @@ function ShadeListItem({
     style: {
       flex: 1,
       minWidth: 0,
-      alignSelf: 'center',
-      padding: '12px 0'
+      display: 'flex',
+      flexDirection: 'column'
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
-      fontSize: 13,
-      fontWeight: 500,
-      color: 'var(--espresso)',
-      fontFamily: 'DM Sans'
-    }
-  }, p.brand), /*#__PURE__*/React.createElement("div", {
-    style: {
+      background: p.hex,
+      color: ink,
+      padding: '8px 14px 7px',
       fontFamily: 'Cormorant Garamond',
-      fontSize: 15,
-      fontStyle: 'italic',
-      color: 'var(--espresso-mid)',
-      lineHeight: 1.2,
-      marginTop: 2
+      fontWeight: 500,
+      lineHeight: 1.15,
+      textTransform: 'capitalize',
+      fontVariantNumeric: 'lining-nums' // shade names are often numbers ("999", "0 Ultra Light")
     }
-  }, p.shade), /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("span", {
+    style: srOnly
+  }, "Brand: "), /*#__PURE__*/React.createElement("span", {
     style: {
-      fontSize: 11,
-      color: 'var(--text-muted)',
-      marginTop: 3,
+      fontSize: TYPE.title
+    }
+  }, p.brand), /*#__PURE__*/React.createElement("span", {
+    "aria-hidden": "true",
+    style: {
+      margin: '0 7px',
+      opacity: 0.75
+    }
+  }, "\xB7"), /*#__PURE__*/React.createElement("span", {
+    style: srOnly
+  }, "Shade: "), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: TYPE.shade
+    }
+  }, p.shade)), /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1,
+      display: 'flex',
+      alignItems: 'center',
+      gap: 12,
+      padding: '9px 14px 10px'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1,
+      minWidth: 0,
       fontFamily: 'DM Sans'
     }
-  }, p.product, p.finish ? ` · ${p.finish}` : '')), /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("div", {
     style: {
-      alignSelf: 'center'
+      fontSize: TYPE.body,
+      lineHeight: 1.35,
+      color: 'var(--text-body)',
+      textTransform: 'capitalize'
     }
-  }, action));
+  }, p.product), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: TYPE.micro,
+      color: 'var(--text-muted)',
+      letterSpacing: '0.04em',
+      marginTop: 5
+    }
+  }, facts.join(' · ')), redName && /*#__PURE__*/React.createElement("div", {
+    style: {
+      ...RED_LABEL_STYLE,
+      fontSize: TYPE.micro,
+      marginTop: 4
+    }
+  }, redName)), /*#__PURE__*/React.createElement("div", null, action))));
 }
 
 // ── Wishlist Panel ────────────────────────────────────────────────────────────

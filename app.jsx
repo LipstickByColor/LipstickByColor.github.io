@@ -523,9 +523,7 @@ function ResultsTable({ selectedColor, matches, totalProducts, pinnedItems, togg
     return 'neutral';
   }
 
-  // Tone words as the red guide uses them
-  const RED_TONES = { blue:'blue-red', true:'true red', orange:'orange-red' };
-  const red = selectedColor ? redKind(selectedColor.hex) : null;
+  const redName = selectedColor ? redLabel(selectedColor.hex) : null;
 
   function tierOf(p) { return p.price_tier || '$$'; }
   function finishOf(p) { return (p.finish || '').trim() || 'Unlisted'; }
@@ -635,14 +633,7 @@ function ResultsTable({ selectedColor, matches, totalProducts, pinnedItems, togg
             {selectedColor.hex.toUpperCase()} · Closest lip matches by ΔE
           </p>
           {/* Reds only: tone and depth, by the red guide's rules */}
-          {red && (
-            <p style={{
-              marginTop:6, fontFamily:'DM Sans', fontSize:11, fontWeight:500,
-              letterSpacing:'0.12em', textTransform:'uppercase', color:'var(--blush-deep)',
-            }}>
-              {red.depth} {RED_TONES[red.tone]}
-            </p>
-          )}
+          {redName && <p style={{ ...RED_LABEL_STYLE, marginTop:6 }}>{redName}</p>}
         </div>
       </div>
 
@@ -1390,36 +1381,78 @@ function sharedListUrl(wishlist) {
   return `${window.location.origin}${window.location.pathname}?${q}`;
 }
 
-// One saved shade — used by My Favorites and the shared-list panel
+// ── Red label ─────────────────────────────────────────────────────────────────
+// "bright orange-red", "deep blue-red"… for any color the red guide counts as a
+// red (tone words as the guide uses them); null for everything else.
+const RED_TONES = { blue:'blue-red', true:'true red', orange:'orange-red' };
+function redLabel(hex) {
+  const red = hex ? redKind(hex) : null;
+  return red ? `${red.depth} ${RED_TONES[red.tone]}` : null;
+}
+const RED_LABEL_STYLE = {
+  fontFamily:'DM Sans', fontSize:11, fontWeight:500,
+  letterSpacing:'0.12em', textTransform:'uppercase', color:'var(--blush-deep)',
+};
+
+// Words on a band of color `hex`: white or the dark brown, whichever contrasts
+// more (WCAG contrast ratio). Deep shades get white; pinks, corals and nudes get brown.
+function bandInk(hex) {
+  const lum = h => {
+    const [r, g, b] = [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16) / 255)
+      .map(v => v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4);
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  };
+  const ESPRESSO = '#2A1A14', L = lum(hex);
+  return 1.05 / (L + 0.05) >= (L + 0.05) / (lum(ESPRESSO) + 0.05) ? '#fff' : 'var(--espresso)';
+}
+
+// One saved shade — used by My Favorites and the shared-list panel.
+// Photo on the left at full height; to its right, a band in the shade's own
+// color carries "Brand · shade" (after the back of the "nine kinds" cards in the
+// red guide), with everything else below it.
+// Sizes, each with one job: title 18 for the brand, shade 15 for the shade name,
+// body 13 for the product, micro 11 for facts and the red label.
+const SHADE_ITEM_TYPE = { micro:11, body:13, shade:15, title:18 };
 function ShadeListItem({ p, action }) {
+  const TYPE = SHADE_ITEM_TYPE;
+  const redName = redLabel(p.hex);
+  const facts = [(p.finish || '').trim(), p.price_tier, p.hex.toUpperCase(), p.discontinued && 'Discontinued'].filter(Boolean);
+  const ink = bandInk(p.hex);
   return (
     <li style={{
-      display:'flex', alignItems:'stretch', gap:14,
-      padding:'0 14px 0 0', background:'#fff',
+      display:'flex', alignItems:'stretch', background:'#fff',
       borderRadius:14, border:'1px solid var(--border)', overflow:'hidden',
     }}>
-      {/* Full, uncropped image beside a swatch strip — same treatment as result cards */}
-      <div style={{ position:'relative', width:112, minHeight:108, flexShrink:0, background:'var(--cream-dark)' }}>
-        <span role="img" aria-label={`Swatch ${p.hex}`} title={p.hex} style={{ position:'absolute', left:0, top:0, bottom:0, width:14, background:p.hex }} />
-        <div style={{ position:'absolute', top:8, right:8, bottom:8, left:22 }}>
+      <div style={{ position:'relative', width:112, minHeight:112, flexShrink:0, background:'var(--cream-dark)' }}>
+        <div style={{ position:'absolute', inset:8 }}>
           <ProductThumb product={p} width="100%" height="100%" fit="contain" radius={0} ring={false} tint={false} />
         </div>
       </div>
-      <div style={{ flex:1, minWidth:0, alignSelf:'center', padding:'12px 0' }}>
-        <div style={{ fontSize:13, fontWeight:500, color:'var(--espresso)', fontFamily:'DM Sans' }}>
-          {p.brand}
-        </div>
+      <div style={{ flex:1, minWidth:0, display:'flex', flexDirection:'column' }}>
         <div style={{
-          fontFamily:'Cormorant Garamond', fontSize:15, fontStyle:'italic',
-          color:'var(--espresso-mid)', lineHeight:1.2, marginTop:2,
+          background:p.hex, color:ink, padding:'8px 14px 7px',
+          fontFamily:'Cormorant Garamond', fontWeight:500, lineHeight:1.15, textTransform:'capitalize',
+          fontVariantNumeric:'lining-nums', // shade names are often numbers ("999", "0 Ultra Light")
         }}>
-          {p.shade}
+          <span style={srOnly}>Brand: </span>
+          <span style={{ fontSize:TYPE.title }}>{p.brand}</span>
+          <span aria-hidden="true" style={{ margin:'0 7px', opacity:0.75 }}>·</span>
+          <span style={srOnly}>Shade: </span>
+          <span style={{ fontSize:TYPE.shade }}>{p.shade}</span>
         </div>
-        <div style={{ fontSize:11, color:'var(--text-muted)', marginTop:3, fontFamily:'DM Sans' }}>
-          {p.product}{p.finish ? ` · ${p.finish}` : ''}
+        <div style={{ flex:1, display:'flex', alignItems:'center', gap:12, padding:'9px 14px 10px' }}>
+          <div style={{ flex:1, minWidth:0, fontFamily:'DM Sans' }}>
+            <div style={{ fontSize:TYPE.body, lineHeight:1.35, color:'var(--text-body)', textTransform:'capitalize' }}>
+              {p.product}
+            </div>
+            <div style={{ fontSize:TYPE.micro, color:'var(--text-muted)', letterSpacing:'0.04em', marginTop:5 }}>
+              {facts.join(' · ')}
+            </div>
+            {redName && <div style={{ ...RED_LABEL_STYLE, fontSize:TYPE.micro, marginTop:4 }}>{redName}</div>}
+          </div>
+          <div>{action}</div>
         </div>
       </div>
-      <div style={{ alignSelf:'center' }}>{action}</div>
     </li>
   );
 }
