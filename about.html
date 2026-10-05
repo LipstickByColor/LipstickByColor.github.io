@@ -813,7 +813,7 @@
       <div class="premise-tag"><span class="pt-word">How</span></div>
       <p class="body-text">
         Behind the tool is an ML pipeline — image classification, semantic segmentation, and
-        perceptual color clustering — applied to 17,000+ raw product images to build a searchable
+        perceptual color clustering — applied to 34,000+ raw product images to build a searchable
         color index from scratch.
       </p>
     </div>
@@ -1154,12 +1154,13 @@
         <div class="ptitle">Ingest &amp; Clean</div>
         <p class="pdesc">
           Scraped product listings and imagery across major retailers. Validated and repaired
-          downloaded images.
+          downloaded images. 12.5% of products shared the same stock photo and were removed
+          before classification.
         </p>
         <div class="pmetrics">
-          <span class="pmetric"><span class="v">17,000+</span><span class="l">unique products</span></span>
+          <span class="pmetric"><span class="v">34,000+</span><span class="l">products</span></span>
           <span class="pmetric"><span class="v">138</span><span class="l">retailers</span></span>
-          <span class="pmetric"><span class="v">381</span><span class="l">brands</span></span>
+          <span class="pmetric"><span class="v">437</span><span class="l">brands</span></span>
         </div>
       </div>
 
@@ -1187,7 +1188,8 @@
           Trained a classifier to distinguish image types such as swatch, bullet lipstick, and
           liquid lipstick, among others. Image type determines the color extraction strategy, rather
           than applying a one-size-fits-all method. Images with no visible product color, like sealed
-          packaging or multi-product shots, are flagged as unclassifiable and skip extraction.
+          packaging or multi-product shots, are flagged as unclassifiable and skip extraction: about
+          18% of all images.
         </p>
         <div class="pmetrics">
           <span class="pmetric"><span class="v">88%</span><span class="l">accuracy</span></span>
@@ -1207,6 +1209,7 @@
         </p>
         <div class="pmetrics">
           <span class="pmetric"><span class="v">0.70–0.88</span><span class="l">validation IoU</span></span>
+          <span class="pmetric"><span class="v">4.9%</span><span class="l">identified no color region</span></span>
           <span class="pmetric"><span class="l">CNN · U-Net</span></span>
           <span class="pmetric"><span class="l">Transfer learning</span></span>
           <span class="pmetric"><span class="l">PyTorch</span></span>
@@ -1244,7 +1247,7 @@
     <div class="pinks-reveal is-summary outcome-card">
       <p class="pinks-summary-eyebrow">Outcome</p>
       <p class="pinks-caption">
-        The web app lets users search nearly 20,000 products by color. For most products, the top match
+        The web app lets users search products by color. For most products, the top match
         is as close to the target shade as the human eye can detect.
       </p>
 
