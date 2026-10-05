@@ -1939,6 +1939,37 @@ function ShareImageModal({
   }, "Tip: on mobile, long-press the saved image to share it directly to Instagram or other apps."))));
 }
 
+// ── "new" tag on the Guides links ─────────────────────────────────────────────
+// A small tilted word whose "n" starts at the link's left edge and overlaps its
+// top (the link needs position:relative). Switches itself off after
+// GUIDES_NEW_UNTIL so it can't go stale.
+const GUIDES_NEW_UNTIL = new Date('2026-11-16');
+function GuidesNewTag({
+  top = -4,
+  left = 0
+}) {
+  if (new Date() > GUIDES_NEW_UNTIL) return null;
+  return /*#__PURE__*/React.createElement("span", {
+    "aria-label": "New",
+    style: {
+      position: 'absolute',
+      top,
+      left,
+      transform: 'rotate(-16deg)',
+      transformOrigin: '0 100%',
+      pointerEvents: 'none',
+      fontFamily: "'Cormorant Garamond', serif",
+      fontWeight: 600,
+      fontSize: 17,
+      lineHeight: 1,
+      letterSpacing: 0,
+      textTransform: 'none',
+      color: 'var(--blush)',
+      textShadow: '0 0 2px var(--cream), 0 0 2px var(--cream), 0 0 3px var(--cream)'
+    }
+  }, "new");
+}
+
 // ── Shared links ──────────────────────────────────────────────────────────────
 // The URL mirrors what's on screen so it can be copied and sent:
 //   ?color=a02523                 matches for a color (wheel, photo, hex, list)
@@ -5275,6 +5306,7 @@ function App() {
       location: 'header'
     }),
     style: {
+      position: 'relative',
       display: 'flex',
       alignItems: 'center',
       gap: 8,
@@ -5299,7 +5331,7 @@ function App() {
       e.currentTarget.style.borderColor = 'var(--border)';
       e.currentTarget.style.color = 'var(--espresso)';
     }
-  }, "Guides"), /*#__PURE__*/React.createElement("a", {
+  }, "Guides", /*#__PURE__*/React.createElement(GuidesNewTag, null)), /*#__PURE__*/React.createElement("a", {
     href: "about.html",
     className: "header-how-it-works",
     onClick: () => window.gtag?.('event', 'nav_link_click', {
@@ -5371,7 +5403,32 @@ function App() {
       borderRadius: 20,
       marginLeft: 2
     }
-  }, wishlist.length)))), mode === 'landing' ? /*#__PURE__*/React.createElement("main", {
+  }, wishlist.length))), /*#__PURE__*/React.createElement("nav", {
+    className: "header-mobile-links",
+    "aria-label": "Pages"
+  }, [['guides/', 'Guides', 'guides'], ['about.html', 'Behind the Project', 'about']].map(([href, label, target]) => /*#__PURE__*/React.createElement("a", {
+    key: target,
+    href: href,
+    onClick: () => window.gtag?.('event', 'nav_link_click', {
+      target,
+      location: 'header'
+    }),
+    style: {
+      position: 'relative',
+      color: 'var(--espresso-mid)',
+      textDecoration: 'none',
+      fontFamily: 'DM Sans',
+      fontSize: 12,
+      fontWeight: 500,
+      letterSpacing: '0.06em',
+      textTransform: 'uppercase',
+      borderBottom: '1px solid var(--border)',
+      paddingBottom: 2
+    }
+  }, label, target === 'guides' && /*#__PURE__*/React.createElement(GuidesNewTag, {
+    top: -9,
+    left: 0
+  }))))), mode === 'landing' ? /*#__PURE__*/React.createElement("main", {
     className: "landing-main"
   }, /*#__PURE__*/React.createElement(Landing, {
     onPick: id => switchMode(id, 'landing')

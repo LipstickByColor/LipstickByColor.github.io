@@ -1318,6 +1318,24 @@ function ShareImageModal({ wishlist, onClose }) {
   );
 }
 
+// ── "new" tag on the Guides links ─────────────────────────────────────────────
+// A small tilted word whose "n" starts at the link's left edge and overlaps its
+// top (the link needs position:relative). Switches itself off after
+// GUIDES_NEW_UNTIL so it can't go stale.
+const GUIDES_NEW_UNTIL = new Date('2026-11-16');
+function GuidesNewTag({ top = -4, left = 0 }) {
+  if (new Date() > GUIDES_NEW_UNTIL) return null;
+  return (
+    <span aria-label="New" style={{
+      position:'absolute', top, left, transform:'rotate(-16deg)', transformOrigin:'0 100%', pointerEvents:'none',
+      fontFamily:"'Cormorant Garamond', serif", fontWeight:600,
+      fontSize:17, lineHeight:1, letterSpacing:0, textTransform:'none',
+      color:'var(--blush)',
+      textShadow:'0 0 2px var(--cream), 0 0 2px var(--cream), 0 0 3px var(--cream)',
+    }}>new</span>
+  );
+}
+
 // ── Shared links ──────────────────────────────────────────────────────────────
 // The URL mirrors what's on screen so it can be copied and sent:
 //   ?color=a02523                 matches for a color (wheel, photo, hex, list)
@@ -3144,6 +3162,7 @@ function App() {
           <a href="guides/" className="header-how-it-works"
             onClick={() => window.gtag?.('event', 'nav_link_click', { target: 'guides', location: 'header' })}
             style={{
+              position:'relative',
               display:'flex', alignItems:'center', gap:8,
               padding:'8px 16px', borderRadius:24,
               border:'1.5px solid var(--border)',
@@ -3156,6 +3175,7 @@ function App() {
             onMouseLeave={e => { e.currentTarget.style.borderColor='var(--border)'; e.currentTarget.style.color='var(--espresso)'; }}
           >
             Guides
+            <GuidesNewTag />
           </a>
           <a href="about.html" className="header-how-it-works"
             onClick={() => window.gtag?.('event', 'nav_link_click', { target: 'about', location: 'header' })}
@@ -3195,6 +3215,21 @@ function App() {
             )}
           </button>
         </div>
+        {/* Phones: the two page links drop to a second line under My Favorites */}
+        <nav className="header-mobile-links" aria-label="Pages">
+          {[['guides/', 'Guides', 'guides'], ['about.html', 'Behind the Project', 'about']].map(([href, label, target]) => (
+            <a key={target} href={href}
+              onClick={() => window.gtag?.('event', 'nav_link_click', { target, location: 'header' })}
+              style={{
+                position:'relative', color:'var(--espresso-mid)', textDecoration:'none',
+                fontFamily:'DM Sans', fontSize:12, fontWeight:500, letterSpacing:'0.06em', textTransform:'uppercase',
+                borderBottom:'1px solid var(--border)', paddingBottom:2,
+              }}>
+              {label}
+              {target === 'guides' && <GuidesNewTag top={-9} left={0} />}
+            </a>
+          ))}
+        </nav>
       </header>
 
       {/* Main layout */}

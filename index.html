@@ -75,6 +75,7 @@
     flex: 1; display: flex; flex-direction: column; min-height: 0; min-width: 0;
   }
   .mobile-picker-tips { display: none; }
+  .header-mobile-links { display: none; }
   /* Result cards: on hover, softly ring the save (♥) and compare (+) buttons.
      Hover-capable pointers only, so touch screens never get a stuck ring. */
   @media (hover: hover) {
@@ -147,6 +148,11 @@
     .landing-lede { font-size: 28px; }
     .app-header { padding: 14px 16px 10px; gap: 6px 8px; }
     .header-how-it-works { display: none !important; }
+    /* …and return as a line of text links under My Favorites */
+    .header-mobile-links {
+      display: flex; flex-basis: 100%; justify-content: flex-end; gap: 22px;
+      padding: 6px 2px 2px;
+    }
     .header-product-count { display: none !important; }
     .mode-bar {
       display: grid !important; grid-template-columns: 1fr 1fr;
