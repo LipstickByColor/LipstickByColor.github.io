@@ -5646,7 +5646,18 @@ function App() {
       paddingBottom: 1,
       transition: 'opacity 0.15s'
     }
-  }, "Guides"), selectedColor && matches.length > 0 && /*#__PURE__*/React.createElement("span", {
+  }, "Guides"), /*#__PURE__*/React.createElement("a", {
+    href: "privacy.html",
+    style: {
+      fontSize: 11,
+      color: 'var(--blush)',
+      letterSpacing: '0.05em',
+      textDecoration: 'none',
+      borderBottom: '1px solid currentColor',
+      paddingBottom: 1,
+      transition: 'opacity 0.15s'
+    }
+  }, "Privacy"), selectedColor && matches.length > 0 && /*#__PURE__*/React.createElement("span", {
     style: {
       fontSize: 11,
       color: 'var(--text-muted)'

@@ -3378,6 +3378,13 @@ function App() {
         }}>
           Guides
         </a>
+        <a href="privacy.html" style={{
+          fontSize:11, color:'var(--blush)', letterSpacing:'0.05em',
+          textDecoration:'none', borderBottom:'1px solid currentColor', paddingBottom:1,
+          transition:'opacity 0.15s',
+        }}>
+          Privacy
+        </a>
         {selectedColor && matches.length > 0 && (
           <span style={{ fontSize:11, color:'var(--text-muted)' }}>
             · {matches.length} closest match{matches.length !== 1 ? 'es' : ''} from {REAL_PRODUCTS.length} products
