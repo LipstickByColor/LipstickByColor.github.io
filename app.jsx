@@ -1321,14 +1321,22 @@ function ShareImageModal({ wishlist, onClose }) {
 // ── Shared links ──────────────────────────────────────────────────────────────
 // The URL mirrors what's on screen so it can be copied and sent:
 //   ?color=a02523                 matches for a color (wheel, photo, hex, list)
+//   ?wheel=classic-red            a wheel color by name, whatever its hex is today (guides link here)
 //   ?brand=chanel&dupe=99+pirate  dupes for a product
+//   ?mode=dupe                    the dupe finder, nothing picked yet (guides link here)
 //   ?item=brand|shade&item=…      a shared favorites list
 // Brands never contain '|' (shades can), so items split on the first one.
 function parseSharedLink(search) {
   const q = new URLSearchParams(search);
   const color = q.get('color'), brand = q.get('brand'), dupe = q.get('dupe');
   if (color && /^[0-9a-f]{6}$/i.test(color)) return { type:'color', hex:'#' + color.toLowerCase() };
+  const wheel = q.get('wheel');
+  if (wheel) {
+    const c = LIPSTICK_DATA.find(c => c.name.toLowerCase().replace(/[^a-z0-9]+/g, '-') === wheel.toLowerCase());
+    if (c) return { type:'color', hex:c.hex.toLowerCase() };
+  }
   if (brand && dupe) return { type:'dupe', brand, shade:dupe };
+  if (q.get('mode') === 'dupe') return { type:'dupe' };
   // Older links packed the list as ?list=brand|shade,brand|shade — best effort,
   // since a few names contain commas
   const items = q.getAll('item').length ? q.getAll('item') : (q.get('list') || '').split(',').filter(Boolean);
@@ -2849,18 +2857,23 @@ function App() {
     if (initialLink) window.gtag?.('event', 'open_shared_link', { link_type: initialLink.type });
   }, []);
 
-  const [selectedColor, setSelectedColor] = useState(null);
+  // A ?color= link that is exactly a wheel color opens on the wheel with that
+  // segment selected (that's how a wheel pick is shared); any other hex opens
+  // the custom-color picker
+  const [initialWheelColor] = useState(() => initialLink?.type === 'color'
+    ? LIPSTICK_DATA.find(c => c.hex.toLowerCase() === initialLink.hex) || null : null);
+  const [selectedColor, setSelectedColor] = useState(initialWheelColor);
   const [hoveredId, setHoveredId] = useState(null);
   const resultsRef = React.useRef(null);
   const [toneIdx, setToneIdx] = useState(null);
   const [mode, setMode] = useState(() => { // 'landing' | 'wheel' | 'photo' | 'hex' | 'dupe' | 'list'
-    if (initialLink?.type === 'color') return 'hex';
+    if (initialLink?.type === 'color') return initialWheelColor ? 'wheel' : 'hex';
     if (initialLink?.type === 'dupe') return 'dupe';
     try { return localStorage.getItem('lipstick-visited') ? 'wheel' : 'landing'; }
     catch { return 'landing'; }
   });
   const [photoHex, setPhotoHex] = useState(null);
-  const [hexHex, setHexHex] = useState(initialLink?.type === 'color' ? initialLink.hex : null);
+  const [hexHex, setHexHex] = useState(initialLink?.type === 'color' && !initialWheelColor ? initialLink.hex : null);
   const [dupeProduct, setDupeProduct] = useState(null);
   // Bumped to remount DupeFinder, clearing its brand/shade search back to step 1
   const [dupeResetKey, setDupeResetKey] = useState(0);
@@ -2964,7 +2977,7 @@ function App() {
 
   // Shared dupe link: the product can only be looked up once the catalogue is in
   useEffect(() => {
-    if (!dataReady || initialLink?.type !== 'dupe' || mode !== 'dupe') return;
+    if (!dataReady || initialLink?.type !== 'dupe' || !initialLink.brand || mode !== 'dupe') return;
     const p = findProduct(initialLink.brand, initialLink.shade);
     if (p) setDupeProduct(p);
     else window.gtag?.('event', 'shared_link_not_found', { link_type: 'dupe', brand: initialLink.brand, shade: initialLink.shade });
@@ -3072,6 +3085,7 @@ function App() {
     const q = new URLSearchParams();
     if (sharedListKeys) sharedListKeys.forEach(k => q.append('item', `${k.brand}|${k.shade}`));
     else if (mode === 'dupe' && dupeProduct) { q.set('brand', dupeProduct.brand); q.set('dupe', dupeProduct.shade); }
+    else if (mode === 'dupe' && initialLink?.type === 'dupe' && !initialLink.brand) q.set('mode', 'dupe');
     else if (mode === 'dupe' && !dataReady && initialLink?.type === 'dupe') { q.set('brand', initialLink.brand); q.set('dupe', initialLink.shade); }
     else if (mode !== 'dupe' && effectiveColor) q.set('color', effectiveColor.hex.slice(1).toLowerCase());
     const search = q.toString() ? `?${q}` : '';
@@ -3127,6 +3141,22 @@ function App() {
           · Nearly 20,000 lip products
         </span>
         <div style={{ marginLeft:'auto', display:'flex', alignItems:'center', gap:16 }}>
+          <a href="guides/" className="header-how-it-works"
+            onClick={() => window.gtag?.('event', 'nav_link_click', { target: 'guides', location: 'header' })}
+            style={{
+              display:'flex', alignItems:'center', gap:8,
+              padding:'8px 16px', borderRadius:24,
+              border:'1.5px solid var(--border)',
+              background:'#fff',
+              color:'var(--espresso)', textDecoration:'none',
+              fontFamily:'DM Sans', fontSize:12, fontWeight:500, letterSpacing:'0.06em',
+              textTransform:'uppercase', transition:'all 0.15s',
+            }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor='var(--blush)'; e.currentTarget.style.color='var(--blush)'; }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor='var(--border)'; e.currentTarget.style.color='var(--espresso)'; }}
+          >
+            Guides
+          </a>
           <a href="about.html" className="header-how-it-works"
             onClick={() => window.gtag?.('event', 'nav_link_click', { target: 'about', location: 'header' })}
             style={{
@@ -3338,6 +3368,15 @@ function App() {
           transition:'opacity 0.15s',
         }}>
           How It Works
+        </a>
+        <a href="guides/"
+          onClick={() => window.gtag?.('event', 'nav_link_click', { target: 'guides', location: 'footer' })}
+          style={{
+          fontSize:11, color:'var(--blush)', letterSpacing:'0.05em',
+          textDecoration:'none', borderBottom:'1px solid currentColor', paddingBottom:1,
+          transition:'opacity 0.15s',
+        }}>
+          Guides
         </a>
         {selectedColor && matches.length > 0 && (
           <span style={{ fontSize:11, color:'var(--text-muted)' }}>

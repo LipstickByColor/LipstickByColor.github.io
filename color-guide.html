@@ -266,6 +266,27 @@
   }
   .cta:hover { background: var(--espresso-mid); }
 
+  /* Closing card: same pink panel that ends the red lipstick guide */
+  .next-card {
+    margin-top: 72px;
+    background: #F6E2E8; border-radius: 28px;
+    padding: clamp(28px, 5vw, 48px);
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 24px 28px; flex-wrap: wrap;
+  }
+  .next-card > div { flex: 1 1 320px; min-width: 0; }
+  .next-card h2 {
+    font-family: 'Cormorant Garamond', serif; font-weight: 300;
+    font-size: clamp(28px, 4vw, 40px); line-height: 1.08;
+  }
+  .next-card h2 em { font-weight: 400; }
+  .next-card p {
+    margin-top: 12px; font-size: 16px; line-height: 1.6;
+    color: var(--espresso-mid); max-width: 460px; text-wrap: pretty;
+  }
+  .next-card .cta { white-space: nowrap; }
+  .next-card + .page-footer { margin-top: 40px; }
+
   @media (max-width: 600px) {
     .page { padding: 32px 20px 60px; }
     .formula-card { flex-direction: column; gap: 20px; }
@@ -282,10 +303,12 @@
 <body>
 <div class="page">
 
-  <!-- Back -->
+  <div style="display:flex;justify-content:space-between;gap:16px">
   <a href="index.html" class="back">
     ← Back to Color Finder
   </a>
+  <a href="guides/" class="back">Guides</a>
+  </div>
 
   <!-- Hero -->
   <div class="hero">
@@ -512,6 +535,15 @@
   <p class="side-note">
     Depth is read directly from <em>L*</em> (lightness): under 32 is deep, 32–55 is medium, above 55 is light.
   </p>
+
+  <!-- Next: how the colors are measured -->
+  <div class="next-card">
+    <div>
+      <h2>From product photo <em>to measured color</em></h2>
+      <p>How do we get a color out of a picture of a lipstick? See the steps behind the 17,000+ shades in the finder.</p>
+    </div>
+    <a href="about.html#pipeline" class="cta">See how it works →</a>
+  </div>
 
   <!-- Footer nav -->
   <div class="page-footer">
