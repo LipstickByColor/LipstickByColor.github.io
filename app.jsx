@@ -638,7 +638,7 @@ function ResultsTable({ selectedColor, matches, totalProducts, pinnedItems, togg
           {red && (
             <p style={{
               marginTop:6, fontFamily:'DM Sans', fontSize:11, fontWeight:500,
-              letterSpacing:'0.12em', textTransform:'uppercase', color:'var(--blush)',
+              letterSpacing:'0.12em', textTransform:'uppercase', color:'var(--blush-deep)',
             }}>
               {red.depth} {RED_TONES[red.tone]}
             </p>

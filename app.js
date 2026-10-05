@@ -966,7 +966,7 @@ function ResultsTable({
       fontWeight: 500,
       letterSpacing: '0.12em',
       textTransform: 'uppercase',
-      color: 'var(--blush)'
+      color: 'var(--blush-deep)'
     }
   }, red.depth, " ", RED_TONES[red.tone]))), toneRamp && toneRamp.ramp.length > 1 && /*#__PURE__*/React.createElement("div", {
     style: {
