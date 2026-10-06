@@ -1323,19 +1323,20 @@ function ShareImageModal({ wishlist, onClose }) {
 }
 
 // ── "new" tag on the Guides links ─────────────────────────────────────────────
-// A small tilted word whose "n" starts at the link's left edge and overlaps its
-// top (the link needs position:relative). Switches itself off after
-// GUIDES_NEW_UNTIL so it can't go stale.
+// A small pill badge that overlaps the link's top-right corner (the link needs
+// position:relative). Switches itself off after GUIDES_NEW_UNTIL so it can't
+// go stale.
 const GUIDES_NEW_UNTIL = new Date('2026-11-16');
-function GuidesNewTag({ top = -4, left = 0 }) {
+function GuidesNewTag({ top = -8, right = -10 }) {
   if (new Date() > GUIDES_NEW_UNTIL) return null;
   return (
     <span aria-label="New" style={{
-      position:'absolute', top, left, transform:'rotate(-16deg)', transformOrigin:'0 100%', pointerEvents:'none',
-      fontFamily:"'Cormorant Garamond', serif", fontWeight:600,
-      fontSize:17, lineHeight:1, letterSpacing:0, textTransform:'none',
-      color:'var(--blush)',
-      textShadow:'0 0 2px var(--cream), 0 0 2px var(--cream), 0 0 3px var(--cream)',
+      position:'absolute', top, right, pointerEvents:'none',
+      fontFamily:"'DM Sans', sans-serif", fontWeight:500,
+      fontSize:9, lineHeight:1, letterSpacing:'0.12em', textTransform:'uppercase', whiteSpace:'nowrap',
+      color:'#fff', background:'var(--blush-deep)',
+      padding:'3px 6px 2px', borderRadius:10,
+      boxShadow:'0 0 0 2px var(--cream)',
     }}>new</span>
   );
 }
@@ -3272,7 +3273,7 @@ function App() {
                 borderBottom:'1px solid var(--border)', paddingBottom:2,
               }}>
               {label}
-              {target === 'guides' && <GuidesNewTag top={-9} left={0} />}
+              {target === 'guides' && <GuidesNewTag top={-13} right={-16} />}
             </a>
           ))}
         </nav>
