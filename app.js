@@ -5532,7 +5532,7 @@ function App() {
     label: 'Dupe finder'
   }, ...(wishlist.length > 0 ? [{
     id: 'list',
-    label: 'From My List'
+    label: 'From Favorites'
   }] : [])].map(t => {
     const active = mode === t.id;
     return /*#__PURE__*/React.createElement("button", {
