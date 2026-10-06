@@ -168,6 +168,10 @@
     row.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); showRed(key); } });
     card.querySelector('[data-red-back]').addEventListener('click', backRed);
   });
+  // Tapping the empty red around an open shade goes back to the list
+  redFlip.closest('section').addEventListener('click', e => {
+    if (state.redCard && !redFlip.contains(e.target) && !e.target.closest('a, button')) backRed();
+  });
 
   // ── Famous reds map ─────────────────────────────────────────────────────────
   const pop = $('pop'), popPhotos = $$('[data-if="sel.hasPhotos"] img');
