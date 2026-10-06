@@ -19,13 +19,13 @@ function _setDataStatus(status) {
 
 const _client = supabase.createClient(_SUPABASE_URL, _SUPABASE_KEY);
 
-// Fetch every row's `cols`. ~17.5k rows today: requesting a guessed number of
+// Fetch every row's `cols`. ~16.8k rows today: requesting a guessed number of
 // pages in parallel skips a separate count round trip, and if the catalogue
 // outgrows it we keep going. Ordered by id so pages never overlap or skip rows.
 async function _fetchAll(cols) {
   const PAGE = 1000;
-  const EXPECTED_PAGES = 18;
-  const fetchPage = i => _client.from('lipstick-data-update')
+  const EXPECTED_PAGES = 17;
+  const fetchPage = i => _client.from('lipstic-data-update-oct26')
     .select(cols)
     .order('id')
     .range(i * PAGE, (i + 1) * PAGE - 1);

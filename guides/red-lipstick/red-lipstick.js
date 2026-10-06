@@ -77,11 +77,11 @@
     ['Chanel Pirate', '$$$$', '#c52638', 26.6, 43.5, ['pirate-lips-1.webp?v=2', 'pirate-lips-2.webp?v=2', 'pirate-bullet-3.webp']],
     ['Pat McGrath Elson', '$$$', '#af2737', 25.1, 39.4, 'elson-lips-', [1, 2, 3]],
     ['Charlotte Tilbury Love Liberty', '$$$', '#86222e', 22.9, 30.5, 'love-liberty-lips-', [2, 1, 3]],
-    ['Givenchy Le Rouge 334 Grenat Volontaire', '$$$', '#b22137', 23.9, 39.3, 'grenat-volontaire-lips-', [1, 2, 3]],
+    ['Givenchy Le Rouge 334 Grenat Volontaire', '$$$$', '#b22137', 23.9, 39.3, 'grenat-volontaire-lips-', [1, 2, 3]],
     ['MAC Lady Danger', '$$', '#de2a21', 37.1, 48.8, 'lady-danger-lips-', [1, 2, 3]],
-    ['Tom Ford Scarlet Rouge', '$$$', '#d3222c', 32.1, 45.9, 'tom-ford-scarlet-rouge-lips-', [2, 1, 3]],
-    ['Lancôme L\'Absolu Rouge 196 French Touch', '$$', '#913227', 35.7, 34.9, 'lancome-196-french-touch-lips-', [1, 2, 3]],
-    ['Armani Lip Maestro 405 Sultan', '$$$', '#951f13', 38.2, 32.7, 'armani-405-sultan-lips-', [1, 2, 3]],
+    ['Tom Ford Scarlet Rouge', '$$$$', '#d3222c', 32.1, 45.9, 'tom-ford-scarlet-rouge-lips-', [2, 1, 3]],
+    ['Lancôme L\'Absolu Rouge 196 French Touch', '$$$', '#913227', 35.7, 34.9, 'lancome-196-french-touch-lips-', [1, 2, 3]],
+    ['Armani Lip Maestro 405 Sultan', '$$$$', '#951f13', 38.2, 32.7, 'armani-405-sultan-lips-', [1, 2, 3]],
     ['Revlon 806 Electric Melon', '$', '#f83155', 21.9, 54.9, 'revlon-806-electric-melon-lips-', ['1', '2b', '3']],
     ['Dior 784 Rouge Rose', '$$$$', '#e23959', 18.7, 51.6, 'dior-784-rouge-rose-lips-', [1, 2, 3]],
     ['Dior 777 Fahrenheit', '$$$$', '#b33125', 36.5, 41.1, 'dior-777-fahrenheit-lips-', [1, 2, 3]],
@@ -91,11 +91,11 @@
     ['Revlon Cherries in the Snow 440', '$', '#c50c3c', 21.4, 41.8, 'cherries-in-the-snow-lips-', [1, 2, 3]],
     ['Fenty Beauty Stunna Uncensored', '$$', '#b32126', 33.3, 39.2, 'uncensored-lips-', [3, 2, 1]],
     ['Revlon 720 Fire & Ice', '$', '#db2129', 33.4, 47.4, 'fire-and-ice-lips-', ['1', '2b', '4']],
-    ['Gucci Rouge à Lèvres Satin Goldie Red', '$$$', '#a20313', 34.8, 33.5, 'goldie-red-lips-', [1, 2, 3]],
-    ['Lisa Eldridge True Velvet Velvet Ribbon', '$$$', '#b91b2f', 27.7, 40.1, 'velvet-ribbon-lips-', [1, 2, 3]],
-    ['Lisa Eldridge True Velvet Velvet Dragon', '$$$', '#ad2d13', 41.6, 39.3, 'velvet-dragon-lips-', [2, 1, 3]],
+    ['Gucci Rouge à Lèvres Satin Goldie Red', '$$$$', '#a20313', 34.8, 33.5, 'goldie-red-lips-', [1, 2, 3]],
+    ['Lisa Eldridge True Velvet Velvet Ribbon', '$$', '#b91b2f', 27.7, 40.1, 'velvet-ribbon-lips-', [1, 2, 3]],
+    ['Lisa Eldridge True Velvet Velvet Dragon', '$$', '#ad2d13', 41.6, 39.3, 'velvet-dragon-lips-', [2, 1, 3]],
     ['Maybelline SuperStay Matte Ink Ruler', '$', '#961e32', 21.5, 33.2, 'ruler-lips-', [1, 2, 3]],
-    ['YSL Le Orange', '$$$', '#ca3121', 38.1, 45.4, 'le-orange-lips-', [1, 2, 3], '?v=2'],
+    ['YSL Le Orange', '$$$$', '#ca3121', 38.1, 45.4, 'le-orange-lips-', [1, 2, 3], '?v=2'],
     ['Dior 550 Red Shock', '$$$$', '#8b1b1c', 32.7, 30.3, 'red-shock-lips-', [1, 2, 3]],
   ].map(([name, tier, hex, h, L, stem, order, bust]) => ({
     key: name, name, tier, hex, h, L,
@@ -314,7 +314,7 @@
       limit: redBox ? 300 : 60,
     });
     if (redBox) { params.append('lab_l', 'gte.20'); params.append('lab_l', 'lte.55'); params.append('lab_a', 'gte.33'); params.append('lab_b', 'gte.13'); }
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/lipstick-data-update?${params}`, {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/lipstic-data-update-oct26?${params}`, {
       headers: { apikey: SUPABASE_KEY, Authorization: 'Bearer ' + SUPABASE_KEY },
     });
     if (!res.ok) throw new Error(res.status);

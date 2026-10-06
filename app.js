@@ -825,9 +825,9 @@ function ResultsTable({
   const allTones = [...new Set(matches.map(toneOf))];
   const TONE_ORDER = ['cool', 'neutral', 'warm'];
   const orderedTones = TONE_ORDER.filter(t => allTones.includes(t));
-  const TIER_ORDER = ['$', '$$', '$$$'];
+  const TIER_ORDER = ['$', '$$', '$$$', '$$$$'];
   const allTiers = TIER_ORDER.filter(t => matches.some(p => tierOf(p) === t));
-  const FINISH_ORDER = ['Matte', 'Satin', 'Gloss', 'Sheer', 'Shimmer', 'Unlisted'];
+  const FINISH_ORDER = ['Cream', 'Glossy', 'Matte', 'Satin', 'Semi-Matte', 'Sheer', 'Shimmer', 'Unlisted'];
   const allFinishes = FINISH_ORDER.filter(f => matches.some(p => finishOf(p) === f));
   const FORMAT_ORDER = ['Bullet Lipstick', 'Liquid Lipstick', 'Lip Gloss', 'Lip Stain & Tint', 'Lip Liner & Pencil', 'Lip Oil', 'Lip Balm & Care'];
   const FORMAT_LABELS = {
@@ -3524,7 +3524,7 @@ function VibePanel({
     temps: [],
     depths: []
   });
-  const FINISHES = ['Matte', 'Satin', 'Gloss', 'Sheer', 'Shimmer', 'Unlisted'];
+  const FINISHES = ['Cream', 'Glossy', 'Matte', 'Satin', 'Semi-Matte', 'Sheer', 'Shimmer', 'Unlisted'];
   const TEMPS = [{
     id: 'cool',
     label: 'Cool'
@@ -5197,11 +5197,14 @@ function App() {
   // ── Vibe profile (persistent shopper preferences) ───────────────────────
   const [vibe, setVibe] = useState(() => {
     try {
-      return JSON.parse(localStorage.getItem('lipstick-vibe') || 'null') || {
+      const saved = JSON.parse(localStorage.getItem('lipstick-vibe') || 'null') || {
         finishes: [],
         temps: [],
         depths: []
       };
+      // "Gloss" was renamed "Glossy" in the catalogue; carry saved preferences over
+      if (saved.finishes) saved.finishes = saved.finishes.map(f => f === 'Gloss' ? 'Glossy' : f);
+      return saved;
     } catch {
       return {
         finishes: [],
