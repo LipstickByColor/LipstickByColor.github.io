@@ -1,5 +1,9 @@
 const { useState, useEffect } = React;
 
+// Filled heart. The trailing U+FE0E asks for the text glyph: without it phones
+// draw U+2665 as a red emoji that ignores the CSS color.
+const HEART = '\u2665\uFE0E';
+
 // Look up a product's image URL from the prebuilt index.
 // Keys are "brand|product|shade" lowercased.
 function getProductImage(p) {
@@ -124,7 +128,7 @@ function MatchCard({ p, wishlist, toggleWishlist, pinnedItems, togglePin }) {
             title={isLiked ? 'Remove from My Favorites' : 'Save to My Favorites'}
             className="match-card-action"
             style={heartBtnStyle(isLiked)}
-          >{isLiked ? '♥' : '♡'}</button>
+          >{isLiked ? HEART : '♡'}</button>
           <button
             onClick={e => { e.stopPropagation(); togglePin(p); }}
             aria-label={`${isPinned ? 'Remove' : 'Add'} ${p.brand} ${p.shade} ${isPinned ? 'from' : 'to'} comparison`}
@@ -1562,7 +1566,7 @@ function WishlistPanel({ wishlist, onClose, onRemove, onClear }) {
           padding:'24px 32px 20px', borderBottom:'1px solid var(--border)',
           display:'flex', alignItems:'center', gap:12,
         }}>
-          <span style={{ color:'var(--blush)', fontSize:22 }}>♥</span>
+          <span style={{ color:'var(--blush)', fontSize:22 }}>{HEART}</span>
           <h2 style={{ fontFamily:'Cormorant Garamond', fontWeight:400, fontSize:26, color:'var(--espresso)' }}>
             My Favorites
           </h2>
@@ -1592,7 +1596,7 @@ function WishlistPanel({ wishlist, onClose, onRemove, onClear }) {
             <ul style={{ listStyle:'none', display:'flex', flexDirection:'column', gap:10 }}>
               {wishlist.map((p, i) => (
                 <ShadeListItem key={i} p={p} action={
-                  <button onClick={() => onRemove(p)} title="Remove from My Favorites" aria-label={`Remove ${p.brand} ${p.shade} from My Favorites`} style={heartBtnStyle(true)}>♥</button>
+                  <button onClick={() => onRemove(p)} title="Remove from My Favorites" aria-label={`Remove ${p.brand} ${p.shade} from My Favorites`} style={heartBtnStyle(true)}>{HEART}</button>
                 } />
               ))}
             </ul>
@@ -1704,7 +1708,7 @@ function SharedListPanel({ items, missing, loading, wishlist, toggleWishlist, on
                   const isSaved = saved.has(key(p));
                   return (
                     <ShadeListItem key={key(p)} p={p} action={
-                      <button onClick={() => toggleWishlist(p)} title={isSaved ? 'Remove from favorites' : 'Save to favorites'} aria-pressed={isSaved} style={heartBtnStyle(isSaved)}>{isSaved ? '♥' : '♡'}</button>
+                      <button onClick={() => toggleWishlist(p)} title={isSaved ? 'Remove from favorites' : 'Save to favorites'} aria-pressed={isSaved} style={heartBtnStyle(isSaved)}>{isSaved ? HEART : '♡'}</button>
                     } />
                   );
                 })}
@@ -1728,7 +1732,7 @@ function SharedListPanel({ items, missing, loading, wishlist, toggleWishlist, on
               cursor: unsaved.length ? 'pointer' : 'default',
               fontFamily:'DM Sans', fontSize:13, fontWeight:500,
             }}>
-              {unsaved.length ? `♥ Save ${unsaved.length === items.length ? 'all' : unsaved.length} to my favorites` : '♥ All saved to your favorites'}
+              {unsaved.length ? `${HEART} Save ${unsaved.length === items.length ? 'all' : unsaved.length} to my favorites` : `${HEART} All saved to your favorites`}
             </button>
           </div>
         )}
@@ -3258,7 +3262,7 @@ function App() {
             onMouseEnter={e => { e.currentTarget.style.borderColor='var(--blush)'; e.currentTarget.style.color='var(--blush)'; }}
             onMouseLeave={e => { e.currentTarget.style.borderColor='var(--border)'; e.currentTarget.style.color='var(--espresso)'; }}
           >
-            <span style={{ color:'var(--blush)' }}>♥</span> My Favorites
+            <span style={{ color:'var(--blush)' }}>{HEART}</span> My Favorites
             {wishlist.length > 0 && (
               <span style={{
                 background:'var(--blush)', color:'#fff',

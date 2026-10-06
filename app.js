@@ -4,6 +4,10 @@ const {
   useEffect
 } = React;
 
+// Filled heart. The trailing U+FE0E asks for the text glyph: without it phones
+// draw U+2665 as a red emoji that ignores the CSS color.
+const HEART = '\u2665\uFE0E';
+
 // Look up a product's image URL from the prebuilt index.
 // Keys are "brand|product|shade" lowercased.
 function getProductImage(p) {
@@ -218,7 +222,7 @@ function MatchCard({
     title: isLiked ? 'Remove from My Favorites' : 'Save to My Favorites',
     className: "match-card-action",
     style: heartBtnStyle(isLiked)
-  }, isLiked ? '♥' : '♡'), /*#__PURE__*/React.createElement("button", {
+  }, isLiked ? HEART : '♡'), /*#__PURE__*/React.createElement("button", {
     onClick: e => {
       e.stopPropagation();
       togglePin(p);
@@ -2354,7 +2358,7 @@ function WishlistPanel({
       color: 'var(--blush)',
       fontSize: 22
     }
-  }, "\u2665"), /*#__PURE__*/React.createElement("h2", {
+  }, HEART), /*#__PURE__*/React.createElement("h2", {
     style: {
       fontFamily: 'Cormorant Garamond',
       fontWeight: 400,
@@ -2426,7 +2430,7 @@ function WishlistPanel({
       title: "Remove from My Favorites",
       "aria-label": `Remove ${p.brand} ${p.shade} from My Favorites`,
       style: heartBtnStyle(true)
-    }, "\u2665")
+    }, HEART)
   })))), wishlist.length > 0 && /*#__PURE__*/React.createElement("div", {
     style: {
       borderTop: '1px solid var(--border)',
@@ -2604,7 +2608,7 @@ function SharedListPanel({
         title: isSaved ? 'Remove from favorites' : 'Save to favorites',
         "aria-pressed": isSaved,
         style: heartBtnStyle(isSaved)
-      }, isSaved ? '♥' : '♡')
+      }, isSaved ? HEART : '♡')
     });
   })), missing > 0 && /*#__PURE__*/React.createElement("p", {
     style: {
@@ -2634,7 +2638,7 @@ function SharedListPanel({
       fontSize: 13,
       fontWeight: 500
     }
-  }, unsaved.length ? `♥ Save ${unsaved.length === items.length ? 'all' : unsaved.length} to my favorites` : '♥ All saved to your favorites'))));
+  }, unsaved.length ? `${HEART} Save ${unsaved.length === items.length ? 'all' : unsaved.length} to my favorites` : `${HEART} All saved to your favorites`))));
 }
 
 // ── Comparison Tray ────────────────────────────────────────────────────────────
@@ -5472,7 +5476,7 @@ function App() {
     style: {
       color: 'var(--blush)'
     }
-  }, "\u2665"), " My Favorites", wishlist.length > 0 && /*#__PURE__*/React.createElement("span", {
+  }, HEART), " My Favorites", wishlist.length > 0 && /*#__PURE__*/React.createElement("span", {
     style: {
       background: 'var(--blush)',
       color: '#fff',
