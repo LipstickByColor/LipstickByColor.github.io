@@ -30,6 +30,8 @@
 body{margin:0;background:#FAF6F1;color:#2A1A14;font-family:'DM Sans',system-ui,sans-serif}
 a{color:#B0566F}a:hover{color:#2A1A14}
 [hidden]{display:none!important}
+/* The map starts with no popover open; hide it until the script has closed it */
+#pop.pre{display:none!important}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{transition-duration:.01ms!important;animation-duration:.01ms!important;scroll-behavior:auto!important}}
 .red-card{flex:1;display:flex;flex-direction:column}
 /* Search results (built in red-lipstick.js) */
@@ -960,26 +962,6 @@ a{color:#B0566F}a:hover{color:#2A1A14}
     <h2 style="margin:0 0 14px;font-family:'Cormorant Garamond',serif;font-weight:300;font-size:clamp(34px,5vw,56px);line-height:1.02">Where the famous reds <em style="font-weight:400">really land</em></h2>
     <p style="margin:0 0 32px;font-size:17px;line-height:1.7;color:#5C3D30;max-width:580px;text-wrap:pretty">We measured the cult reds and dropped them onto the map of nine kinds. <em style="font-family:'Cormorant Garamond',serif;font-size:1.2em;color:#B0566F">Tap a red to see what kind it really is.</em></p>
 
-    <div style="max-width:920px;position:relative;z-index:10;margin:0 0 18px">
-      <label for="red-q" style="display:block;font-size:13px;color:#5C3D30;margin-bottom:8px">Add your red to the map</label>
-      <div style="display:flex;align-items:center;gap:10px;background:#fff;border:1.5px solid #E0D0C4;border-radius:30px;padding:10px 16px;max-width:520px">
-        <span style="color:#8C6858;font-size:15px">⌕</span>
-        <input id="red-q" autocomplete="off" value="" placeholder="Search a brand or shade, e.g. nars, cherry" aria-label="Search red lipsticks" style="flex:1;min-width:0;border:none;outline:none;background:transparent;font-family:'DM Sans',sans-serif;font-size:15px;color:#2A1A14">
-        
-          <button data-if="hasQ" hidden id="red-q-clear" type="button" aria-label="Clear search" style="font-family:'DM Sans',sans-serif;background:none;border:none;color:#A08878;font-size:16px;cursor:pointer;padding:0">×</button>
-        
-      </div>
-      <span role="status" aria-live="polite" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap"><span data-t="searchStatus"></span></span>
-      
-        <ul data-if="showResults" hidden id="red-results" aria-label="Matching lipsticks" style="list-style:none;margin:6px 0 0;padding:6px;position:absolute;left:0;top:100%;width:min(520px,100%);background:#fff;border:1px solid #E0D0C4;border-radius:18px;box-shadow:0 14px 40px rgba(42,26,20,.16)">
-          
-          <li data-if="searchDown" hidden style="padding:12px;font-size:13px;color:#8C6858">Search isn't available right now. Try again in a moment.</li>
-          
-            <li data-if="noResults" hidden style="padding:12px;font-size:13px;color:#8C6858">No reds match that yet. Try a brand name.</li>
-          
-        </ul>
-      
-    </div>
 
     <div style="max-width:920px">
       <div style="position:relative;width:100%;box-sizing:border-box;aspect-ratio:3/2;min-height:340px;border-radius:18px;background:#fff;border:1px solid #E0D0C4">
@@ -1068,7 +1050,7 @@ a{color:#B0566F}a:hover{color:#2A1A14}
           <button class="h5 b1" id="dot-dior-550-red-shock" type="button" aria-expanded="false" title="Dior 550 Red Shock" aria-label="Dior 550 Red Shock" style="position:absolute;left:61.3%;top:77.1%;width:24px;height:24px;margin:-12px 0 0 -12px;border-radius:50%;background:#8b1b1c;border:1.5px solid #fff;box-shadow:0 2px 6px rgba(42,26,20,.25);cursor:pointer;padding:0;transition:transform .15s;z-index:1;touch-action:manipulation"></button>
         
         
-          <div data-if="hasSel" id="pop" role="dialog" aria-label="MAC Ruby Woo" style="position:absolute;left:clamp(8px, calc(39.6% - min(190px, calc(50% - 8px))), calc(100% - min(380px, calc(100% - 16px)) - 8px));top:53.0%;transform:translateY(calc(-100% - 22px));width:min(380px,calc(100% - 16px));box-sizing:border-box;background:#FAF6F1;border:1px solid #E0D0C4;border-radius:18px;box-shadow:0 14px 40px rgba(42,26,20,.2);padding:16px 16px 14px 18px;display:flex;flex-direction:column;gap:14px;z-index:6">
+          <div data-if="hasSel" id="pop" class="pre" role="dialog" aria-label="MAC Ruby Woo" style="position:absolute;left:clamp(8px, calc(39.6% - min(190px, calc(50% - 8px))), calc(100% - min(380px, calc(100% - 16px)) - 8px));top:53.0%;transform:translateY(calc(-100% - 22px));width:min(380px,calc(100% - 16px));box-sizing:border-box;background:#FAF6F1;border:1px solid #E0D0C4;border-radius:18px;box-shadow:0 14px 40px rgba(42,26,20,.2);padding:16px 16px 14px 18px;display:flex;flex-direction:column;gap:14px;z-index:6">
             <div style="display:flex;gap:14px;align-items:flex-start">
             
             
@@ -1106,6 +1088,27 @@ a{color:#B0566F}a:hover{color:#2A1A14}
         
       </div>
       <div style="display:flex;justify-content:space-between;margin-top:10px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#8C6858"><span>← Blue-red</span><span>Brighter on top · deeper below</span><span>Orange-red →</span></div>
+    </div>
+
+    <div style="max-width:920px;position:relative;z-index:10;margin:22px 0 0">
+      <label for="red-q" style="display:block;font-size:13px;color:#5C3D30;margin-bottom:8px">Add your red to the map</label>
+      <div style="display:flex;align-items:center;gap:10px;background:#fff;border:1.5px solid #E0D0C4;border-radius:30px;padding:10px 16px;max-width:520px">
+        <span style="color:#8C6858;font-size:15px">⌕</span>
+        <input id="red-q" autocomplete="off" value="" placeholder="Search a brand or shade, e.g. nars, cherry" aria-label="Search red lipsticks" style="flex:1;min-width:0;border:none;outline:none;background:transparent;font-family:'DM Sans',sans-serif;font-size:15px;color:#2A1A14">
+        
+          <button data-if="hasQ" hidden id="red-q-clear" type="button" aria-label="Clear search" style="font-family:'DM Sans',sans-serif;background:none;border:none;color:#A08878;font-size:16px;cursor:pointer;padding:0">×</button>
+        
+      </div>
+      <span role="status" aria-live="polite" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap"><span data-t="searchStatus"></span></span>
+      
+        <ul data-if="showResults" hidden id="red-results" aria-label="Matching lipsticks" style="list-style:none;margin:6px 0 0;padding:6px;position:absolute;left:0;top:100%;width:min(520px,100%);background:#fff;border:1px solid #E0D0C4;border-radius:18px;box-shadow:0 14px 40px rgba(42,26,20,.16)">
+          
+          <li data-if="searchDown" hidden style="padding:12px;font-size:13px;color:#8C6858">Search isn't available right now. Try again in a moment.</li>
+          
+            <li data-if="noResults" hidden style="padding:12px;font-size:13px;color:#8C6858">No reds match that yet. Try a brand name.</li>
+          
+        </ul>
+      
     </div>
 
     <div style="margin-top:36px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:28px 40px;max-width:920px">

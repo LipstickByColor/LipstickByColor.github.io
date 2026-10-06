@@ -104,7 +104,7 @@
   const BRANDS = ['Armani', 'Lancôme', 'Charlotte Tilbury', 'Pat McGrath', 'Fenty Beauty', 'Tom Ford', 'Lisa Eldridge', 'Maybelline', 'MAC', 'NARS', 'Chanel', 'Revlon', 'Dior', 'Gucci', 'YSL', 'Givenchy'];
   const LINES = /^(L'Absolu Rouge|Lip Maestro|Stunna|Rouge à Lèvres Satin|True Velvet|SuperStay Matte Ink|Rouge Dior Forever Liquid|Rouge Dior|Le Rouge) /;
 
-  const state = { flipped: null, hoverKind: null, redCard: null, icon: 'MAC Ruby Woo', mine: null };
+  const state = { flipped: null, hoverKind: null, redCard: null, icon: null, mine: null };
 
   // ── Nine kinds: flip cards ──────────────────────────────────────────────────
   const tiles = $$('[data-kind]');
@@ -243,6 +243,9 @@
     dot.addEventListener('mouseenter', () => { if (state.icon !== key && finePointer()) selectIcon(key); });
   }
   ICONS.forEach(r => wireDot($(dotId(r.key)), r.key));
+  // The markup carries Ruby Woo's card filled in; the map starts with nothing open
+  renderMap();
+  pop.classList.remove('pre');
   $('pop-close').addEventListener('click', closePop);
   $('red-map-bg').addEventListener('click', closePop);
 
@@ -262,6 +265,8 @@
     pop.before(dot);
     wireDot(dot, '__mine');
     selectIcon('__mine');
+    // The search sits under the map, so bring the new dot into view
+    dot.scrollIntoView({ block: 'center', behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
   }
 
   // Hue/chroma map for "what makes a red red", at L* 40; everything outside the
