@@ -1,554 +1,363 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Lipstick Undertone, Depth &amp; Delta E Explained · Color Guide</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💄</text></svg>">
-<meta name="description" content="How lipstick color is measured: what undertone and depth mean, how CIELAB works, and how Delta E (ΔE) tells you whether two shades are true dupes." />
-<meta property="og:type" content="website" />
-<meta property="og:url" content="https://lipstickbycolor.github.io/color-guide.html" />
-<meta property="og:title" content="Lipstick Undertone, Depth &amp; Delta E Explained · Color Guide" />
-<meta property="og:description" content="How lipstick color is measured: what undertone and depth mean, how CIELAB works, and how Delta E (ΔE) tells you whether two shades are true dupes." />
-<meta property="og:image" content="https://lipstickbycolor.github.io/assets/share-card.png" />
-<meta property="og:image:width" content="1200" />
-<meta property="og:image:height" content="630" />
-<meta property="og:image:alt" content="Lipstick Color Finder: find lipstick by color, with rows of lips in every color of the rainbow" />
-<meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="Lipstick Undertone, Depth &amp; Delta E Explained · Color Guide" />
-<meta name="twitter:description" content="How lipstick color is measured: what undertone and depth mean, how CIELAB works, and how Delta E (ΔE) tells you whether two shades are true dupes." />
-<meta name="twitter:image" content="https://lipstickbycolor.github.io/assets/share-card.png" />
-<link rel="canonical" href="https://lipstickbycolor.github.io/color-guide.html" />
+<meta name="description" content="How lipstick color is measured: what undertone and depth mean, how CIELAB works, and how Delta E (ΔE) tells you whether two shades are true dupes.">
+<link rel="canonical" href="https://lipstickbycolor.github.io/color-guide.html">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://lipstickbycolor.github.io/color-guide.html">
+<meta property="og:site_name" content="Lipstick by Color">
+<meta property="og:title" content="Lipstick Undertone, Depth &amp; Delta E Explained · Color Guide">
+<meta property="og:description" content="How lipstick color is measured: what undertone and depth mean, how CIELAB works, and how Delta E (ΔE) tells you whether two shades are true dupes.">
+<meta property="og:image" content="https://lipstickbycolor.github.io/assets/share-card.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Lipstick Color Finder: find lipstick by color, with rows of lips in every color of the rainbow">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Lipstick Undertone, Depth &amp; Delta E Explained · Color Guide">
+<meta name="twitter:description" content="How lipstick color is measured: what undertone and depth mean, how CIELAB works, and how Delta E (ΔE) tells you whether two shades are true dupes.">
+<meta name="twitter:image" content="https://lipstickbycolor.github.io/assets/share-card.png">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"How colors are measured: undertone, depth and Delta E","description":"How lipstick color is measured: what undertone and depth mean, how CIELAB works, and how Delta E (ΔE) tells you whether two shades are true dupes.","author":{"@type":"Organization","name":"Lipstick by Color","url":"https://lipstickbycolor.github.io/"},"publisher":{"@type":"Organization","name":"Lipstick by Color"},"image":"https://lipstickbycolor.github.io/assets/share-card.png","dateModified":"2026-10-06","mainEntityOfPage":"https://lipstickbycolor.github.io/color-guide.html"}</script>
 <script src="/consent.js"></script>
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&amp;family=DM+Sans:wght@300;400;500&amp;display=swap" rel="stylesheet">
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-  :root {
-    --cream: #FAF6F1;
-    --cream-dark: #F0E8DF;
-    --espresso: #2A1A14;
-    --espresso-mid: #5C3D30;
-    --blush: #C87890;
-    --text-muted: #8C6858;
-    --border: #E0D0C4;
-    --shadow: rgba(42,26,20,0.10);
-  }
-
-  html, body {
-    min-height: 100vh;
-    background: var(--cream);
-    color: var(--espresso);
-    font-family: 'DM Sans', sans-serif;
-  }
-
-  body::before {
-    content: '';
-    position: fixed; inset: 0; pointer-events: none; z-index: 0;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
-    opacity: 0.4;
-  }
-
-  .page {
-    position: relative; z-index: 1;
-    max-width: 780px;
-    margin: 0 auto;
-    padding: 48px 40px 80px;
-  }
-
-  /* Back link */
-  .back {
-    display: inline-flex; align-items: center; gap: 6px;
-    font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase;
-    color: var(--text-muted); text-decoration: none;
-    margin-bottom: 48px;
-    transition: color 0.15s;
-  }
-  .back:hover { color: var(--espresso); }
-
-  /* Hero */
-  .hero { margin-bottom: 56px; }
-  .hero-label {
-    font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase;
-    color: var(--blush); margin-bottom: 12px; font-weight: 500;
-  }
-  .hero h1 {
-    font-family: 'Cormorant Garamond', serif;
-    font-weight: 300; font-size: clamp(36px, 6vw, 56px);
-    line-height: 1.05; letter-spacing: -0.01em;
-    margin-bottom: 20px;
-  }
-  .hero h1 em { font-style: italic; font-weight: 400; }
-  .hero-body {
-    font-size: 16px; line-height: 1.7; color: var(--espresso-mid);
-    max-width: 560px;
-  }
-  .hero-list {
-    list-style: none; margin: 16px 0 0; padding: 0;
-    max-width: 560px;
-    display: flex; flex-direction: column; gap: 10px;
-  }
-  .hero-list li {
-    font-size: 16px; line-height: 1.55; color: var(--espresso-mid);
-    padding-left: 20px; position: relative;
-  }
-  .hero-list li::before {
-    content: ''; position: absolute; left: 2px; top: 9px;
-    width: 6px; height: 6px; border-radius: 50%;
-    background: var(--blush);
-  }
-  .hero-list strong { color: var(--espresso); }
-
-  /* Formula card */
-  .formula-card {
-    background: #fff;
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 32px 36px;
-    margin-bottom: 56px;
-    box-shadow: 0 2px 16px var(--shadow);
-    display: flex; gap: 40px; align-items: center;
-  }
-  .formula {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 28px; font-weight: 400;
-    color: var(--espresso);
-    white-space: nowrap; flex-shrink: 0;
-  }
-  .formula sub { font-size: 16px; }
-  .formula-desc {
-    font-size: 13px; line-height: 1.7; color: var(--text-muted);
-    border-left: 2px solid var(--border);
-    padding-left: 24px;
-  }
-  .formula-desc strong { color: var(--espresso); font-weight: 500; }
-
-  /* Scale section */
-  .scale-title {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 28px; font-weight: 300; margin-bottom: 8px;
-  }
-  .scale-subtitle {
-    font-size: 16px; color: var(--espresso-mid); margin-bottom: 36px; line-height: 1.7;
-  }
-
-  /* Scale rows */
-  .scale-row {
-    display: grid;
-    grid-template-columns: 72px 1fr auto;
-    gap: 0 24px;
-    align-items: center;
-    padding: 20px 0;
-    border-bottom: 1px solid var(--cream-dark);
-  }
-  .scale-row:last-child { border-bottom: none; }
-
-  .scale-de {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 32px; font-weight: 300; color: var(--espresso);
-    line-height: 1;
-  }
-  .scale-de span {
-    display: block;
-    font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;
-    color: var(--text-muted); font-family: 'DM Sans', sans-serif;
-    font-weight: 400; margin-top: 2px;
-  }
-
-  .scale-info { }
-  .scale-label {
-    font-size: 15px; font-weight: 500; color: var(--espresso); margin-bottom: 4px;
-  }
-  .scale-desc {
-    font-size: 13px; color: var(--text-muted); line-height: 1.6;
-  }
-  .scale-retail {
-    display: inline-block; margin-top: 6px;
-    font-size: 11px; padding: 3px 10px; border-radius: 20px;
-    background: var(--cream-dark); color: var(--espresso-mid);
-    font-weight: 500; letter-spacing: 0.04em;
-  }
-
-  .scale-swatches {
-    display: flex; gap: 0; align-items: center; flex-shrink: 0;
-  }
-  .swatch-pair {
-    display: flex; align-items: center; gap: 0;
-    border-radius: 12px; overflow: hidden;
-    box-shadow: 0 2px 8px rgba(42,26,20,0.14);
-  }
-  .swatch {
-    width: 44px; height: 44px;
-  }
-  .swatch-arrow {
-    font-size: 16px; color: var(--text-muted);
-    margin: 0 10px;
-  }
-
-  /* Context section */
-  .context {
-    margin-top: 56px;
-    background: #fff;
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 32px 36px;
-    box-shadow: 0 2px 16px var(--shadow);
-  }
-  .context h2 {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 24px; font-weight: 400; margin-bottom: 16px;
-  }
-  .context p {
-    font-size: 16px; line-height: 1.7; color: var(--espresso-mid);
-    margin-bottom: 12px;
-  }
-  .context p:last-child { margin-bottom: 0; }
-  .context strong { color: var(--espresso); font-weight: 500; }
-
-  /* Section divider */
-  .divider {
-    height: 1px; background: var(--border);
-    margin: 64px 0 48px;
-  }
-  /* Trio cards (undertone / depth examples) */
-  .trio {
-    display: grid; grid-template-columns: repeat(3, 1fr);
-    gap: 20px; margin: 28px 0 24px;
-  }
-  .trio-card {
-    background: #fff; border: 1px solid var(--border);
-    border-radius: 16px; padding: 20px;
-    box-shadow: 0 2px 12px var(--shadow);
-    display: flex; flex-direction: column; gap: 12px;
-  }
-  .trio-swatch {
-    width: 100%; aspect-ratio: 2 / 1;
-    border-radius: 10px;
-    box-shadow: inset 0 -2px 6px rgba(0,0,0,0.15), 0 1px 4px var(--shadow);
-  }
-  .trio-label {
-    font-family: 'Cormorant Garamond', serif;
-    font-style: italic;
-    font-size: 20px; color: var(--espresso);
-  }
-  .trio-desc {
-    font-size: 13px; line-height: 1.55; color: var(--text-muted);
-  }
-  .side-note {
-    font-size: 16px; color: var(--espresso-mid); line-height: 1.7;
-    font-style: italic; margin-top: 14px;
-    padding-left: 18px; border-left: 2px solid var(--blush);
-  }
-  .side-note em { font-style: normal; color: var(--espresso); font-weight: 500; }
-
-  /* Footer nav */
-  .page-footer {
-    margin-top: 64px;
-    padding-top: 24px;
-    border-top: 1px solid var(--border);
-    display: flex; justify-content: space-between; align-items: center;
-  }
-  .page-footer-label {
-    font-size: 11px; color: var(--text-muted); letter-spacing: 0.08em; text-transform: uppercase;
-  }
-  .cta {
-    display: inline-flex; align-items: center; gap: 8px;
-    background: var(--espresso); color: #FAF6F1;
-    font-size: 12px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase;
-    padding: 12px 24px; border-radius: 40px; text-decoration: none;
-    transition: background 0.15s;
-  }
-  .cta:hover { background: var(--espresso-mid); }
-
-  /* Closing card: same pink panel that ends the red lipstick guide */
-  .next-card {
-    margin-top: 72px;
-    background: #F6E2E8; border-radius: 28px;
-    padding: clamp(28px, 5vw, 48px);
-    display: flex; align-items: center; justify-content: space-between;
-    gap: 24px 28px; flex-wrap: wrap;
-  }
-  .next-card > div { flex: 1 1 320px; min-width: 0; }
-  .next-card h2 {
-    font-family: 'Cormorant Garamond', serif; font-weight: 300;
-    font-size: clamp(28px, 4vw, 40px); line-height: 1.08;
-  }
-  .next-card h2 em { font-weight: 400; }
-  .next-card p {
-    margin-top: 12px; font-size: 16px; line-height: 1.6;
-    color: var(--espresso-mid); max-width: 460px; text-wrap: pretty;
-  }
-  .next-card .cta { white-space: nowrap; }
-  .next-card + .page-footer { margin-top: 40px; }
-
-  @media (max-width: 600px) {
-    .page { padding: 32px 20px 60px; }
-    .formula-card { flex-direction: column; gap: 20px; }
-    .formula-desc { border-left: none; border-top: 2px solid var(--border); padding-left: 0; padding-top: 16px; }
-    .scale-row { grid-template-columns: 56px 1fr; grid-template-rows: auto auto; }
-    .scale-de { grid-column: 1; grid-row: 1 / 3; align-self: start; padding-top: 2px; }
-    .scale-info { grid-column: 2; grid-row: 1; }
-    .scale-swatches { display: flex; grid-column: 2; grid-row: 2; margin-top: 10px; }
-    .swatch { width: 36px; height: 36px; }
-    .trio { grid-template-columns: 1fr; gap: 12px; }
-  }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{min-height:100vh;background:#FAF6F1;color:#2A1A14;font-family:'DM Sans',sans-serif}
+a{color:#2A1A14}a:hover{color:#5C3D30}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{transition-duration:.01ms!important}}
+[hidden]{display:none!important}
+.h1:hover{color:#2A1A14!important}
+.h2:hover{color:#B0566F!important}
+.h3:hover{background:#5C3D30!important;color:#FAF6F1!important}
 </style>
 </head>
 <body>
-<div class="page">
+<main style="max-width:780px;margin:0 auto;padding:clamp(32px,6vw,48px) clamp(20px,5vw,40px) 80px">
 
-  <div style="display:flex;justify-content:space-between;gap:16px">
-  <a href="index.html" class="back">
-    ← Back to Color Finder
-  </a>
-  <a href="guides/" class="back">Guides</a>
-  </div>
+  <nav style="display:flex;justify-content:space-between;gap:16px;margin-bottom:48px">
+    <a class="h1" href="/" style="display:inline-flex;align-items:center;gap:6px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#8C6858;text-decoration:none;transition:color .15s">← Back to Color Finder</a>
+    <a class="h1" href="/guides/" style="display:inline-flex;align-items:center;gap:6px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#8C6858;text-decoration:none;transition:color .15s">Guides</a>
+  </nav>
 
-  <!-- Hero -->
-  <div class="hero">
-    <p class="hero-label">Color Guide</p>
-    <h1>How colors are <em>measured</em></h1>
-    <p id="cielab" class="hero-body">
-      CIELAB is an easy way of giving every color a precise location in space. Color names are
-      fuzzy — your "rose" and mine might differ — but CIELAB fixes that by plotting each color
-      as a single point in a 3D space built to match how the human eye actually sees. Three
-      numbers pin a color down exactly. Think of it as a color's address.
-    </p>
-  </div>
+  <header style="margin-bottom:56px">
+    <p style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#B0566F;margin-bottom:12px;font-weight:500">Color Guide</p>
+    <h1 style="font-family:'Cormorant Garamond',serif;font-weight:300;font-size:clamp(36px,6vw,56px);line-height:1.05;letter-spacing:-.01em;margin-bottom:20px">How colors are <em style="font-style:italic;font-weight:400">measured</em></h1>
+    <p id="cielab" style="font-size:16px;line-height:1.7;color:#5C3D30;max-width:560px;text-wrap:pretty">CIELAB is an easy way of giving every color a precise location in space. Color names are fuzzy — your "rose" and mine might differ — but CIELAB fixes that by plotting each color as a single point in a 3D space built to match how the human eye actually sees. Three numbers pin a color down exactly. Think of it as a color's address.</p>
+  </header>
 
-  <div class="trio">
-    <div class="trio-card">
-      <div class="trio-swatch" style="background:linear-gradient(to top,#1a1a1a,#ffffff);"></div>
-      <div class="trio-label">L* — Lightness</div>
-      <div class="trio-desc">How light or dark the color is, from 0 (black) to 100 (white).</div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));gap:20px;margin:28px 0 56px">
+    <div style="background:#fff;border:1px solid #E0D0C4;border-radius:16px;padding:20px;box-shadow:0 2px 12px rgba(42,26,20,.10);display:flex;flex-direction:column;gap:12px">
+      <div style="width:100%;aspect-ratio:2/1;border-radius:10px;box-shadow:inset 0 -2px 6px rgba(0,0,0,.15),0 1px 4px rgba(42,26,20,.10);background:linear-gradient(to right,#1a1a1a,#ffffff)"></div>
+      <h3 style="font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:400;font-size:20px">L* — Lightness</h3>
+      <p style="font-size:13px;line-height:1.55;color:#8C6858">How light or dark the color is, from black to white.</p>
     </div>
-    <div class="trio-card">
-      <div class="trio-swatch" style="background:linear-gradient(to right,#3a8a3a,#c83232);"></div>
-      <div class="trio-label">a* — Green → Red</div>
-      <div class="trio-desc">How far the color leans toward green (negative) or red (positive).</div>
+    <div style="background:#fff;border:1px solid #E0D0C4;border-radius:16px;padding:20px;box-shadow:0 2px 12px rgba(42,26,20,.10);display:flex;flex-direction:column;gap:12px">
+      <div style="width:100%;aspect-ratio:2/1;border-radius:10px;box-shadow:inset 0 -2px 6px rgba(0,0,0,.15),0 1px 4px rgba(42,26,20,.10);background:linear-gradient(to right,#3a8a3a,#c83232)"></div>
+      <h3 style="font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:400;font-size:20px">a* — Green → Red</h3>
+      <p style="font-size:13px;line-height:1.55;color:#8C6858">How far the color leans toward green or red.</p>
     </div>
-    <div class="trio-card">
-      <div class="trio-swatch" style="background:linear-gradient(to right,#2a5ac8,#d4b21e);"></div>
-      <div class="trio-label">b* — Blue → Yellow</div>
-      <div class="trio-desc">How far the color leans toward blue (negative) or yellow (positive).</div>
+    <div style="background:#fff;border:1px solid #E0D0C4;border-radius:16px;padding:20px;box-shadow:0 2px 12px rgba(42,26,20,.10);display:flex;flex-direction:column;gap:12px">
+      <div style="width:100%;aspect-ratio:2/1;border-radius:10px;box-shadow:inset 0 -2px 6px rgba(0,0,0,.15),0 1px 4px rgba(42,26,20,.10);background:linear-gradient(to right,#2a5ac8,#d4b21e)"></div>
+      <h3 style="font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:400;font-size:20px">b* — Blue → Yellow</h3>
+      <p style="font-size:13px;line-height:1.55;color:#8C6858">How far the color leans toward blue or yellow.</p>
     </div>
   </div>
 
-  <h2 class="scale-title" style="margin-bottom: 16px;">From those three numbers, color metrics can be derived</h2>
-  <p class="scale-subtitle" style="margin-bottom: 18px;">
-    Once a color is just three numbers, comparing and describing it becomes simple arithmetic.
-    Each idea in this guide is just a different question asked of those same coordinates:
-  </p>
-  <ul class="hero-list" style="margin-top:0;">
-    <li><strong>ΔE</strong> — how different two colors are</li>
-    <li><strong>Undertone</strong> — which direction it leans</li>
-    <li><strong>Depth</strong> — how light or dark it is</li>
+  <h2 style="font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:300;margin-bottom:16px">From those three numbers, color metrics can be derived</h2>
+  <p style="font-size:16px;color:#5C3D30;margin-bottom:18px;line-height:1.7;text-wrap:pretty">Once a color is just three numbers, comparing and describing it becomes simple arithmetic. Each idea in this guide is just a different question asked of those same coordinates:</p>
+  <ul style="list-style:none;max-width:560px;display:flex;flex-direction:column;gap:10px">
+    <li style="font-size:16px;line-height:1.55;color:#5C3D30;display:flex;gap:12px;align-items:baseline"><span style="flex:none;width:6px;height:6px;border-radius:50%;background:#C87890;transform:translateY(-2px)"></span><span><a href="#depth" style="color:#2A1A14;font-weight:700;text-decoration:none">Depth</a> — how light or dark it is</span></li>
+    <li style="font-size:16px;line-height:1.55;color:#5C3D30;display:flex;gap:12px;align-items:baseline"><span style="flex:none;width:6px;height:6px;border-radius:50%;background:#C87890;transform:translateY(-2px)"></span><span><a href="#undertone" style="color:#2A1A14;font-weight:700;text-decoration:none">Undertone</a> — which direction it leans</span></li>
+    <li style="font-size:16px;line-height:1.55;color:#5C3D30;display:flex;gap:12px;align-items:baseline"><span style="flex:none;width:6px;height:6px;border-radius:50%;background:#C87890;transform:translateY(-2px)"></span><span><a href="#delta-e" style="color:#2A1A14;font-weight:700;text-decoration:none">ΔE</a> — how different two colors are</span></li>
   </ul>
 
-  <div class="divider"></div>
+  <hr style="border:none;height:1px;background:#E0D0C4;margin:64px 0 48px">
 
-  <!-- Section anchor: Delta E -->
-  <h2 id="delta-e" class="scale-title" style="margin-bottom: 24px;"><em style="font-family:'Cormorant Garamond',serif;font-style:italic;">ΔE</em>: The distance between two colors</h2>
-  <p class="scale-subtitle" style="margin-bottom: 28px;">
-    If every color is a point in CIELAB space, then the difference between two colors is just
-    the distance between their two points. That distance is <strong>ΔE (Delta E)</strong>, one
-    number for how different two colors look to the human eye. The smaller the number, the more
-    similar the colors. It's the industry standard for color accuracy in cosmetics, printing, and design.
-  </p>
-
-  <!-- Formula -->
-  <div class="formula-card">
-    <div class="formula">
-      ΔE = √(ΔL*² + Δa*² + Δb*²)
+  <h2 id="depth" style="font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:300;margin-bottom:8px">Depth: How light or dark</h2>
+  <p style="font-size:16px;color:#5C3D30;line-height:1.7">Depth describes how light or dark a shade appears.</p>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));gap:20px;margin:28px 0 24px">
+    <div style="background:#fff;border:1px solid #E0D0C4;border-radius:16px;padding:20px;box-shadow:0 2px 12px rgba(42,26,20,.10);display:flex;flex-direction:column;gap:12px">
+      <div style="width:100%;aspect-ratio:2/1;border-radius:10px;box-shadow:inset 0 -2px 6px rgba(0,0,0,.15),0 1px 4px rgba(42,26,20,.10);background:#5A2530"></div>
+      <h3 style="font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:400;font-size:20px">Deep</h3>
+      <p style="font-size:13px;line-height:1.55;color:#8C6858">Bold and saturated. Vampy, plum, oxblood, deep berry.</p>
     </div>
-    <div class="formula-desc">
-    <p>
-      Straight from Pythagoras: at its simplest, <strong>ΔE</strong> is the straight-line distance between two
-      points in CIELAB space: the differences in <strong>L*</strong>, <strong>a*</strong>, and
-      <strong>b*</strong>, squared, summed, and rooted. Same math as measuring the distance
-      between two pins on a map, just in three dimensions.
-    </p>
-    <p style="margin-top: 10px;">
-      This tool uses the refined version, <strong>CIEDE2000</strong>. It starts from the same idea but
-      re-weights lightness, saturation, and hue to match how the eye actually judges them. For
-      example, the eye is less sensitive to small differences between very vivid colors than the
-      straight-line formula assumes, so CIEDE2000 counts those differences for less.
-    </p>
+    <div style="background:#fff;border:1px solid #E0D0C4;border-radius:16px;padding:20px;box-shadow:0 2px 12px rgba(42,26,20,.10);display:flex;flex-direction:column;gap:12px">
+      <div style="width:100%;aspect-ratio:2/1;border-radius:10px;box-shadow:inset 0 -2px 6px rgba(0,0,0,.15),0 1px 4px rgba(42,26,20,.10);background:#B86870"></div>
+      <h3 style="font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:400;font-size:20px">Medium</h3>
+      <p style="font-size:13px;line-height:1.55;color:#8C6858">Pigmented but not heavy. The everyday range, where most lip products live.</p>
+    </div>
+    <div style="background:#fff;border:1px solid #E0D0C4;border-radius:16px;padding:20px;box-shadow:0 2px 12px rgba(42,26,20,.10);display:flex;flex-direction:column;gap:12px">
+      <div style="width:100%;aspect-ratio:2/1;border-radius:10px;box-shadow:inset 0 -2px 6px rgba(0,0,0,.15),0 1px 4px rgba(42,26,20,.10);background:#E8B8B0"></div>
+      <h3 style="font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:400;font-size:20px">Light</h3>
+      <p style="font-size:13px;line-height:1.55;color:#8C6858">Soft and quiet on the lip. Pales, sheers, washes of color.</p>
     </div>
   </div>
+  <p style="font-size:16px;color:#5C3D30;line-height:1.7;font-style:italic;margin-top:14px;padding-left:18px;border-left:2px solid #C87890">Depth comes straight from <em style="font-style:normal;color:#2A1A14;font-weight:500">L*</em>, the lightness scale that runs from 0 (black) to 100 (white). In cosmetics, a shade under 45 counts as deep, 45 to 60 as medium, and anything above 60 as light.</p>
 
-  <!-- Scale -->
-  <h2 class="scale-title">The ΔE scale, in plain English</h2>
-  <p class="scale-subtitle">How noticeable is the color difference at each level?</p>
+  <hr style="border:none;height:1px;background:#E0D0C4;margin:64px 0 48px">
+
+  <h2 id="undertone" style="font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:300;margin-bottom:8px">Undertone: How a color leans</h2>
+  <p style="font-size:16px;color:#5C3D30;line-height:1.7;text-wrap:pretty">Undertone describes which direction a color leans, independent of how light or dark it is. Colors within the same family can be <strong style="color:#2A1A14">cool</strong>, <strong style="color:#2A1A14">neutral</strong>, or <strong style="color:#2A1A14">warm</strong>.</p>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));gap:20px;margin:28px 0 24px">
+    <div style="background:#fff;border:1px solid #E0D0C4;border-radius:16px;padding:20px;box-shadow:0 2px 12px rgba(42,26,20,.10);display:flex;flex-direction:column;gap:12px">
+      <div style="width:100%;aspect-ratio:2/1;border-radius:10px;box-shadow:inset 0 -2px 6px rgba(0,0,0,.15),0 1px 4px rgba(42,26,20,.10);background:#B83A5E"></div>
+      <h3 style="font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:400;font-size:20px">Cool red</h3>
+      <p style="font-size:13px;line-height:1.55;color:#8C6858">Leans toward blue or pink. Berries, fuchsias, blue‑based reds.</p>
+    </div>
+    <div style="background:#fff;border:1px solid #E0D0C4;border-radius:16px;padding:20px;box-shadow:0 2px 12px rgba(42,26,20,.10);display:flex;flex-direction:column;gap:12px">
+      <div style="width:100%;aspect-ratio:2/1;border-radius:10px;box-shadow:inset 0 -2px 6px rgba(0,0,0,.15),0 1px 4px rgba(42,26,20,.10);background:#BC3232"></div>
+      <h3 style="font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:400;font-size:20px">Neutral red</h3>
+      <p style="font-size:13px;line-height:1.55;color:#8C6858">Balanced, neither blue‑ nor orange‑leaning. True reds and balanced rose.</p>
+    </div>
+    <div style="background:#fff;border:1px solid #E0D0C4;border-radius:16px;padding:20px;box-shadow:0 2px 12px rgba(42,26,20,.10);display:flex;flex-direction:column;gap:12px">
+      <div style="width:100%;aspect-ratio:2/1;border-radius:10px;box-shadow:inset 0 -2px 6px rgba(0,0,0,.15),0 1px 4px rgba(42,26,20,.10);background:#B84A2A"></div>
+      <h3 style="font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:400;font-size:20px">Warm red</h3>
+      <p style="font-size:13px;line-height:1.55;color:#8C6858">Leans toward orange or yellow. Bricks, corals, terracotta reds.</p>
+    </div>
+  </div>
+  <p style="font-size:16px;color:#5C3D30;line-height:1.7;font-style:italic;margin-top:14px;padding-left:18px;border-left:2px solid #C87890">The <em style="font-style:normal;color:#2A1A14;font-weight:500">hue angle</em> on the a*–b* plane, the direction the color points, gives the undertone: below about 12° is cool, 12–28° neutral, above 28° warm. These are rules of thumb; individual color families can use finer bands.</p>
+
+  <h2 id="depth-undertone" style="font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:300;margin:56px 0 8px">Depth meets undertone</h2>
+  <p style="font-size:16px;line-height:1.7;color:#5C3D30;text-wrap:pretty">The same space sorts colors into families, too: reds, pinks, nudes and corals each sit in their own region. <a class="h2" href="/guides/red-lipstick/" style="color:#2A1A14;font-weight:500;text-decoration:underline;text-decoration-color:#C87890;text-underline-offset:3px">See where every red lands in the red lipstick guide →</a></p>
+  <figure style="margin:20px 0 0">
+    <div id="scene" style="--yaw:-70deg;--tilt:-24deg;position:relative;height:clamp(360px,62vw,440px);perspective:1100px;overflow:hidden;touch-action:pan-y;border-radius:20px;background:#fff;border:1px solid #E0D0C4;box-shadow:0 2px 16px rgba(42,26,20,.10);cursor:grab">
+      <div style="position:absolute;left:50%;top:44%;width:0;height:0;transform-style:preserve-3d;transform:rotateX(var(--tilt)) rotateY(var(--yaw))">
+        <div style="position:absolute;left:-186px;top:-186px;width:372px;height:372px;border-radius:50%;transform:translateY(130px) rotateX(90deg);background:conic-gradient(from 0deg,lab(82% 4 72),lab(66% 42 58),lab(52% 66 32),lab(48% 62 -28),lab(42% 22 -62),lab(62% -28 -38),lab(64% -56 34),lab(80% -26 66),lab(82% 4 72));opacity:.38"></div>
+        <div style="position:absolute;left:-186px;top:-186px;width:372px;height:372px;border-radius:50%;transform:translateY(130px) rotateX(90deg);background:radial-gradient(circle,#FFFFFF 0%,rgba(255,255,255,.55) 40%,rgba(255,255,255,0) 72%);border:1px solid #E0D0C4">
+          <span style="position:absolute;left:50%;top:50%;width:50%;height:1.5px;background:#2A1A14;opacity:.4;transform-origin:0 50%;transform:rotate(-12deg)"></span>
+          <span style="position:absolute;left:50%;top:50%;width:50%;height:1.5px;background:#2A1A14;opacity:.4;transform-origin:0 50%;transform:rotate(-28deg)"></span>
+        </div>
+        <span style="position:absolute;left:0;top:0;width:1.5px;height:260px;background:#2A1A14;opacity:.45;transform:translate3d(0,130px,0) rotateY(calc(var(--yaw) * -1)) translate(-50%,-100%)"></span>
+        <span style="position:absolute;left:0;top:0;pointer-events:none;white-space:nowrap;font-size:11px;letter-spacing:.1em;text-transform:uppercase;font-weight:500;color:#5C3D30;transform:translate3d(0.0px,-83.2px,0.0px) rotateY(calc(var(--yaw) * -1)) rotateX(calc(var(--tilt) * -1)) translate(calc(-100% - 12px),-50%)">Light</span>
+        <span style="position:absolute;left:0;top:0;pointer-events:none;white-space:nowrap;font-size:11px;letter-spacing:.1em;text-transform:uppercase;font-weight:500;color:#5C3D30;transform:translate3d(0.0px,-6.5px,0.0px) rotateY(calc(var(--yaw) * -1)) rotateX(calc(var(--tilt) * -1)) translate(calc(-100% - 12px),-50%)">Medium</span>
+        <span style="position:absolute;left:0;top:0;pointer-events:none;white-space:nowrap;font-size:11px;letter-spacing:.1em;text-transform:uppercase;font-weight:500;color:#5C3D30;transform:translate3d(0.0px,67.6px,0.0px) rotateY(calc(var(--yaw) * -1)) rotateX(calc(var(--tilt) * -1)) translate(calc(-100% - 12px),-50%)">Deep</span>
+        <span style="position:absolute;left:0;top:0;pointer-events:none;white-space:nowrap;font-size:11px;color:#8C6858;transform:translate3d(0.0px,13.0px,0.0px) rotateY(calc(var(--yaw) * -1)) rotateX(calc(var(--tilt) * -1)) translate(2px,-50%)">— 45</span>
+        <span style="position:absolute;left:0;top:0;pointer-events:none;white-space:nowrap;font-size:11px;color:#8C6858;transform:translate3d(0.0px,-26.0px,0.0px) rotateY(calc(var(--yaw) * -1)) rotateX(calc(var(--tilt) * -1)) translate(2px,-50%)">— 60</span>
+        <span style="position:absolute;left:0;top:0;pointer-events:none;white-space:nowrap;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:19px;color:#2A1A14;transform:translate3d(196.9px,130.0px,20.7px) rotateY(calc(var(--yaw) * -1)) rotateX(calc(var(--tilt) * -1)) translate(-50%,-50%)">Cool</span>
+        <span style="position:absolute;left:0;top:0;pointer-events:none;white-space:nowrap;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:19px;color:#2A1A14;transform:translate3d(186.1px,130.0px,-67.7px) rotateY(calc(var(--yaw) * -1)) rotateX(calc(var(--tilt) * -1)) translate(-50%,-50%)">Neutral</span>
+        <span style="position:absolute;left:0;top:0;pointer-events:none;white-space:nowrap;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:19px;color:#2A1A14;transform:translate3d(142.4px,130.0px,-137.5px) rotateY(calc(var(--yaw) * -1)) rotateX(calc(var(--tilt) * -1)) translate(-50%,-50%)">Warm</span>
+        <span style="position:absolute;left:0;top:0;pointer-events:none;width:1px;height:60.8px;background:lab(28% 29.5 -5.2);opacity:.55;transform:translate3d(88.6px,130px,15.6px) rotateY(calc(var(--yaw) * -1)) translate(-50%,-100%)"></span>
+        <button type="button" class="pt" aria-label="deep cool plum: L* 28, hue angle −10°" aria-pressed="false" data-family="plum" data-depth="deep" data-l="28" data-tone="cool" data-hue="−10" style="position:absolute;left:0;top:0;width:34px;height:34px;padding:0;border:none;background:none;cursor:pointer;display:grid;place-items:center;transform:translate3d(88.6px,57.2px,15.6px) rotateY(calc(var(--yaw) * -1)) rotateX(calc(var(--tilt) * -1)) translate(-50%,-50%)">
+          <span style="width:24px;height:24px;border-radius:50%;background:lab(28% 29.5 -5.2);box-shadow:0 0 0 2px #fff,0 2px 6px rgba(42,26,20,.25);transition:box-shadow .2s"></span>
+        </button>
+        <span style="position:absolute;left:0;top:0;pointer-events:none;width:1px;height:84.2px;background:lab(37% 46.0 0.0);opacity:.55;transform:translate3d(138.0px,130px,0.0px) rotateY(calc(var(--yaw) * -1)) translate(-50%,-100%)"></span>
+        <button type="button" class="pt" aria-label="deep cool berry: L* 37, hue angle 0°" aria-pressed="false" data-family="berry" data-depth="deep" data-l="37" data-tone="cool" data-hue="0" style="position:absolute;left:0;top:0;width:34px;height:34px;padding:0;border:none;background:none;cursor:pointer;display:grid;place-items:center;transform:translate3d(138.0px,33.8px,0.0px) rotateY(calc(var(--yaw) * -1)) rotateX(calc(var(--tilt) * -1)) translate(-50%,-50%)">
+          <span style="width:24px;height:24px;border-radius:50%;background:lab(37% 46.0 0.0);box-shadow:0 0 0 2px #fff,0 2px 6px rgba(42,26,20,.25);transition:box-shadow .2s"></span>
+        </button>
+        <span style="position:absolute;left:0;top:0;pointer-events:none;width:1px;height:76.4px;background:lab(34% 43.6 28.3);opacity:.55;transform:translate3d(130.8px,130px,-85.0px) rotateY(calc(var(--yaw) * -1)) translate(-50%,-100%)"></span>
+        <button type="button" class="pt" aria-label="deep warm red: L* 34, hue angle 33°" aria-pressed="false" data-family="red" data-depth="deep" data-l="34" data-tone="warm" data-hue="33" style="position:absolute;left:0;top:0;width:34px;height:34px;padding:0;border:none;background:none;cursor:pointer;display:grid;place-items:center;transform:translate3d(130.8px,41.6px,-85.0px) rotateY(calc(var(--yaw) * -1)) rotateX(calc(var(--tilt) * -1)) translate(-50%,-50%)">
+          <span style="width:24px;height:24px;border-radius:50%;background:lab(34% 43.6 28.3);box-shadow:0 0 0 2px #fff,0 2px 6px rgba(42,26,20,.25);transition:box-shadow .2s"></span>
+        </button>
+        <span style="position:absolute;left:0;top:0;pointer-events:none;width:1px;height:118px;background:lab(50% 57.4 -8.1);opacity:.55;transform:translate3d(172.3px,130px,24.2px) rotateY(calc(var(--yaw) * -1)) translate(-50%,-100%)"></span>
+        <button type="button" class="pt" aria-label="medium cool pink: L* 50, hue angle −8°" aria-pressed="false" data-family="pink" data-depth="medium" data-l="50" data-tone="cool" data-hue="−8" style="position:absolute;left:0;top:0;width:34px;height:34px;padding:0;border:none;background:none;cursor:pointer;display:grid;place-items:center;transform:translate3d(172.3px,0.0px,24.2px) rotateY(calc(var(--yaw) * -1)) rotateX(calc(var(--tilt) * -1)) translate(-50%,-50%)">
+          <span style="width:24px;height:24px;border-radius:50%;background:lab(50% 57.4 -8.1);box-shadow:0 0 0 2px #fff,0 2px 6px rgba(42,26,20,.25);transition:box-shadow .2s"></span>
+        </button>
+        <span style="position:absolute;left:0;top:0;pointer-events:none;width:1px;height:110.2px;background:lab(47% 55.6 22.5);opacity:.55;transform:translate3d(166.9px,130px,-67.4px) rotateY(calc(var(--yaw) * -1)) translate(-50%,-100%)"></span>
+        <button type="button" class="pt" aria-label="medium neutral red: L* 47, hue angle 22°" aria-pressed="false" data-family="red" data-depth="medium" data-l="47" data-tone="neutral" data-hue="22" style="position:absolute;left:0;top:0;width:34px;height:34px;padding:0;border:none;background:none;cursor:pointer;display:grid;place-items:center;transform:translate3d(166.9px,7.8px,-67.4px) rotateY(calc(var(--yaw) * -1)) rotateX(calc(var(--tilt) * -1)) translate(-50%,-50%)">
+          <span style="width:24px;height:24px;border-radius:50%;background:lab(47% 55.6 22.5);box-shadow:0 0 0 2px #fff,0 2px 6px rgba(42,26,20,.25);transition:box-shadow .2s"></span>
+        </button>
+        <span style="position:absolute;left:0;top:0;pointer-events:none;width:1px;height:138.8px;background:lab(58% 38.3 32.1);opacity:.55;transform:translate3d(114.9px,130px,-96.4px) rotateY(calc(var(--yaw) * -1)) translate(-50%,-100%)"></span>
+        <button type="button" class="pt" aria-label="medium warm coral: L* 58, hue angle 40°" aria-pressed="false" data-family="coral" data-depth="medium" data-l="58" data-tone="warm" data-hue="40" style="position:absolute;left:0;top:0;width:34px;height:34px;padding:0;border:none;background:none;cursor:pointer;display:grid;place-items:center;transform:translate3d(114.9px,-20.8px,-96.4px) rotateY(calc(var(--yaw) * -1)) rotateX(calc(var(--tilt) * -1)) translate(-50%,-50%)">
+          <span style="width:24px;height:24px;border-radius:50%;background:lab(58% 38.3 32.1);box-shadow:0 0 0 2px #fff,0 2px 6px rgba(42,26,20,.25);transition:box-shadow .2s"></span>
+        </button>
+        <span style="position:absolute;left:0;top:0;pointer-events:none;width:1px;height:175.20000000000002px;background:lab(72% 25.9 1.8);opacity:.55;transform:translate3d(77.8px,130px,-5.4px) rotateY(calc(var(--yaw) * -1)) translate(-50%,-100%)"></span>
+        <button type="button" class="pt" aria-label="light cool pink: L* 72, hue angle 4°" aria-pressed="false" data-family="pink" data-depth="light" data-l="72" data-tone="cool" data-hue="4" style="position:absolute;left:0;top:0;width:34px;height:34px;padding:0;border:none;background:none;cursor:pointer;display:grid;place-items:center;transform:translate3d(77.8px,-57.2px,-5.4px) rotateY(calc(var(--yaw) * -1)) rotateX(calc(var(--tilt) * -1)) translate(-50%,-50%)">
+          <span style="width:24px;height:24px;border-radius:50%;background:lab(72% 25.9 1.8);box-shadow:0 0 0 2px #fff,0 2px 6px rgba(42,26,20,.25);transition:box-shadow .2s"></span>
+        </button>
+        <span style="position:absolute;left:0;top:0;pointer-events:none;width:1px;height:157px;background:lab(65% 20.9 6.8);opacity:.55;transform:translate3d(62.8px,130px,-20.4px) rotateY(calc(var(--yaw) * -1)) translate(-50%,-100%)"></span>
+        <button type="button" class="pt" aria-label="light neutral nude: L* 65, hue angle 18°" aria-pressed="false" data-family="nude" data-depth="light" data-l="65" data-tone="neutral" data-hue="18" style="position:absolute;left:0;top:0;width:34px;height:34px;padding:0;border:none;background:none;cursor:pointer;display:grid;place-items:center;transform:translate3d(62.8px,-39.0px,-20.4px) rotateY(calc(var(--yaw) * -1)) rotateX(calc(var(--tilt) * -1)) translate(-50%,-50%)">
+          <span style="width:24px;height:24px;border-radius:50%;background:lab(65% 20.9 6.8);box-shadow:0 0 0 2px #fff,0 2px 6px rgba(42,26,20,.25);transition:box-shadow .2s"></span>
+        </button>
+        <span style="position:absolute;left:0;top:0;pointer-events:none;width:1px;height:172.6px;background:lab(71% 13.5 17.3);opacity:.55;transform:translate3d(40.6px,130px,-52.0px) rotateY(calc(var(--yaw) * -1)) translate(-50%,-100%)"></span>
+        <button type="button" class="pt" aria-label="light warm nude: L* 71, hue angle 52°" aria-pressed="false" data-family="nude" data-depth="light" data-l="71" data-tone="warm" data-hue="52" style="position:absolute;left:0;top:0;width:34px;height:34px;padding:0;border:none;background:none;cursor:pointer;display:grid;place-items:center;transform:translate3d(40.6px,-54.6px,-52.0px) rotateY(calc(var(--yaw) * -1)) rotateX(calc(var(--tilt) * -1)) translate(-50%,-50%)">
+          <span style="width:24px;height:24px;border-radius:50%;background:lab(71% 13.5 17.3);box-shadow:0 0 0 2px #fff,0 2px 6px rgba(42,26,20,.25);transition:box-shadow .2s"></span>
+        </button>
+        <span style="position:absolute;left:0;top:0;pointer-events:none;width:1px;height:201.20000000000002px;background:lab(82% 19.4 4.8);opacity:.55;transform:translate3d(58.2px,130px,-14.5px) rotateY(calc(var(--yaw) * -1)) translate(-50%,-100%)"></span>
+        <button type="button" class="pt" aria-label="light neutral pink: L* 82, hue angle 14°" aria-pressed="false" data-family="pink" data-depth="light" data-l="82" data-tone="neutral" data-hue="14" style="position:absolute;left:0;top:0;width:34px;height:34px;padding:0;border:none;background:none;cursor:pointer;display:grid;place-items:center;transform:translate3d(58.2px,-83.2px,-14.5px) rotateY(calc(var(--yaw) * -1)) rotateX(calc(var(--tilt) * -1)) translate(-50%,-50%)">
+          <span style="width:24px;height:24px;border-radius:50%;background:lab(82% 19.4 4.8);box-shadow:0 0 0 2px #fff,0 2px 6px rgba(42,26,20,.25);transition:box-shadow .2s"></span>
+        </button>
+        <span style="position:absolute;left:0;top:0;pointer-events:none;width:1px;height:81.60000000000001px;background:lab(36% 16.1 17.8);opacity:.55;transform:translate3d(48.2px,130px,-53.5px) rotateY(calc(var(--yaw) * -1)) translate(-50%,-100%)"></span>
+        <button type="button" class="pt" aria-label="deep warm nude: L* 36, hue angle 48°" aria-pressed="false" data-family="nude" data-depth="deep" data-l="36" data-tone="warm" data-hue="48" style="position:absolute;left:0;top:0;width:34px;height:34px;padding:0;border:none;background:none;cursor:pointer;display:grid;place-items:center;transform:translate3d(48.2px,36.4px,-53.5px) rotateY(calc(var(--yaw) * -1)) rotateX(calc(var(--tilt) * -1)) translate(-50%,-50%)">
+          <span style="width:24px;height:24px;border-radius:50%;background:lab(36% 16.1 17.8);box-shadow:0 0 0 2px #fff,0 2px 6px rgba(42,26,20,.25);transition:box-shadow .2s"></span>
+        </button>
+      </div>
+      <div aria-live="polite" style="position:absolute;top:14px;right:16px;left:16px;text-align:right;font-size:16px;line-height:1.4;font-weight:500;color:#5C3D30;pointer-events:none">
+        <p id="no-pick">Hover or tap a dot to read it.</p>
+        <div id="has-pick" hidden>
+          <p>Family: <span data-t="family"></span></p>
+          <p>L* <span data-t="L"></span> → <span style="color:#B0566F"><span data-t="depth"></span></span></p>
+          <p>Hue angle <span data-t="hue"></span>° → <span style="color:#B0566F"><span data-t="tone"></span></span></p>
+          <p style="margin-top:6px;padding-top:6px;border-top:1px solid #E0D0C4;display:inline-block;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:22px;line-height:1.1;color:#2A1A14"><span style="color:#B0566F"><span data-t="Depth"></span> <span data-t="tone"></span></span> <span data-t="family"></span></p>
+        </div>
+      </div>
+    </div>
+    <figcaption style="margin-top:12px;font-size:13px;line-height:1.6;color:#8C6858;text-wrap:pretty">Depth is height, undertone is direction. Eleven lip colors, each named by family, depth and undertone. Drag to turn it.</figcaption>
+  </figure>
+
+  <hr style="border:none;height:1px;background:#E0D0C4;margin:64px 0 48px">
+
+  <h2 id="delta-e" style="font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:300;margin-bottom:24px"><em style="font-style:italic">ΔE</em>: The distance between two colors</h2>
+  <p style="font-size:16px;color:#5C3D30;margin-bottom:28px;line-height:1.7;text-wrap:pretty">If every color is a point in CIELAB space, then the difference between two colors is just the distance between their two points. That distance is <strong style="color:#2A1A14">ΔE (Delta E)</strong>, one number for how different two colors look to the human eye. The smaller the number, the more similar the colors. It's the industry standard for color accuracy in cosmetics, printing, and design.</p>
+
+  <div style="background:#fff;border:1px solid #E0D0C4;border-radius:20px;padding:clamp(24px,4vw,32px) clamp(20px,4vw,36px);margin-bottom:14px;box-shadow:0 2px 16px rgba(42,26,20,.10);display:flex;flex-wrap:wrap;gap:20px 40px;align-items:center">
+    <p style="font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:400;white-space:nowrap;flex:none">ΔE = √(ΔL*² + Δa*² + Δb*²)</p>
+    <div style="flex:1 1 280px;min-width:0;font-size:13px;line-height:1.7;color:#8C6858;border-left:2px solid #E0D0C4;padding-left:24px;display:flex;flex-direction:column;gap:10px">
+      <p>Like measuring the distance between two pins on a map, in three dimensions: square the differences in <strong style="color:#2A1A14;font-weight:500">L*</strong>, <strong style="color:#2A1A14;font-weight:500">a*</strong>, and <strong style="color:#2A1A14;font-weight:500">b*</strong>, add them up, and take the square root.</p>
+    </div>
+  </div>
+  <p style="margin:0 0 56px;padding:0 4px;font-size:13px;line-height:1.6;color:#8C6858;text-wrap:pretty">This tool uses a refined version, <strong style="color:#5C3D30;font-weight:500">CIEDE2000</strong>, which re-weights lightness, saturation and hue to match how the eye actually judges them.</p>
+
+  <h2 style="font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:300;margin-bottom:8px">The ΔE scale, in plain English</h2>
+  <p style="font-size:16px;color:#5C3D30;margin-bottom:36px;line-height:1.7">How noticeable is the color difference at each level?</p>
 
   <div>
-    <!-- ΔE ≤ 1 -->
-    <div class="scale-row">
-      <div class="scale-de">≤ 1<span>ΔE</span></div>
-      <div class="scale-info">
-        <div class="scale-label">Imperceptible</div>
-        <div class="scale-desc">The difference cannot be seen by the human eye, even side by side.</div>
-        <span class="scale-retail">Exact match</span>
+    <div style="display:flex;flex-wrap:wrap;gap:10px 24px;align-items:center;padding:20px 0;border-bottom:1px solid #F0E8DF">
+      <p style="flex:none;width:72px;font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:300;line-height:1">≤ 1<span style="display:block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#8C6858;font-family:'DM Sans',sans-serif;font-weight:400;margin-top:2px">ΔE</span></p>
+      <div style="flex:1 1 240px;min-width:0">
+        <h3 style="font-size:15px;font-weight:500;margin-bottom:4px">Imperceptible</h3>
+        <p style="font-size:13px;color:#8C6858;line-height:1.6">The difference cannot be seen by the human eye, even side by side.</p>
+        <span style="display:inline-block;margin-top:6px;font-size:11px;padding:3px 10px;border-radius:20px;background:#F0E8DF;color:#5C3D30;font-weight:500;letter-spacing:.04em">Exact match</span>
       </div>
-      <div class="scale-swatches">
-        <div class="swatch-pair">
-          <div class="swatch" style="background:#C87890;"></div>
-          <div class="swatch" style="background:#C97991;"></div>
-        </div>
+      <div role="img" aria-label="Two swatches about ΔE ≤ 1 apart" style="flex:none;display:flex;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(42,26,20,.14)">
+        <span style="width:44px;height:44px;background:#C87890"></span>
+        <span style="width:44px;height:44px;background:#C97991"></span>
       </div>
     </div>
-
-    <!-- ΔE 1–3 -->
-    <div class="scale-row">
-      <div class="scale-de">1–3<span>ΔE</span></div>
-      <div class="scale-info">
-        <div class="scale-label">Just noticeable</div>
-        <div class="scale-desc">Trained eyes can detect the difference. Most consumers cannot.</div>
-        <span class="scale-retail">Excellent match</span>
+    <div style="display:flex;flex-wrap:wrap;gap:10px 24px;align-items:center;padding:20px 0;border-bottom:1px solid #F0E8DF">
+      <p style="flex:none;width:72px;font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:300;line-height:1">1–3<span style="display:block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#8C6858;font-family:'DM Sans',sans-serif;font-weight:400;margin-top:2px">ΔE</span></p>
+      <div style="flex:1 1 240px;min-width:0">
+        <h3 style="font-size:15px;font-weight:500;margin-bottom:4px">Just noticeable</h3>
+        <p style="font-size:13px;color:#8C6858;line-height:1.6">Trained eyes can detect the difference. Most consumers cannot.</p>
+        <span style="display:inline-block;margin-top:6px;font-size:11px;padding:3px 10px;border-radius:20px;background:#F0E8DF;color:#5C3D30;font-weight:500;letter-spacing:.04em">Excellent match</span>
       </div>
-      <div class="scale-swatches">
-        <div class="swatch-pair">
-          <div class="swatch" style="background:#C87890;"></div>
-          <div class="swatch" style="background:#CC8498;"></div>
-        </div>
+      <div role="img" aria-label="Two swatches about ΔE 1–3 apart" style="flex:none;display:flex;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(42,26,20,.14)">
+        <span style="width:44px;height:44px;background:#C87890"></span>
+        <span style="width:44px;height:44px;background:#CC8498"></span>
       </div>
     </div>
-
-    <!-- ΔE 3–6 -->
-    <div class="scale-row">
-      <div class="scale-de">3–6<span>ΔE</span></div>
-      <div class="scale-info">
-        <div class="scale-label">Noticeable difference</div>
-        <div class="scale-desc">Most people can see a difference. Still in the same color family.</div>
-        <span class="scale-retail">Good match</span>
+    <div style="display:flex;flex-wrap:wrap;gap:10px 24px;align-items:center;padding:20px 0;border-bottom:1px solid #F0E8DF">
+      <p style="flex:none;width:72px;font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:300;line-height:1">3–6<span style="display:block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#8C6858;font-family:'DM Sans',sans-serif;font-weight:400;margin-top:2px">ΔE</span></p>
+      <div style="flex:1 1 240px;min-width:0">
+        <h3 style="font-size:15px;font-weight:500;margin-bottom:4px">Noticeable difference</h3>
+        <p style="font-size:13px;color:#8C6858;line-height:1.6">Most people can see a difference. Still in the same color family.</p>
+        <span style="display:inline-block;margin-top:6px;font-size:11px;padding:3px 10px;border-radius:20px;background:#F0E8DF;color:#5C3D30;font-weight:500;letter-spacing:.04em">Good match</span>
       </div>
-      <div class="scale-swatches">
-        <div class="swatch-pair">
-          <div class="swatch" style="background:#C87890;"></div>
-          <div class="swatch" style="background:#D292A0;"></div>
-        </div>
+      <div role="img" aria-label="Two swatches about ΔE 3–6 apart" style="flex:none;display:flex;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(42,26,20,.14)">
+        <span style="width:44px;height:44px;background:#C87890"></span>
+        <span style="width:44px;height:44px;background:#D292A0"></span>
       </div>
     </div>
-
-    <!-- ΔE 6–12 -->
-    <div class="scale-row">
-      <div class="scale-de">6–12<span>ΔE</span></div>
-      <div class="scale-info">
-        <div class="scale-label">Clearly different</div>
-        <div class="scale-desc">The difference is obvious at a glance. Related shade, different depth or tone.</div>
-        <span class="scale-retail">Approximate match</span>
+    <div style="display:flex;flex-wrap:wrap;gap:10px 24px;align-items:center;padding:20px 0;border-bottom:1px solid #F0E8DF">
+      <p style="flex:none;width:72px;font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:300;line-height:1">6–12<span style="display:block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#8C6858;font-family:'DM Sans',sans-serif;font-weight:400;margin-top:2px">ΔE</span></p>
+      <div style="flex:1 1 240px;min-width:0">
+        <h3 style="font-size:15px;font-weight:500;margin-bottom:4px">Clearly different</h3>
+        <p style="font-size:13px;color:#8C6858;line-height:1.6">The difference is obvious at a glance. Related shade, different depth or tone.</p>
+        <span style="display:inline-block;margin-top:6px;font-size:11px;padding:3px 10px;border-radius:20px;background:#F0E8DF;color:#5C3D30;font-weight:500;letter-spacing:.04em">Approximate match</span>
       </div>
-      <div class="scale-swatches">
-        <div class="swatch-pair">
-          <div class="swatch" style="background:#C87890;"></div>
-          <div class="swatch" style="background:#DCA8B4;"></div>
-        </div>
+      <div role="img" aria-label="Two swatches about ΔE 6–12 apart" style="flex:none;display:flex;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(42,26,20,.14)">
+        <span style="width:44px;height:44px;background:#C87890"></span>
+        <span style="width:44px;height:44px;background:#DCA8B4"></span>
       </div>
     </div>
-
-    <!-- ΔE > 12 -->
-    <div class="scale-row">
-      <div class="scale-de">&gt; 12<span>ΔE</span></div>
-      <div class="scale-info">
-        <div class="scale-label">Different colors</div>
-        <div class="scale-desc">These are distinct shades. Useful as a reference point, not a substitute.</div>
-        <span class="scale-retail">Different shade</span>
+    <div style="display:flex;flex-wrap:wrap;gap:10px 24px;align-items:center;padding:20px 0;border-bottom:none">
+      <p style="flex:none;width:72px;font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:300;line-height:1">&gt; 12<span style="display:block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#8C6858;font-family:'DM Sans',sans-serif;font-weight:400;margin-top:2px">ΔE</span></p>
+      <div style="flex:1 1 240px;min-width:0">
+        <h3 style="font-size:15px;font-weight:500;margin-bottom:4px">Different colors</h3>
+        <p style="font-size:13px;color:#8C6858;line-height:1.6">These are distinct shades. Useful as a reference point, not a substitute.</p>
+        <span style="display:inline-block;margin-top:6px;font-size:11px;padding:3px 10px;border-radius:20px;background:#F0E8DF;color:#5C3D30;font-weight:500;letter-spacing:.04em">Different shade</span>
       </div>
-      <div class="scale-swatches">
-        <div class="swatch-pair">
-          <div class="swatch" style="background:#C87890;"></div>
-          <div class="swatch" style="background:#ECC8B0;"></div>
-        </div>
+      <div role="img" aria-label="Two swatches about ΔE &gt; 12 apart" style="flex:none;display:flex;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(42,26,20,.14)">
+        <span style="width:44px;height:44px;background:#C87890"></span>
+        <span style="width:44px;height:44px;background:#ECC8B0"></span>
       </div>
     </div>
   </div>
 
-  <!-- Context -->
-  <div class="context">
-    <h2>How ΔE is used in this tool</h2>
-    <p>
-      Each lipstick in the database has been color-profiled in <strong>CIELAB color space</strong>
-      using computer vision. When you select a color on the wheel, the ΔE distance from that color
-      to every product in the database is computed and the closest matches are surfaced, ranked
-      from most to least similar.
-    </p>
-  </div>
+  <section style="margin-top:56px;background:#fff;border:1px solid #E0D0C4;border-radius:20px;padding:clamp(24px,4vw,32px) clamp(20px,4vw,36px);box-shadow:0 2px 16px rgba(42,26,20,.10)">
+    <h2 style="font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:400;margin-bottom:16px">How ΔE is used in this tool</h2>
+    <p style="font-size:16px;line-height:1.7;color:#5C3D30;text-wrap:pretty">Each lipstick in the database has been color-profiled in <strong style="color:#2A1A14;font-weight:500">CIELAB color space</strong> using computer vision. When you select a color on the wheel, the ΔE distance from that color to every product in the database is computed and the closest matches are surfaced, ranked from most to least similar.</p>
+  </section>
 
-  <!-- Undertone -->
-  <div class="divider"></div>
-  <h2 id="undertone" class="scale-title">Undertone: How a color leans</h2>
-  <p class="scale-subtitle">
-    Undertone describes which direction a color leans, independent of how light or dark it is.
-    Colors within the same family can be <strong>cool</strong>, <strong>neutral</strong>, or <strong>warm</strong>.
-  </p>
-  <div class="trio">
-    <div class="trio-card">
-      <div class="trio-swatch" style="background:#B83A5E;"></div>
-      <div class="trio-label">Cool red</div>
-      <div class="trio-desc">Leans toward blue or pink. Berries, fuchsias, blue‑based reds.</div>
+  <section style="margin-top:72px;background:#F6E2E8;border-radius:28px;padding:clamp(28px,5vw,48px);display:flex;align-items:center;justify-content:space-between;gap:24px 28px;flex-wrap:wrap">
+    <div style="flex:1 1 320px;min-width:0">
+      <h2 style="font-family:'Cormorant Garamond',serif;font-weight:300;font-size:clamp(28px,4vw,40px);line-height:1.08">From product photo <em style="font-weight:400">to measured color</em></h2>
+      <p style="margin-top:12px;font-size:16px;line-height:1.6;color:#5C3D30;max-width:460px;text-wrap:pretty">How do we get a color out of a picture of a lipstick? See the steps behind the 17,000+ shades in the finder.</p>
     </div>
-    <div class="trio-card">
-      <div class="trio-swatch" style="background:#BC3232;"></div>
-      <div class="trio-label">Neutral red</div>
-      <div class="trio-desc">Balanced, neither blue‑ nor orange‑leaning. True reds and balanced rose.</div>
-    </div>
-    <div class="trio-card">
-      <div class="trio-swatch" style="background:#B84A2A;"></div>
-      <div class="trio-label">Warm red</div>
-      <div class="trio-desc">Leans toward orange or yellow. Bricks, corals, terracotta reds.</div>
-    </div>
-  </div>
-  <p class="side-note">
-    The <em>hue angle</em> on the a*–b* plane — the direction the color points — determines undertone.
-    Hues under ~12° are cool, 12–28° neutral, above 28° warm.
-  </p>
+    <a class="h3" href="/about.html#pipeline" style="display:inline-flex;align-items:center;gap:8px;white-space:nowrap;background:#2A1A14;color:#FAF6F1;font-size:12px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;padding:12px 24px;border-radius:40px;text-decoration:none;transition:background .15s">See how it works →</a>
+  </section>
 
-  <!-- Depth -->
-  <div class="divider"></div>
-  <h2 id="depth" class="scale-title">Depth: How light or dark</h2>
-  <p class="scale-subtitle">
-    Depth describes how light or dark a shade appears.
-  </p>
-  <div class="trio">
-    <div class="trio-card">
-      <div class="trio-swatch" style="background:#E8B8B0;"></div>
-      <div class="trio-label">Light</div>
-      <div class="trio-desc">Soft and quiet on the lip. Pales, sheers, washes of color.</div>
-    </div>
-    <div class="trio-card">
-      <div class="trio-swatch" style="background:#B86870;"></div>
-      <div class="trio-label">Medium</div>
-      <div class="trio-desc">Pigmented but not heavy. The everyday range, most reds and pinks live here.</div>
-    </div>
-    <div class="trio-card">
-      <div class="trio-swatch" style="background:#5A2530;"></div>
-      <div class="trio-label">Deep</div>
-      <div class="trio-desc">Bold and saturated. Vampy, plum, oxblood, deep berry.</div>
-    </div>
-  </div>
-  <p class="side-note">
-    Depth is read directly from <em>L*</em> (lightness): under 32 is deep, 32–55 is medium, above 55 is light.
-  </p>
+  <section aria-labelledby="sources" style="margin-top:48px;display:flex;flex-direction:column;gap:8px">
+    <h2 id="sources" style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#8C6858;font-weight:500;margin-bottom:10px">Sources</h2>
+    <p style="font-size:13px;line-height:1.6;color:#5C3D30;padding-left:2em;text-indent:-2em;text-wrap:pretty">CIE (2018). <em>CIE 015:2018 Colorimetry</em> (4th ed.). Commission Internationale de l'Éclairage. ISBN 978-3-902842-13-8.</p>
+    <p style="font-size:13px;line-height:1.6;color:#5C3D30;padding-left:2em;text-indent:-2em;text-wrap:pretty">Luo, M. R., Cui, G., &amp; Rigg, B. (2001). The development of the CIE 2000 colour-difference formula: CIEDE2000. <em>Color Research &amp; Application, 26</em>(5), 340–350.</p>
+    <p style="font-size:13px;line-height:1.6;color:#5C3D30;padding-left:2em;text-indent:-2em;text-wrap:pretty">Xiao, K., Zhai, Q., Li, C., Zhu, Y., &amp; Pointer, M. R. (2017). Color difference evaluation for human skin. <em>Optics Express, 25</em>(18), 21212–21222.</p>
+  </section>
 
-  <!-- Next: how the colors are measured -->
-  <div class="next-card">
-    <div>
-      <h2>From product photo <em>to measured color</em></h2>
-      <p>How do we get a color out of a picture of a lipstick? See the steps behind the 17,000+ shades in the finder.</p>
-    </div>
-    <a href="about.html#pipeline" class="cta">See how it works →</a>
-  </div>
+  <footer style="margin-top:32px;padding-top:24px;border-top:1px solid #E0D0C4;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:16px">
+    <span style="font-size:11px;color:#8C6858;letter-spacing:.08em;text-transform:uppercase">Lipstick Color Finder · Color guide · <a href="/privacy.html" style="color:inherit">Privacy</a></span>
+    <a class="h3" href="/" style="display:inline-flex;align-items:center;gap:8px;background:#2A1A14;color:#FAF6F1;font-size:12px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;padding:12px 24px;border-radius:40px;text-decoration:none;transition:background .15s">Back to Color Finder →</a>
+  </footer>
 
-  <!-- Footer nav -->
-  <div class="page-footer">
-    <span class="page-footer-label">Lipstick Color Finder · Color guide · <a href="privacy.html" style="color:inherit">Privacy</a></span>
-    <a href="index.html" class="cta">
-      Back to Color Finder →
-    </a>
-  </div>
+</main>
+<script>
+// Turns the depth/undertone scene and fills the readout; everything else on the page is static HTML.
+(function () {
+  var scene = document.getElementById('scene');
+  var dots = Array.prototype.slice.call(scene.querySelectorAll('.pt'));
+  var noPick = document.getElementById('no-pick'), hasPick = document.getElementById('has-pick');
+  var RING_ON = '0 0 0 3px #fff,0 0 0 5px #2A1A14', RING_OFF = '0 0 0 2px #fff,0 2px 6px rgba(42,26,20,.25)';
+  var active = null, ptr = null, drag = null, visible = true, cur = { y: -70, x: -24 };
+  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-</div>
+  function setActive(btn) {
+    if (btn === active) return;
+    active = btn;
+    dots.forEach(function (d) {
+      d.setAttribute('aria-pressed', d === btn ? 'true' : 'false');
+      d.firstElementChild.style.boxShadow = d === btn ? RING_ON : RING_OFF;
+    });
+    noPick.hidden = !!btn; hasPick.hidden = !btn;
+    if (!btn) return;
+    var p = btn.dataset, vals = { family: p.family, depth: p.depth, Depth: p.depth[0].toUpperCase() + p.depth.slice(1), L: p.l, tone: p.tone, hue: p.hue };
+    hasPick.querySelectorAll('[data-t]').forEach(function (el) { el.textContent = vals[el.dataset.t]; });
+  }
+  dots.forEach(function (d) {
+    ['click', 'mouseenter', 'focus'].forEach(function (ev) { d.addEventListener(ev, function () { setActive(d); }); });
+  });
+
+  scene.addEventListener('pointerdown', function (e) {
+    if (e.pointerType !== 'mouse') drag = { x: e.clientX, y: e.clientY, dy: ptr ? ptr.dy : 0, dx: ptr ? ptr.dx : 0 };
+  });
+  scene.addEventListener('pointerup', function () { drag = null; });
+  scene.addEventListener('pointermove', function (e) {
+    if (e.pointerType === 'mouse') {
+      var r = scene.getBoundingClientRect();
+      ptr = { dy: ((e.clientX - r.left) / r.width - .5) * 60, dx: -((e.clientY - r.top) / r.height - .5) * 20 };
+    } else if (drag) ptr = { dy: drag.dy + (e.clientX - drag.x) * .4, dx: drag.dx - (e.clientY - drag.y) * .15 };
+  });
+  function leave(e) {
+    ptr = null; drag = null;
+    if (e.pointerType === 'mouse' && active && !scene.contains(document.activeElement)) setActive(null);
+  }
+  scene.addEventListener('pointerleave', leave);
+  scene.addEventListener('pointercancel', leave);
+
+  if ('IntersectionObserver' in window) new IntersectionObserver(function (es) { visible = es[0].isIntersecting; }).observe(scene);
+  requestAnimationFrame(function tick(t) {
+    requestAnimationFrame(tick);
+    if (!visible) return;
+    var sway = reduced ? 0 : 1;
+    var by = -70 + Math.sin(t / 2600) * 14 * sway, bx = -24 + Math.sin(t / 3700) * 3 * sway;
+    var ty = by + (ptr ? ptr.dy : 0), tx = Math.max(-60, Math.min(-6, bx + (ptr ? ptr.dx : 0)));
+    cur.y += (ty - cur.y) * .07; cur.x += (tx - cur.x) * .07;
+    scene.style.setProperty('--yaw', cur.y.toFixed(2) + 'deg'); scene.style.setProperty('--tilt', cur.x.toFixed(2) + 'deg');
+  });
+})();
+</script>
 </body>
 </html>
