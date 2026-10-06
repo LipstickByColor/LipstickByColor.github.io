@@ -40,12 +40,17 @@ a{color:#2A1A14}a:hover{color:#5C3D30}
 .scene-fig{position:relative;--s:1}
 #scene{border-radius:20px}
 .readout{position:absolute;z-index:1;top:14px;right:16px;left:16px;text-align:right;font-size:16px;line-height:1.4;font-weight:500;color:#5C3D30;pointer-events:none}
+.ro-name{margin-top:6px;padding-top:6px;border-top:1px solid #E0D0C4;display:inline-block;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:22px;line-height:1.1;color:#2A1A14}
 .for-touch{display:none}
 @media (hover:none),(pointer:coarse){.for-mouse{display:none}.for-touch{display:inline}}
 @media (max-width:600px){
   /* Phones: the readout becomes a strip on top of the scene, so it never covers the dots */
-  .readout{position:static;min-height:104px;display:flex;flex-direction:column;justify-content:center;padding:12px 16px;text-align:left;font-size:15px;background:#fff;border:1px solid #E0D0C4;border-bottom:none;border-radius:20px 20px 0 0}
+  .readout{position:static;min-height:70px;display:flex;flex-direction:column;justify-content:center;padding:10px 16px;text-align:left;font-size:14px;background:#fff;border:1px solid #E0D0C4;border-bottom:none;border-radius:20px 20px 0 0}
   .readout .ro-family{display:none}
+  /* Measures on the left, the name they add up to on the right */
+  #has-pick{display:flex;align-items:center;justify-content:space-between;gap:14px}
+  .ro-facts{flex:none}
+  .ro-name{margin:0;padding:0;border:none;text-align:right}
   #scene{border-radius:0 0 20px 20px}
 }
 @media (max-width:600px){.scene-fig{--dot:calc(21px / var(--s));--hit:calc(40px / var(--s))}}
@@ -53,7 +58,7 @@ a{color:#2A1A14}a:hover{color:#5C3D30}
 @media (max-width:439px){.scene-fig{--s:.85}}
 @media (max-width:413px){.scene-fig{--s:.8}}
 @media (max-width:389px){.scene-fig{--s:.75}}
-@media (max-width:374px){.scene-fig{--s:.7}}
+@media (max-width:374px){.scene-fig{--s:.7}.ro-wide{display:none}}
 @media (max-width:359px){.scene-fig{--s:.6}}
 </style>
 </head>
@@ -149,10 +154,12 @@ a{color:#2A1A14}a:hover{color:#5C3D30}
     <div class="readout" aria-live="polite">
       <p id="no-pick"><span class="for-mouse">Hover or tap a dot to read it.</span><span class="for-touch">Tap a dot to read it.</span></p>
       <div id="has-pick" hidden>
-        <p class="ro-family">Family: <span data-t="family"></span></p>
-        <p>L* <span data-t="L"></span> → <span style="color:#B0566F"><span data-t="depth"></span></span></p>
-        <p>Hue angle <span data-t="hue"></span>° → <span style="color:#B0566F"><span data-t="tone"></span></span></p>
-        <p style="margin-top:6px;padding-top:6px;border-top:1px solid #E0D0C4;display:inline-block;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:22px;line-height:1.1;color:#2A1A14"><span style="color:#B0566F"><span data-t="Depth"></span> <span data-t="tone"></span></span> <span data-t="family"></span></p>
+        <div class="ro-facts">
+          <p class="ro-family">Family: <span data-t="family"></span></p>
+          <p>L* <span data-t="L"></span> → <span style="color:#B0566F"><span data-t="depth"></span></span></p>
+          <p>Hue<span class="ro-wide"> angle</span> <span data-t="hue"></span>° → <span style="color:#B0566F"><span data-t="tone"></span></span></p>
+        </div>
+        <p class="ro-name"><span style="color:#B0566F"><span data-t="Depth"></span> <span data-t="tone"></span></span> <span data-t="family"></span></p>
       </div>
     </div>
     <div id="scene" style="--yaw:-70deg;--tilt:-24deg;position:relative;height:calc(var(--s,1) * 460px);perspective:1100px;overflow:hidden;touch-action:pan-y;background:#fff;border:1px solid #E0D0C4;box-shadow:0 2px 16px rgba(42,26,20,.10);cursor:grab">
@@ -332,7 +339,8 @@ a{color:#2A1A14}a:hover{color:#5C3D30}
   var dots = Array.prototype.slice.call(scene.querySelectorAll('.pt'));
   var noPick = document.getElementById('no-pick'), hasPick = document.getElementById('has-pick');
   var RING_ON = '0 0 0 3px #fff,0 0 0 5px #2A1A14', RING_OFF = '0 0 0 2px #fff,0 2px 6px rgba(42,26,20,.25)';
-  var active = null, ptr = null, drag = null, visible = true, cur = { y: -70, x: -24 };
+  var active = null, drag = null, moved = false, justDragged = false, visible = true;
+  var rot = { y: -70, x: -24 }, cur = { y: -70, x: -24 }; // where it rests, and where it is drawn right now
   var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   function setActive(btn) {
@@ -351,32 +359,44 @@ a{color:#2A1A14}a:hover{color:#5C3D30}
     ['click', 'mouseenter', 'focus'].forEach(function (ev) { d.addEventListener(ev, function () { setActive(d); }); });
   });
 
+  // Drag to turn, with mouse or finger. The scene rests wherever it is left.
   scene.addEventListener('pointerdown', function (e) {
-    if (e.pointerType !== 'mouse') drag = { x: e.clientX, y: e.clientY, dy: ptr ? ptr.dy : 0, dx: ptr ? ptr.dx : 0 };
+    if (e.button) return;
+    drag = { id: e.pointerId, x: e.clientX, y: e.clientY, ry: rot.y, rx: rot.x, on: false };
   });
-  scene.addEventListener('pointerup', function () { drag = null; });
   scene.addEventListener('pointermove', function (e) {
-    if (e.pointerType === 'mouse') {
-      var r = scene.getBoundingClientRect();
-      ptr = { dy: ((e.clientX - r.left) / r.width - .5) * 60, dx: -((e.clientY - r.top) / r.height - .5) * 20 };
-    } else if (drag) ptr = { dy: drag.dy + (e.clientX - drag.x) * .4, dx: drag.dx - (e.clientY - drag.y) * .15 };
+    if (!drag || e.pointerId !== drag.id) return;
+    var dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+    if (!drag.on) {
+      if (Math.abs(dx) + Math.abs(dy) < 4) return; // still a click or tap
+      drag.on = moved = true;
+      try { scene.setPointerCapture(e.pointerId); } catch (err) {}
+      scene.style.cursor = 'grabbing';
+    }
+    rot.y = drag.ry + dx * .4;
+    rot.x = Math.max(-60, Math.min(-6, drag.rx - dy * .15));
   });
-  function leave(e) {
-    ptr = null; drag = null;
-    if (e.pointerType === 'mouse' && active && !scene.contains(document.activeElement)) setActive(null);
+  function endDrag() {
+    if (drag && drag.on) { justDragged = true; setTimeout(function () { justDragged = false; }, 350); }
+    drag = null; scene.style.cursor = 'grab';
   }
+  scene.addEventListener('pointerup', endDrag);
+  scene.addEventListener('pointercancel', endDrag);
+  // The click that ends a drag isn't a selection or a "clear"
+  scene.addEventListener('click', function (e) { if (justDragged) { e.stopPropagation(); e.preventDefault(); } }, true);
   scene.addEventListener('click', function (e) { if (!e.target.closest('.pt')) setActive(null); });
-  scene.addEventListener('pointerleave', leave);
-  scene.addEventListener('pointercancel', leave);
+  scene.addEventListener('pointerleave', function (e) {
+    if (e.pointerType === 'mouse' && !drag && active && !scene.contains(document.activeElement)) setActive(null);
+  });
 
   if ('IntersectionObserver' in window) new IntersectionObserver(function (es) { visible = es[0].isIntersecting; }).observe(scene);
   requestAnimationFrame(function tick(t) {
     requestAnimationFrame(tick);
     if (!visible) return;
-    var sway = reduced || active || drag ? 0 : 1; // hold still while a dot is being read or a finger is down
-    var by = -70 + Math.sin(t / 2600) * 14 * sway, bx = -24 + Math.sin(t / 3700) * 3 * sway;
-    var ty = by + (ptr ? ptr.dy : 0), tx = Math.max(-60, Math.min(-6, bx + (ptr ? ptr.dx : 0)));
-    cur.y += (ty - cur.y) * .07; cur.x += (tx - cur.x) * .07;
+    // Sways gently until someone turns it; after that it stays put. Also holds still while a dot is being read.
+    var sway = reduced || moved || active || drag ? 0 : 1, ease = drag && drag.on ? .25 : .07;
+    var ty = rot.y + Math.sin(t / 2600) * 14 * sway, tx = rot.x + Math.sin(t / 3700) * 3 * sway;
+    cur.y += (ty - cur.y) * ease; cur.x += (tx - cur.x) * ease;
     scene.style.setProperty('--yaw', cur.y.toFixed(2) + 'deg'); scene.style.setProperty('--tilt', cur.x.toFixed(2) + 'deg');
   });
 })();
