@@ -2,7 +2,7 @@
 // Google Analytics is only requested once analytics is allowed:
 //   - visitors on a European time zone are asked first (banner below), and nothing loads until they accept
 //   - browsers sending Global Privacy Control are treated as "no" without asking
-//   - everyone else gets analytics by default and can switch it off on /privacy.html
+//   - everyone else gets analytics by default and can switch it off on /privacy/
 // The choice lives in localStorage under 'lipstick-consent' ('granted' | 'denied').
 // gtag() is always defined, so `window.gtag?.('event', …)` calls elsewhere are safe either way.
 window.dataLayer = window.dataLayer || [];
@@ -94,7 +94,7 @@ function gtag(){dataLayer.push(arguments);}
       'padding:10px 16px;border-radius:40px;cursor:pointer;border:1px solid #2A1A14;';
     el.innerHTML =
       '<p style="flex:1 1 260px;margin:0">May we use Google Analytics cookies to see which parts of the site get used? ' +
-      '<a href="/privacy.html" style="color:#5C3D30">Privacy</a></p>' +
+      '<a href="/privacy/" style="color:#5C3D30">Privacy</a></p>' +
       '<div style="display:flex;gap:8px;flex:none">' +
       '<button type="button" data-consent="denied" style="' + btn + 'background:#fff;color:#2A1A14">No thanks</button>' +
       '<button type="button" data-consent="granted" style="' + btn + 'background:#2A1A14;color:#FAF6F1">Allow</button>' +

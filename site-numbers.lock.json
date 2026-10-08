@@ -1,0 +1,17 @@
+{
+  "products": {
+    "exact": "16,794",
+    "round": "nearly 17,000",
+    "plus": "16,000+"
+  },
+  "reds": {
+    "exact": "2,656",
+    "round": "over 2,600",
+    "plus": "2,600+"
+  },
+  "brands": {
+    "exact": "437",
+    "round": "nearly 450",
+    "plus": "400+"
+  }
+}

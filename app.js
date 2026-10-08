@@ -1987,9 +1987,27 @@ function GuidesNewTag({
 //   ?color=a02523                 matches for a color (wheel, photo, hex, list)
 //   ?wheel=classic-red            a wheel color by name, whatever its hex is today (guides link here)
 //   ?brand=chanel&dupe=99+pirate  dupes for a product
-//   ?mode=dupe                    the dupe finder, nothing picked yet (guides link here)
+//   ?mode=dupe                    the dupe finder, nothing picked yet (older links; now /dupe-finder/)
 //   ?item=brand|shade&item=…      a shared favorites list
 // Brands never contain '|' (shades can), so items split on the first one.
+// Tools with a page of their own: the same app, opened in that mode. The path
+// follows the mode as tabs change. Titles match the pages build-pages.js writes.
+const MODE_PAGES = {
+  wheel: {
+    path: '/color-wheel/',
+    title: 'Lipstick Color Wheel — Discover Lipstick Shades by Color'
+  },
+  photo: {
+    path: '/photo-match/',
+    title: 'Find Your Lipstick Shade from a Photo'
+  },
+  dupe: {
+    path: '/dupe-finder/',
+    title: 'Lipstick Dupe Finder — Find Dupes for Any Shade by Color'
+  }
+};
+const HOME_TITLE = 'Lipstick Color Finder — Search Lipstick by Color & Find Dupes';
+const PAGE_MODE = Object.keys(MODE_PAGES).find(m => window.location.pathname.startsWith(MODE_PAGES[m].path)) || null;
 function parseSharedLink(search) {
   const q = new URLSearchParams(search);
   const color = q.get('color'),
@@ -3717,7 +3735,7 @@ function VibePanel({
       letterSpacing: '0.04em'
     }
   }, active === 0 ? 'No filters — showing all shades' : `${active} filter${active === 1 ? '' : 's'} active`), /*#__PURE__*/React.createElement("a", {
-    href: "color-guide.html#undertone",
+    href: "/color-science/#undertone",
     onClick: () => window.gtag?.('event', 'nav_link_click', {
       target: 'color_guide',
       location: 'undertone_panel'
@@ -3789,6 +3807,15 @@ function Section({
 // Quick-start options shown under the dupe search for anyone who
 // doesn't have a specific lipstick in mind yet.
 const POPULAR_DUPE_PICKS = [{
+  brand: 'mac cosmetics',
+  shade: 'ruby woo'
+}, {
+  brand: 'charlotte tilbury',
+  shade: 'pillow talk'
+}, {
+  brand: 'pat mcgrath labs',
+  shade: 'elson 4'
+}, {
   brand: 'chanel',
   shade: '99 pirate'
 }, {
@@ -4770,11 +4797,20 @@ function LandingCard({
   icon,
   title,
   desc,
+  href,
   onClick
 }) {
   const [hovered, setHovered] = useState(false);
-  return /*#__PURE__*/React.createElement("div", {
-    onClick: onClick,
+  // A real link where the tool has its own page (crawlable, opens in a new tab);
+  // a plain click still switches in place
+  const Tag = href ? 'a' : 'div';
+  return /*#__PURE__*/React.createElement(Tag, {
+    href: href,
+    onClick: e => {
+      if (e.metaKey || e.ctrlKey || e.shiftKey) return;
+      e.preventDefault();
+      onClick();
+    },
     onMouseEnter: () => setHovered(true),
     onMouseLeave: () => setHovered(false),
     style: {
@@ -4787,6 +4823,8 @@ function LandingCard({
       borderColor: hovered ? 'var(--blush)' : 'var(--border)',
       borderRadius: 16,
       cursor: 'pointer',
+      textDecoration: 'none',
+      color: 'inherit',
       transform: hovered ? 'translateY(-4px)' : 'none',
       boxShadow: hovered ? '0 14px 34px var(--shadow)' : 'none',
       transition: 'transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease'
@@ -4868,7 +4906,7 @@ function Landing({
       textAlign: 'center',
       marginBottom: 14
     }
-  }, "Perceptual color matching \xB7 Nearly 20,000 lip products"), /*#__PURE__*/React.createElement("h2", {
+  }, "Perceptual color matching \xB7 Nearly 17,000 lip products"), /*#__PURE__*/React.createElement("h2", {
     className: "landing-lede"
   }, "Let's find your ", /*#__PURE__*/React.createElement("em", {
     style: {
@@ -4882,6 +4920,7 @@ function Landing({
     icon: c.icon,
     title: c.title,
     desc: c.desc,
+    href: MODE_PAGES[c.id]?.path,
     onClick: () => onPick(c.id)
   }))));
 }
@@ -4909,7 +4948,7 @@ function CatalogueLoading() {
       fontSize: 18,
       color: 'var(--text-muted)'
     }
-  }, "Loading nearly 20,000 shades\u2026"));
+  }, "Loading nearly 17,000 shades\u2026"));
 }
 
 // Replaces the whole app when the catalogue can't be loaded, so visitors don't
@@ -4988,6 +5027,7 @@ function App() {
     // 'landing' | 'wheel' | 'photo' | 'hex' | 'dupe' | 'list'
     if (initialLink?.type === 'color') return initialWheelColor ? 'wheel' : 'hex';
     if (initialLink?.type === 'dupe') return 'dupe';
+    if (PAGE_MODE) return PAGE_MODE;
     try {
       return localStorage.getItem('lipstick-visited') ? 'wheel' : 'landing';
     } catch {
@@ -5305,14 +5345,16 @@ function App() {
     if (sharedListKeys) sharedListKeys.forEach(k => q.append('item', `${k.brand}|${k.shade}`));else if (mode === 'dupe' && dupeProduct) {
       q.set('brand', dupeProduct.brand);
       q.set('dupe', dupeProduct.shade);
-    } else if (mode === 'dupe' && initialLink?.type === 'dupe' && !initialLink.brand) q.set('mode', 'dupe');else if (mode === 'dupe' && !dataReady && initialLink?.type === 'dupe') {
+    } else if (mode === 'dupe' && !dataReady && initialLink?.type === 'dupe') {
       q.set('brand', initialLink.brand);
       q.set('dupe', initialLink.shade);
     } else if (mode !== 'dupe' && effectiveColor) q.set('color', effectiveColor.hex.slice(1).toLowerCase());
     const search = q.toString() ? `?${q}` : '';
-    if (search !== window.location.search) {
-      history.replaceState(null, '', window.location.pathname + search + window.location.hash);
+    const path = MODE_PAGES[mode]?.path || '/';
+    if (search !== window.location.search || path !== window.location.pathname) {
+      history.replaceState(null, '', path + search + window.location.hash);
     }
+    document.title = MODE_PAGES[mode]?.title || HOME_TITLE;
   }, [sharedListKeys, mode, dupeProduct, effectiveColor?.hex, dataReady]);
   const matches = React.useMemo(() => {
     if (!selectedColor || !dataReady) return [];
@@ -5373,7 +5415,7 @@ function App() {
       color: 'var(--text-muted)',
       letterSpacing: '0.02em'
     }
-  }, "\xB7 Nearly 20,000 lip products"), /*#__PURE__*/React.createElement("div", {
+  }, "\xB7 Nearly 17,000 lip products"), /*#__PURE__*/React.createElement("div", {
     style: {
       marginLeft: 'auto',
       display: 'flex',
@@ -5381,7 +5423,7 @@ function App() {
       gap: 16
     }
   }, /*#__PURE__*/React.createElement("a", {
-    href: "guides/",
+    href: "/guides/",
     className: "header-how-it-works",
     onClick: () => window.gtag?.('event', 'nav_link_click', {
       target: 'guides',
@@ -5414,7 +5456,7 @@ function App() {
       e.currentTarget.style.color = 'var(--espresso)';
     }
   }, "Guides", /*#__PURE__*/React.createElement(GuidesNewTag, null)), /*#__PURE__*/React.createElement("a", {
-    href: "about.html",
+    href: "/about/",
     className: "header-how-it-works",
     onClick: () => window.gtag?.('event', 'nav_link_click', {
       target: 'about',
@@ -5445,7 +5487,7 @@ function App() {
       e.currentTarget.style.borderColor = 'var(--border)';
       e.currentTarget.style.color = 'var(--espresso)';
     }
-  }, "Behind the Project"), /*#__PURE__*/React.createElement("button", {
+  }, "How I Built It"), /*#__PURE__*/React.createElement("button", {
     onClick: () => setShowWishlist(true),
     style: {
       display: 'flex',
@@ -5488,7 +5530,7 @@ function App() {
   }, wishlist.length))), /*#__PURE__*/React.createElement("nav", {
     className: "header-mobile-links",
     "aria-label": "Pages"
-  }, [['guides/', 'Guides', 'guides'], ['about.html', 'Behind the Project', 'about']].map(([href, label, target]) => /*#__PURE__*/React.createElement("a", {
+  }, [['/guides/', 'Guides', 'guides'], ['/about/', 'How I Built It', 'about']].map(([href, label, target]) => /*#__PURE__*/React.createElement("a", {
     key: target,
     href: href,
     onClick: () => window.gtag?.('event', 'nav_link_click', {
@@ -5726,7 +5768,15 @@ function App() {
     toneRamp: toneRamp,
     toneIdx: toneIdx,
     setToneIdx: handleToneIdxChange
-  })))), /*#__PURE__*/React.createElement("footer", {
+  })))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: mode === PAGE_MODE ? 'block' : 'none'
+    },
+    ref: el => {
+      const copy = document.getElementById('page-copy');
+      if (el && copy && copy.parentNode !== el) el.appendChild(copy);
+    }
+  }), /*#__PURE__*/React.createElement("footer", {
     className: "app-footer",
     style: {
       borderTop: '1px solid var(--border)',
@@ -5741,7 +5791,7 @@ function App() {
       letterSpacing: '0.05em'
     }
   }, "Showing closest matches by color distance (\u0394E)"), /*#__PURE__*/React.createElement("a", {
-    href: "color-guide.html",
+    href: "/color-science/",
     onClick: () => window.gtag?.('event', 'nav_link_click', {
       target: 'color_guide',
       location: 'footer'
@@ -5756,7 +5806,7 @@ function App() {
       transition: 'opacity 0.15s'
     }
   }, "What is \u0394E?"), /*#__PURE__*/React.createElement("a", {
-    href: "about.html",
+    href: "/about/",
     onClick: () => window.gtag?.('event', 'nav_link_click', {
       target: 'about',
       location: 'footer'
@@ -5770,8 +5820,8 @@ function App() {
       paddingBottom: 1,
       transition: 'opacity 0.15s'
     }
-  }, "Behind the Project"), /*#__PURE__*/React.createElement("a", {
-    href: "guides/",
+  }, "How I Built It"), /*#__PURE__*/React.createElement("a", {
+    href: "/guides/",
     onClick: () => window.gtag?.('event', 'nav_link_click', {
       target: 'guides',
       location: 'footer'
@@ -5786,7 +5836,7 @@ function App() {
       transition: 'opacity 0.15s'
     }
   }, "Guides"), /*#__PURE__*/React.createElement("a", {
-    href: "privacy.html",
+    href: "/privacy/",
     style: {
       fontSize: 11,
       color: 'var(--blush)',

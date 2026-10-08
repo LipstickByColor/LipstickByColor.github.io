@@ -1,0 +1,1103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Building Lipstick Color Finder: Data, ML &amp; Color Science</title>
+<meta name="description" content="How I built a color-search engine from thousands of lipstick images, combining computer vision, color science, machine learning, and human validation." />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="Lipstick Color Finder" />
+<meta property="og:url" content="https://lipstickbycolor.github.io/about/" />
+<meta property="og:title" content="Building Lipstick Color Finder: Data, ML &amp; Color Science" />
+<meta property="og:description" content="How I built a color-search engine from thousands of lipstick images, combining computer vision, color science, machine learning, and human validation." />
+<meta property="og:image" content="https://lipstickbycolor.github.io/assets/share-card.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content="Lipstick Color Finder: find lipstick by color, with rows of lips in every color of the rainbow" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Building Lipstick Color Finder: Data, ML &amp; Color Science" />
+<meta name="twitter:description" content="How I built a color-search engine from thousands of lipstick images, combining computer vision, color science, machine learning, and human validation." />
+<meta name="twitter:image" content="https://lipstickbycolor.github.io/assets/share-card.png" />
+<link rel="canonical" href="https://lipstickbycolor.github.io/about/" />
+<link rel="icon" href="/favicon.ico" sizes="48x48" />
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+<link rel="icon" href="/favicon-96x96.png" type="image/png" sizes="96x96" />
+<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+<script src="/consent.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --cream: #FAF6F1;
+    --cream-dark: #F0E8DF;
+    --espresso: #2A1A14;
+    --espresso-mid: #5C3D30;
+    --blush: #C87890;
+    --text-muted: #8C6858;
+    --border: #E0D0C4;
+    --shadow: rgba(42,26,20,0.10);
+  }
+
+  html, body {
+    min-height: 100vh;
+    background: var(--cream);
+    color: var(--espresso);
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  body::before {
+    content: '';
+    position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
+    opacity: 0.4;
+  }
+
+  .page {
+    position: relative; z-index: 1;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 48px 40px 80px;
+  }
+
+  .back {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--text-muted); text-decoration: none;
+    margin-bottom: 48px;
+    transition: color 0.15s;
+  }
+  .back:hover { color: var(--espresso); }
+
+  .hero-label {
+    font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--blush); margin-bottom: 12px; font-weight: 500;
+  }
+  h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 300; font-size: clamp(36px, 6vw, 56px);
+    line-height: 1.05; letter-spacing: -0.01em;
+    margin-bottom: 28px;
+  }
+  h1 em { font-style: italic; font-weight: 400; }
+
+  .hero-subtitle {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 300; font-style: italic;
+    font-size: clamp(20px, 3vw, 27px);
+    line-height: 1.25; letter-spacing: -0.005em;
+    color: var(--espresso-mid);
+    margin: -16px 0 30px;
+    max-width: 560px;
+  }
+
+  .body-text {
+    font-size: 17px; line-height: 1.75; color: var(--espresso-mid);
+    max-width: 560px;
+    margin-bottom: 20px;
+  }
+  .body-text:last-of-type { margin-bottom: 36px; }
+  .body-text a {
+    color: var(--blush); text-decoration: none;
+    border-bottom: 1px solid currentColor; padding-bottom: 1px;
+    transition: opacity 0.15s;
+  }
+  .body-text a:hover { opacity: 0.7; }
+
+  /* — Why / What / How — labeled premise sequence ——————————————— */
+  .premise {
+    display: flex; flex-direction: column;
+    margin-bottom: 36px;
+  }
+  .premise-row {
+    display: grid;
+    grid-template-columns: 96px 1fr;
+    gap: 28px;
+    padding: 14px 0;
+  }
+  .premise-tag {
+    display: flex; flex-direction: column; gap: 6px;
+    padding-top: 5px;
+  }
+  .premise-tag .pt-num {
+    font-family: ui-monospace, Menlo, monospace;
+    font-size: 11px; letter-spacing: 0.1em;
+    color: var(--text-muted);
+  }
+  .premise-tag .pt-word {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic; font-weight: 500;
+    font-size: 26px; line-height: 1; color: var(--blush);
+  }
+  .premise .body-text { margin-bottom: 0; }
+  .premise .body-text:last-of-type { margin-bottom: 0; }
+  .premise-more {
+    display: flex; align-items: center; justify-content: center; gap: 14px;
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic; font-size: 26px;
+    color: var(--espresso-mid);
+    margin: 30px 0 4px; padding-top: 30px;
+    border-top: 1px solid var(--border);
+  }
+  .premise-more .pm-arrow {
+    font-style: normal; font-size: 19px; color: var(--blush);
+    animation: pmNudge 2.4s ease-in-out infinite;
+  }
+  @keyframes pmNudge {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(4px); }
+  }
+  @media (prefers-reduced-motion: reduce) { .premise-more .pm-arrow { animation: none; } }
+  @media (max-width: 600px) {
+    .premise-row { grid-template-columns: 1fr; gap: 12px; }
+    .premise-tag { flex-direction: row; align-items: baseline; gap: 10px; padding-top: 0; }
+  }
+
+  /* — The problem comparison ———————————————————————————————————— */
+  .problem {
+    margin: 56px 0 8px;
+    padding-top: 48px;
+    border-top: 1px solid var(--border);
+  }
+  .problem.is-sub {
+    margin-top: 12px;
+    padding-top: 0;
+    border-top: none;
+  }
+  .problem.is-tight {
+    margin-top: 24px;
+    padding-top: 0;
+    border-top: none;
+  }
+  .problem.is-tight + .problem {
+    margin-top: 24px;
+    padding-top: 28px;
+  }
+  .section-label.is-cont {
+    color: var(--text-muted);
+    padding-left: 18px;
+  }
+  .section-label.is-cont .cont-glyph {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 16px; color: var(--blush);
+    margin-left: -18px; margin-right: -3px;
+    text-transform: none; letter-spacing: 0;
+  }
+  .section-label {
+    font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--blush); margin-bottom: 14px; font-weight: 500;
+    display: flex; align-items: baseline; gap: 11px;
+  }
+  .section-label .echo {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic; font-weight: 500;
+    font-size: 20px; letter-spacing: 0; text-transform: none;
+    color: var(--blush); line-height: 1;
+  }
+  .section-label .echo::after {
+    content: ""; display: inline-block;
+    width: 1px; height: 13px; margin-left: 11px;
+    background: var(--border); vertical-align: middle;
+    transform: translateY(2px);
+  }
+  .section-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 300; font-size: clamp(28px, 4.5vw, 40px);
+    line-height: 1.1; letter-spacing: -0.01em; margin-bottom: 18px;
+  }
+  .section-title em { font-style: italic; font-weight: 400; }
+  .section-lede {
+    font-size: 16px; line-height: 1.7; color: var(--espresso-mid);
+    max-width: 560px; margin-bottom: 36px;
+  }
+  .section-lede.is-wide { max-width: 640px; }
+  .mode-list {
+    list-style: none; max-width: 640px;
+    margin: 0 0 36px; padding-left: 18px;
+    display: flex; flex-direction: column; gap: 16px;
+  }
+  .mode-list li {
+    display: flex; gap: 13px; align-items: flex-start;
+    font-size: 16px; line-height: 1.7; color: var(--espresso-mid);
+  }
+  .mode-list strong { color: var(--espresso); font-weight: 600; }
+  .lede-num {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: var(--blush); color: #fff;
+    font-size: 12px; font-weight: 600; letter-spacing: 0;
+    display: inline-flex; align-items: center; justify-content: center;
+    flex-shrink: 0; margin-top: 3px;
+  }
+  .lede-note { color: var(--text-muted); font-style: italic; }
+
+  .pink-stats {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 18px;
+    margin-bottom: 36px;
+  }
+  .pink-stat {
+    background: #fff; border: 1px solid var(--border);
+    border-radius: 18px; padding: 22px 24px;
+    display: flex; align-items: baseline; gap: 14px;
+  }
+  .pink-stat .punch-num { flex-shrink: 0; }
+  .stat-swatch {
+    width: 26px; height: 26px; border-radius: 50%; flex-shrink: 0;
+    align-self: center;
+    box-shadow: inset 0 0 0 1px rgba(0,0,0,0.06), 0 1px 4px var(--shadow);
+  }
+  .pink-stat .punch-label strong { color: var(--espresso); font-weight: 500; }
+  @media (max-width: 600px) {
+    .pink-stats { grid-template-columns: 1fr; }
+  }
+
+  .retailers {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 18px;
+    margin-bottom: 40px;
+  }
+  .retailer {
+    background: #fff; border: 1px solid var(--border);
+    border-radius: 18px; padding: 22px 22px 24px;
+  }
+  .retailer-name {
+    font-size: 12px; font-weight: 500; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--espresso); margin-bottom: 4px;
+  }
+  .retailer-sub {
+    font-size: 13px; color: var(--text-muted); margin-bottom: 18px;
+  }
+  .swatch-grid {
+    display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 20px;
+  }
+  .swatch-chip {
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 4px 11px 4px 5px; border-radius: 20px;
+    border: 1px solid var(--border); background: var(--cream);
+    font-size: 12px; color: var(--espresso-mid);
+  }
+  .swatch-chip.is-pink {
+    border-color: var(--blush); background: #fff;
+    box-shadow: 0 0 0 1px var(--blush);
+  }
+  .swatch-dot {
+    width: 16px; height: 16px; border-radius: 50%; flex-shrink: 0;
+    box-shadow: inset 0 0 0 1px rgba(0,0,0,0.06);
+  }
+  .swatch-count { color: var(--text-muted); font-size: 11px; }
+
+  /* Amazon / Google — no palette, just a query */
+  .no-palette {
+    background: #fff; border: 1px solid var(--border);
+    border-radius: 18px; padding: 22px 24px; margin-bottom: 28px;
+  }
+  .search-mock {
+    display: inline-flex; align-items: center; gap: 12px;
+    background: var(--cream); border: 1px solid var(--border);
+    border-radius: 30px; padding: 12px 20px; margin: 16px 0 16px;
+    min-width: min(420px, 100%);
+  }
+  .search-mock svg { width: 18px; height: 18px; color: var(--text-muted); flex-shrink: 0; }
+  .search-mock .q { font-size: 15px; color: var(--espresso); }
+  .search-mock .cursor {
+    width: 1.5px; height: 18px; background: var(--blush); display: inline-block;
+    animation: blink 1.1s step-end infinite;
+  }
+  @keyframes blink { 50% { opacity: 0; } }
+  .no-palette-note {
+    font-size: 13px; line-height: 1.6; color: var(--espresso-mid); max-width: 520px;
+  }
+
+  .market-callout {
+    padding: 4px 0 0 20px; border-left: 2px solid var(--blush);
+    max-width: 560px;
+  }
+  .market-callout--standalone {
+    margin: 48px 0 8px;
+    padding-top: 8px;
+    max-width: 684px;
+  }
+  .market-callout--standalone .market-body {
+    font-size: 16px; line-height: 1.7;
+  }
+  .market-label {
+    font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--blush); font-weight: 500; margin-bottom: 8px;
+  }
+  .market-body {
+    font-size: 14px; line-height: 1.65; color: var(--espresso-mid);
+  }
+  .market-callout strong {
+    color: var(--espresso); font-family: 'Cormorant Garamond', serif;
+    font-size: 21px; font-weight: 500;
+  }
+  .retailer-punch {
+    display: flex; align-items: baseline; gap: 10px;
+    padding-top: 16px; border-top: 1px dashed var(--border);
+  }
+  .punch-num {
+    font-family: 'Cormorant Garamond', serif; font-weight: 400;
+    font-size: 40px; line-height: 1; color: var(--blush);
+  }
+  .punch-label {
+    font-size: 13px; line-height: 1.45; color: var(--espresso-mid);
+  }
+
+  @media (max-width: 600px) {
+    .retailers { grid-template-columns: 1fr; }
+  }
+
+  /* The "many pinks" reveal */
+  .pinks-reveal {
+    background: var(--cream-dark);
+    border-radius: 18px; padding: 28px 26px;
+    margin-bottom: 44px;
+  }
+  .pinks-reveal.is-summary {
+    margin-bottom: 8px;
+    border: 1px solid var(--blush);
+    box-shadow: 0 4px 22px rgba(200,120,144,0.16);
+  }
+  .pinks-summary-eyebrow {
+    font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--blush); font-weight: 500; margin-bottom: 11px;
+    display: flex; align-items: center; gap: 9px;
+  }
+  .pinks-summary-eyebrow::after {
+    content: ""; flex: 1; height: 1px; background: var(--border);
+  }
+  .pinks-reveal.is-summary .pinks-caption {
+    font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 400;
+    font-size: 23px; line-height: 1.3; color: var(--espresso);
+    margin-bottom: 22px;
+  }
+  .pinks-reveal.is-summary .pinks-caption .fill { font-style: italic; }
+  .pinks-reveal.is-summary .pinks-caption strong { font-style: normal; }
+  .pinks-caption {
+    font-size: 14px; line-height: 1.6; color: var(--espresso-mid);
+    margin-bottom: 18px;
+  }
+  .pinks-caption strong { color: var(--espresso); font-weight: 500; }
+  .pinks-row {
+    display: flex; gap: 0; border-radius: 12px; overflow: hidden;
+    box-shadow: 0 2px 10px var(--shadow);
+  }
+  .pinks-row .p { flex: 1; height: 64px; }
+  .pinks-tags {
+    display: flex; justify-content: space-between; flex-wrap: wrap; gap: 6px;
+    margin-top: 12px;
+  }
+  .pinks-tags span {
+    font-size: 11px; color: var(--text-muted); letter-spacing: 0.02em;
+  }
+
+  /* Real result screenshots — proof */
+  .proof {
+    margin-bottom: 44px;
+  }
+  .proof-caption {
+    font-size: 16px; line-height: 1.7; color: var(--espresso-mid);
+    max-width: 560px; margin-bottom: 20px;
+  }
+  .proof-caption strong { color: var(--espresso); font-weight: 500; }
+  .proof-shots {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 18px;
+    align-items: start;
+  }
+  .proof-shots.is-compact {
+    max-width: 78%; margin-left: auto; margin-right: auto;
+    gap: 40px;
+  }
+  .proof-shots.is-compact .proof-shot img {
+    aspect-ratio: auto;
+  }
+  .proof-shot {
+    background: #fff; border: 1px solid var(--border);
+    border-radius: 18px; overflow: hidden;
+    box-shadow: 0 2px 10px var(--shadow);
+  }
+  .proof-shot figure {
+    background: #fff;
+  }
+  .proof-shot img {
+    width: 100%; height: auto; display: block;
+    aspect-ratio: 4 / 5; object-fit: cover; object-position: 50% 0%;
+  }
+  .proof-shot figcaption {
+    padding: 14px 18px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .proof-shot .ps-head {
+    display: flex; align-items: flex-start; gap: 9px; margin-bottom: 5px;
+  }
+  .proof-shot .ps-dot {
+    width: 16px; height: 16px; border-radius: 50%; flex-shrink: 0; margin-top: 1px;
+    box-shadow: inset 0 0 0 1px rgba(0,0,0,0.06), 0 1px 3px var(--shadow);
+  }
+  .proof-shot .ps-name {
+    font-size: 12px; font-weight: 500; letter-spacing: 0.07em; line-height: 1.4;
+    text-transform: uppercase; color: var(--espresso); white-space: nowrap;
+  }
+  .proof-shot .ps-sub {
+    font-size: 13px; color: var(--text-muted);
+  }
+  .proof-shot .ps-sub b { color: var(--blush); font-weight: 500; }
+  @media (max-width: 600px) {
+    .proof-shots { grid-template-columns: 1fr; }
+  }
+
+  /* Our-approach slot (user adds screenshots) */
+  .approach {
+    margin-bottom: 8px;
+  }
+
+  /* App modes — one row of screenshots */
+  .flow-row {
+    display: flex; align-items: flex-start; gap: 16px;
+    margin-top: 44px;
+  }
+  .flow-step {
+    flex: 1 1 0; min-width: 0;
+    display: flex; flex-direction: column;
+  }
+  .flow-step img {
+    width: 100%; height: auto; aspect-ratio: 462 / 570;
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    background: var(--cream);
+    box-shadow: 0 2px 10px var(--shadow);
+    object-fit: contain;
+  }
+  .step-cap {
+    margin-top: 12px;
+    font-size: 14px; line-height: 1.45; color: var(--espresso-mid);
+  }
+  .flow-cta { margin-top: 28px; display: flex; justify-content: center; }
+  @media (max-width: 600px) {
+    .flow-row.is-modes {
+      overflow-x: auto; scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch; padding-bottom: 8px;
+    }
+    .flow-row.is-modes .flow-step { flex: 0 0 62%; scroll-snap-align: start; }
+  }
+  .approach-slot {
+    display: flex; align-items: center; justify-content: center;
+    text-align: center;
+    min-height: 220px; padding: 32px;
+    border: 1.5px dashed var(--border); border-radius: 18px;
+    background: #fff;
+    color: var(--text-muted); font-size: 13px; line-height: 1.6;
+    max-width: 560px;
+  }
+
+  .links {
+    display: flex; gap: 12px; flex-wrap: wrap;
+    margin-top: 8px;
+  }
+  .link-card {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 12px 20px;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px; font-weight: 500;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--espresso); text-decoration: none;
+    transition: all 0.15s ease;
+  }
+  .link-card:hover {
+    border-color: var(--blush);
+    color: var(--blush);
+  }
+  .link-card svg {
+    width: 16px; height: 16px;
+    flex-shrink: 0;
+  }
+
+  .page-footer {
+    margin-top: 64px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .page-footer-label {
+    font-size: 11px; color: var(--text-muted); letter-spacing: 0.08em; text-transform: uppercase;
+  }
+  .cta {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--espresso); color: #FAF6F1;
+    font-size: 12px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 12px 24px; border-radius: 40px; text-decoration: none;
+    white-space: nowrap;
+    transition: background 0.15s;
+  }
+  .cta:hover { background: var(--espresso-mid); }
+
+  @media (max-width: 600px) {
+    .page { padding: 32px 20px 60px; }
+    .links { flex-direction: column; align-items: stretch; }
+    .link-card { justify-content: center; }
+  }
+
+  /* — Hero meta strip (Role / Stack / Timeline) ——————————————— */
+  .meta-strip {
+    display: flex; flex-wrap: wrap; gap: 14px 40px;
+    margin: 0 0 40px;
+    padding: 20px 0 0;
+    border-top: 1px solid var(--border);
+  }
+  .meta-item dt {
+    font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--blush); font-weight: 500; margin-bottom: 6px;
+  }
+  .meta-item dd {
+    margin: 0; font-size: 14px; line-height: 1.5; color: var(--espresso);
+    max-width: 240px;
+  }
+
+  /* Fill-in placeholder token (replace with real copy / numbers) */
+  .fill {
+    display: inline-block;
+    font-size: 12px; color: var(--blush); font-style: normal;
+    background: rgba(200,120,144,0.10);
+    border: 1px dashed var(--blush); border-radius: 8px;
+    padding: 3px 9px; vertical-align: middle;
+  }
+
+  /* — Under the hood: pipeline ———————————————————————————————— */
+  .pipeline-flow { margin: 4px 0 8px; }
+  .pstage { position: relative; padding-left: 54px; padding-bottom: 32px; }
+  .pstage:last-child { padding-bottom: 0; }
+  .pstage::before {
+    content: ''; position: absolute; left: 17px; top: 8px; bottom: -8px;
+    width: 2px; background: var(--border);
+  }
+  .pstage:last-child::before { display: none; }
+  .pnode {
+    position: absolute; left: 0; top: 0;
+    width: 36px; height: 36px; border-radius: 50%;
+    background: var(--cream); border: 2px solid var(--blush); color: var(--blush);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Cormorant Garamond', serif; font-size: 18px; font-weight: 500;
+  }
+  .pstage.is-output .pnode { background: var(--blush); color: #fff; }
+  .ptitle { font-size: 18px; font-weight: 600; color: var(--espresso); margin-bottom: 6px; letter-spacing: -0.01em; }
+  .pdesc { font-size: 14.5px; line-height: 1.6; color: var(--espresso-mid); max-width: 520px; margin-bottom: 13px; }
+  .pmetrics { display: flex; flex-wrap: wrap; gap: 8px; }
+  .pmetric {
+    display: inline-flex; align-items: center; gap: 7px;
+    background: #fff; border: 1px solid var(--border); border-radius: 10px;
+    padding: 7px 13px;
+  }
+  .pmetric .v { font-family: 'Cormorant Garamond', serif; font-size: 21px; color: var(--blush); line-height: 1; }
+  .pmetric .v[data-fill] { color: var(--text-muted); opacity: 0.55; border-bottom: 2px dashed var(--border); }
+  .pmetric .l { font-size: 12px; color: var(--text-muted); white-space: nowrap; }
+
+  /* — Outcome / results ——————————————————————————————————————— */
+  .outcome-metrics {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
+    margin: 4px 0 30px;
+  }
+  .pinks-reveal.is-summary.outcome-card { margin-bottom: 64px; padding: 30px 28px; }
+  .outcome-card .outcome-metrics { margin: 0; }
+  .ometric {
+    background: #fff; border: 1px solid var(--border); border-radius: 18px;
+    padding: 24px 22px; box-shadow: 0 2px 10px var(--shadow);
+  }
+  .ometric .ov {
+    font-family: 'Cormorant Garamond', serif; font-weight: 400;
+    font-size: 44px; line-height: 1; color: var(--blush); margin-bottom: 10px;
+  }
+  .ometric .ov[data-fill] { color: var(--text-muted); opacity: 0.5; border-bottom: 2px dashed var(--border); display: inline-block; }
+  .ometric .ol { font-size: 13px; line-height: 1.45; color: var(--espresso-mid); }
+  @media (max-width: 600px) { .outcome-metrics { grid-template-columns: 1fr 1fr; } }
+
+  .repo-cta {
+    display: flex; align-items: center; justify-content: space-between; gap: 24px;
+    background: var(--cream-dark); border: 1px solid var(--border);
+    border-radius: 18px; padding: 22px 26px; margin-top: 4px;
+  }
+  .repo-cta .rc-title { font-family: 'Cormorant Garamond', serif; font-size: 22px; color: var(--espresso); margin-bottom: 4px; }
+  .repo-cta .rc-sub { font-size: 13.5px; line-height: 1.5; color: var(--espresso-mid); max-width: 380px; }
+  @media (max-width: 600px) {
+    .repo-cta { flex-direction: column; align-items: stretch; text-align: left; }
+  }
+
+  /* — About me ———————————————————————————————————————————————— */
+  .aboutme-row {
+    display: flex; align-items: flex-start; gap: 24px;
+  }
+.aboutme-text { flex: 1 1 auto; min-width: 0; }
+  .aboutme-name {
+    font-family: 'Cormorant Garamond', serif; font-weight: 400;
+    font-size: 26px; line-height: 1.1; color: var(--espresso); margin-bottom: 10px;
+  }
+  .aboutme-bio {
+    font-size: 15px; line-height: 1.7; color: var(--espresso-mid);
+    max-width: 520px; margin-bottom: 18px;
+  }
+  .aboutme-link { margin-top: 0; white-space: nowrap; }
+  .aboutme-name .fill {
+    font-size: 18px; padding: 4px 12px; white-space: nowrap;
+  }
+  @media (max-width: 600px) {
+    .aboutme-row { flex-direction: column; align-items: flex-start; gap: 18px; }
+  }
+</style>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "ProfilePage",
+  "mainEntity": {
+    "@type": "Person",
+    "name": "Connie Schibber",
+    "jobTitle": "Data Scientist",
+    "description": "Data Scientist who builds the measurement systems, experiments, and ML pipelines behind AI products: what to build, why they fail, how to improve them, and when to launch. Built this app's end-to-end ML pipeline — image classification (CNN, ResNet-18), color-region segmentation (U-Net), and CIELAB perceptual color extraction — to power exact-color search across nearly 17,000 lip products.",
+    "sameAs": [
+      "https://www.linkedin.com/in/cschibber/",
+      "https://github.com/ConstanzaSchibber"
+    ]
+  }
+}
+</script>
+</head>
+<body>
+<div class="page">
+
+  <div style="display:flex;justify-content:space-between;gap:16px">
+  <a href="/" class="back">
+    ← Back to Color Finder
+  </a>
+  <a href="/guides/" class="back">Guides</a>
+  </div>
+
+  <p class="hero-label">About this project</p>
+  <h1>Search &amp; Discovery for <em>Lip Products</em></h1>
+  <p class="hero-subtitle">Color Matching Beyond Brand Shade Names</p>
+
+  <div class="premise">
+    <div class="premise-row">
+      <div class="premise-tag"><span class="pt-word">Why</span></div>
+      <p class="body-text">
+        Shade names like "Velvet Plum," "Midnight Berry," and "Spiced Rosewood" are evocative and
+        aspirational, but not helpful when searching for a specific shade among thousands of options.
+        Online shopping makes it worse: coarse color groupings like "Pink," "Berry," and "Nude" leave
+        users scrolling through hundreds of products... and even those groupings span a wide range of shades!
+      </p>
+    </div>
+
+    <div class="premise-row">
+      <div class="premise-tag"><span class="pt-word">What</span></div>
+      <p class="body-text">
+        So I built a color search and discovery tool that skips the names entirely, matching lip
+        products by actual color using <a href="/color-science/">CIELAB and Delta E</a>, the same
+        standard cosmetics manufacturers use internally.
+      </p>
+    </div>
+
+    <div class="premise-row">
+      <div class="premise-tag"><span class="pt-word">How</span></div>
+      <p class="body-text">
+        Behind the tool is an ML pipeline — image classification, semantic segmentation, and
+        perceptual color clustering — applied to 34,000+ raw product images to build a searchable
+        color index from scratch.
+      </p>
+    </div>
+
+  </div>
+
+  <div class="market-callout market-callout--standalone">
+    <p class="market-label">And it's a sizable market</p>
+    <p class="market-body">
+      <strong>$17.49B → $23.77B.</strong> The global lipstick market is projected to grow from 2024 to
+      2030 at 4.7% a year, an enormous category that still has considerable user pain points for
+      search and discovery.
+    </p>
+  </div>
+
+  <p class="premise-more">The why, what &amp; how, in full below<span class="pm-arrow">↓</span></p>
+
+  <!-- ── The problem: how stores let you shop color ────────────────────── -->
+  <section class="problem">
+    <p class="section-label"><span class="echo">Why</span>The palette</p>
+    <h2 class="section-title">How retailers organize the color spectrum <em>(or don't)</em></h2>
+    <p class="section-lede">
+      Every major retailer collapses the entire color spectrum into about a dozen named
+      groups — Sephora has 14, Ulta has 12. And while a dozen groupings might sound like a lot, a
+      single category can hold
+      hundreds of products and very different shades of the color group.
+    </p>
+
+    <div class="retailers">
+      <div class="retailer">
+        <div class="retailer-name">Sephora</div>
+        <div class="retailer-sub">14 color groups</div>
+        <div class="swatch-grid">
+          <span class="swatch-chip"><span class="swatch-dot" style="background:#F2C9A6;"></span>Nude <span class="swatch-count">65</span></span>
+          <span class="swatch-chip"><span class="swatch-dot" style="background:#B5172F;"></span>Red <span class="swatch-count">58</span></span>
+          <span class="swatch-chip"><span class="swatch-dot" style="background:#E55454;"></span>Coral <span class="swatch-count">22</span></span>
+          <span class="swatch-chip is-pink"><span class="swatch-dot" style="background:#D14D78;"></span>Pink <span class="swatch-count">78</span></span>
+          <span class="swatch-chip"><span class="swatch-dot" style="background:#9A5C2E;"></span>Brown <span class="swatch-count">32</span></span>
+          <span class="swatch-chip"><span class="swatch-dot" style="background:#9B4FC4;"></span>Purple <span class="swatch-count">15</span></span>
+          <span class="swatch-chip"><span class="swatch-dot" style="background:#F07E1E;"></span>Orange <span class="swatch-count">11</span></span>
+          <span class="swatch-chip"><span class="swatch-dot" style="background:#7A1F45;"></span>Berry <span class="swatch-count">31</span></span>
+          <span class="swatch-chip"><span class="swatch-dot" style="background:#8A7B2E;"></span>Gold <span class="swatch-count">2</span></span>
+          <span class="swatch-chip"><span class="swatch-dot" style="background:conic-gradient(from 90deg,#e74c3c,#f39c12,#2ecc71,#3498db,#9b59b6,#e74c3c);"></span>Multi <span class="swatch-count">3</span></span>
+          <span class="swatch-chip"><span class="swatch-dot" style="background:#1A1A1A;"></span>Black <span class="swatch-count">1</span></span>
+          <span class="swatch-chip"><span class="swatch-dot" style="background:conic-gradient(#F2C9A6,#D8A98A,#9A6B52,#5C3D30,#F2C9A6);"></span>Universal <span class="swatch-count">1</span></span>
+          <span class="swatch-chip"><span class="swatch-dot" style="background:linear-gradient(135deg,#fff,#dCe6ea);"></span>Clear <span class="swatch-count">2</span></span>
+          <span class="swatch-chip"><span class="swatch-dot" style="background:#7DAA1E;"></span>Green <span class="swatch-count">1</span></span>
+        </div>
+      </div>
+
+      <div class="retailer">
+        <div class="retailer-name">Ulta</div>
+        <div class="retailer-sub">12 color groups</div>
+        <div class="swatch-grid">
+          <span class="swatch-chip"><span class="swatch-dot" style="background:#B98A5E;"></span>Brown <span class="swatch-count">414</span></span>
+          <span class="swatch-chip"><span class="swatch-dot" style="background:#B49AC9;"></span>Purple <span class="swatch-count">244</span></span>
+          <span class="swatch-chip"><span class="swatch-dot" style="background:#F2A98C;"></span>Coral <span class="swatch-count">167</span></span>
+          <span class="swatch-chip"><span class="swatch-dot" style="background:#9A6B72;"></span>Wine <span class="swatch-count">149</span></span>
+          <span class="swatch-chip"><span class="swatch-dot" style="background:#B083A0;"></span>Berry <span class="swatch-count">218</span></span>
+          <span class="swatch-chip"><span class="swatch-dot" style="background:#EFEAD0;"></span>Beige <span class="swatch-count">313</span></span>
+          <span class="swatch-chip is-pink"><span class="swatch-dot" style="background:#F4C6D5;"></span>Pink <span class="swatch-count">641</span></span>
+          <span class="swatch-chip"><span class="swatch-dot" style="background:#B8443C;"></span>Red <span class="swatch-count">397</span></span>
+          <span class="swatch-chip"><span class="swatch-dot" style="background:#F2B58C;"></span>Orange <span class="swatch-count">142</span></span>
+          <span class="swatch-chip"><span class="swatch-dot" style="background:linear-gradient(135deg,#fff,#cfd6da);"></span>Clear <span class="swatch-count">292</span></span>
+          <span class="swatch-chip"><span class="swatch-dot" style="background:conic-gradient(from 90deg,#e74c3c,#f39c12,#2ecc71,#3498db,#9b59b6,#e74c3c);"></span>Multi <span class="swatch-count">26</span></span>
+          <span class="swatch-chip" style="padding-left:11px;">Non-Traditional <span class="swatch-count">58</span></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="proof">
+      <p class="proof-caption">
+        Take <strong>"Pink,"</strong> for instance. The Sephora and Ulta palettes above already show
+        that "Pink" means something different at each retailer. Apply that filter and the result is a
+        wide range of shades, hundreds of products, endless scrolling, and no way to quickly find the
+        color someone is searching for:
+      </p>
+      <div class="proof-shots is-compact">
+        <div class="proof-shot">
+          <figcaption>
+            <div class="ps-head">
+              <span class="ps-dot" style="background:#D14D78;"></span>
+              <div class="ps-name">Sephora</div>
+            </div>
+            <div class="ps-sub"><b>78 results</b> under one tap on Pink</div>
+          </figcaption>
+          <figure>
+            <img src="/assets/sephora-pink-results.png" alt="Sephora search results filtered by Pink, showing 78 results of widely varying shades" />
+          </figure>
+        </div>
+        <div class="proof-shot">
+          <figcaption>
+            <div class="ps-head">
+              <span class="ps-dot" style="background:#F4C6D5;"></span>
+              <div class="ps-name">Ulta</div>
+            </div>
+            <div class="ps-sub"><b>641 results</b> under one tap on Pink</div>
+          </figcaption>
+          <figure>
+            <img src="/assets/ulta-pink-results.png" alt="Ulta lip products filtered by Pink, showing 641 results including balms and liners" />
+          </figure>
+        </div>
+      </div>
+    </div>
+
+    <!-- Amazon / Google: not even a palette to start from -->
+    <p class="proof-caption">
+      Marketplaces like Amazon and Google Shopping offer just a search bar and no color filter at
+      all. Finding something more specific than "red" or "pink" requires fluency in makeup
+      vocabulary: knowing that the shade in mind is "terracotta," "mauve," or "dusty rose." These
+      terms mean nothing to a casual shopper. Moreover, discovery becomes impossible when there are
+      no words for what you're looking for.
+    </p>
+    <div class="no-palette">
+      <div class="retailer-name">Amazon · Google Shopping</div>
+      <div class="retailer-sub">No color palette at all</div>
+      <div class="search-mock">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+          <circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <span class="q">pink lipstick</span><span class="cursor"></span>
+      </div>
+    </div>
+
+    <!-- Real Amazon / Google result screenshots — drop your own in -->
+    <div class="proof">
+      <p class="proof-caption">
+        In fact, here is what searching "pink lipstick" returns:
+      </p>
+      <div class="proof-shots">
+        <div class="proof-shot">
+          <figcaption>
+            <div class="ps-head">
+              <span class="ps-dot" style="background:#FF9900;"></span>
+              <div class="ps-name">Amazon</div>
+            </div>
+            <div class="ps-sub"><b>"pink lipstick"</b> — keyword search</div>
+          </figcaption>
+          <figure>
+            <img src="/assets/amazon-pink-results.png" alt="Amazon search results for pink lipstick, mixing pale pink glosses, coral balms and hot pink lipsticks" />
+          </figure>
+        </div>
+        <div class="proof-shot">
+          <figcaption>
+            <div class="ps-head">
+              <span class="ps-dot" style="background:#4285F4;"></span>
+              <div class="ps-name">Google Shopping</div>
+            </div>
+            <div class="ps-sub"><b>"pink lipstick"</b> — keyword search</div>
+          </figcaption>
+          <figure>
+            <img src="/assets/google-pink-results.png" alt="Google Shopping results for pink lipstick, ranging from pale nude pink to bright fuchsia" />
+          </figure>
+        </div>
+      </div>
+    </div>
+
+    <!-- Takeaway: one word, every one of these shades -->
+    <div class="pinks-reveal is-summary">
+      <p class="pinks-summary-eyebrow">The takeaway</p>
+      <p class="pinks-caption">
+        Searching for <strong>"Pink"</strong> returns every shade below (and more) at once, making it
+        difficult to discover and search lip products.
+      </p>
+      <div class="pinks-row">
+        <div class="p" style="background:#F6D3DD;"></div>
+        <div class="p" style="background:#E58FB0;"></div>
+        <div class="p" style="background:#D14D78;"></div>
+        <div class="p" style="background:#C03A6B;"></div>
+        <div class="p" style="background:#B86B82;"></div>
+        <div class="p" style="background:#9A5C6E;"></div>
+        <div class="p" style="background:#CE7E8E;"></div>
+        <div class="p" style="background:#E9A7A0;"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Our approach (add app screenshots here) ───────────────────────── -->
+  <section class="problem">
+    <div class="approach">
+      <p class="section-label"><span class="echo">What</span>The approach</p>
+      <h2 class="section-title">Search and discover by <em>color</em></h2>
+      <p class="section-lede is-wide">
+        Color search works differently depending on how much is already known about the target
+        shade. The three modes below cover everything from casual exploration to color-perfect
+        precision.
+      </p>
+      <ul class="mode-list">
+        <li>
+          <span class="lede-num">1</span>
+          <span>For casual exploration, the <strong>color wheel</strong> groups shades by their
+          distribution in the product catalog, with an option to zoom into lighter and deeper
+          shades.</span>
+        </li>
+        <li>
+          <span class="lede-num">2</span>
+          <span>When a reference exists — a photo, a screenshot, something spotted on someone, or a
+          product that needs a dupe — the <strong>photo upload</strong> identifies the closest
+          matches within a perceptually imperceptible difference.</span>
+        </li>
+        <li>
+          <span class="lede-num">3</span>
+          <span>For full control, the <strong>hex input</strong> opens the entire color space: paste
+          a known value directly, or open the color field and drag across every hue and saturation
+          to land on exactly the right point.</span>
+        </li>
+      </ul>
+
+      <div class="flow-row is-modes">
+        <div class="flow-step">
+          <img src="/assets/flow-wheel-a.png" alt="The lipstick color wheel: two rings of clickable color segments, mostly reds, pinks and nudes" />
+          <p class="step-cap">Pick a shade from the color wheel.</p>
+        </div>
+        <div class="flow-step">
+          <img src="/assets/flow-photo-a.png" alt="Uploading a photo and sampling a color from it" />
+          <p class="step-cap">Or sample a color from a photo.</p>
+        </div>
+        <div class="flow-step">
+          <img src="/assets/flow-wheel-b.png" alt="Results list of closest lip matches for the chosen shade" />
+          <p class="step-cap">Matching products ranked by similarity.</p>
+        </div>
+      </div>
+      <div class="flow-cta">
+        <a href="/" class="cta">Try the Color Finder →</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Under the hood: the data pipeline (DS centerpiece) ───────────── -->
+  <section class="problem" id="pipeline">
+    <p class="section-label"><span class="echo">How</span>Under the hood</p>
+    <h2 class="section-title">Building the <em>color index</em></h2>
+    <p class="section-lede">
+      Building the tool required an end-to-end ML pipeline, from raw scraped images to a
+      searchable perceptual color index. Each stage is outlined below.
+    </p>
+
+    <div class="pipeline-flow">
+      <div class="pstage">
+        <div class="pnode">1</div>
+        <div class="ptitle">Ingest &amp; Clean</div>
+        <p class="pdesc">
+          Scraped product listings and imagery across major retailers. Validated and repaired
+          downloaded images. 12.5% of products shared the same stock photo and were removed
+          before classification.
+        </p>
+        <div class="pmetrics">
+          <span class="pmetric"><span class="v">34,000+</span><span class="l">products</span></span>
+          <span class="pmetric"><span class="v">138</span><span class="l">retailers</span></span>
+          <span class="pmetric"><span class="v">437</span><span class="l">brands</span></span>
+        </div>
+      </div>
+
+      <div class="pstage">
+        <div class="pnode">2</div>
+        <div class="ptitle">Training, Evaluation, Test Sets</div>
+        <p class="pdesc">
+          No labeled dataset existed, so one was built. The training set uses a multi-step strategy
+          optimized for coverage, while a separate validation and test set is drawn for
+          representativeness, so reported metrics reflect overall performance.
+        </p>
+        <div class="pmetrics">
+          <span class="pmetric"><span class="v">392</span><span class="l">training images</span></span>
+          <span class="pmetric"><span class="v">483</span><span class="l">validation images</span></span>
+          <span class="pmetric"><span class="l">Human annotation</span></span>
+          <span class="pmetric"><span class="l">Label Studio</span></span>
+          <span class="pmetric"><span class="l">Segmentation masks</span></span>
+        </div>
+      </div>
+
+      <div class="pstage">
+        <div class="pnode">3</div>
+        <div class="ptitle">Classify</div>
+        <p class="pdesc">
+          Trained a classifier to distinguish image types such as swatch, bullet lipstick, and
+          liquid lipstick, among others. Image type determines the color extraction strategy, rather
+          than applying a one-size-fits-all method. Images with no visible product color, like sealed
+          packaging or multi-product shots, are flagged as unclassifiable and skip extraction: about
+          18% of all images.
+        </p>
+        <div class="pmetrics">
+          <span class="pmetric"><span class="v">88%</span><span class="l">accuracy</span></span>
+          <span class="pmetric"><span class="l">CNN · ResNet-18</span></span>
+          <span class="pmetric"><span class="l">PyTorch</span></span>
+        </div>
+      </div>
+
+      <div class="pstage">
+        <div class="pnode">4</div>
+        <div class="ptitle">Segment</div>
+        <p class="pdesc">
+          Four segmentation models, one per image-type family, identify the color region — the bullet
+          tip, the wand, lips on a model — isolating the actual product color from packaging and background.
+          Each is scored by IoU (intersection over union), the overlap between the predicted
+          mask and a hand-drawn one, where 1.0 is a perfect match.
+        </p>
+        <div class="pmetrics">
+          <span class="pmetric"><span class="v">0.70–0.88</span><span class="l">validation IoU</span></span>
+          <span class="pmetric"><span class="v">4.9%</span><span class="l">identified no color region</span></span>
+          <span class="pmetric"><span class="l">CNN · U-Net</span></span>
+          <span class="pmetric"><span class="l">Transfer learning</span></span>
+          <span class="pmetric"><span class="l">PyTorch</span></span>
+        </div>
+      </div>
+
+      <div class="pstage">
+        <div class="pnode">5</div>
+        <div class="ptitle">Extract &amp; Index</div>
+        <p class="pdesc">
+          Color is extracted in CIELAB space for each product by taking the median of the masked
+          pixels, giving every shade a precise, perceptually-grounded coordinate. Images with no
+          visible color are declined rather than guessed. A Gaussian Mixture Model (GMM) clusters over the full
+          catalog to define color wheel.
+        </p>
+        <div class="pmetrics">
+          <span class="pmetric"><span class="v">48</span><span class="l">color clusters</span></span>
+          <span class="pmetric"><span class="l">Gaussian Mixture Model</span></span>
+        </div>
+      </div>
+
+      <div class="pstage is-output">
+        <div class="pnode">★</div>
+        <div class="ptitle">Searchable color index</div>
+        <p class="pdesc">
+          Every product becomes a point in CIELAB space. So a query color returns the closest shades
+          by ΔE, across brands, type of lip product, and price point.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Outcome / results ────────────────────────────────────────────── -->
+  <section class="problem is-tight">
+    <div class="pinks-reveal is-summary outcome-card">
+      <p class="pinks-summary-eyebrow">Outcome</p>
+      <p class="pinks-caption">
+        The web app lets users search products by color. For most products, the top match
+        is as close to the target shade as the human eye can detect.
+      </p>
+
+      <div class="outcome-metrics">
+        <div class="ometric">
+          <div class="ov">0.31</div>
+          <div class="ol">Median ΔE across the validation set — under ~2.3 is imperceptible to the eye</div>
+        </div>
+        <div class="ometric">
+          <div class="ov">90.5%</div>
+          <div class="ol">Of validation images within the ~2.3 ΔE just-noticeable threshold</div>
+        </div>
+        <div class="ometric">
+          <div class="ov">16,000+</div>
+          <div class="ol">Products searchable by exact color</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="repo-cta">
+      <div class="rc-text">
+        <div class="rc-title">Technical details</div>
+        <p class="rc-sub">Pipeline code, model choices, evaluation, and the color-matching logic, are all documented on GitHub.</p>
+      </div>
+      <a href="https://github.com/ConstanzaSchibber/lipstick_color_extraction" class="cta" target="_blank" rel="noopener noreferrer">
+        View the repo →
+      </a>
+    </div>
+  </section>
+
+  <!-- ── About me ─────────────────────────────────────────────────────── -->
+  <section class="problem about-me" id="about-me">
+    <p class="section-label">About me</p>
+    <div class="aboutme-row">
+      <div class="aboutme-text">
+        <h2 class="aboutme-name">Connie Schibber</h2>
+        <p class="aboutme-bio">
+          Data Scientist who builds the measurement systems, experiments, and ML pipelines behind AI products: what to build, why they fail,  how to improve them, and when to launch.
+
+        </p>
+        <p class="aboutme-bio" style="margin-bottom: 16px;">
+          I'd love to hear if you found the app useful. You can connect on LinkedIn and include a message that you checked out the app! 
+        </p>
+        <a href="https://www.linkedin.com/in/cschibber/" class="link-card aboutme-link" target="_blank" rel="noopener noreferrer">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M20.5 2h-17A1.5 1.5 0 002 3.5v17A1.5 1.5 0 003.5 22h17a1.5 1.5 0 001.5-1.5v-17A1.5 1.5 0 0020.5 2zM8 19H5V8h3v11zM6.5 6.7a1.8 1.8 0 110-3.5 1.8 1.8 0 010 3.5zM19 19h-3v-5.6c0-1.4-.5-2.4-1.8-2.4-1 0-1.6.7-1.9 1.4-.1.2-.1.6-.1.9V19h-3V8h3v1.4c.4-.6 1.1-1.5 2.7-1.5 2 0 3.5 1.3 3.5 4.1V19z"/>
+          </svg>
+          Connect on LinkedIn
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <div class="page-footer">
+    <span class="page-footer-label">Lipstick Color Finder · How I Built It · <a href="/privacy/" style="color:inherit">Privacy</a></span>
+    <a href="/" class="cta">
+      Back to Color Finder →
+    </a>
+  </div>
+
+</div>
+</body>
+</html>

@@ -1350,9 +1350,19 @@ function GuidesNewTag({ top = -8, right = -10 }) {
 //   ?color=a02523                 matches for a color (wheel, photo, hex, list)
 //   ?wheel=classic-red            a wheel color by name, whatever its hex is today (guides link here)
 //   ?brand=chanel&dupe=99+pirate  dupes for a product
-//   ?mode=dupe                    the dupe finder, nothing picked yet (guides link here)
+//   ?mode=dupe                    the dupe finder, nothing picked yet (older links; now /dupe-finder/)
 //   ?item=brand|shade&item=…      a shared favorites list
 // Brands never contain '|' (shades can), so items split on the first one.
+// Tools with a page of their own: the same app, opened in that mode. The path
+// follows the mode as tabs change. Titles match the pages build-pages.js writes.
+const MODE_PAGES = {
+  wheel: { path:'/color-wheel/', title:'Lipstick Color Wheel — Discover Lipstick Shades by Color' },
+  photo: { path:'/photo-match/', title:'Find Your Lipstick Shade from a Photo' },
+  dupe:  { path:'/dupe-finder/', title:'Lipstick Dupe Finder — Find Dupes for Any Shade by Color' },
+};
+const HOME_TITLE = 'Lipstick Color Finder — Search Lipstick by Color & Find Dupes';
+const PAGE_MODE = Object.keys(MODE_PAGES).find(m => window.location.pathname.startsWith(MODE_PAGES[m].path)) || null;
+
 function parseSharedLink(search) {
   const q = new URLSearchParams(search);
   const color = q.get('color'), brand = q.get('brand'), dupe = q.get('dupe');
@@ -2402,7 +2412,7 @@ function VibePanel({ vibe, setVibe, onClose }) {
           <span style={{ fontSize:11, color:'var(--text-muted)', fontFamily:'DM Sans', letterSpacing:'0.04em' }}>
             {active === 0 ? 'No filters — showing all shades' : `${active} filter${active===1?'':'s'} active`}
           </span>
-          <a href="color-guide.html#undertone"
+          <a href="/color-science/#undertone"
             onClick={() => window.gtag?.('event', 'nav_link_click', { target: 'color_guide', location: 'undertone_panel' })}
             style={{
             fontSize:11, color:'var(--blush)', fontFamily:'DM Sans',
@@ -2444,6 +2454,9 @@ function Section({ title, children }) {
 // Quick-start options shown under the dupe search for anyone who
 // doesn't have a specific lipstick in mind yet.
 const POPULAR_DUPE_PICKS = [
+  { brand: 'mac cosmetics', shade: 'ruby woo' },
+  { brand: 'charlotte tilbury', shade: 'pillow talk' },
+  { brand: 'pat mcgrath labs', shade: 'elson 4' },
   { brand: 'chanel', shade: '99 pirate' },
   { brand: 'chanel', shade: '49 ever red' },
   { brand: 'dior', shade: '100 forever nude look' },
@@ -2791,18 +2804,22 @@ const MODE_ICONS = {
   ),
 };
 
-function LandingCard({ icon, title, desc, onClick }) {
+function LandingCard({ icon, title, desc, href, onClick }) {
   const [hovered, setHovered] = useState(false);
+  // A real link where the tool has its own page (crawlable, opens in a new tab);
+  // a plain click still switches in place
+  const Tag = href ? 'a' : 'div';
   return (
-    <div
-      onClick={onClick}
+    <Tag
+      href={href}
+      onClick={e => { if (e.metaKey || e.ctrlKey || e.shiftKey) return; e.preventDefault(); onClick(); }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
         display:'flex', flexDirection:'column', gap:14,
         padding:'28px 26px 24px', background:'#fff',
         border:'1px solid', borderColor: hovered ? 'var(--blush)' : 'var(--border)',
-        borderRadius:16, cursor:'pointer',
+        borderRadius:16, cursor:'pointer', textDecoration:'none', color:'inherit',
         transform: hovered ? 'translateY(-4px)' : 'none',
         boxShadow: hovered ? '0 14px 34px var(--shadow)' : 'none',
         transition:'transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease',
@@ -2823,7 +2840,7 @@ function LandingCard({ icon, title, desc, onClick }) {
         Start here
         <span style={{ transition:'transform 0.18s ease', transform: hovered ? 'translateX(5px)' : 'none' }}>→</span>
       </span>
-    </div>
+    </Tag>
   );
 }
 
@@ -2858,7 +2875,7 @@ function Landing({ onPick }) {
           fontSize:11, letterSpacing:'0.18em', textTransform:'uppercase',
           color:'var(--text-muted)', textAlign:'center', marginBottom:14,
         }}>
-          Perceptual color matching · Nearly 20,000 lip products
+          Perceptual color matching · Nearly 17,000 lip products
         </p>
         <h2 className="landing-lede">
           Let's find your <em style={{ fontStyle:'italic', color:'var(--espresso-mid)' }}>shade</em>.
@@ -2866,7 +2883,7 @@ function Landing({ onPick }) {
       </div>
       <div className="landing-grid">
         {cards.map(c => (
-          <LandingCard key={c.id} icon={c.icon} title={c.title} desc={c.desc} onClick={() => onPick(c.id)} />
+          <LandingCard key={c.id} icon={c.icon} title={c.title} desc={c.desc} href={MODE_PAGES[c.id]?.path} onClick={() => onPick(c.id)} />
         ))}
       </div>
     </>
@@ -2881,7 +2898,7 @@ function CatalogueLoading() {
     <div role="status" style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:14, padding:'48px 16px', textAlign:'center' }}>
       <div className="preload-spinner" />
       <p style={{ fontFamily:'Cormorant Garamond, serif', fontStyle:'italic', fontSize:18, color:'var(--text-muted)' }}>
-        Loading nearly 20,000 shades…
+        Loading nearly 17,000 shades…
       </p>
     </div>
   );
@@ -2938,6 +2955,7 @@ function App() {
   const [mode, setMode] = useState(() => { // 'landing' | 'wheel' | 'photo' | 'hex' | 'dupe' | 'list'
     if (initialLink?.type === 'color') return initialWheelColor ? 'wheel' : 'hex';
     if (initialLink?.type === 'dupe') return 'dupe';
+    if (PAGE_MODE) return PAGE_MODE;
     try { return localStorage.getItem('lipstick-visited') ? 'wheel' : 'landing'; }
     catch { return 'landing'; }
   });
@@ -3159,13 +3177,14 @@ function App() {
     const q = new URLSearchParams();
     if (sharedListKeys) sharedListKeys.forEach(k => q.append('item', `${k.brand}|${k.shade}`));
     else if (mode === 'dupe' && dupeProduct) { q.set('brand', dupeProduct.brand); q.set('dupe', dupeProduct.shade); }
-    else if (mode === 'dupe' && initialLink?.type === 'dupe' && !initialLink.brand) q.set('mode', 'dupe');
     else if (mode === 'dupe' && !dataReady && initialLink?.type === 'dupe') { q.set('brand', initialLink.brand); q.set('dupe', initialLink.shade); }
     else if (mode !== 'dupe' && effectiveColor) q.set('color', effectiveColor.hex.slice(1).toLowerCase());
     const search = q.toString() ? `?${q}` : '';
-    if (search !== window.location.search) {
-      history.replaceState(null, '', window.location.pathname + search + window.location.hash);
+    const path = MODE_PAGES[mode]?.path || '/';
+    if (search !== window.location.search || path !== window.location.pathname) {
+      history.replaceState(null, '', path + search + window.location.hash);
     }
+    document.title = MODE_PAGES[mode]?.title || HOME_TITLE;
   }, [sharedListKeys, mode, dupeProduct, effectiveColor?.hex, dataReady]);
 
   const matches = React.useMemo(() => {
@@ -3212,10 +3231,10 @@ function App() {
         <span className="header-product-count" style={{
           fontFamily:'DM Sans', fontSize:11, color:'var(--text-muted)', letterSpacing:'0.02em',
         }}>
-          · Nearly 20,000 lip products
+          · Nearly 17,000 lip products
         </span>
         <div style={{ marginLeft:'auto', display:'flex', alignItems:'center', gap:16 }}>
-          <a href="guides/" className="header-how-it-works"
+          <a href="/guides/" className="header-how-it-works"
             onClick={() => window.gtag?.('event', 'nav_link_click', { target: 'guides', location: 'header' })}
             style={{
               position:'relative',
@@ -3233,7 +3252,7 @@ function App() {
             Guides
             <GuidesNewTag />
           </a>
-          <a href="about.html" className="header-how-it-works"
+          <a href="/about/" className="header-how-it-works"
             onClick={() => window.gtag?.('event', 'nav_link_click', { target: 'about', location: 'header' })}
             style={{
               display:'flex', alignItems:'center', gap:8,
@@ -3247,7 +3266,7 @@ function App() {
             onMouseEnter={e => { e.currentTarget.style.borderColor='var(--blush)'; e.currentTarget.style.color='var(--blush)'; }}
             onMouseLeave={e => { e.currentTarget.style.borderColor='var(--border)'; e.currentTarget.style.color='var(--espresso)'; }}
           >
-            Behind the Project
+            How I Built It
           </a>
           <button
             onClick={() => setShowWishlist(true)}
@@ -3273,7 +3292,7 @@ function App() {
         </div>
         {/* Phones: the two page links drop to a second line under My Favorites */}
         <nav className="header-mobile-links" aria-label="Pages">
-          {[['guides/', 'Guides', 'guides'], ['about.html', 'Behind the Project', 'about']].map(([href, label, target]) => (
+          {[['/guides/', 'Guides', 'guides'], ['/about/', 'How I Built It', 'about']].map(([href, label, target]) => (
             <a key={target} href={href}
               onClick={() => window.gtag?.('event', 'nav_link_click', { target, location: 'header' })}
               style={{
@@ -3434,6 +3453,10 @@ function App() {
       </>
       )}
 
+      {/* Tool pages ship a static write-up after #root (see build-pages.js); seat it above the footer */}
+      <div style={{ display: mode === PAGE_MODE ? 'block' : 'none' }}
+        ref={el => { const copy = document.getElementById('page-copy'); if (el && copy && copy.parentNode !== el) el.appendChild(copy); }} />
+
       {/* Footer */}
       <footer className="app-footer" style={{
         borderTop:'1px solid var(--border)',
@@ -3442,7 +3465,7 @@ function App() {
         <span style={{ fontSize:11, color:'var(--text-muted)', letterSpacing:'0.05em' }}>
           Showing closest matches by color distance (ΔE)
         </span>
-        <a href="color-guide.html"
+        <a href="/color-science/"
           onClick={() => window.gtag?.('event', 'nav_link_click', { target: 'color_guide', location: 'footer' })}
           style={{
           fontSize:11, color:'var(--blush)', letterSpacing:'0.05em',
@@ -3451,16 +3474,16 @@ function App() {
         }}>
           What is ΔE?
         </a>
-        <a href="about.html"
+        <a href="/about/"
           onClick={() => window.gtag?.('event', 'nav_link_click', { target: 'about', location: 'footer' })}
           style={{
           fontSize:11, color:'var(--blush)', letterSpacing:'0.05em',
           textDecoration:'none', borderBottom:'1px solid currentColor', paddingBottom:1,
           transition:'opacity 0.15s',
         }}>
-          Behind the Project
+          How I Built It
         </a>
-        <a href="guides/"
+        <a href="/guides/"
           onClick={() => window.gtag?.('event', 'nav_link_click', { target: 'guides', location: 'footer' })}
           style={{
           fontSize:11, color:'var(--blush)', letterSpacing:'0.05em',
@@ -3469,7 +3492,7 @@ function App() {
         }}>
           Guides
         </a>
-        <a href="privacy.html" style={{
+        <a href="/privacy/" style={{
           fontSize:11, color:'var(--blush)', letterSpacing:'0.05em',
           textDecoration:'none', borderBottom:'1px solid currentColor', paddingBottom:1,
           transition:'opacity 0.15s',

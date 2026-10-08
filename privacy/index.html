@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Privacy · Lipstick Color Finder</title>
+<link rel="icon" href="/favicon.ico" sizes="48x48" />
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+<link rel="icon" href="/favicon-96x96.png" type="image/png" sizes="96x96" />
+<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+<meta name="description" content="What Lipstick Color Finder collects, what stays on your device, and how to turn analytics on or off." />
+<link rel="canonical" href="https://lipstickbycolor.github.io/privacy/" />
+<script src="/consent.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --cream: #FAF6F1;
+    --espresso: #2A1A14;
+    --espresso-mid: #5C3D30;
+    --blush: #C87890;
+    --text-muted: #8C6858;
+    --border: #E0D0C4;
+  }
+
+  html, body {
+    min-height: 100vh;
+    background: var(--cream);
+    color: var(--espresso);
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  body::before {
+    content: '';
+    position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
+    opacity: 0.4;
+  }
+
+  .page {
+    position: relative; z-index: 1;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 48px 40px 80px;
+  }
+
+  .back {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--text-muted); text-decoration: none;
+    margin-bottom: 48px;
+    transition: color 0.15s;
+  }
+  .back:hover { color: var(--espresso); }
+
+  .hero-label {
+    font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--blush); margin-bottom: 12px; font-weight: 500;
+  }
+
+  h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 300; font-size: clamp(36px, 6vw, 56px);
+    line-height: 1.05; letter-spacing: -0.01em;
+    margin-bottom: 20px;
+  }
+  h1 em { font-style: italic; font-weight: 400; }
+
+  h2 {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 400; font-size: 28px; line-height: 1.15;
+    margin: 48px 0 14px;
+  }
+
+  p, li {
+    font-size: 16px; line-height: 1.7; color: var(--espresso-mid);
+    max-width: 600px;
+  }
+  p + p { margin-top: 14px; }
+  ul { margin: 12px 0 0; padding-left: 20px; }
+  li + li { margin-top: 8px; }
+  li strong, p strong { color: var(--espresso); font-weight: 500; }
+  .page a:not(.back):not(.cta) { color: var(--espresso-mid); }
+
+  .lede { font-size: 17px; }
+
+  .choice {
+    margin-top: 20px; padding: 20px 22px;
+    background: #fff; border: 1px solid var(--border); border-radius: 14px;
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px 20px;
+    max-width: 600px;
+  }
+  .choice-status { font-size: 15px; color: var(--espresso); }
+  .choice-status strong { font-weight: 500; }
+  .choice button {
+    font: inherit; font-size: 12px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 12px 20px; border-radius: 40px; cursor: pointer;
+    background: var(--espresso); color: #FAF6F1; border: 1px solid var(--espresso);
+    transition: background 0.15s;
+  }
+  .choice button:hover { background: var(--espresso-mid); }
+
+  .updated { margin-top: 48px; font-size: 13px; color: var(--text-muted); }
+
+  .page-footer {
+    margin-top: 40px; padding-top: 24px;
+    border-top: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap;
+  }
+  .page-footer-label {
+    font-size: 11px; color: var(--text-muted); letter-spacing: 0.08em; text-transform: uppercase;
+  }
+  .cta {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--espresso); color: #FAF6F1;
+    font-size: 12px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 12px 24px; border-radius: 40px; text-decoration: none;
+    transition: background 0.15s;
+  }
+  .cta:hover { background: var(--espresso-mid); }
+
+  @media (max-width: 600px) {
+    .page { padding: 32px 20px 60px; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <a href="/" class="back">← Back to Color Finder</a>
+  <p class="hero-label">Privacy</p>
+  <h1>What we collect, and <em>what we don't</em></h1>
+  <p class="lede">Lipstick Color Finder has no accounts, no sign-up, and no ads. We never ask for your name or email. This page explains the little that does happen when you use the site.</p>
+
+  <h2 id="analytics">Analytics</h2>
+  <p>We use Google Analytics to understand which parts of the site get used, so we know what to improve. When it is on, it records the pages you open and what you do in the finder and the guides: the colors you pick, the filters you apply, the brands and shades you look up or save, and searches that return nothing. It sets cookies in your browser so that repeat visits count as one visitor. Google also receives your IP address and basic device details.</p>
+  <p>If your device is set to a European time zone, analytics stays off until you allow it. Elsewhere it is on by default. If your browser sends a Global Privacy Control signal, analytics stays off. You can change your choice here at any time:</p>
+  <div class="choice">
+    <span class="choice-status" id="consent-status" role="status">Analytics needs JavaScript, so it is off.</span>
+    <button type="button" id="consent-toggle" hidden></button>
+  </div>
+
+  <h2 id="device">What stays on your device</h2>
+  <ul>
+    <li><strong>Your photos.</strong> When you match a color from a photo, the image is read by your browser. It is never uploaded or stored.</li>
+    <li><strong>Your favorites and preferences.</strong> Saved shades, your finish and tone preferences, and your analytics choice are kept in your browser's storage. We can't see them, and clearing your browser data removes them.</li>
+    <li><strong>Shared lists.</strong> A link you create to share your favorites carries the list inside the link itself. Anyone with the link can see that list.</li>
+  </ul>
+
+  <h2 id="services">Services the site relies on</h2>
+  <p>Loading the site means your browser contacts a few other services, which see your IP address as any website does:</p>
+  <ul>
+    <li><strong>GitHub Pages</strong> hosts the site.</li>
+    <li><strong>Supabase</strong> serves the lipstick catalogue, and the search in the guides.</li>
+    <li><strong>Google Fonts</strong>, <strong>unpkg</strong> and <strong>jsDelivr</strong> deliver fonts and code libraries.</li>
+    <li><strong>Brand and retailer websites</strong> serve the product photos shown in results.</li>
+  </ul>
+
+  <h2 id="contact">Questions</h2>
+  <p>The site is built and run by Connie Schibber. You can reach Connie through the <a href="/about/#about-me">About me</a> section of the How I Built It page.</p>
+
+  <p class="updated">Last updated October 5, 2026.</p>
+
+  <div class="page-footer">
+    <span class="page-footer-label">Lipstick Color Finder · Privacy</span>
+    <a href="/" class="cta">Back to Color Finder →</a>
+  </div>
+</div>
+<script>
+(function () {
+  var status = document.getElementById('consent-status'), btn = document.getElementById('consent-toggle');
+  if (!window.lipstickConsent) return;
+  function render() {
+    var on = lipstickConsent.state() === 'granted';
+    status.innerHTML = 'Analytics is <strong>' + (on ? 'on' : 'off') + '</strong> in this browser.';
+    btn.textContent = on ? 'Turn analytics off' : 'Allow analytics';
+    btn.hidden = false;
+  }
+  btn.addEventListener('click', function () {
+    lipstickConsent.set(lipstickConsent.state() === 'granted' ? 'denied' : 'granted');
+  });
+  window.addEventListener('lipstick-consent', render);
+  render();
+})();
+</script>
+</body>
+</html>
