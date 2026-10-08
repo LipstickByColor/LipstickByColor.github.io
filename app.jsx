@@ -503,7 +503,18 @@ function FilterDropdown({ label, count, onClear, isOpen, onOpen, children }) {
 }
 
 // ── Results Table ─────────────────────────────────────────────────────────────
-function ResultsTable({ selectedColor, matches, totalProducts, pinnedItems, togglePin, wishlist, toggleWishlist, toneRamp, toneIdx, setToneIdx }) {
+// ── Filters in the link ───────────────────────────────────────────────────────
+// Result filters ride along in the URL so a filtered view can be shared:
+//   &price=1&price=2 ($ and $$)  &fbrand=dior  &finish=Matte  &format=Lip+Gloss
+//   &tone=cool  &discontinued=show
+// (fbrand, not brand: ?brand= already names the lipstick in a dupe link)
+const FILTER_PARAMS = ['price', 'fbrand', 'finish', 'format', 'tone', 'discontinued'];
+const PRICE_TIERS = ['$', '$$', '$$$', '$$$$'];
+function filterParamsFrom(search) {
+  return [...new URLSearchParams(search)].filter(([k]) => FILTER_PARAMS.includes(k));
+}
+
+function ResultsTable({ selectedColor, matches, totalProducts, pinnedItems, togglePin, wishlist, toggleWishlist, toneRamp, toneIdx, setToneIdx, initialFilterParams, onFiltersChange }) {
   const [activeBrands, setActiveBrands] = React.useState([]);
   const [activeTones, setActiveTones] = React.useState([]);
   const [activeTiers, setActiveTiers] = React.useState([]);
@@ -512,8 +523,32 @@ function ResultsTable({ selectedColor, matches, totalProducts, pinnedItems, togg
   const [hideDiscontinued, setHideDiscontinued] = React.useState(true);
   const [openFilter, setOpenFilter] = React.useState(null);
 
-  // Reset filters when selection changes (hideDiscontinued persists as a standing preference)
-  React.useEffect(() => { setActiveBrands([]); setActiveTones([]); setActiveTiers([]); setActiveFinishes([]); setActiveFormats([]); setOpenFilter(null); }, [selectedColor?.id]);
+  // Filters the page was opened with (a shared link), waiting for the first results to apply to
+  const linkFilters = React.useRef(initialFilterParams || []);
+  // Reset filters when selection changes (hideDiscontinued persists as a standing preference).
+  // The first selection takes the link's filters instead.
+  React.useEffect(() => {
+    const fromLink = selectedColor ? linkFilters.current : null;
+    if (selectedColor) linkFilters.current = null;
+    const got = key => (fromLink || []).filter(([k]) => k === key).map(([, v]) => v);
+    setActiveBrands(got('fbrand')); setActiveTones(got('tone')); setActiveFinishes(got('finish')); setActiveFormats(got('format'));
+    setActiveTiers(got('price').map(n => PRICE_TIERS[n - 1]).filter(Boolean));
+    if (got('discontinued').includes('show')) setHideDiscontinued(false);
+    setOpenFilter(null);
+  }, [selectedColor?.id]);
+
+  // Tell the app which filters are on, for the URL
+  React.useEffect(() => {
+    if (linkFilters.current || !onFiltersChange) return;
+    onFiltersChange([
+      ...activeTiers.map(t => ['price', String(PRICE_TIERS.indexOf(t) + 1)]),
+      ...activeBrands.map(b => ['fbrand', b]),
+      ...activeFinishes.map(f => ['finish', f]),
+      ...activeFormats.map(f => ['format', f]),
+      ...activeTones.map(t => ['tone', t]),
+      ...(hideDiscontinued ? [] : [['discontinued', 'show']]),
+    ]);
+  }, [selectedColor?.id, activeTiers, activeBrands, activeFinishes, activeFormats, activeTones, hideDiscontinued]);
 
   // Classify undertone from LAB hue angle (matches Vibe panel logic)
   function toneOf(p) {
@@ -537,7 +572,7 @@ function ResultsTable({ selectedColor, matches, totalProducts, pinnedItems, togg
   const allTones    = [...new Set(matches.map(toneOf))];
   const TONE_ORDER  = ['cool','neutral','warm'];
   const orderedTones = TONE_ORDER.filter(t => allTones.includes(t));
-  const TIER_ORDER  = ['$','$$','$$$','$$$$'];
+  const TIER_ORDER  = PRICE_TIERS;
   const allTiers    = TIER_ORDER.filter(t => matches.some(p => tierOf(p) === t));
   const FINISH_ORDER = ['Cream','Glossy','Matte','Satin','Semi-Matte','Sheer','Shimmer','Unlisted'];
   const allFinishes = FINISH_ORDER.filter(f => matches.some(p => finishOf(p) === f));
@@ -2939,6 +2974,8 @@ function App() {
 
   // Link this page was opened with, if any — see parseSharedLink
   const [initialLink] = useState(() => parseSharedLink(window.location.search));
+  // Result filters as URL pairs — from the link at first, then whatever ResultsTable reports
+  const [filterParams, setFilterParams] = useState(() => filterParamsFrom(window.location.search));
   useEffect(() => {
     if (initialLink) window.gtag?.('event', 'open_shared_link', { link_type: initialLink.type });
   }, []);
@@ -3179,13 +3216,14 @@ function App() {
     else if (mode === 'dupe' && dupeProduct) { q.set('brand', dupeProduct.brand); q.set('dupe', dupeProduct.shade); }
     else if (mode === 'dupe' && !dataReady && initialLink?.type === 'dupe') { q.set('brand', initialLink.brand); q.set('dupe', initialLink.shade); }
     else if (mode !== 'dupe' && effectiveColor) q.set('color', effectiveColor.hex.slice(1).toLowerCase());
+    if (q.has('color') || q.has('dupe')) filterParams.forEach(([k, v]) => q.append(k, v));
     const search = q.toString() ? `?${q}` : '';
     const path = MODE_PAGES[mode]?.path || '/';
     if (search !== window.location.search || path !== window.location.pathname) {
       history.replaceState(null, '', path + search + window.location.hash);
     }
     document.title = MODE_PAGES[mode]?.title || HOME_TITLE;
-  }, [sharedListKeys, mode, dupeProduct, effectiveColor?.hex, dataReady]);
+  }, [sharedListKeys, mode, dupeProduct, effectiveColor?.hex, dataReady, filterParams]);
 
   const matches = React.useMemo(() => {
     if (!selectedColor || !dataReady) return [];
@@ -3447,7 +3485,7 @@ function App() {
 
         {/* Right: Results */}
         <div className="results-col" ref={resultsRef}>
-          {selectedColor && !dataReady ? <CatalogueLoading /> : <ResultsTable selectedColor={effectiveColor} matches={matches} totalProducts={REAL_PRODUCTS.length} pinnedItems={pinnedItems} togglePin={togglePin} wishlist={wishlist} toggleWishlist={toggleWishlist} toneRamp={toneRamp} toneIdx={toneIdx} setToneIdx={handleToneIdxChange} />}
+          {selectedColor && !dataReady ? <CatalogueLoading /> : <ResultsTable selectedColor={effectiveColor} matches={matches} totalProducts={REAL_PRODUCTS.length} pinnedItems={pinnedItems} togglePin={togglePin} wishlist={wishlist} toggleWishlist={toggleWishlist} toneRamp={toneRamp} toneIdx={toneIdx} setToneIdx={handleToneIdxChange} initialFilterParams={filterParams} onFiltersChange={setFilterParams} />}
         </div>
       </main>
       </>
