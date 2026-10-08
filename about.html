@@ -447,36 +447,10 @@
     margin-bottom: 8px;
   }
 
-  /* App user-flows — horizontal step strips */
-  .flows { margin-top: 44px; }
-  .flow { margin-bottom: 38px; }
-  .flow:last-child { margin-bottom: 4px; }
-  .flow-head { margin-bottom: 16px; }
-  .flow-eyebrow {
-    display: inline-flex; align-items: center; gap: 11px;
-    font-size: 15px; letter-spacing: 0.1em; text-transform: uppercase;
-    color: var(--blush); font-weight: 500; margin-bottom: 9px;
-    white-space: nowrap;
-  }
-  .flow-eyebrow .n {
-    width: 24px; height: 24px; border-radius: 50%;
-    background: var(--blush); color: #fff;
-    font-size: 13px; letter-spacing: 0;
-    display: inline-flex; align-items: center; justify-content: center;
-  }
-  .flow-title {
-    font-family: 'Cormorant Garamond', serif; font-weight: 400;
-    font-size: 25px; line-height: 1.15; color: var(--espresso); margin-bottom: 6px;
-  }
-  .flow-sub {
-    font-size: 14px; line-height: 1.55; color: var(--text-muted); max-width: 520px;
-  }
-
-  .flow-grid {
-    display: flex; flex-direction: column; gap: 24px;
-  }
+  /* App modes — one row of screenshots */
   .flow-row {
     display: flex; align-items: flex-start; gap: 16px;
+    margin-top: 44px;
   }
   .flow-step {
     flex: 1 1 0; min-width: 0;
@@ -491,106 +465,16 @@
     object-fit: contain;
   }
   .step-cap {
-    order: -1;
-    margin-bottom: 12px;
+    margin-top: 12px;
     font-size: 14px; line-height: 1.45; color: var(--espresso-mid);
-    display: flex; gap: 8px;
   }
-  .step-cap .sn {
-    flex-shrink: 0;
-    font-family: 'Cormorant Garamond', serif; font-weight: 500;
-    font-size: 17px; color: var(--blush); line-height: 1;
-  }
-  .flow-arrow {
-    flex: 0 0 auto; align-self: center;
-    color: var(--blush); opacity: 0.5; font-size: 22px;
-    margin-top: 24px;
-  }
+  .flow-cta { margin-top: 28px; display: flex; justify-content: center; }
   @media (max-width: 600px) {
-    .flow-row { flex-direction: column; align-items: stretch; }
-    .flow-step img { aspect-ratio: 462 / 570; }
-    .flow-arrow { align-self: center; transform: rotate(90deg); margin: 2px 0; }
-  }
-
-  /* Live hex color-field widget (recreates the in-app picker) */
-  .hex-results-row { justify-content: center; }
-  .hex-results-row .flow-step { flex: 0 0 auto; width: calc(50% - 8px); }
-  .picker-screen {
-    width: 100%; aspect-ratio: 462 / 570;
-    border: 1px solid var(--border); border-radius: 18px;
-    background: #fff; box-shadow: 0 2px 10px var(--shadow);
-    overflow: hidden; display: flex; flex-direction: column;
-    padding: 14px 14px; gap: 9px;
-  }
-  .hxp-tabs { display: flex; gap: 5px; justify-content: center; }
-  .hxp-tab {
-    font-size: 8.5px; letter-spacing: 0.1em; text-transform: uppercase;
-    padding: 5px 9px; border-radius: 20px; border: 1px solid var(--border);
-    color: var(--text-muted);
-  }
-  .hxp-tab.is-active { background: var(--espresso); color: #fff; border-color: var(--espresso); }
-  .hxp-field {
-    position: relative; width: 100%; flex: 1 1 auto; min-height: 0;
-    border-radius: 12px; overflow: hidden; cursor: crosshair; touch-action: none;
-    box-shadow: inset 0 0 0 1px rgba(0,0,0,0.08);
-  }
-  .hxp-field .sat { position: absolute; inset: 0; background: linear-gradient(to right, #fff, hsl(var(--h, 0) 100% 50%)); }
-  .hxp-field .val { position: absolute; inset: 0; background: linear-gradient(to top, #000, rgba(0,0,0,0)); }
-  .hxp-thumb {
-    position: absolute; width: 20px; height: 20px; border-radius: 50%;
-    border: 2.5px solid #fff; box-shadow: 0 0 0 1px rgba(0,0,0,0.35), 0 1px 4px rgba(0,0,0,0.4);
-    transform: translate(-50%, -50%); pointer-events: none;
-  }
-  .hxp-hue {
-    position: relative; height: 14px; border-radius: 10px; cursor: pointer; touch-action: none;
-    background: linear-gradient(to right, #f00, #ff0, #0f0, #0ff, #00f, #f0f, #f00);
-    box-shadow: inset 0 0 0 1px rgba(0,0,0,0.08);
-  }
-  .hxp-hue-thumb {
-    position: absolute; top: 50%; width: 16px; height: 16px; border-radius: 50%;
-    border: 2.5px solid #fff; box-shadow: 0 0 0 1px rgba(0,0,0,0.35);
-    transform: translate(-50%, -50%); pointer-events: none; background: #fff;
-  }
-  .hxp-readout { display: flex; align-items: center; gap: 10px; }
-  .hxp-swatch { width: 30px; height: 30px; border-radius: 8px; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.12); flex-shrink: 0; }
-  .hxp-hex { line-height: 1.2; }
-  .hxp-hex small { display: block; font-size: 8.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 3px; white-space: nowrap; }
-  .hxp-hex-val { font-family: ui-monospace, Menlo, monospace; font-size: 14px; letter-spacing: 0.04em; color: var(--espresso); }
-  .hxp-matches { margin-top: 0; }
-  .hxp-matches .lab { font-size: 8.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px; }
-  .hxp-dots { display: flex; gap: 7px; }
-  .hxp-dots span { flex: 1; height: 24px; border-radius: 6px; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.06); }
-  .hxp-hint { font-size: 13px; color: var(--blush); text-align: center; }
-
-  /* Live "From hex" screen (step A) — circle + code sync to the picker */
-  .hexscreen {
-    width: 100%; aspect-ratio: 462 / 570;
-    border: 1px solid var(--border); border-radius: 18px;
-    background: var(--cream); box-shadow: 0 2px 10px var(--shadow);
-    overflow: hidden; display: flex; flex-direction: column; align-items: center;
-    padding: 14px 14px; gap: 12px;
-  }
-  .hxs-circle-wrap {
-    flex: 1 1 auto; min-height: 0; width: 100%;
-    display: flex; align-items: center; justify-content: center;
-  }
-  .hxs-circle {
-    width: 64%; aspect-ratio: 1; border-radius: 50%;
-    background: #EC0932; border: 5px solid #fff;
-    box-shadow: 0 0 26px 3px rgba(236,9,50,0.45), 0 2px 10px rgba(0,0,0,0.12);
-    transition: background .08s linear, box-shadow .08s linear;
-  }
-  .hxs-input {
-    display: flex; align-items: center; gap: 8px;
-    background: #fff; border-radius: 13px; padding: 9px 9px 9px 15px;
-    width: 84%; box-shadow: 0 1px 4px var(--shadow);
-  }
-  .hxs-hash { font-family: ui-monospace, Menlo, monospace; font-weight: 600; color: var(--espresso-mid); font-size: 15px; }
-  .hxs-code { font-family: ui-monospace, Menlo, monospace; font-weight: 600; letter-spacing: 0.07em; color: var(--espresso); font-size: 15px; flex: 1; }
-  .hxs-palette { width: 28px; height: 28px; border-radius: 8px; background: var(--cream); display: flex; align-items: center; justify-content: center; font-size: 14px; }
-  .hxs-note { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 14px; line-height: 1.35; text-align: center; color: var(--espresso-mid); max-width: 92%; }
-  @media (max-width: 600px) {
-    .hex-results-row .flow-step { width: 100%; }
+    .flow-row.is-modes {
+      overflow-x: auto; scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch; padding-bottom: 8px;
+    }
+    .flow-row.is-modes .flow-step { flex: 0 0 62%; scroll-snap-align: start; }
   }
   .approach-slot {
     display: flex; align-items: center; justify-content: center;
@@ -1021,119 +905,22 @@
         </li>
       </ul>
 
-      <div class="flows">
-
-        <div class="flow">
-          <div class="flow-head">
-            <span class="flow-eyebrow"><span class="n">1</span> The color wheel</span>
-          </div>
-          <div class="flow-grid">
-            <div class="flow-row">
-              <div class="flow-step">
-                <img src="assets/flow-wheel-a.png" alt="Front page — the wheel" />
-                <p class="step-cap"><span class="sn">A</span>Select a hue from the color wheel.</p>
-              </div>
-              <div class="flow-arrow">→</div>
-              <div class="flow-step">
-                <img src="assets/flow-wheel-b.png" alt="Results for chosen shade" />
-                <p class="step-cap"><span class="sn">B</span>Matching products ranked by similarity.</p>
-              </div>
-            </div>
-            <div class="flow-row">
-              <div class="flow-step">
-                <img src="assets/flow-wheel-c.png" alt="Lighter / deeper of that shade" />
-                <p class="step-cap"><span class="sn">C</span>Zoom into the selected hue for lighter to deeper options.</p>
-              </div>
-              <div class="flow-arrow">→</div>
-              <div class="flow-step">
-                <img src="assets/flow-wheel-d.png" alt="Updated results" />
-                <p class="step-cap"><span class="sn">D</span>Results re-rank to the new choice.</p>
-              </div>
-            </div>
-          </div>
+      <div class="flow-row is-modes">
+        <div class="flow-step">
+          <img src="assets/flow-wheel-a.png" alt="The color wheel on the front page" />
+          <p class="step-cap">Pick a shade from the color wheel.</p>
         </div>
-
-        <div class="flow">
-          <div class="flow-head">
-            <span class="flow-eyebrow"><span class="n">2</span> From a photo</span>
-          </div>
-          <div class="flow-grid">
-            <div class="flow-row">
-              <div class="flow-step">
-                <img src="assets/flow-photo-a.png" alt="Upload + color selection" />
-                <p class="step-cap"><span class="sn">A</span>Upload an image and sample a color.</p>
-              </div>
-              <div class="flow-arrow">→</div>
-              <div class="flow-step">
-                <img src="assets/flow-photo-b.png" alt="Results" />
-                <p class="step-cap"><span class="sn">B</span>Matching products and more options.</p>
-              </div>
-            </div>
-          </div>
+        <div class="flow-step">
+          <img src="assets/flow-photo-a.png" alt="Uploading a photo and sampling a color from it" />
+          <p class="step-cap">Or sample a color from a photo.</p>
         </div>
-
-        <div class="flow">
-          <div class="flow-head">
-            <span class="flow-eyebrow"><span class="n">3</span> Exact hex</span>
-          </div>
-          <div class="flow-grid">
-            <div class="flow-row">
-              <div class="flow-step">
-                <div class="hexscreen" id="hxs">
-                  <div class="hxp-tabs">
-                    <span class="hxp-tab">Wheel</span>
-                    <span class="hxp-tab">Photo</span>
-                    <span class="hxp-tab is-active">Hex</span>
-                  </div>
-                  <div class="hxs-circle-wrap">
-                    <div class="hxs-circle"></div>
-                  </div>
-                  <div class="hxs-input">
-                    <span class="hxs-hash">#</span>
-                    <span class="hxs-code">EC0932</span>
-                    <span class="hxs-palette">🎨</span>
-                  </div>
-                  <p class="hxs-note">Pick any color you love or paste a hex, and we'll find the lipsticks closest to it.</p>
-                </div>
-                <p class="step-cap"><span class="sn">A</span>Enter a hex number or open the color field to find similar lip products.</p>
-              </div>
-              <div class="flow-arrow">→</div>
-              <div class="flow-step">
-                <div class="picker-screen" id="hxp">
-                  <div class="hxp-tabs">
-                    <span class="hxp-tab">Wheel</span>
-                    <span class="hxp-tab">Photo</span>
-                    <span class="hxp-tab is-active">Hex</span>
-                  </div>
-                  <div class="hxp-field">
-                    <div class="sat"></div>
-                    <div class="val"></div>
-                    <div class="hxp-thumb"></div>
-                  </div>
-                  <div class="hxp-hue">
-                    <div class="hxp-hue-thumb"></div>
-                  </div>
-                  <div class="hxp-readout">
-                    <div class="hxp-swatch"></div>
-                    <div class="hxp-hex"><small>Your color</small><span class="hxp-hex-val">#000000</span></div>
-                  </div>
-                  <div class="hxp-hint">↑ Live — click the field</div>
-                </div>
-                <p class="step-cap"><span class="sn">B</span>Opening the full color field allows for further discovery across hues and shades.</p>
-              </div>
-            </div>
-          </div>
+        <div class="flow-step">
+          <img src="assets/flow-wheel-b.png" alt="Results list of closest lip matches for the chosen shade" />
+          <p class="step-cap">Matching products ranked by similarity.</p>
         </div>
-
       </div>
-
-      <div class="market-callout market-callout--standalone">
-        <p class="market-label">From the wishlist</p>
-        <p class="market-body">
-          Saved products become a starting point. Anything in the wishlist can anchor a new search,
-          making it possible to explore similar shades without starting from scratch, or find a
-          cheaper alternative to a favorite.
-        </p>
+      <div class="flow-cta">
+        <a href="index.html" class="cta">Try the Color Finder →</a>
       </div>
     </div>
   </section>
@@ -1308,78 +1095,5 @@
   </div>
 
 </div>
-<script>
-(function () {
-  var root = document.getElementById('hxp');
-  if (!root) return;
-  var field = root.querySelector('.hxp-field');
-  var thumb = root.querySelector('.hxp-thumb');
-  var hue = root.querySelector('.hxp-hue');
-  var hueThumb = root.querySelector('.hxp-hue-thumb');
-  var swatch = root.querySelector('.hxp-swatch');
-  var hexVal = root.querySelector('.hxp-hex-val');
-  // live step-A screen elements
-  var hxsCircle = document.querySelector('#hxs .hxs-circle');
-  var hxsCode = document.querySelector('#hxs .hxs-code');
-
-  // state: h 0-360, s 0-1, v 0-1 — seeded near the page's blush accent
-  var state = { h: 340, s: 0.55, v: 0.78 };
-
-  function hsv2rgb(h, s, v) {
-    var c = v * s, x = c * (1 - Math.abs(((h / 60) % 2) - 1)), m = v - c, r = 0, g = 0, b = 0;
-    if (h < 60) { r = c; g = x; }
-    else if (h < 120) { r = x; g = c; }
-    else if (h < 180) { g = c; b = x; }
-    else if (h < 240) { g = x; b = c; }
-    else if (h < 300) { r = x; b = c; }
-    else { r = c; b = x; }
-    return [Math.round((r + m) * 255), Math.round((g + m) * 255), Math.round((b + m) * 255)];
-  }
-  function hex(rgb) {
-    return '#' + rgb.map(function (n) { return ('0' + n.toString(16)).slice(-2); }).join('').toUpperCase();
-  }
-  function clamp(n) { return Math.max(0, Math.min(1, n)); }
-
-  function render() {
-    field.style.setProperty('--h', state.h);
-    thumb.style.left = (state.s * 100) + '%';
-    thumb.style.top = ((1 - state.v) * 100) + '%';
-    var rgb = hsv2rgb(state.h, state.s, state.v);
-    var hx = hex(rgb);
-    thumb.style.background = hx;
-    swatch.style.background = hx;
-    hexVal.textContent = hx;
-    hueThumb.style.left = (state.h / 360 * 100) + '%';
-    hueThumb.style.background = hex(hsv2rgb(state.h, 1, 1));
-    if (hxsCircle) {
-      hxsCircle.style.background = hx;
-      hxsCircle.style.boxShadow = '0 0 26px 3px rgba(' + rgb[0] + ',' + rgb[1] + ',' + rgb[2] + ',0.45), 0 2px 10px rgba(0,0,0,0.12)';
-    }
-    if (hxsCode) { hxsCode.textContent = hx.replace('#', ''); }
-  }
-
-  function drag(el, onMove) {
-    el.addEventListener('pointerdown', function (e) {
-      el.setPointerCapture(e.pointerId);
-      var move = function (ev) {
-        var r = el.getBoundingClientRect();
-        onMove(clamp((ev.clientX - r.left) / r.width), clamp((ev.clientY - r.top) / r.height));
-        render();
-      };
-      move(e);
-      var up = function () {
-        el.removeEventListener('pointermove', move);
-        el.removeEventListener('pointerup', up);
-      };
-      el.addEventListener('pointermove', move);
-      el.addEventListener('pointerup', up);
-    });
-  }
-
-  drag(field, function (x, y) { state.s = x; state.v = 1 - y; });
-  drag(hue, function (x) { state.h = x * 360; });
-  render();
-})();
-</script>
 </body>
 </html>
