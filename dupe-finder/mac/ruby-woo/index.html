@@ -43,24 +43,26 @@ h1{margin:0;font-family:'Cormorant Garamond',serif;font-weight:300;font-size:cla
 .lede{margin:20px 0 0;font-size:17px;line-height:1.7;color:#5C3D30;max-width:620px}
 .source{display:flex;align-items:stretch;margin-top:30px;background:#fff;border:1px solid #E0D0C4;border-radius:16px;overflow:hidden}
 .source-swatch{flex:0 0 120px;min-height:120px}
+.source-img{flex:none;width:120px;height:120px;object-fit:contain;align-self:center;margin-left:14px}
 .source-body{padding:18px 20px;display:flex;flex-direction:column;justify-content:center;gap:6px}
 .source-name{font-family:'Cormorant Garamond',serif;font-weight:500;font-size:26px;line-height:1.15}
 .source-facts{font-size:14px;line-height:1.5;color:#3D2820}
 .source-hex{font-family:ui-monospace,Menlo,monospace;font-size:13px;color:#5C3D30}
-.cta{display:inline-block;margin-top:26px;background:#2A1A14;color:#FAF6F1;text-decoration:none;font-size:12px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;padding:14px 22px;border-radius:40px}
-.cta:hover{background:#B54A6A;color:#fff}
+.cta{display:inline-block;margin-top:26px;background:#B54A6A;color:#fff;text-decoration:none;font-size:12px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;padding:14px 22px;border-radius:40px}
+.cta:hover{background:#2A1A14;color:#FAF6F1}
 .block{padding-top:60px}
 h2{margin:0;font-family:'Cormorant Garamond',serif;font-weight:400;font-size:clamp(28px,4vw,36px);line-height:1.15}
 .block-intro{margin:10px 0 0;font-size:15px;line-height:1.7;color:#3D2820;max-width:620px}
 .matches{list-style:none;margin:22px 0 0;padding:0;background:#fff;border:1px solid #E0D0C4;border-radius:16px;overflow:hidden}
-.matches li{display:flex;align-items:center;gap:14px;padding:13px 18px;border-top:1px solid #F0E8DF}
+.matches li{display:flex;align-items:stretch;gap:14px;padding-right:18px;border-top:1px solid #F0E8DF}
 .matches li:first-child{border-top:none}
-.dot{flex:none;width:34px;height:34px;border-radius:50%;border:1px solid rgba(42,26,20,.08)}
-.who{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.sw{flex:0 0 40px}
+.thumb{flex:none;width:64px;height:64px;margin:8px 0;align-self:center;object-fit:contain}
+.who{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;gap:2px;padding:13px 0}
 .who a{font-size:15px;color:#2A1A14;text-decoration:none;font-weight:500}
 .who a:hover{color:#B54A6A}
 .what{font-size:13px;line-height:1.4;color:#5C3D30}
-.de{flex:none;font-size:13px;color:#3D2820;white-space:nowrap}
+.de{flex:none;align-self:center;font-size:13px;color:#3D2820;white-space:nowrap}
 .notes{padding:60px 0 0;max-width:680px}
 .notes h3{margin:26px 0 0;font-family:'Cormorant Garamond',serif;font-weight:500;font-size:21px;line-height:1.3}
 .notes p{font-size:15px;line-height:1.7;color:#3D2820;margin:10px 0 0}
@@ -69,7 +71,7 @@ h2{margin:0;font-family:'Cormorant Garamond',serif;font-weight:400;font-size:cla
 .more a:hover{border-color:#C87890}
 .foot{padding:36px 0 48px;font-size:12px}
 .foot a{color:#5C3D30}
-@media (max-width:540px){.top a:first-child{flex-basis:100%;padding-bottom:0}.source-swatch{flex-basis:84px}.matches li{padding:12px 14px;gap:12px}.dot{width:28px;height:28px}}
+@media (max-width:540px){.top a:first-child{flex-basis:100%;padding-bottom:0}.source-swatch{flex-basis:56px}.source-img{width:84px;height:84px;margin-left:10px}.source-body{padding:14px}.matches li{padding-right:14px;gap:12px}.sw{flex-basis:28px}.thumb{width:52px;height:52px}}
 </style>
 </head>
 <body>
@@ -86,6 +88,7 @@ h2{margin:0;font-family:'Cormorant Garamond',serif;font-weight:400;font-size:cla
 
   <div class="source">
     <div class="source-swatch" style="background:#a51c28"></div>
+    <img class="source-img" src="/dupe-finder/assets/mac-cosmetics-retro-matte-lipstick-ruby-woo-240.webp" alt="MAC Ruby Woo Retro Matte Lipstick" width="120" height="120">
     <div class="source-body">
       <span class="source-name">MAC Ruby Woo</span>
       <span class="source-facts">Retro Matte Lipstick · Matte · Bullet Lipstick · $$</span>
@@ -99,7 +102,8 @@ h2{margin:0;font-family:'Cormorant Garamond',serif;font-weight:400;font-size:cla
       <p class="block-intro">Any brand, any price. ΔE is the measured color difference from the original: the lower the number, the closer the match.</p>
       <ol class="matches">
         <li>
-          <span class="dot" style="background:#a41d27"></span>
+          <span class="sw" style="background:#a41d27"></span>
+          <img class="thumb" src="/dupe-finder/assets/jason-wu-beauty-stay-in-line-20-ginger-red-sill-20-ginger-red-144.webp" alt="Jason Wu Beauty Sill-20 Ginger Red Stay In Line - 20 Ginger Red" width="64" height="64" loading="lazy" decoding="async">
           <span class="who">
             <a href="/dupe-finder/?brand=jason%20wu%20beauty&amp;dupe=sill-20%20ginger%20red">Jason Wu Beauty · Sill-20 Ginger Red</a>
             <span class="what">Stay In Line - 20 Ginger Red · Bullet Lipstick · $</span>
@@ -107,7 +111,8 @@ h2{margin:0;font-family:'Cormorant Garamond',serif;font-weight:400;font-size:cla
           <span class="de" title="Color difference from the original; lower is closer">ΔE 0.4</span>
         </li>
         <li>
-          <span class="dot" style="background:#a21c27"></span>
+          <span class="sw" style="background:#a21c27"></span>
+          <img class="thumb" src="/dupe-finder/assets/l-a-colors-hydrating-lipstick-clipc30-wild-fire-144.webp" alt="L.A. Colors Clipc30 Wild Fire Hydrating Lipstick" width="64" height="64" loading="lazy" decoding="async">
           <span class="who">
             <a href="/dupe-finder/?brand=l.a.%20colors&amp;dupe=clipc30%20wild%20fire">L.A. Colors · Clipc30 Wild Fire</a>
             <span class="what">Hydrating Lipstick · Cream · Bullet Lipstick · $</span>
@@ -115,7 +120,8 @@ h2{margin:0;font-family:'Cormorant Garamond',serif;font-weight:400;font-size:cla
           <span class="de" title="Color difference from the original; lower is closer">ΔE 0.6</span>
         </li>
         <li>
-          <span class="dot" style="background:#a42027"></span>
+          <span class="sw" style="background:#a42027"></span>
+          <img class="thumb" src="/dupe-finder/assets/maybelline-color-sensational-the-creams-lip-color-crimson-race-144.webp" alt="Maybelline Crimson Race Color Sensational The Creams Lip Color" width="64" height="64" loading="lazy" decoding="async">
           <span class="who">
             <a href="/dupe-finder/?brand=maybelline&amp;dupe=crimson%20race">Maybelline · Crimson Race</a>
             <span class="what">Color Sensational The Creams Lip Color · Cream · Bullet Lipstick · $</span>
@@ -123,7 +129,8 @@ h2{margin:0;font-family:'Cormorant Garamond',serif;font-weight:400;font-size:cla
           <span class="de" title="Color difference from the original; lower is closer">ΔE 0.8</span>
         </li>
         <li>
-          <span class="dot" style="background:#a81226"></span>
+          <span class="sw" style="background:#a81226"></span>
+          <img class="thumb" src="/dupe-finder/assets/mellow-cosmetics-lip-paint-paris-144.webp" alt="Mellow Cosmetics Paris Lip Paint" width="64" height="64" loading="lazy" decoding="async">
           <span class="who">
             <a href="/dupe-finder/?brand=mellow%20cosmetics&amp;dupe=paris">Mellow Cosmetics · Paris</a>
             <span class="what">Lip Paint · Liquid Lipstick · $$</span>
@@ -131,7 +138,8 @@ h2{margin:0;font-family:'Cormorant Garamond',serif;font-weight:400;font-size:cla
           <span class="de" title="Color difference from the original; lower is closer">ΔE 0.9</span>
         </li>
         <li>
-          <span class="dot" style="background:#a31425"></span>
+          <span class="sw" style="background:#a31425"></span>
+          <img class="thumb" src="/dupe-finder/assets/maybelline-super-stay-teddy-lip-tint-tomato-girl-144.webp" alt="Maybelline Tomato Girl Super Stay Teddy Lip Tint" width="64" height="64" loading="lazy" decoding="async">
           <span class="who">
             <a href="/dupe-finder/?brand=maybelline&amp;dupe=tomato%20girl">Maybelline · Tomato Girl</a>
             <span class="what">Super Stay Teddy Lip Tint · Lip Stain &amp; Tint · $</span>
@@ -139,7 +147,8 @@ h2{margin:0;font-family:'Cormorant Garamond',serif;font-weight:400;font-size:cla
           <span class="de" title="Color difference from the original; lower is closer">ΔE 0.9</span>
         </li>
         <li>
-          <span class="dot" style="background:#a01f27"></span>
+          <span class="sw" style="background:#a01f27"></span>
+          <img class="thumb" src="/dupe-finder/assets/dior-rouge-ultra-care-liquid-lipstick-966-desire-144.webp" alt="Dior 966 Desire Rouge Ultra Care Liquid Lipstick" width="64" height="64" loading="lazy" decoding="async">
           <span class="who">
             <a href="/dupe-finder/?brand=dior&amp;dupe=966%20desire">Dior · 966 Desire</a>
             <span class="what">Rouge Ultra Care Liquid Lipstick · Satin · Liquid Lipstick · $$$$</span>
@@ -147,7 +156,8 @@ h2{margin:0;font-family:'Cormorant Garamond',serif;font-weight:400;font-size:cla
           <span class="de" title="Color difference from the original; lower is closer">ΔE 1.0</span>
         </li>
         <li>
-          <span class="dot" style="background:#a81127"></span>
+          <span class="sw" style="background:#a81127"></span>
+          <img class="thumb" src="/dupe-finder/assets/maybelline-color-sensational-creamy-matte-lip-color-691-rich-ruby-144.webp" alt="Maybelline 691 Rich Ruby Color Sensational Creamy Matte Lip Color" width="64" height="64" loading="lazy" decoding="async">
           <span class="who">
             <a href="/dupe-finder/?brand=maybelline&amp;dupe=691%20rich%20ruby">Maybelline · 691 Rich Ruby</a>
             <span class="what">Color Sensational Creamy Matte Lip Color · Matte · Bullet Lipstick · $</span>
@@ -155,7 +165,8 @@ h2{margin:0;font-family:'Cormorant Garamond',serif;font-weight:400;font-size:cla
           <span class="de" title="Color difference from the original; lower is closer">ΔE 1.0</span>
         </li>
         <li>
-          <span class="dot" style="background:#a32026"></span>
+          <span class="sw" style="background:#a32026"></span>
+          <img class="thumb" src="/dupe-finder/assets/valentino-liquirosso-2-in-1-soft-matte-liquid-lipstick-blush-220a-take-the-lipstick-and-run-144.webp" alt="Valentino 220a - Take The Lipstick And Run Liquirosso 2 In 1 Soft Matte Liquid Lipstick &amp; Blush" width="64" height="64" loading="lazy" decoding="async">
           <span class="who">
             <a href="/dupe-finder/?brand=valentino&amp;dupe=220a%20-%20take%20the%20lipstick%20and%20run">Valentino · 220a - Take The Lipstick And Run</a>
             <span class="what">Liquirosso 2 In 1 Soft Matte Liquid Lipstick &amp; Blush · Semi-Matte · Liquid Lipstick · $$$$</span>
@@ -163,7 +174,8 @@ h2{margin:0;font-family:'Cormorant Garamond',serif;font-weight:400;font-size:cla
           <span class="de" title="Color difference from the original; lower is closer">ΔE 1.0</span>
         </li>
         <li>
-          <span class="dot" style="background:#aa1729"></span>
+          <span class="sw" style="background:#aa1729"></span>
+          <img class="thumb" src="/dupe-finder/assets/the-creme-shop-my-wand-only-matte-liquid-lipstick-lucy-i-m-home-144.webp" alt="The Creme Shop Lucy I'm Home My Wand &amp; Only Matte Liquid Lipstick" width="64" height="64" loading="lazy" decoding="async">
           <span class="who">
             <a href="/dupe-finder/?brand=the%20creme%20shop&amp;dupe=lucy%20i'm%20home">The Creme Shop · Lucy I'm Home</a>
             <span class="what">My Wand &amp; Only Matte Liquid Lipstick · Matte · Liquid Lipstick · $</span>
@@ -171,7 +183,8 @@ h2{margin:0;font-family:'Cormorant Garamond',serif;font-weight:400;font-size:cla
           <span class="de" title="Color difference from the original; lower is closer">ΔE 1.1</span>
         </li>
         <li>
-          <span class="dot" style="background:#a41323"></span>
+          <span class="sw" style="background:#a41323"></span>
+          <img class="thumb" src="/dupe-finder/assets/mac-cosmetics-powder-kiss-lipstick-werk-werk-werk-144.webp" alt="MAC Werk Werk Werk Powder Kiss Lipstick" width="64" height="64" loading="lazy" decoding="async">
           <span class="who">
             <a href="/dupe-finder/?brand=mac%20cosmetics&amp;dupe=werk%20werk%20werk">MAC · Werk Werk Werk</a>
             <span class="what">Powder Kiss Lipstick · Matte · Bullet Lipstick · $$</span>
@@ -179,7 +192,8 @@ h2{margin:0;font-family:'Cormorant Garamond',serif;font-weight:400;font-size:cla
           <span class="de" title="Color difference from the original; lower is closer">ΔE 1.1</span>
         </li>
         <li>
-          <span class="dot" style="background:#aa1a26"></span>
+          <span class="sw" style="background:#aa1a26"></span>
+          <img class="thumb" src="/dupe-finder/assets/ofra-cosmetics-lipstick-01-riviera-144.webp" alt="Ofra Cosmetics #01 Riviera Lipstick" width="64" height="64" loading="lazy" decoding="async">
           <span class="who">
             <a href="/dupe-finder/?brand=ofra%20cosmetics&amp;dupe=%2301%20riviera">Ofra Cosmetics · #01 Riviera</a>
             <span class="what">Lipstick · Cream · Bullet Lipstick · $$</span>
@@ -187,7 +201,8 @@ h2{margin:0;font-family:'Cormorant Garamond',serif;font-weight:400;font-size:cla
           <span class="de" title="Color difference from the original; lower is closer">ΔE 1.1</span>
         </li>
         <li>
-          <span class="dot" style="background:#aa1227"></span>
+          <span class="sw" style="background:#aa1227"></span>
+          <img class="thumb" src="/dupe-finder/assets/holika-holika-heart-crush-velvet-lipstick-new-woman-144.webp" alt="Holika Holika New Woman Heart Crush Velvet Lipstick" width="64" height="64" loading="lazy" decoding="async">
           <span class="who">
             <a href="/dupe-finder/?brand=holika%20holika&amp;dupe=new%20woman">Holika Holika · New Woman</a>
             <span class="what">Heart Crush Velvet Lipstick · Semi-Matte · Bullet Lipstick · $</span>
@@ -202,7 +217,8 @@ h2{margin:0;font-family:'Cormorant Garamond',serif;font-weight:400;font-size:cla
       <p class="block-intro">The closest matches in the lowest price tier ($).</p>
       <ol class="matches">
         <li>
-          <span class="dot" style="background:#a41d27"></span>
+          <span class="sw" style="background:#a41d27"></span>
+          <img class="thumb" src="/dupe-finder/assets/jason-wu-beauty-stay-in-line-20-ginger-red-sill-20-ginger-red-144.webp" alt="Jason Wu Beauty Sill-20 Ginger Red Stay In Line - 20 Ginger Red" width="64" height="64" loading="lazy" decoding="async">
           <span class="who">
             <a href="/dupe-finder/?brand=jason%20wu%20beauty&amp;dupe=sill-20%20ginger%20red">Jason Wu Beauty · Sill-20 Ginger Red</a>
             <span class="what">Stay In Line - 20 Ginger Red · Bullet Lipstick · $</span>
@@ -210,7 +226,8 @@ h2{margin:0;font-family:'Cormorant Garamond',serif;font-weight:400;font-size:cla
           <span class="de" title="Color difference from the original; lower is closer">ΔE 0.4</span>
         </li>
         <li>
-          <span class="dot" style="background:#a21c27"></span>
+          <span class="sw" style="background:#a21c27"></span>
+          <img class="thumb" src="/dupe-finder/assets/l-a-colors-hydrating-lipstick-clipc30-wild-fire-144.webp" alt="L.A. Colors Clipc30 Wild Fire Hydrating Lipstick" width="64" height="64" loading="lazy" decoding="async">
           <span class="who">
             <a href="/dupe-finder/?brand=l.a.%20colors&amp;dupe=clipc30%20wild%20fire">L.A. Colors · Clipc30 Wild Fire</a>
             <span class="what">Hydrating Lipstick · Cream · Bullet Lipstick · $</span>
@@ -218,7 +235,8 @@ h2{margin:0;font-family:'Cormorant Garamond',serif;font-weight:400;font-size:cla
           <span class="de" title="Color difference from the original; lower is closer">ΔE 0.6</span>
         </li>
         <li>
-          <span class="dot" style="background:#a42027"></span>
+          <span class="sw" style="background:#a42027"></span>
+          <img class="thumb" src="/dupe-finder/assets/maybelline-color-sensational-the-creams-lip-color-crimson-race-144.webp" alt="Maybelline Crimson Race Color Sensational The Creams Lip Color" width="64" height="64" loading="lazy" decoding="async">
           <span class="who">
             <a href="/dupe-finder/?brand=maybelline&amp;dupe=crimson%20race">Maybelline · Crimson Race</a>
             <span class="what">Color Sensational The Creams Lip Color · Cream · Bullet Lipstick · $</span>
@@ -226,7 +244,8 @@ h2{margin:0;font-family:'Cormorant Garamond',serif;font-weight:400;font-size:cla
           <span class="de" title="Color difference from the original; lower is closer">ΔE 0.8</span>
         </li>
         <li>
-          <span class="dot" style="background:#a31425"></span>
+          <span class="sw" style="background:#a31425"></span>
+          <img class="thumb" src="/dupe-finder/assets/maybelline-super-stay-teddy-lip-tint-tomato-girl-144.webp" alt="Maybelline Tomato Girl Super Stay Teddy Lip Tint" width="64" height="64" loading="lazy" decoding="async">
           <span class="who">
             <a href="/dupe-finder/?brand=maybelline&amp;dupe=tomato%20girl">Maybelline · Tomato Girl</a>
             <span class="what">Super Stay Teddy Lip Tint · Lip Stain &amp; Tint · $</span>
@@ -234,7 +253,8 @@ h2{margin:0;font-family:'Cormorant Garamond',serif;font-weight:400;font-size:cla
           <span class="de" title="Color difference from the original; lower is closer">ΔE 0.9</span>
         </li>
         <li>
-          <span class="dot" style="background:#a81127"></span>
+          <span class="sw" style="background:#a81127"></span>
+          <img class="thumb" src="/dupe-finder/assets/maybelline-color-sensational-creamy-matte-lip-color-691-rich-ruby-144.webp" alt="Maybelline 691 Rich Ruby Color Sensational Creamy Matte Lip Color" width="64" height="64" loading="lazy" decoding="async">
           <span class="who">
             <a href="/dupe-finder/?brand=maybelline&amp;dupe=691%20rich%20ruby">Maybelline · 691 Rich Ruby</a>
             <span class="what">Color Sensational Creamy Matte Lip Color · Matte · Bullet Lipstick · $</span>
@@ -242,7 +262,8 @@ h2{margin:0;font-family:'Cormorant Garamond',serif;font-weight:400;font-size:cla
           <span class="de" title="Color difference from the original; lower is closer">ΔE 1.0</span>
         </li>
         <li>
-          <span class="dot" style="background:#aa1729"></span>
+          <span class="sw" style="background:#aa1729"></span>
+          <img class="thumb" src="/dupe-finder/assets/the-creme-shop-my-wand-only-matte-liquid-lipstick-lucy-i-m-home-144.webp" alt="The Creme Shop Lucy I'm Home My Wand &amp; Only Matte Liquid Lipstick" width="64" height="64" loading="lazy" decoding="async">
           <span class="who">
             <a href="/dupe-finder/?brand=the%20creme%20shop&amp;dupe=lucy%20i'm%20home">The Creme Shop · Lucy I'm Home</a>
             <span class="what">My Wand &amp; Only Matte Liquid Lipstick · Matte · Liquid Lipstick · $</span>
@@ -257,7 +278,8 @@ h2{margin:0;font-family:'Cormorant Garamond',serif;font-weight:400;font-size:cla
       <p class="block-intro">The closest matches one tier up ($$).</p>
       <ol class="matches">
         <li>
-          <span class="dot" style="background:#a81226"></span>
+          <span class="sw" style="background:#a81226"></span>
+          <img class="thumb" src="/dupe-finder/assets/mellow-cosmetics-lip-paint-paris-144.webp" alt="Mellow Cosmetics Paris Lip Paint" width="64" height="64" loading="lazy" decoding="async">
           <span class="who">
             <a href="/dupe-finder/?brand=mellow%20cosmetics&amp;dupe=paris">Mellow Cosmetics · Paris</a>
             <span class="what">Lip Paint · Liquid Lipstick · $$</span>
@@ -265,7 +287,8 @@ h2{margin:0;font-family:'Cormorant Garamond',serif;font-weight:400;font-size:cla
           <span class="de" title="Color difference from the original; lower is closer">ΔE 0.9</span>
         </li>
         <li>
-          <span class="dot" style="background:#a41323"></span>
+          <span class="sw" style="background:#a41323"></span>
+          <img class="thumb" src="/dupe-finder/assets/mac-cosmetics-powder-kiss-lipstick-werk-werk-werk-144.webp" alt="MAC Werk Werk Werk Powder Kiss Lipstick" width="64" height="64" loading="lazy" decoding="async">
           <span class="who">
             <a href="/dupe-finder/?brand=mac%20cosmetics&amp;dupe=werk%20werk%20werk">MAC · Werk Werk Werk</a>
             <span class="what">Powder Kiss Lipstick · Matte · Bullet Lipstick · $$</span>
@@ -273,7 +296,8 @@ h2{margin:0;font-family:'Cormorant Garamond',serif;font-weight:400;font-size:cla
           <span class="de" title="Color difference from the original; lower is closer">ΔE 1.1</span>
         </li>
         <li>
-          <span class="dot" style="background:#aa1a26"></span>
+          <span class="sw" style="background:#aa1a26"></span>
+          <img class="thumb" src="/dupe-finder/assets/ofra-cosmetics-lipstick-01-riviera-144.webp" alt="Ofra Cosmetics #01 Riviera Lipstick" width="64" height="64" loading="lazy" decoding="async">
           <span class="who">
             <a href="/dupe-finder/?brand=ofra%20cosmetics&amp;dupe=%2301%20riviera">Ofra Cosmetics · #01 Riviera</a>
             <span class="what">Lipstick · Cream · Bullet Lipstick · $$</span>
@@ -281,7 +305,8 @@ h2{margin:0;font-family:'Cormorant Garamond',serif;font-weight:400;font-size:cla
           <span class="de" title="Color difference from the original; lower is closer">ΔE 1.1</span>
         </li>
         <li>
-          <span class="dot" style="background:#a62329"></span>
+          <span class="sw" style="background:#a62329"></span>
+          <img class="thumb" src="/dupe-finder/assets/sephora-collection-clean-liquid-lip-mousse-rose-144.webp" alt="Sephora Collection Rose Clean Liquid Lip Mousse" width="64" height="64" loading="lazy" decoding="async">
           <span class="who">
             <a href="/dupe-finder/?brand=sephora%20collection&amp;dupe=rose">Sephora Collection · Rose</a>
             <span class="what">Clean Liquid Lip Mousse · Liquid Lipstick · $$</span>
@@ -289,7 +314,8 @@ h2{margin:0;font-family:'Cormorant Garamond',serif;font-weight:400;font-size:cla
           <span class="de" title="Color difference from the original; lower is closer">ΔE 1.1</span>
         </li>
         <li>
-          <span class="dot" style="background:#a3252a"></span>
+          <span class="sw" style="background:#a3252a"></span>
+          <img class="thumb" src="/dupe-finder/assets/mac-cosmetics-powder-kiss-lipstick-ruby-new-144.webp" alt="MAC Ruby New Powder Kiss Lipstick" width="64" height="64" loading="lazy" decoding="async">
           <span class="who">
             <a href="/dupe-finder/?brand=mac%20cosmetics&amp;dupe=ruby%20new">MAC · Ruby New</a>
             <span class="what">Powder Kiss Lipstick · Matte · Bullet Lipstick · $$</span>
@@ -297,7 +323,8 @@ h2{margin:0;font-family:'Cormorant Garamond',serif;font-weight:400;font-size:cla
           <span class="de" title="Color difference from the original; lower is closer">ΔE 1.1</span>
         </li>
         <li>
-          <span class="dot" style="background:#ab1428"></span>
+          <span class="sw" style="background:#ab1428"></span>
+          <img class="thumb" src="/dupe-finder/assets/laura-geller-new-york-modern-classic-cream-lipstick-red-144.webp" alt="Laura Geller New York Red Modern Classic Cream Lipstick" width="64" height="64" loading="lazy" decoding="async">
           <span class="who">
             <a href="/dupe-finder/?brand=laura%20geller%20new%20york&amp;dupe=red">Laura Geller New York · Red</a>
             <span class="what">Modern Classic Cream Lipstick · Satin · Bullet Lipstick · $$</span>

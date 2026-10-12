@@ -43,24 +43,26 @@ h1{margin:0;font-family:'Cormorant Garamond',serif;font-weight:300;font-size:cla
 .lede{margin:20px 0 0;font-size:17px;line-height:1.7;color:#5C3D30;max-width:620px}
 .source{display:flex;align-items:stretch;margin-top:30px;background:#fff;border:1px solid #E0D0C4;border-radius:16px;overflow:hidden}
 .source-swatch{flex:0 0 120px;min-height:120px}
+.source-img{flex:none;width:120px;height:120px;object-fit:contain;align-self:center;margin-left:14px}
 .source-body{padding:18px 20px;display:flex;flex-direction:column;justify-content:center;gap:6px}
 .source-name{font-family:'Cormorant Garamond',serif;font-weight:500;font-size:26px;line-height:1.15}
 .source-facts{font-size:14px;line-height:1.5;color:#3D2820}
 .source-hex{font-family:ui-monospace,Menlo,monospace;font-size:13px;color:#5C3D30}
-.cta{display:inline-block;margin-top:26px;background:#2A1A14;color:#FAF6F1;text-decoration:none;font-size:12px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;padding:14px 22px;border-radius:40px}
-.cta:hover{background:#B54A6A;color:#fff}
+.cta{display:inline-block;margin-top:26px;background:#B54A6A;color:#fff;text-decoration:none;font-size:12px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;padding:14px 22px;border-radius:40px}
+.cta:hover{background:#2A1A14;color:#FAF6F1}
 .block{padding-top:60px}
 h2{margin:0;font-family:'Cormorant Garamond',serif;font-weight:400;font-size:clamp(28px,4vw,36px);line-height:1.15}
 .block-intro{margin:10px 0 0;font-size:15px;line-height:1.7;color:#3D2820;max-width:620px}
 .matches{list-style:none;margin:22px 0 0;padding:0;background:#fff;border:1px solid #E0D0C4;border-radius:16px;overflow:hidden}
-.matches li{display:flex;align-items:center;gap:14px;padding:13px 18px;border-top:1px solid #F0E8DF}
+.matches li{display:flex;align-items:stretch;gap:14px;padding-right:18px;border-top:1px solid #F0E8DF}
 .matches li:first-child{border-top:none}
-.dot{flex:none;width:34px;height:34px;border-radius:50%;border:1px solid rgba(42,26,20,.08)}
-.who{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.sw{flex:0 0 40px}
+.thumb{flex:none;width:64px;height:64px;margin:8px 0;align-self:center;object-fit:contain}
+.who{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;gap:2px;padding:13px 0}
 .who a{font-size:15px;color:#2A1A14;text-decoration:none;font-weight:500}
 .who a:hover{color:#B54A6A}
 .what{font-size:13px;line-height:1.4;color:#5C3D30}
-.de{flex:none;font-size:13px;color:#3D2820;white-space:nowrap}
+.de{flex:none;align-self:center;font-size:13px;color:#3D2820;white-space:nowrap}
 .notes{padding:60px 0 0;max-width:680px}
 .notes h3{margin:26px 0 0;font-family:'Cormorant Garamond',serif;font-weight:500;font-size:21px;line-height:1.3}
 .notes p{font-size:15px;line-height:1.7;color:#3D2820;margin:10px 0 0}
@@ -69,7 +71,7 @@ h2{margin:0;font-family:'Cormorant Garamond',serif;font-weight:400;font-size:cla
 .more a:hover{border-color:#C87890}
 .foot{padding:36px 0 48px;font-size:12px}
 .foot a{color:#5C3D30}
-@media (max-width:540px){.top a:first-child{flex-basis:100%;padding-bottom:0}.source-swatch{flex-basis:84px}.matches li{padding:12px 14px;gap:12px}.dot{width:28px;height:28px}}
+@media (max-width:540px){.top a:first-child{flex-basis:100%;padding-bottom:0}.source-swatch{flex-basis:56px}.source-img{width:84px;height:84px;margin-left:10px}.source-body{padding:14px}.matches li{padding-right:14px;gap:12px}.sw{flex-basis:28px}.thumb{width:52px;height:52px}}
 </style>
 </head>
 <body>
@@ -86,6 +88,7 @@ h2{margin:0;font-family:'Cormorant Garamond',serif;font-weight:400;font-size:cla
 
   <div class="source">
     <div class="source-swatch" style="background:#d35d7e"></div>
+    <img class="source-img" src="/dupe-finder/assets/dior-rouge-dior-forever-transfer-proof-lipstick-670-rose-blues-240.webp" alt="Dior 670 Rose Blues Rouge Dior Forever Transfer-Proof Lipstick" width="120" height="120">
     <div class="source-body">
       <span class="source-name">Dior 670 Rose Blues</span>
       <span class="source-facts">Rouge Dior Forever Transfer-Proof Lipstick · Satin · Bullet Lipstick · $$$$</span>
@@ -99,7 +102,8 @@ h2{margin:0;font-family:'Cormorant Garamond',serif;font-weight:400;font-size:cla
       <p class="block-intro">Any brand, any price. ΔE is the measured color difference from the original: the lower the number, the closer the match.</p>
       <ol class="matches">
         <li>
-          <span class="dot" style="background:#ce617e"></span>
+          <span class="sw" style="background:#ce617e"></span>
+          <img class="thumb" src="/dupe-finder/assets/morphe-2-good-talk-blotted-matte-lipstick-pink-pucker-144.webp" alt="Morphe 2 Pink Pucker Good Talk Blotted Matte Lipstick" width="64" height="64" loading="lazy" decoding="async">
           <span class="who">
             <a href="/dupe-finder/?brand=morphe%202&amp;dupe=pink%20pucker">Morphe 2 · Pink Pucker</a>
             <span class="what">Good Talk Blotted Matte Lipstick · Matte · Bullet Lipstick · $</span>
@@ -107,7 +111,8 @@ h2{margin:0;font-family:'Cormorant Garamond',serif;font-weight:400;font-size:cla
           <span class="de" title="Color difference from the original; lower is closer">ΔE 1.2</span>
         </li>
         <li>
-          <span class="dot" style="background:#d75e7c"></span>
+          <span class="sw" style="background:#d75e7c"></span>
+          <img class="thumb" src="/dupe-finder/assets/l-a-colors-pout-chaser-lipstick-clipc858-attention-144.webp" alt="L.A. Colors Clipc858 Attention Pout Chaser Lipstick" width="64" height="64" loading="lazy" decoding="async">
           <span class="who">
             <a href="/dupe-finder/?brand=l.a.%20colors&amp;dupe=clipc858%20attention">L.A. Colors · Clipc858 Attention</a>
             <span class="what">Pout Chaser Lipstick · Cream · Bullet Lipstick · $</span>
@@ -115,7 +120,8 @@ h2{margin:0;font-family:'Cormorant Garamond',serif;font-weight:400;font-size:cla
           <span class="de" title="Color difference from the original; lower is closer">ΔE 1.3</span>
         </li>
         <li>
-          <span class="dot" style="background:#d76281"></span>
+          <span class="sw" style="background:#d76281"></span>
+          <img class="thumb" src="/dupe-finder/assets/covergirl-simply-ageless-moisture-renew-core-lipstick-370-precious-mauve-144.webp" alt="CoverGirl 370 Precious Mauve Simply Ageless Moisture Renew Core Lipstick" width="64" height="64" loading="lazy" decoding="async">
           <span class="who">
             <a href="/dupe-finder/?brand=covergirl&amp;dupe=370%20precious%20mauve">CoverGirl · 370 Precious Mauve</a>
             <span class="what">Simply Ageless Moisture Renew Core Lipstick · Cream · Bullet Lipstick · $</span>
@@ -123,7 +129,8 @@ h2{margin:0;font-family:'Cormorant Garamond',serif;font-weight:400;font-size:cla
           <span class="de" title="Color difference from the original; lower is closer">ΔE 1.5</span>
         </li>
         <li>
-          <span class="dot" style="background:#da5e82"></span>
+          <span class="sw" style="background:#da5e82"></span>
+          <img class="thumb" src="/dupe-finder/assets/buxom-full-force-plumping-lipstick-mover-144.webp" alt="Buxom Mover Full Force Plumping Lipstick" width="64" height="64" loading="lazy" decoding="async">
           <span class="who">
             <a href="/dupe-finder/?brand=buxom&amp;dupe=mover">Buxom · Mover</a>
             <span class="what">Full Force Plumping Lipstick · Bullet Lipstick · $$</span>
@@ -131,7 +138,8 @@ h2{margin:0;font-family:'Cormorant Garamond',serif;font-weight:400;font-size:cla
           <span class="de" title="Color difference from the original; lower is closer">ΔE 1.5</span>
         </li>
         <li>
-          <span class="dot" style="background:#d85b79"></span>
+          <span class="sw" style="background:#d85b79"></span>
+          <img class="thumb" src="/dupe-finder/assets/fwee-blurry-pudding-pot-cr03-bff-pink-coral-144.webp" alt="Fwee Cr03 Bff (Pink Coral) Blurry Pudding Pot" width="64" height="64" loading="lazy" decoding="async">
           <span class="who">
             <a href="/dupe-finder/?brand=fwee&amp;dupe=cr03%20bff%20(pink%20coral)">Fwee · Cr03 Bff (Pink Coral)</a>
             <span class="what">Blurry Pudding Pot · Semi-Matte · Bullet Lipstick · $$</span>
@@ -139,7 +147,8 @@ h2{margin:0;font-family:'Cormorant Garamond',serif;font-weight:400;font-size:cla
           <span class="de" title="Color difference from the original; lower is closer">ΔE 1.8</span>
         </li>
         <li>
-          <span class="dot" style="background:#d75977"></span>
+          <span class="sw" style="background:#d75977"></span>
+          <img class="thumb" src="/dupe-finder/assets/estee-lauder-pure-color-creme-lipstick-220-powerful-144.webp" alt="Estée Lauder 220 Powerful Pure Color Creme Lipstick" width="64" height="64" loading="lazy" decoding="async">
           <span class="who">
             <a href="/dupe-finder/?brand=estee%20lauder&amp;dupe=220%20Powerful">Estée Lauder · 220 Powerful</a>
             <span class="what">Pure Color Creme Lipstick · Cream · Bullet Lipstick · $$$</span>
@@ -147,7 +156,8 @@ h2{margin:0;font-family:'Cormorant Garamond',serif;font-weight:400;font-size:cla
           <span class="de" title="Color difference from the original; lower is closer">ΔE 1.9</span>
         </li>
         <li>
-          <span class="dot" style="background:#d15f78"></span>
+          <span class="sw" style="background:#d15f78"></span>
+          <img class="thumb" src="/dupe-finder/assets/jeffree-star-cosmetics-liquid-lip-balm-doll-parts-144.webp" alt="Jeffree Star Cosmetics Doll Parts Liquid Lip Balm" width="64" height="64" loading="lazy" decoding="async">
           <span class="who">
             <a href="/dupe-finder/?brand=jeffree%20star%20cosmetics&amp;dupe=doll%20parts">Jeffree Star Cosmetics · Doll Parts</a>
             <span class="what">Liquid Lip Balm · Lip Balm &amp; Care · $$</span>
@@ -155,7 +165,8 @@ h2{margin:0;font-family:'Cormorant Garamond',serif;font-weight:400;font-size:cla
           <span class="de" title="Color difference from the original; lower is closer">ΔE 1.9</span>
         </li>
         <li>
-          <span class="dot" style="background:#dc5580"></span>
+          <span class="sw" style="background:#dc5580"></span>
+          <img class="thumb" src="/dupe-finder/assets/amuse-jel-fit-gloss-04-bare-girl-144.webp" alt="Amuse 04 Bare Girl Jel-Fit Gloss" width="64" height="64" loading="lazy" decoding="async">
           <span class="who">
             <a href="/dupe-finder/?brand=amuse&amp;dupe=04%20bare%20girl">Amuse · 04 Bare Girl</a>
             <span class="what">Jel-Fit Gloss · Glossy · Lip Gloss · $$</span>
@@ -163,7 +174,8 @@ h2{margin:0;font-family:'Cormorant Garamond',serif;font-weight:400;font-size:cla
           <span class="de" title="Color difference from the original; lower is closer">ΔE 2.0</span>
         </li>
         <li>
-          <span class="dot" style="background:#c8607b"></span>
+          <span class="sw" style="background:#c8607b"></span>
+          <img class="thumb" src="/dupe-finder/assets/naturium-phyto-glow-lip-balm-shimmer-solar-solar-144.webp" alt="Naturium Solar Phyto-Glow Lip Balm Shimmer Solar" width="64" height="64" loading="lazy" decoding="async">
           <span class="who">
             <a href="/dupe-finder/?brand=naturium&amp;dupe=solar">Naturium · Solar</a>
             <span class="what">Phyto-Glow Lip Balm Shimmer Solar · Shimmer · Lip Balm &amp; Care · $</span>
@@ -171,7 +183,8 @@ h2{margin:0;font-family:'Cormorant Garamond',serif;font-weight:400;font-size:cla
           <span class="de" title="Color difference from the original; lower is closer">ΔE 2.1</span>
         </li>
         <li>
-          <span class="dot" style="background:#db547f"></span>
+          <span class="sw" style="background:#db547f"></span>
+          <img class="thumb" src="/dupe-finder/assets/l-a-colors-hydrating-lipstick-clipc9-pink-wink-144.webp" alt="L.A. Colors Clipc9 Pink Wink Hydrating Lipstick" width="64" height="64" loading="lazy" decoding="async">
           <span class="who">
             <a href="/dupe-finder/?brand=l.a.%20colors&amp;dupe=clipc9%20pink%20wink">L.A. Colors · Clipc9 Pink Wink</a>
             <span class="what">Hydrating Lipstick · Cream · Bullet Lipstick · $</span>
@@ -179,7 +192,8 @@ h2{margin:0;font-family:'Cormorant Garamond',serif;font-weight:400;font-size:cla
           <span class="de" title="Color difference from the original; lower is closer">ΔE 2.1</span>
         </li>
         <li>
-          <span class="dot" style="background:#de5d81"></span>
+          <span class="sw" style="background:#de5d81"></span>
+          <img class="thumb" src="/dupe-finder/assets/gerard-cosmetics-liquid-lipstick-honeymoon-hydramatte-liquid-lipstick-144.webp" alt="Gerard Cosmetics Honeymoon- Hydramatte®️liquid Lipstick Liquid Lipstick" width="64" height="64" loading="lazy" decoding="async">
           <span class="who">
             <a href="/dupe-finder/?brand=gerard%20cosmetics&amp;dupe=honeymoon-%20hydramatte%C2%AE%EF%B8%8Fliquid%20lipstick">Gerard Cosmetics · Honeymoon- Hydramatte®️liquid Lipstick</a>
             <span class="what">Liquid Lipstick · Matte · Liquid Lipstick · $$</span>
@@ -187,7 +201,8 @@ h2{margin:0;font-family:'Cormorant Garamond',serif;font-weight:400;font-size:cla
           <span class="de" title="Color difference from the original; lower is closer">ΔE 2.1</span>
         </li>
         <li>
-          <span class="dot" style="background:#d16682"></span>
+          <span class="sw" style="background:#d16682"></span>
+          <img class="thumb" src="/dupe-finder/assets/make-up-for-ever-rouge-artist-lipstick-200-spirited-pink-144.webp" alt="Make Up for Ever 200 Spirited Pink Rouge Artist Lipstick" width="64" height="64" loading="lazy" decoding="async">
           <span class="who">
             <a href="/dupe-finder/?brand=make%20up%20for%20ever&amp;dupe=200%20spirited%20pink">Make Up for Ever · 200 Spirited Pink</a>
             <span class="what">Rouge Artist Lipstick · Satin · Bullet Lipstick · $$</span>
@@ -202,7 +217,8 @@ h2{margin:0;font-family:'Cormorant Garamond',serif;font-weight:400;font-size:cla
       <p class="block-intro">The closest matches in the lowest price tier ($).</p>
       <ol class="matches">
         <li>
-          <span class="dot" style="background:#ce617e"></span>
+          <span class="sw" style="background:#ce617e"></span>
+          <img class="thumb" src="/dupe-finder/assets/morphe-2-good-talk-blotted-matte-lipstick-pink-pucker-144.webp" alt="Morphe 2 Pink Pucker Good Talk Blotted Matte Lipstick" width="64" height="64" loading="lazy" decoding="async">
           <span class="who">
             <a href="/dupe-finder/?brand=morphe%202&amp;dupe=pink%20pucker">Morphe 2 · Pink Pucker</a>
             <span class="what">Good Talk Blotted Matte Lipstick · Matte · Bullet Lipstick · $</span>
@@ -210,7 +226,8 @@ h2{margin:0;font-family:'Cormorant Garamond',serif;font-weight:400;font-size:cla
           <span class="de" title="Color difference from the original; lower is closer">ΔE 1.2</span>
         </li>
         <li>
-          <span class="dot" style="background:#d75e7c"></span>
+          <span class="sw" style="background:#d75e7c"></span>
+          <img class="thumb" src="/dupe-finder/assets/l-a-colors-pout-chaser-lipstick-clipc858-attention-144.webp" alt="L.A. Colors Clipc858 Attention Pout Chaser Lipstick" width="64" height="64" loading="lazy" decoding="async">
           <span class="who">
             <a href="/dupe-finder/?brand=l.a.%20colors&amp;dupe=clipc858%20attention">L.A. Colors · Clipc858 Attention</a>
             <span class="what">Pout Chaser Lipstick · Cream · Bullet Lipstick · $</span>
@@ -218,7 +235,8 @@ h2{margin:0;font-family:'Cormorant Garamond',serif;font-weight:400;font-size:cla
           <span class="de" title="Color difference from the original; lower is closer">ΔE 1.3</span>
         </li>
         <li>
-          <span class="dot" style="background:#d76281"></span>
+          <span class="sw" style="background:#d76281"></span>
+          <img class="thumb" src="/dupe-finder/assets/covergirl-simply-ageless-moisture-renew-core-lipstick-370-precious-mauve-144.webp" alt="CoverGirl 370 Precious Mauve Simply Ageless Moisture Renew Core Lipstick" width="64" height="64" loading="lazy" decoding="async">
           <span class="who">
             <a href="/dupe-finder/?brand=covergirl&amp;dupe=370%20precious%20mauve">CoverGirl · 370 Precious Mauve</a>
             <span class="what">Simply Ageless Moisture Renew Core Lipstick · Cream · Bullet Lipstick · $</span>
@@ -226,7 +244,8 @@ h2{margin:0;font-family:'Cormorant Garamond',serif;font-weight:400;font-size:cla
           <span class="de" title="Color difference from the original; lower is closer">ΔE 1.5</span>
         </li>
         <li>
-          <span class="dot" style="background:#c8607b"></span>
+          <span class="sw" style="background:#c8607b"></span>
+          <img class="thumb" src="/dupe-finder/assets/naturium-phyto-glow-lip-balm-shimmer-solar-solar-144.webp" alt="Naturium Solar Phyto-Glow Lip Balm Shimmer Solar" width="64" height="64" loading="lazy" decoding="async">
           <span class="who">
             <a href="/dupe-finder/?brand=naturium&amp;dupe=solar">Naturium · Solar</a>
             <span class="what">Phyto-Glow Lip Balm Shimmer Solar · Shimmer · Lip Balm &amp; Care · $</span>
@@ -234,7 +253,8 @@ h2{margin:0;font-family:'Cormorant Garamond',serif;font-weight:400;font-size:cla
           <span class="de" title="Color difference from the original; lower is closer">ΔE 2.1</span>
         </li>
         <li>
-          <span class="dot" style="background:#db547f"></span>
+          <span class="sw" style="background:#db547f"></span>
+          <img class="thumb" src="/dupe-finder/assets/l-a-colors-hydrating-lipstick-clipc9-pink-wink-144.webp" alt="L.A. Colors Clipc9 Pink Wink Hydrating Lipstick" width="64" height="64" loading="lazy" decoding="async">
           <span class="who">
             <a href="/dupe-finder/?brand=l.a.%20colors&amp;dupe=clipc9%20pink%20wink">L.A. Colors · Clipc9 Pink Wink</a>
             <span class="what">Hydrating Lipstick · Cream · Bullet Lipstick · $</span>
@@ -242,12 +262,13 @@ h2{margin:0;font-family:'Cormorant Garamond',serif;font-weight:400;font-size:cla
           <span class="de" title="Color difference from the original; lower is closer">ΔE 2.1</span>
         </li>
         <li>
-          <span class="dot" style="background:#cb6077"></span>
+          <span class="sw" style="background:#d25275"></span>
+          <img class="thumb" src="/dupe-finder/assets/l-oreal-brilliant-signature-shiny-lip-stain-be-cheerful-144.webp" alt="L'Oréal Be Cheerful Brilliant Signature Shiny Lip Stain" width="64" height="64" loading="lazy" decoding="async">
           <span class="who">
-            <a href="/dupe-finder/?brand=mua%20makeup%20academy&amp;dupe=new%20intense%20colour%20lip%20liner%20dream%20girl">MUA Makeup Academy · New Intense Colour Lip Liner Dream Girl</a>
-            <span class="what">New Mua Intense Colour Lip Liner · Lip Liner &amp; Pencil · $</span>
+            <a href="/dupe-finder/?brand=l%20oreal&amp;dupe=be%20cheerful">L'Oréal · Be Cheerful</a>
+            <span class="what">Brilliant Signature Shiny Lip Stain · Glossy · Lip Stain &amp; Tint · $</span>
           </span>
-          <span class="de" title="Color difference from the original; lower is closer">ΔE 2.3</span>
+          <span class="de" title="Color difference from the original; lower is closer">ΔE 2.6</span>
         </li>
       </ol>
     </section>
@@ -257,7 +278,8 @@ h2{margin:0;font-family:'Cormorant Garamond',serif;font-weight:400;font-size:cla
       <p class="block-intro">The closest matches one tier up ($$).</p>
       <ol class="matches">
         <li>
-          <span class="dot" style="background:#da5e82"></span>
+          <span class="sw" style="background:#da5e82"></span>
+          <img class="thumb" src="/dupe-finder/assets/buxom-full-force-plumping-lipstick-mover-144.webp" alt="Buxom Mover Full Force Plumping Lipstick" width="64" height="64" loading="lazy" decoding="async">
           <span class="who">
             <a href="/dupe-finder/?brand=buxom&amp;dupe=mover">Buxom · Mover</a>
             <span class="what">Full Force Plumping Lipstick · Bullet Lipstick · $$</span>
@@ -265,7 +287,8 @@ h2{margin:0;font-family:'Cormorant Garamond',serif;font-weight:400;font-size:cla
           <span class="de" title="Color difference from the original; lower is closer">ΔE 1.5</span>
         </li>
         <li>
-          <span class="dot" style="background:#d85b79"></span>
+          <span class="sw" style="background:#d85b79"></span>
+          <img class="thumb" src="/dupe-finder/assets/fwee-blurry-pudding-pot-cr03-bff-pink-coral-144.webp" alt="Fwee Cr03 Bff (Pink Coral) Blurry Pudding Pot" width="64" height="64" loading="lazy" decoding="async">
           <span class="who">
             <a href="/dupe-finder/?brand=fwee&amp;dupe=cr03%20bff%20(pink%20coral)">Fwee · Cr03 Bff (Pink Coral)</a>
             <span class="what">Blurry Pudding Pot · Semi-Matte · Bullet Lipstick · $$</span>
@@ -273,7 +296,8 @@ h2{margin:0;font-family:'Cormorant Garamond',serif;font-weight:400;font-size:cla
           <span class="de" title="Color difference from the original; lower is closer">ΔE 1.8</span>
         </li>
         <li>
-          <span class="dot" style="background:#d15f78"></span>
+          <span class="sw" style="background:#d15f78"></span>
+          <img class="thumb" src="/dupe-finder/assets/jeffree-star-cosmetics-liquid-lip-balm-doll-parts-144.webp" alt="Jeffree Star Cosmetics Doll Parts Liquid Lip Balm" width="64" height="64" loading="lazy" decoding="async">
           <span class="who">
             <a href="/dupe-finder/?brand=jeffree%20star%20cosmetics&amp;dupe=doll%20parts">Jeffree Star Cosmetics · Doll Parts</a>
             <span class="what">Liquid Lip Balm · Lip Balm &amp; Care · $$</span>
@@ -281,7 +305,8 @@ h2{margin:0;font-family:'Cormorant Garamond',serif;font-weight:400;font-size:cla
           <span class="de" title="Color difference from the original; lower is closer">ΔE 1.9</span>
         </li>
         <li>
-          <span class="dot" style="background:#dc5580"></span>
+          <span class="sw" style="background:#dc5580"></span>
+          <img class="thumb" src="/dupe-finder/assets/amuse-jel-fit-gloss-04-bare-girl-144.webp" alt="Amuse 04 Bare Girl Jel-Fit Gloss" width="64" height="64" loading="lazy" decoding="async">
           <span class="who">
             <a href="/dupe-finder/?brand=amuse&amp;dupe=04%20bare%20girl">Amuse · 04 Bare Girl</a>
             <span class="what">Jel-Fit Gloss · Glossy · Lip Gloss · $$</span>
@@ -289,7 +314,8 @@ h2{margin:0;font-family:'Cormorant Garamond',serif;font-weight:400;font-size:cla
           <span class="de" title="Color difference from the original; lower is closer">ΔE 2.0</span>
         </li>
         <li>
-          <span class="dot" style="background:#de5d81"></span>
+          <span class="sw" style="background:#de5d81"></span>
+          <img class="thumb" src="/dupe-finder/assets/gerard-cosmetics-liquid-lipstick-honeymoon-hydramatte-liquid-lipstick-144.webp" alt="Gerard Cosmetics Honeymoon- Hydramatte®️liquid Lipstick Liquid Lipstick" width="64" height="64" loading="lazy" decoding="async">
           <span class="who">
             <a href="/dupe-finder/?brand=gerard%20cosmetics&amp;dupe=honeymoon-%20hydramatte%C2%AE%EF%B8%8Fliquid%20lipstick">Gerard Cosmetics · Honeymoon- Hydramatte®️liquid Lipstick</a>
             <span class="what">Liquid Lipstick · Matte · Liquid Lipstick · $$</span>
@@ -297,7 +323,8 @@ h2{margin:0;font-family:'Cormorant Garamond',serif;font-weight:400;font-size:cla
           <span class="de" title="Color difference from the original; lower is closer">ΔE 2.1</span>
         </li>
         <li>
-          <span class="dot" style="background:#d16682"></span>
+          <span class="sw" style="background:#d16682"></span>
+          <img class="thumb" src="/dupe-finder/assets/make-up-for-ever-rouge-artist-lipstick-200-spirited-pink-144.webp" alt="Make Up for Ever 200 Spirited Pink Rouge Artist Lipstick" width="64" height="64" loading="lazy" decoding="async">
           <span class="who">
             <a href="/dupe-finder/?brand=make%20up%20for%20ever&amp;dupe=200%20spirited%20pink">Make Up for Ever · 200 Spirited Pink</a>
             <span class="what">Rouge Artist Lipstick · Satin · Bullet Lipstick · $$</span>

@@ -2,13 +2,19 @@
 // its closest color matches, and cheaper alternatives, all from the live catalogue.
 // Needs the network, so it is run on its own:
 //   npm run build:dupes
+// Product photos are saved as small WebP thumbnails in /dupe-finder/assets/, so the pages
+// don't depend on retailer image links. Ones already saved are reused; unused ones are removed.
 // Add a shade to SHADES to give it a page. Keep the list short and hand-picked:
 // each page should be a shade people really search for. Don't edit the generated pages.
 const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
+const sharp = require('sharp');
 
 const SITE = 'https://lipstickbycolor.github.io';
+const IMG_DIR = path.join(__dirname, 'dupe-finder', 'assets');
+// Saved at twice the size they are shown at, for sharp screens
+const THUMB = 144, SOURCE_IMG = 240;
 
 // brand and shade exactly as the catalogue has them (lowercase); name is how to print it.
 // product picks one line when a shade is sold in several; brandSlug shortens the address.
@@ -21,6 +27,13 @@ const SHADES = [
   { brand:'mac cosmetics', shade:'ruby woo', product:'retro matte lipstick', name:'MAC Ruby Woo', brandSlug:'mac' },
   { brand:'charlotte tilbury', shade:'pillow talk', product:'matte revolution lipstick', name:'Charlotte Tilbury Pillow Talk' },
   { brand:'pat mcgrath labs', shade:'elson 4', name:'Pat McGrath Labs Elson 4', brandSlug:'pat-mcgrath' },
+];
+
+// Never listed as a match. Liners aren't a stand-in for a lipstick; SKIP is for single
+// products the catalogue has as a lipstick but aren't one, as 'brand|product|shade'.
+const SKIP_FORMATS = ['Lip Liner & Pencil'];
+const SKIP = [
+  'buxom|plump shot™ peptide lip serum|lingerie', // a near-clear balm
 ];
 
 // Brands whose names plain title-casing gets wrong
@@ -51,7 +64,7 @@ async function fetchCatalogue() {
   const table = src.match(/_client\.from\('([^']+)'\)/)[1];
   const rows = [];
   for (let i = 0; ; i++) {
-    const res = await fetch(`${url}/rest/v1/${table}?select=brand,product,shade,finish,type,lab_l,lab_a,lab_b,hex,price_tier,discontinued&order=id`,
+    const res = await fetch(`${url}/rest/v1/${table}?select=brand,product,shade,finish,type,lab_l,lab_a,lab_b,hex,price_tier,discontinued,image_url&order=id`,
       { headers: { apikey: key, Range: `${i * 1000}-${i * 1000 + 999}` } });
     if (!res.ok) throw new Error(`catalogue fetch failed: ${res.status}`);
     const page = await res.json();
@@ -61,13 +74,38 @@ async function fetchCatalogue() {
   return rows.map(r => ({
     brand: r.brand, product: r.product || '', shade: r.shade || '', finish: (r.finish || '').trim(), format: r.type || '',
     lab: [r.lab_l, r.lab_a, r.lab_b], hex: (r.hex || '').toLowerCase(), tier: r.price_tier || '$$',
-    discontinued: r.discontinued === '1' || r.discontinued === 1,
+    discontinued: r.discontinued === '1' || r.discontinued === 1, imageUrl: r.image_url || '',
   }));
 }
 
+// Saves a product's photo as a square WebP and returns its address, or null when there is none
+const images = new Map();
+function image(p, px) {
+  if (!p.imageUrl) return null;
+  const name = `${slug(`${p.brand} ${p.product} ${p.shade}`)}-${px}.webp`;
+  if (!images.has(name)) images.set(name, (async () => {
+    const file = path.join(IMG_DIR, name);
+    if (!fs.existsSync(file)) {
+      try {
+        const res = await fetch(p.imageUrl.replace(/^\/\//, 'https://'), { headers: { 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36', Accept: 'image/avif,image/webp,image/*,*/*;q=0.8' }, signal: AbortSignal.timeout(20000) });
+        if (!res.ok) throw new Error(`status ${res.status}`);
+        await sharp(Buffer.from(await res.arrayBuffer())).flatten({ background: '#fff' })
+          .resize(px, px, { fit: 'contain', background: '#fff' }).webp({ quality: 80 }).toFile(file);
+      } catch (err) {
+        console.warn(`no image for ${p.brand} / ${p.shade}: ${err.message}`);
+        return null;
+      }
+    }
+    return `/dupe-finder/assets/${name}`;
+  })());
+  return images.get(name);
+}
+const altText = p => `${brandName(p.brand)} ${titleCase(p.shade)} ${titleCase(p.product)}`.trim();
+
 const row = p => `
         <li>
-          <span class="dot" style="background:${p.hex}"></span>
+          <span class="sw" style="background:${p.hex}"></span>
+          ${p.img ? `<img class="thumb" src="${p.img}" alt="${esc(altText(p))}" width="64" height="64" loading="lazy" decoding="async">` : '<span class="thumb"></span>'}
           <span class="who">
             <a href="${finderUrl(p)}">${esc(brandName(p.brand))} · ${esc(titleCase(p.shade))}</a>
             <span class="what">${esc([titleCase(p.product), p.finish, p.format, p.tier].filter(Boolean).join(' · '))}</span>
@@ -75,7 +113,7 @@ const row = p => `
           <span class="de" title="Color difference from the original; lower is closer">ΔE ${p.d.toFixed(1)}</span>
         </li>`;
 
-function page(s, src, closest, budget, mid, others) {
+function page(s, src, srcImg, closest, budget, mid, others) {
   const url = `${SITE}${pageUrl(s)}`;
   const title = `${s.name} Dupes & Closest Color Matches`;
   const description = `The closest color matches to ${s.name} from nearly 17,000 lip products, ranked by measured color difference, with cheaper alternatives at every price.`;
@@ -138,24 +176,26 @@ h1{margin:0;font-family:'Cormorant Garamond',serif;font-weight:300;font-size:cla
 .lede{margin:20px 0 0;font-size:17px;line-height:1.7;color:#5C3D30;max-width:620px}
 .source{display:flex;align-items:stretch;margin-top:30px;background:#fff;border:1px solid #E0D0C4;border-radius:16px;overflow:hidden}
 .source-swatch{flex:0 0 120px;min-height:120px}
+.source-img{flex:none;width:120px;height:120px;object-fit:contain;align-self:center;margin-left:14px}
 .source-body{padding:18px 20px;display:flex;flex-direction:column;justify-content:center;gap:6px}
 .source-name{font-family:'Cormorant Garamond',serif;font-weight:500;font-size:26px;line-height:1.15}
 .source-facts{font-size:14px;line-height:1.5;color:#3D2820}
 .source-hex{font-family:ui-monospace,Menlo,monospace;font-size:13px;color:#5C3D30}
-.cta{display:inline-block;margin-top:26px;background:#2A1A14;color:#FAF6F1;text-decoration:none;font-size:12px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;padding:14px 22px;border-radius:40px}
-.cta:hover{background:#B54A6A;color:#fff}
+.cta{display:inline-block;margin-top:26px;background:#B54A6A;color:#fff;text-decoration:none;font-size:12px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;padding:14px 22px;border-radius:40px}
+.cta:hover{background:#2A1A14;color:#FAF6F1}
 .block{padding-top:60px}
 h2{margin:0;font-family:'Cormorant Garamond',serif;font-weight:400;font-size:clamp(28px,4vw,36px);line-height:1.15}
 .block-intro{margin:10px 0 0;font-size:15px;line-height:1.7;color:#3D2820;max-width:620px}
 .matches{list-style:none;margin:22px 0 0;padding:0;background:#fff;border:1px solid #E0D0C4;border-radius:16px;overflow:hidden}
-.matches li{display:flex;align-items:center;gap:14px;padding:13px 18px;border-top:1px solid #F0E8DF}
+.matches li{display:flex;align-items:stretch;gap:14px;padding-right:18px;border-top:1px solid #F0E8DF}
 .matches li:first-child{border-top:none}
-.dot{flex:none;width:34px;height:34px;border-radius:50%;border:1px solid rgba(42,26,20,.08)}
-.who{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.sw{flex:0 0 40px}
+.thumb{flex:none;width:64px;height:64px;margin:8px 0;align-self:center;object-fit:contain}
+.who{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;gap:2px;padding:13px 0}
 .who a{font-size:15px;color:#2A1A14;text-decoration:none;font-weight:500}
 .who a:hover{color:#B54A6A}
 .what{font-size:13px;line-height:1.4;color:#5C3D30}
-.de{flex:none;font-size:13px;color:#3D2820;white-space:nowrap}
+.de{flex:none;align-self:center;font-size:13px;color:#3D2820;white-space:nowrap}
 .notes{padding:60px 0 0;max-width:680px}
 .notes h3{margin:26px 0 0;font-family:'Cormorant Garamond',serif;font-weight:500;font-size:21px;line-height:1.3}
 .notes p{font-size:15px;line-height:1.7;color:#3D2820;margin:10px 0 0}
@@ -164,7 +204,7 @@ h2{margin:0;font-family:'Cormorant Garamond',serif;font-weight:400;font-size:cla
 .more a:hover{border-color:#C87890}
 .foot{padding:36px 0 48px;font-size:12px}
 .foot a{color:#5C3D30}
-@media (max-width:540px){.top a:first-child{flex-basis:100%;padding-bottom:0}.source-swatch{flex-basis:84px}.matches li{padding:12px 14px;gap:12px}.dot{width:28px;height:28px}}
+@media (max-width:540px){.top a:first-child{flex-basis:100%;padding-bottom:0}.source-swatch{flex-basis:56px}.source-img{width:84px;height:84px;margin-left:10px}.source-body{padding:14px}.matches li{padding-right:14px;gap:12px}.sw{flex-basis:28px}.thumb{width:52px;height:52px}}
 </style>
 </head>
 <body>
@@ -180,7 +220,8 @@ h2{margin:0;font-family:'Cormorant Garamond',serif;font-weight:400;font-size:cla
   <p class="lede">The lipsticks whose measured color is closest to ${esc(s.name)}, out of nearly 17,000 lip products, closest first.</p>
 
   <div class="source">
-    <div class="source-swatch" style="background:${src.hex}"></div>
+    <div class="source-swatch" style="background:${src.hex}"></div>${srcImg ? `
+    <img class="source-img" src="${srcImg}" alt="${esc(altText(src))}" width="120" height="120">` : ''}
     <div class="source-body">
       <span class="source-name">${esc(s.name)}</span>
       <span class="source-facts">${esc(facts.join(' · '))}</span>
@@ -213,8 +254,10 @@ ${list('Mid-priced alternatives', 'The closest matches one tier up ($$).', mid)}
 
 (async () => {
   const products = await fetchCatalogue();
-  const tidy = p => p.shade && p.shade.length <= 40 && !p.shade.includes('|') && p.hex;
+  const tidy = p => p.shade && p.shade.length <= 40 && !p.shade.includes('|') && p.hex
+    && !SKIP_FORMATS.includes(p.format) && !SKIP.includes(`${p.brand}|${p.product}|${p.shade}`);
   const written = [];
+  fs.mkdirSync(IMG_DIR, { recursive: true });
   for (const s of SHADES) {
     const src = products.find(p => p.brand === s.brand && p.shade === s.shade && (!s.product || p.product === s.product));
     if (!src) { console.warn(`skipped ${s.name}: not in the catalogue as "${s.brand}" / "${s.shade}"`); continue; }
@@ -224,12 +267,19 @@ ${list('Mid-priced alternatives', 'The closest matches one tier up ($$).', mid)}
     const ranked = products.filter(p => !p.discontinued && tidy(p) && !(p.brand === src.brand && p.shade.includes(src.shade)))
       .map(p => ({ ...p, d: utils.deltaE(src.lab, p.lab) })).sort((a, b) => a.d - b.d)
       .filter(p => { const k = `${p.brand}|${p.shade}`; if (seen.has(k)) return false; seen.add(k); return true; });
-    const html = page(s, src, ranked.slice(0, 12), ranked.filter(p => p.tier === '$').slice(0, 6), ranked.filter(p => p.tier === '$$').slice(0, 6), SHADES.filter(o => o !== s));
+    const closest = ranked.slice(0, 12), budget = ranked.filter(p => p.tier === '$').slice(0, 6), mid = ranked.filter(p => p.tier === '$$').slice(0, 6);
+    await Promise.all([...closest, ...budget, ...mid].map(async p => { p.img = await image(p, THUMB); }));
+    const html = page(s, src, await image(src, SOURCE_IMG), closest, budget, mid, SHADES.filter(o => o !== s));
     const dir = path.join(__dirname, pageUrl(s));
     fs.mkdirSync(dir, { recursive: true });
     fs.writeFileSync(path.join(dir, 'index.html'), html);
     written.push(s);
     console.log(`wrote ${pageUrl(s).slice(1)}index.html (closest ΔE ${ranked[0].d.toFixed(1)})`);
+  }
+
+  // Drop thumbnails no page shows any more (only when every page was rewritten)
+  if (written.length === SHADES.length) {
+    for (const f of fs.readdirSync(IMG_DIR)) if (f.endsWith('.webp') && !images.has(f)) fs.unlinkSync(path.join(IMG_DIR, f));
   }
 
   // List the pages in the sitemap

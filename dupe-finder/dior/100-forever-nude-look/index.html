@@ -43,24 +43,26 @@ h1{margin:0;font-family:'Cormorant Garamond',serif;font-weight:300;font-size:cla
 .lede{margin:20px 0 0;font-size:17px;line-height:1.7;color:#5C3D30;max-width:620px}
 .source{display:flex;align-items:stretch;margin-top:30px;background:#fff;border:1px solid #E0D0C4;border-radius:16px;overflow:hidden}
 .source-swatch{flex:0 0 120px;min-height:120px}
+.source-img{flex:none;width:120px;height:120px;object-fit:contain;align-self:center;margin-left:14px}
 .source-body{padding:18px 20px;display:flex;flex-direction:column;justify-content:center;gap:6px}
 .source-name{font-family:'Cormorant Garamond',serif;font-weight:500;font-size:26px;line-height:1.15}
 .source-facts{font-size:14px;line-height:1.5;color:#3D2820}
 .source-hex{font-family:ui-monospace,Menlo,monospace;font-size:13px;color:#5C3D30}
-.cta{display:inline-block;margin-top:26px;background:#2A1A14;color:#FAF6F1;text-decoration:none;font-size:12px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;padding:14px 22px;border-radius:40px}
-.cta:hover{background:#B54A6A;color:#fff}
+.cta{display:inline-block;margin-top:26px;background:#B54A6A;color:#fff;text-decoration:none;font-size:12px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;padding:14px 22px;border-radius:40px}
+.cta:hover{background:#2A1A14;color:#FAF6F1}
 .block{padding-top:60px}
 h2{margin:0;font-family:'Cormorant Garamond',serif;font-weight:400;font-size:clamp(28px,4vw,36px);line-height:1.15}
 .block-intro{margin:10px 0 0;font-size:15px;line-height:1.7;color:#3D2820;max-width:620px}
 .matches{list-style:none;margin:22px 0 0;padding:0;background:#fff;border:1px solid #E0D0C4;border-radius:16px;overflow:hidden}
-.matches li{display:flex;align-items:center;gap:14px;padding:13px 18px;border-top:1px solid #F0E8DF}
+.matches li{display:flex;align-items:stretch;gap:14px;padding-right:18px;border-top:1px solid #F0E8DF}
 .matches li:first-child{border-top:none}
-.dot{flex:none;width:34px;height:34px;border-radius:50%;border:1px solid rgba(42,26,20,.08)}
-.who{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.sw{flex:0 0 40px}
+.thumb{flex:none;width:64px;height:64px;margin:8px 0;align-self:center;object-fit:contain}
+.who{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;gap:2px;padding:13px 0}
 .who a{font-size:15px;color:#2A1A14;text-decoration:none;font-weight:500}
 .who a:hover{color:#B54A6A}
 .what{font-size:13px;line-height:1.4;color:#5C3D30}
-.de{flex:none;font-size:13px;color:#3D2820;white-space:nowrap}
+.de{flex:none;align-self:center;font-size:13px;color:#3D2820;white-space:nowrap}
 .notes{padding:60px 0 0;max-width:680px}
 .notes h3{margin:26px 0 0;font-family:'Cormorant Garamond',serif;font-weight:500;font-size:21px;line-height:1.3}
 .notes p{font-size:15px;line-height:1.7;color:#3D2820;margin:10px 0 0}
@@ -69,7 +71,7 @@ h2{margin:0;font-family:'Cormorant Garamond',serif;font-weight:400;font-size:cla
 .more a:hover{border-color:#C87890}
 .foot{padding:36px 0 48px;font-size:12px}
 .foot a{color:#5C3D30}
-@media (max-width:540px){.top a:first-child{flex-basis:100%;padding-bottom:0}.source-swatch{flex-basis:84px}.matches li{padding:12px 14px;gap:12px}.dot{width:28px;height:28px}}
+@media (max-width:540px){.top a:first-child{flex-basis:100%;padding-bottom:0}.source-swatch{flex-basis:56px}.source-img{width:84px;height:84px;margin-left:10px}.source-body{padding:14px}.matches li{padding-right:14px;gap:12px}.sw{flex-basis:28px}.thumb{width:52px;height:52px}}
 </style>
 </head>
 <body>
@@ -86,6 +88,7 @@ h2{margin:0;font-family:'Cormorant Garamond',serif;font-weight:400;font-size:cla
 
   <div class="source">
     <div class="source-swatch" style="background:#c67a6c"></div>
+    <img class="source-img" src="/dupe-finder/assets/dior-rouge-dior-forever-transfer-proof-lipstick-100-forever-nude-look-240.webp" alt="Dior 100 Forever Nude Look Rouge Dior Forever Transfer-Proof Lipstick" width="120" height="120">
     <div class="source-body">
       <span class="source-name">Dior 100 Forever Nude Look</span>
       <span class="source-facts">Rouge Dior Forever Transfer-Proof Lipstick · Satin · Bullet Lipstick · $$$$</span>
@@ -99,7 +102,8 @@ h2{margin:0;font-family:'Cormorant Garamond',serif;font-weight:400;font-size:cla
       <p class="block-intro">Any brand, any price. ΔE is the measured color difference from the original: the lower the number, the closer the match.</p>
       <ol class="matches">
         <li>
-          <span class="dot" style="background:#c77b6c"></span>
+          <span class="sw" style="background:#c77b6c"></span>
+          <img class="thumb" src="/dupe-finder/assets/house-of-sillage-diamond-powder-satin-finish-lipstick-silver-count-rich-nude-with-gold-luminosity-144.webp" alt="House of Sillage Count - Rich Nude With Gold Luminosity Diamond Powder Satin Finish Lipstick - Silver" width="64" height="64" loading="lazy" decoding="async">
           <span class="who">
             <a href="/dupe-finder/?brand=house%20of%20sillage&amp;dupe=count%20-%20rich%20nude%20with%20gold%20luminosity">House of Sillage · Count - Rich Nude With Gold Luminosity</a>
             <span class="what">Diamond Powder Satin Finish Lipstick - Silver · Satin · Bullet Lipstick · $$$</span>
@@ -107,7 +111,8 @@ h2{margin:0;font-family:'Cormorant Garamond',serif;font-weight:400;font-size:cla
           <span class="de" title="Color difference from the original; lower is closer">ΔE 0.6</span>
         </li>
         <li>
-          <span class="dot" style="background:#c3796b"></span>
+          <span class="sw" style="background:#c3796b"></span>
+          <img class="thumb" src="/dupe-finder/assets/yves-saint-laurent-rouge-pur-couture-caring-satin-lipstick-with-ceramides-10-beige-tribute-144.webp" alt="Yves Saint Laurent 10 Beige Tribute Rouge Pur Couture Caring Satin Lipstick With Ceramides" width="64" height="64" loading="lazy" decoding="async">
           <span class="who">
             <a href="/dupe-finder/?brand=yves%20saint%20laurent&amp;dupe=10%20beige%20tribute">Yves Saint Laurent · 10 Beige Tribute</a>
             <span class="what">Rouge Pur Couture Caring Satin Lipstick With Ceramides · Satin · Bullet Lipstick · $$$$</span>
@@ -115,7 +120,8 @@ h2{margin:0;font-family:'Cormorant Garamond',serif;font-weight:400;font-size:cla
           <span class="de" title="Color difference from the original; lower is closer">ΔE 0.7</span>
         </li>
         <li>
-          <span class="dot" style="background:#c87c6e"></span>
+          <span class="sw" style="background:#c87c6e"></span>
+          <img class="thumb" src="/dupe-finder/assets/rare-beauty-kind-words-matte-lipstick-creative-144.webp" alt="Rare Beauty Creative Kind Words Matte Lipstick" width="64" height="64" loading="lazy" decoding="async">
           <span class="who">
             <a href="/dupe-finder/?brand=rare%20beauty&amp;dupe=creative">Rare Beauty · Creative</a>
             <span class="what">Kind Words Matte Lipstick · Matte · Bullet Lipstick · $$</span>
@@ -123,7 +129,8 @@ h2{margin:0;font-family:'Cormorant Garamond',serif;font-weight:400;font-size:cla
           <span class="de" title="Color difference from the original; lower is closer">ΔE 0.7</span>
         </li>
         <li>
-          <span class="dot" style="background:#c9796a"></span>
+          <span class="sw" style="background:#c9796a"></span>
+          <img class="thumb" src="/dupe-finder/assets/marie-hunter-lustrous-lipstick-oak-street-144.webp" alt="Marie Hunter Oak Street Lustrous Lipstick" width="64" height="64" loading="lazy" decoding="async">
           <span class="who">
             <a href="/dupe-finder/?brand=marie%20hunter&amp;dupe=oak%20street">Marie Hunter · Oak Street</a>
             <span class="what">Lustrous Lipstick · Cream · Bullet Lipstick · $$$</span>
@@ -131,7 +138,8 @@ h2{margin:0;font-family:'Cormorant Garamond',serif;font-weight:400;font-size:cla
           <span class="de" title="Color difference from the original; lower is closer">ΔE 0.8</span>
         </li>
         <li>
-          <span class="dot" style="background:#c7786b"></span>
+          <span class="sw" style="background:#c7786b"></span>
+          <img class="thumb" src="/dupe-finder/assets/l-oreal-colour-riche-plump-and-shine-lipstick-coconut-144.webp" alt="L'Oréal Coconut Colour Riche Plump And Shine Lipstick" width="64" height="64" loading="lazy" decoding="async">
           <span class="who">
             <a href="/dupe-finder/?brand=l%20oreal&amp;dupe=coconut">L'Oréal · Coconut</a>
             <span class="what">Colour Riche Plump And Shine Lipstick · Glossy · Bullet Lipstick · $</span>
@@ -139,7 +147,8 @@ h2{margin:0;font-family:'Cormorant Garamond',serif;font-weight:400;font-size:cla
           <span class="de" title="Color difference from the original; lower is closer">ΔE 0.8</span>
         </li>
         <li>
-          <span class="dot" style="background:#c47b6c"></span>
+          <span class="sw" style="background:#c47b6c"></span>
+          <img class="thumb" src="/dupe-finder/assets/pat-mcgrath-labs-satinallure-lipstick-skinsane-2-warm-rose-nude-144.webp" alt="Pat McGrath Labs Skinsane 2 (Warm Rose Nude) Satinallure™ Lipstick" width="64" height="64" loading="lazy" decoding="async">
           <span class="who">
             <a href="/dupe-finder/?brand=pat%20mcgrath%20labs&amp;dupe=skinsane%202%20(warm%20rose%20nude)">Pat McGrath Labs · Skinsane 2 (Warm Rose Nude)</a>
             <span class="what">Satinallure™ Lipstick · Satin · Bullet Lipstick · $$$</span>
@@ -147,7 +156,8 @@ h2{margin:0;font-family:'Cormorant Garamond',serif;font-weight:400;font-size:cla
           <span class="de" title="Color difference from the original; lower is closer">ΔE 0.8</span>
         </li>
         <li>
-          <span class="dot" style="background:#c37b6c"></span>
+          <span class="sw" style="background:#c37b6c"></span>
+          <img class="thumb" src="/dupe-finder/assets/joocyee-essence-matte-rouge-211-leather-nude-144.webp" alt="Joocyee 211 Leather Nude Essence Matte Rouge" width="64" height="64" loading="lazy" decoding="async">
           <span class="who">
             <a href="/dupe-finder/?brand=joocyee&amp;dupe=211%20leather%20nude">Joocyee · 211 Leather Nude</a>
             <span class="what">Essence Matte Rouge · Matte · Bullet Lipstick · $$</span>
@@ -155,7 +165,8 @@ h2{margin:0;font-family:'Cormorant Garamond',serif;font-weight:400;font-size:cla
           <span class="de" title="Color difference from the original; lower is closer">ΔE 0.8</span>
         </li>
         <li>
-          <span class="dot" style="background:#c77869"></span>
+          <span class="sw" style="background:#c77869"></span>
+          <img class="thumb" src="/dupe-finder/assets/jane-iredale-colorluxe-hydrating-cream-lipstick-bellini-144.webp" alt="Jane Iredale Bellini Colorluxe Hydrating Cream Lipstick" width="64" height="64" loading="lazy" decoding="async">
           <span class="who">
             <a href="/dupe-finder/?brand=jane%20iredale&amp;dupe=bellini">Jane Iredale · Bellini</a>
             <span class="what">Colorluxe Hydrating Cream Lipstick · Satin · Bullet Lipstick · $$$</span>
@@ -163,7 +174,8 @@ h2{margin:0;font-family:'Cormorant Garamond',serif;font-weight:400;font-size:cla
           <span class="de" title="Color difference from the original; lower is closer">ΔE 0.9</span>
         </li>
         <li>
-          <span class="dot" style="background:#c47869"></span>
+          <span class="sw" style="background:#c47869"></span>
+          <img class="thumb" src="/dupe-finder/assets/kjaer-weis-lipstick-thoughtful-144.webp" alt="Kjaer Weis Thoughtful Lipstick" width="64" height="64" loading="lazy" decoding="async">
           <span class="who">
             <a href="/dupe-finder/?brand=kjaer%20weis&amp;dupe=thoughtful">Kjaer Weis · Thoughtful</a>
             <span class="what">Lipstick · Cream · Bullet Lipstick · $$$</span>
@@ -171,7 +183,8 @@ h2{margin:0;font-family:'Cormorant Garamond',serif;font-weight:400;font-size:cla
           <span class="de" title="Color difference from the original; lower is closer">ΔE 0.9</span>
         </li>
         <li>
-          <span class="dot" style="background:#c47c6e"></span>
+          <span class="sw" style="background:#c47c6e"></span>
+          <img class="thumb" src="/dupe-finder/assets/morphe-liplock-glossy-lipstick-sealed-kiss-144.webp" alt="Morphe Sealed Kiss Liplock Glossy Lipstick" width="64" height="64" loading="lazy" decoding="async">
           <span class="who">
             <a href="/dupe-finder/?brand=morphe&amp;dupe=sealed%20kiss">Morphe · Sealed Kiss</a>
             <span class="what">Liplock Glossy Lipstick · Glossy · Bullet Lipstick · $</span>
@@ -179,7 +192,8 @@ h2{margin:0;font-family:'Cormorant Garamond',serif;font-weight:400;font-size:cla
           <span class="de" title="Color difference from the original; lower is closer">ΔE 0.9</span>
         </li>
         <li>
-          <span class="dot" style="background:#c47c6e"></span>
+          <span class="sw" style="background:#c47c6e"></span>
+          <img class="thumb" src="/dupe-finder/assets/anastasia-beverly-hills-lip-velvet-pure-hollywood-144.webp" alt="Anastasia Beverly Hills Pure Hollywood Lip Velvet" width="64" height="64" loading="lazy" decoding="async">
           <span class="who">
             <a href="/dupe-finder/?brand=anastasia%20beverly%20hills&amp;dupe=pure%20hollywood">Anastasia Beverly Hills · Pure Hollywood</a>
             <span class="what">Lip Velvet · Semi-Matte · Bullet Lipstick · $$</span>
@@ -187,7 +201,8 @@ h2{margin:0;font-family:'Cormorant Garamond',serif;font-weight:400;font-size:cla
           <span class="de" title="Color difference from the original; lower is closer">ΔE 0.9</span>
         </li>
         <li>
-          <span class="dot" style="background:#ca7a6c"></span>
+          <span class="sw" style="background:#ca7a6c"></span>
+          <img class="thumb" src="/dupe-finder/assets/emolyne-cosmetics-velvet-lip-our-nude-our-nude-star-144.webp" alt="Emolyne Cosmetics Our Nude Star Velvet Lip – Our Nude ★" width="64" height="64" loading="lazy" decoding="async">
           <span class="who">
             <a href="/dupe-finder/?brand=emolyne%20cosmetics&amp;dupe=our%20nude%20star">Emolyne Cosmetics · Our Nude Star</a>
             <span class="what">Velvet Lip – Our Nude ★ · Semi-Matte · Bullet Lipstick · $$</span>
@@ -202,7 +217,8 @@ h2{margin:0;font-family:'Cormorant Garamond',serif;font-weight:400;font-size:cla
       <p class="block-intro">The closest matches in the lowest price tier ($).</p>
       <ol class="matches">
         <li>
-          <span class="dot" style="background:#c7786b"></span>
+          <span class="sw" style="background:#c7786b"></span>
+          <img class="thumb" src="/dupe-finder/assets/l-oreal-colour-riche-plump-and-shine-lipstick-coconut-144.webp" alt="L'Oréal Coconut Colour Riche Plump And Shine Lipstick" width="64" height="64" loading="lazy" decoding="async">
           <span class="who">
             <a href="/dupe-finder/?brand=l%20oreal&amp;dupe=coconut">L'Oréal · Coconut</a>
             <span class="what">Colour Riche Plump And Shine Lipstick · Glossy · Bullet Lipstick · $</span>
@@ -210,7 +226,8 @@ h2{margin:0;font-family:'Cormorant Garamond',serif;font-weight:400;font-size:cla
           <span class="de" title="Color difference from the original; lower is closer">ΔE 0.8</span>
         </li>
         <li>
-          <span class="dot" style="background:#c47c6e"></span>
+          <span class="sw" style="background:#c47c6e"></span>
+          <img class="thumb" src="/dupe-finder/assets/morphe-liplock-glossy-lipstick-sealed-kiss-144.webp" alt="Morphe Sealed Kiss Liplock Glossy Lipstick" width="64" height="64" loading="lazy" decoding="async">
           <span class="who">
             <a href="/dupe-finder/?brand=morphe&amp;dupe=sealed%20kiss">Morphe · Sealed Kiss</a>
             <span class="what">Liplock Glossy Lipstick · Glossy · Bullet Lipstick · $</span>
@@ -218,7 +235,8 @@ h2{margin:0;font-family:'Cormorant Garamond',serif;font-weight:400;font-size:cla
           <span class="de" title="Color difference from the original; lower is closer">ΔE 0.9</span>
         </li>
         <li>
-          <span class="dot" style="background:#c57669"></span>
+          <span class="sw" style="background:#c57669"></span>
+          <img class="thumb" src="/dupe-finder/assets/morphe-lip-filter-hydroplump-soft-matte-lipstick-honey-144.webp" alt="Morphe Honey Lip Filter Hydroplump Soft Matte Lipstick" width="64" height="64" loading="lazy" decoding="async">
           <span class="who">
             <a href="/dupe-finder/?brand=morphe&amp;dupe=honey">Morphe · Honey</a>
             <span class="what">Lip Filter Hydroplump Soft Matte Lipstick · Semi-Matte · Bullet Lipstick · $</span>
@@ -226,7 +244,8 @@ h2{margin:0;font-family:'Cormorant Garamond',serif;font-weight:400;font-size:cla
           <span class="de" title="Color difference from the original; lower is closer">ΔE 1.2</span>
         </li>
         <li>
-          <span class="dot" style="background:#c27868"></span>
+          <span class="sw" style="background:#c27868"></span>
+          <img class="thumb" src="/dupe-finder/assets/maybelline-color-sensational-vivid-matte-liquid-lipstick-nude-thrill-144.webp" alt="Maybelline Nude Thrill Color Sensational Vivid Matte Liquid Lipstick" width="64" height="64" loading="lazy" decoding="async">
           <span class="who">
             <a href="/dupe-finder/?brand=maybelline&amp;dupe=nude%20thrill">Maybelline · Nude Thrill</a>
             <span class="what">Color Sensational Vivid Matte Liquid Lipstick · Matte · Liquid Lipstick · $</span>
@@ -234,7 +253,8 @@ h2{margin:0;font-family:'Cormorant Garamond',serif;font-weight:400;font-size:cla
           <span class="de" title="Color difference from the original; lower is closer">ΔE 1.3</span>
         </li>
         <li>
-          <span class="dot" style="background:#c77667"></span>
+          <span class="sw" style="background:#c77667"></span>
+          <img class="thumb" src="/dupe-finder/assets/juvia-s-place-volumizing-gloss-sticks-chocolate-gloss-stick-144.webp" alt="Juvia's Place Chocolate Gloss Stick Volumizing Gloss Sticks" width="64" height="64" loading="lazy" decoding="async">
           <span class="who">
             <a href="/dupe-finder/?brand=juvia's%20place&amp;dupe=chocolate%20gloss%20stick">Juvia's Place · Chocolate Gloss Stick</a>
             <span class="what">Volumizing Gloss Sticks · Glossy · Lip Gloss · $</span>
@@ -242,7 +262,8 @@ h2{margin:0;font-family:'Cormorant Garamond',serif;font-weight:400;font-size:cla
           <span class="de" title="Color difference from the original; lower is closer">ΔE 1.4</span>
         </li>
         <li>
-          <span class="dot" style="background:#c87766"></span>
+          <span class="sw" style="background:#c87766"></span>
+          <img class="thumb" src="/dupe-finder/assets/nyx-professional-makeup-soft-matte-lip-cream-athens-144.webp" alt="NYX Professional Makeup Athens Soft Matte Lip Cream" width="64" height="64" loading="lazy" decoding="async">
           <span class="who">
             <a href="/dupe-finder/?brand=nyx%20professional%20makeup&amp;dupe=athens">NYX Professional Makeup · Athens</a>
             <span class="what">Soft Matte Lip Cream · Semi-Matte · Bullet Lipstick · $</span>
@@ -257,7 +278,8 @@ h2{margin:0;font-family:'Cormorant Garamond',serif;font-weight:400;font-size:cla
       <p class="block-intro">The closest matches one tier up ($$).</p>
       <ol class="matches">
         <li>
-          <span class="dot" style="background:#c87c6e"></span>
+          <span class="sw" style="background:#c87c6e"></span>
+          <img class="thumb" src="/dupe-finder/assets/rare-beauty-kind-words-matte-lipstick-creative-144.webp" alt="Rare Beauty Creative Kind Words Matte Lipstick" width="64" height="64" loading="lazy" decoding="async">
           <span class="who">
             <a href="/dupe-finder/?brand=rare%20beauty&amp;dupe=creative">Rare Beauty · Creative</a>
             <span class="what">Kind Words Matte Lipstick · Matte · Bullet Lipstick · $$</span>
@@ -265,7 +287,8 @@ h2{margin:0;font-family:'Cormorant Garamond',serif;font-weight:400;font-size:cla
           <span class="de" title="Color difference from the original; lower is closer">ΔE 0.7</span>
         </li>
         <li>
-          <span class="dot" style="background:#c37b6c"></span>
+          <span class="sw" style="background:#c37b6c"></span>
+          <img class="thumb" src="/dupe-finder/assets/joocyee-essence-matte-rouge-211-leather-nude-144.webp" alt="Joocyee 211 Leather Nude Essence Matte Rouge" width="64" height="64" loading="lazy" decoding="async">
           <span class="who">
             <a href="/dupe-finder/?brand=joocyee&amp;dupe=211%20leather%20nude">Joocyee · 211 Leather Nude</a>
             <span class="what">Essence Matte Rouge · Matte · Bullet Lipstick · $$</span>
@@ -273,7 +296,8 @@ h2{margin:0;font-family:'Cormorant Garamond',serif;font-weight:400;font-size:cla
           <span class="de" title="Color difference from the original; lower is closer">ΔE 0.8</span>
         </li>
         <li>
-          <span class="dot" style="background:#c47c6e"></span>
+          <span class="sw" style="background:#c47c6e"></span>
+          <img class="thumb" src="/dupe-finder/assets/anastasia-beverly-hills-lip-velvet-pure-hollywood-144.webp" alt="Anastasia Beverly Hills Pure Hollywood Lip Velvet" width="64" height="64" loading="lazy" decoding="async">
           <span class="who">
             <a href="/dupe-finder/?brand=anastasia%20beverly%20hills&amp;dupe=pure%20hollywood">Anastasia Beverly Hills · Pure Hollywood</a>
             <span class="what">Lip Velvet · Semi-Matte · Bullet Lipstick · $$</span>
@@ -281,7 +305,8 @@ h2{margin:0;font-family:'Cormorant Garamond',serif;font-weight:400;font-size:cla
           <span class="de" title="Color difference from the original; lower is closer">ΔE 0.9</span>
         </li>
         <li>
-          <span class="dot" style="background:#ca7a6c"></span>
+          <span class="sw" style="background:#ca7a6c"></span>
+          <img class="thumb" src="/dupe-finder/assets/emolyne-cosmetics-velvet-lip-our-nude-our-nude-star-144.webp" alt="Emolyne Cosmetics Our Nude Star Velvet Lip – Our Nude ★" width="64" height="64" loading="lazy" decoding="async">
           <span class="who">
             <a href="/dupe-finder/?brand=emolyne%20cosmetics&amp;dupe=our%20nude%20star">Emolyne Cosmetics · Our Nude Star</a>
             <span class="what">Velvet Lip – Our Nude ★ · Semi-Matte · Bullet Lipstick · $$</span>
@@ -289,7 +314,8 @@ h2{margin:0;font-family:'Cormorant Garamond',serif;font-weight:400;font-size:cla
           <span class="de" title="Color difference from the original; lower is closer">ΔE 1.0</span>
         </li>
         <li>
-          <span class="dot" style="background:#c77e6f"></span>
+          <span class="sw" style="background:#c77e6f"></span>
+          <img class="thumb" src="/dupe-finder/assets/anastasia-beverly-hills-velvet-lips-mini-lip-velvet-duo-softy-peachy-nude-144.webp" alt="Anastasia Beverly Hills Softy + Peachy Nude Velvet Lips Mini Lip Velvet Duo" width="64" height="64" loading="lazy" decoding="async">
           <span class="who">
             <a href="/dupe-finder/?brand=anastasia%20beverly%20hills&amp;dupe=softy%20%2B%20peachy%20nude">Anastasia Beverly Hills · Softy + Peachy Nude</a>
             <span class="what">Velvet Lips Mini Lip Velvet Duo · Semi-Matte · Liquid Lipstick · $$</span>
@@ -297,7 +323,8 @@ h2{margin:0;font-family:'Cormorant Garamond',serif;font-weight:400;font-size:cla
           <span class="de" title="Color difference from the original; lower is closer">ΔE 1.1</span>
         </li>
         <li>
-          <span class="dot" style="background:#c3796e"></span>
+          <span class="sw" style="background:#c3796e"></span>
+          <img class="thumb" src="/dupe-finder/assets/lawless-forget-the-filler-lip-plumping-line-smoothing-satin-cream-lipstick-soft-truffle-144.webp" alt="Lawless Soft Truffle Forget The Filler Lip-Plumping Line-Smoothing Satin Cream Lipstick" width="64" height="64" loading="lazy" decoding="async">
           <span class="who">
             <a href="/dupe-finder/?brand=lawless&amp;dupe=soft%20truffle">Lawless · Soft Truffle</a>
             <span class="what">Forget The Filler Lip-Plumping Line-Smoothing Satin Cream Lipstick · Satin · Bullet Lipstick · $$</span>
