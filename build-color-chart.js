@@ -2,6 +2,8 @@
 // catalogue lipsticks sit nearest to it, and a few real shades close to it.
 // Reads the live catalogue, so it needs the network and is run on its own:
 //   npm run build:chart
+// Also writes wheel-counts.json (lipsticks per wheel color) for build-pages.js;
+// run `npm run build` afterwards so the color wheel page picks the counts up.
 // Edit the copy and families here. Don't edit the generated page.
 const fs = require('fs');
 const path = require('path');
@@ -98,6 +100,8 @@ async function fetchCatalogue() {
     for (const c of colors) { const d = utils.deltaE(c.lab, p.lab); if (d < bestD) { bestD = d; best = c; } }
     best.count++;
   }
+  // build-pages.js shows the same counts on the color wheel page
+  fs.writeFileSync(path.join(__dirname, 'wheel-counts.json'), JSON.stringify(Object.fromEntries(colors.map(c => [c.name, c.count])), null, 2) + '\n');
   // Three close shades still on sale, one per brand (skipping long, untidy shade names)
   for (const c of colors) {
     const near = products.filter(p => BRANDS[p.brand] && !p.discontinued && p.shade && p.shade.length <= 28 && !/[|+]/.test(p.shade))

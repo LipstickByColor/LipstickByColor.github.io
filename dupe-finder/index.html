@@ -241,6 +241,15 @@
   .page-copy-links { display: flex; flex-wrap: wrap; gap: 10px; }
   .page-copy-links a { padding: 7px 14px; border: 1px solid var(--border); border-radius: 20px; background: #fff; color: var(--espresso); text-decoration: none; font-size: 13px; }
   .page-copy-links a:hover { border-color: var(--blush); }
+  .page-copy .wheel-family { font-size: 11px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--espresso); margin: 22px 0 8px; }
+  .wheel-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(98px, 1fr)); gap: 8px; }
+  .page-copy .wheel-cards a { display: flex; flex-direction: column; border: 1px solid var(--border); border-radius: 10px; background: #fff; overflow: hidden; text-decoration: none; color: var(--espresso); }
+  .page-copy .wheel-cards a:hover { border-color: var(--blush); }
+  .wheel-card-swatch { height: 44px; }
+  .wheel-card-name { padding: 7px 9px 0; font-size: 13px; font-weight: 500; line-height: 1.25; color: var(--blush-deep); }
+  .wheel-card-count { padding: 2px 9px 0; font-size: 11px; color: var(--text-body); }
+  .wheel-card-hex { padding: 2px 9px 8px; font-family: ui-monospace, Menlo, monospace; font-size: 11px; color: var(--text-body); }
+  .page-copy .wheel-after { margin-top: 24px; }
   @media (max-width: 540px) { .page-copy { padding: 32px 16px 40px; } .page-copy h2 { font-size: 26px; } }
 </style>
 </head>

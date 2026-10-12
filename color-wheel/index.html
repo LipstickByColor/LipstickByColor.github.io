@@ -241,6 +241,15 @@
   .page-copy-links { display: flex; flex-wrap: wrap; gap: 10px; }
   .page-copy-links a { padding: 7px 14px; border: 1px solid var(--border); border-radius: 20px; background: #fff; color: var(--espresso); text-decoration: none; font-size: 13px; }
   .page-copy-links a:hover { border-color: var(--blush); }
+  .page-copy .wheel-family { font-size: 11px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--espresso); margin: 22px 0 8px; }
+  .wheel-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(98px, 1fr)); gap: 8px; }
+  .page-copy .wheel-cards a { display: flex; flex-direction: column; border: 1px solid var(--border); border-radius: 10px; background: #fff; overflow: hidden; text-decoration: none; color: var(--espresso); }
+  .page-copy .wheel-cards a:hover { border-color: var(--blush); }
+  .wheel-card-swatch { height: 44px; }
+  .wheel-card-name { padding: 7px 9px 0; font-size: 13px; font-weight: 500; line-height: 1.25; color: var(--blush-deep); }
+  .wheel-card-count { padding: 2px 9px 0; font-size: 11px; color: var(--text-body); }
+  .wheel-card-hex { padding: 2px 9px 8px; font-family: ui-monospace, Menlo, monospace; font-size: 11px; color: var(--text-body); }
+  .page-copy .wheel-after { margin-top: 24px; }
   @media (max-width: 540px) { .page-copy { padding: 32px 16px 40px; } .page-copy h2 { font-size: 26px; } }
 </style>
 </head>
@@ -264,23 +273,78 @@
 <section id="page-copy" class="page-copy">
   <div class="page-copy-inner">
     <h2>How the lipstick color wheel works</h2>
-    <p>The wheel holds 46 lipstick colors, from Ballet and Nude Rose through Classic Red and Coral to Burgundy and Black Cherry. Click a segment and the results show the lipsticks whose measured color is closest to it, closest first. From there you can step to lighter or deeper versions of the same color, and narrow the list by price, brand, format, finish, or undertone.</p>
+    <p>Explore 46 lipstick colors, from pale pinks to deep wines. Select a color to see real lipstick shades that match, then refine your search by depth, brand, finish, or price.</p>
     <h3>Why search by color instead of shade name?</h3>
     <p>Shade names like "Velvet Plum" or "Spiced Rosewood" say little about the color itself, and retailer filters like "Pink" or "Nude" each cover hundreds of very different shades. Here every product is placed by its measured color, so what you click is what you get. <a href="/about/">How I built it</a> explains how the colors are measured.</p>
-    <h3>What if I want an exact color?</h3>
+    <h3>What if I want an exact shade?</h3>
     <p>If you have a picture of it, use <a href="/photo-match/">photo match</a>. If you already own a lipstick in that color, the <a href="/dupe-finder/">dupe finder</a> starts from that shade. The Custom color tab above takes a hex code.</p>
-    <h3>Jump to a color</h3>
-    <p class="page-copy-links">
-      <a href="/color-wheel/?wheel=classic-red">Classic red</a>
-      <a href="/color-wheel/?wheel=cherry">Cherry</a>
-      <a href="/color-wheel/?wheel=coral">Coral</a>
-      <a href="/color-wheel/?wheel=nude-rose">Nude rose</a>
-      <a href="/color-wheel/?wheel=mauve">Mauve</a>
-      <a href="/color-wheel/?wheel=rosewood">Rosewood</a>
-      <a href="/color-wheel/?wheel=terracotta">Terracotta</a>
-      <a href="/color-wheel/?wheel=burgundy">Burgundy</a>
-    </p>
-    <p>See all 46 colors with their hex codes in the <a href="/lipstick-color-chart/">lipstick color chart</a>. For reds in depth, see the <a href="/guides/red-lipstick/">red lipstick guide</a>.</p>
+    <h3>The 46 lipstick shades on the wheel</h3>
+    <p>Each shade is shown with its hex code and the number of lipsticks nearest to it. The names are only labels for the wheel; click one to open it.</p>
+    <p class="wheel-family">Red lipstick shades</p>
+    <div class="wheel-cards">
+      <a href="/color-wheel/?wheel=signal-red"><span class="wheel-card-swatch" style="background:#e3454d"></span><span class="wheel-card-name">Signal Red</span><span class="wheel-card-count">276 lipsticks</span><span class="wheel-card-hex">#E3454D</span></a>
+      <a href="/color-wheel/?wheel=poppy"><span class="wheel-card-swatch" style="background:#de2a21"></span><span class="wheel-card-name">Poppy</span><span class="wheel-card-count">279 lipsticks</span><span class="wheel-card-hex">#DE2A21</span></a>
+      <a href="/color-wheel/?wheel=raspberry-red"><span class="wheel-card-swatch" style="background:#e02040"></span><span class="wheel-card-name">Raspberry Red</span><span class="wheel-card-count">169 lipsticks</span><span class="wheel-card-hex">#E02040</span></a>
+      <a href="/color-wheel/?wheel=vermilion"><span class="wheel-card-swatch" style="background:#da0f18"></span><span class="wheel-card-name">Vermilion</span><span class="wheel-card-count">149 lipsticks</span><span class="wheel-card-hex">#DA0F18</span></a>
+      <a href="/color-wheel/?wheel=classic-red"><span class="wheel-card-swatch" style="background:#b5252c"></span><span class="wheel-card-name">Classic Red</span><span class="wheel-card-count">474 lipsticks</span><span class="wheel-card-hex">#B5252C</span></a>
+      <a href="/color-wheel/?wheel=tomato"><span class="wheel-card-swatch" style="background:#b12d1e"></span><span class="wheel-card-name">Tomato</span><span class="wheel-card-count">346 lipsticks</span><span class="wheel-card-hex">#B12D1E</span></a>
+      <a href="/color-wheel/?wheel=cherry"><span class="wheel-card-swatch" style="background:#a4333e"></span><span class="wheel-card-name">Cherry</span><span class="wheel-card-count">715 lipsticks</span><span class="wheel-card-hex">#A4333E</span></a>
+      <a href="/color-wheel/?wheel=ruby"><span class="wheel-card-swatch" style="background:#a02523"></span><span class="wheel-card-name">Ruby</span><span class="wheel-card-count">358 lipsticks</span><span class="wheel-card-hex">#A02523</span></a>
+      <a href="/color-wheel/?wheel=scarlet"><span class="wheel-card-swatch" style="background:#9c0822"></span><span class="wheel-card-name">Scarlet</span><span class="wheel-card-count">136 lipsticks</span><span class="wheel-card-hex">#9C0822</span></a>
+      <a href="/color-wheel/?wheel=oxblood"><span class="wheel-card-swatch" style="background:#842525"></span><span class="wheel-card-name">Oxblood</span><span class="wheel-card-count">369 lipsticks</span><span class="wheel-card-hex">#842525</span></a>
+      <a href="/color-wheel/?wheel=black-cherry"><span class="wheel-card-swatch" style="background:#801628"></span><span class="wheel-card-name">Black Cherry</span><span class="wheel-card-count">185 lipsticks</span><span class="wheel-card-hex">#801628</span></a>
+      <a href="/color-wheel/?wheel=brick"><span class="wheel-card-swatch" style="background:#7e1c11"></span><span class="wheel-card-name">Brick</span><span class="wheel-card-count">194 lipsticks</span><span class="wheel-card-hex">#7E1C11</span></a>
+    </div>
+    <p class="wheel-family">Pink lipstick shades</p>
+    <div class="wheel-cards">
+      <a href="/color-wheel/?wheel=ballet"><span class="wheel-card-swatch" style="background:#efbfbb"></span><span class="wheel-card-name">Ballet</span><span class="wheel-card-count">430 lipsticks</span><span class="wheel-card-hex">#EFBFBB</span></a>
+      <a href="/color-wheel/?wheel=flamingo"><span class="wheel-card-swatch" style="background:#F89FB5"></span><span class="wheel-card-name">Flamingo</span><span class="wheel-card-count">287 lipsticks</span><span class="wheel-card-hex">#F89FB5</span></a>
+      <a href="/color-wheel/?wheel=bubblegum"><span class="wheel-card-swatch" style="background:#ed7491"></span><span class="wheel-card-name">Bubblegum</span><span class="wheel-card-count">336 lipsticks</span><span class="wheel-card-hex">#ED7491</span></a>
+      <a href="/color-wheel/?wheel=rosy-pink"><span class="wheel-card-swatch" style="background:#ca7780"></span><span class="wheel-card-name">Rosy Pink</span><span class="wheel-card-count">513 lipsticks</span><span class="wheel-card-hex">#CA7780</span></a>
+      <a href="/color-wheel/?wheel=tea-rose"><span class="wheel-card-swatch" style="background:#d56369"></span><span class="wheel-card-name">Tea Rose</span><span class="wheel-card-count">434 lipsticks</span><span class="wheel-card-hex">#D56369</span></a>
+      <a href="/color-wheel/?wheel=faded-rose"><span class="wheel-card-swatch" style="background:#c26f67"></span><span class="wheel-card-name">Faded Rose</span><span class="wheel-card-count">621 lipsticks</span><span class="wheel-card-hex">#C26F67</span></a>
+      <a href="/color-wheel/?wheel=magenta"><span class="wheel-card-swatch" style="background:#dc5391"></span><span class="wheel-card-name">Magenta</span><span class="wheel-card-count">187 lipsticks</span><span class="wheel-card-hex">#DC5391</span></a>
+      <a href="/color-wheel/?wheel=hot-magenta"><span class="wheel-card-swatch" style="background:#DC3092"></span><span class="wheel-card-name">Hot Magenta</span><span class="wheel-card-count">50 lipsticks</span><span class="wheel-card-hex">#DC3092</span></a>
+      <a href="/color-wheel/?wheel=cerise"><span class="wheel-card-swatch" style="background:#cc4c63"></span><span class="wheel-card-name">Cerise</span><span class="wheel-card-count">255 lipsticks</span><span class="wheel-card-hex">#CC4C63</span></a>
+      <a href="/color-wheel/?wheel=dusty-cedar"><span class="wheel-card-swatch" style="background:#af5f64"></span><span class="wheel-card-name">Dusty Cedar</span><span class="wheel-card-count">538 lipsticks</span><span class="wheel-card-hex">#AF5F64</span></a>
+      <a href="/color-wheel/?wheel=raspberry-sorbet"><span class="wheel-card-swatch" style="background:#db2a6a"></span><span class="wheel-card-name">Raspberry Sorbet</span><span class="wheel-card-count">137 lipsticks</span><span class="wheel-card-hex">#DB2A6A</span></a>
+      <a href="/color-wheel/?wheel=azalea"><span class="wheel-card-swatch" style="background:#d23658"></span><span class="wheel-card-name">Azalea</span><span class="wheel-card-count">181 lipsticks</span><span class="wheel-card-hex">#D23658</span></a>
+    </div>
+    <p class="wheel-family">Coral and peach lipstick shades</p>
+    <div class="wheel-cards">
+      <a href="/color-wheel/?wheel=apricot"><span class="wheel-card-swatch" style="background:#d9a083"></span><span class="wheel-card-name">Apricot</span><span class="wheel-card-count">331 lipsticks</span><span class="wheel-card-hex">#D9A083</span></a>
+      <a href="/color-wheel/?wheel=burnt-coral"><span class="wheel-card-swatch" style="background:#ea8e83"></span><span class="wheel-card-name">Burnt Coral</span><span class="wheel-card-count">570 lipsticks</span><span class="wheel-card-hex">#EA8E83</span></a>
+      <a href="/color-wheel/?wheel=carnelian"><span class="wheel-card-swatch" style="background:#c47159"></span><span class="wheel-card-name">Carnelian</span><span class="wheel-card-count">601 lipsticks</span><span class="wheel-card-hex">#C47159</span></a>
+      <a href="/color-wheel/?wheel=coral"><span class="wheel-card-swatch" style="background:#d85d5b"></span><span class="wheel-card-name">Coral</span><span class="wheel-card-count">361 lipsticks</span><span class="wheel-card-hex">#D85D5B</span></a>
+    </div>
+    <p class="wheel-family">Nude and brown lipstick shades</p>
+    <div class="wheel-cards">
+      <a href="/color-wheel/?wheel=rose-dawn"><span class="wheel-card-swatch" style="background:#c48c7f"></span><span class="wheel-card-name">Rose Dawn</span><span class="wheel-card-count">257 lipsticks</span><span class="wheel-card-hex">#C48C7F</span></a>
+      <a href="/color-wheel/?wheel=canyon-clay"><span class="wheel-card-swatch" style="background:#cb8579"></span><span class="wheel-card-name">Canyon Clay</span><span class="wheel-card-count">465 lipsticks</span><span class="wheel-card-hex">#CB8579</span></a>
+      <a href="/color-wheel/?wheel=old-rose"><span class="wheel-card-swatch" style="background:#b07774"></span><span class="wheel-card-name">Old Rose</span><span class="wheel-card-count">339 lipsticks</span><span class="wheel-card-hex">#B07774</span></a>
+      <a href="/color-wheel/?wheel=terracotta"><span class="wheel-card-swatch" style="background:#aa6155"></span><span class="wheel-card-name">Terracotta</span><span class="wheel-card-count">888 lipsticks</span><span class="wheel-card-hex">#AA6155</span></a>
+      <a href="/color-wheel/?wheel=rosewood"><span class="wheel-card-swatch" style="background:#ba5250"></span><span class="wheel-card-name">Rosewood</span><span class="wheel-card-count">653 lipsticks</span><span class="wheel-card-hex">#BA5250</span></a>
+      <a href="/color-wheel/?wheel=nude-rose"><span class="wheel-card-swatch" style="background:#945c55"></span><span class="wheel-card-name">Nude Rose</span><span class="wheel-card-count">748 lipsticks</span><span class="wheel-card-hex">#945C55</span></a>
+      <a href="/color-wheel/?wheel=sable"><span class="wheel-card-swatch" style="background:#76433d"></span><span class="wheel-card-name">Sable</span><span class="wheel-card-count">719 lipsticks</span><span class="wheel-card-hex">#76433D</span></a>
+      <a href="/color-wheel/?wheel=espresso"><span class="wheel-card-swatch" style="background:#50332c"></span><span class="wheel-card-name">Espresso</span><span class="wheel-card-count">181 lipsticks</span><span class="wheel-card-hex">#50332C</span></a>
+    </div>
+    <p class="wheel-family">Berry and wine lipstick shades</p>
+    <div class="wheel-cards">
+      <a href="/color-wheel/?wheel=holly-berry"><span class="wheel-card-swatch" style="background:#b24f5c"></span><span class="wheel-card-name">Holly Berry</span><span class="wheel-card-count">462 lipsticks</span><span class="wheel-card-hex">#B24F5C</span></a>
+      <a href="/color-wheel/?wheel=mauve"><span class="wheel-card-swatch" style="background:#a3487a"></span><span class="wheel-card-name">Mauve</span><span class="wheel-card-count">161 lipsticks</span><span class="wheel-card-hex">#A3487A</span></a>
+      <a href="/color-wheel/?wheel=rose-wine"><span class="wheel-card-swatch" style="background:#92515a"></span><span class="wheel-card-name">Rose Wine</span><span class="wheel-card-count">474 lipsticks</span><span class="wheel-card-hex">#92515A</span></a>
+      <a href="/color-wheel/?wheel=deep-raspberry"><span class="wheel-card-swatch" style="background:#a22956"></span><span class="wheel-card-name">Deep Raspberry</span><span class="wheel-card-count">277 lipsticks</span><span class="wheel-card-hex">#A22956</span></a>
+      <a href="/color-wheel/?wheel=dark-rose"><span class="wheel-card-swatch" style="background:#883042"></span><span class="wheel-card-name">Dark Rose</span><span class="wheel-card-count">406 lipsticks</span><span class="wheel-card-hex">#883042</span></a>
+      <a href="/color-wheel/?wheel=burgundy"><span class="wheel-card-swatch" style="background:#6c3348"></span><span class="wheel-card-name">Burgundy</span><span class="wheel-card-count">329 lipsticks</span><span class="wheel-card-hex">#6C3348</span></a>
+      <a href="/color-wheel/?wheel=syrah"><span class="wheel-card-swatch" style="background:#6b272b"></span><span class="wheel-card-name">Syrah</span><span class="wheel-card-count">477 lipsticks</span><span class="wheel-card-hex">#6B272B</span></a>
+      <a href="/color-wheel/?wheel=dark-wine"><span class="wheel-card-swatch" style="background:#4b2323"></span><span class="wheel-card-name">Dark Wine</span><span class="wheel-card-count">314 lipsticks</span><span class="wheel-card-hex">#4B2323</span></a>
+    </div>
+    <p class="wheel-family">Black and grey lipstick shades</p>
+    <div class="wheel-cards">
+      <a href="/color-wheel/?wheel=charcoal"><span class="wheel-card-swatch" style="background:#454048"></span><span class="wheel-card-name">Charcoal</span><span class="wheel-card-count">94 lipsticks</span><span class="wheel-card-hex">#454048</span></a>
+      <a href="/color-wheel/?wheel=onyx"><span class="wheel-card-swatch" style="background:#170e12"></span><span class="wheel-card-name">Onyx</span><span class="wheel-card-count">68 lipsticks</span><span class="wheel-card-hex">#170E12</span></a>
+    </div>
+    <p class="wheel-after">The <a href="/lipstick-color-chart/">lipstick color chart</a> lists the same shades with example lipsticks for each. For reds in depth, see the <a href="/guides/red-lipstick/">red lipstick guide</a>.</p>
   </div>
 </section>
 </body>

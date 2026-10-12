@@ -10,7 +10,7 @@ design-canvas.jsx
 *.py
 *.ipynb
 products.csv
-search-queries.csv
+search-*.csv
 sample-1000-colors.json
 
 # guides/assets images not referenced by any page (kept locally, not deployed)

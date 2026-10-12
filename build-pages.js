@@ -9,6 +9,38 @@ const SITE = 'https://lipstickbycolor.github.io';
 const HOME_TITLE = 'Lipstick Color Finder — Search Lipstick by Color &amp; Find Dupes';
 const esc = s => s.replace(/&/g, '&amp;').replace(/"/g, '&quot;');
 
+// The wheel's colors as small cards (swatch, name, lipstick count, hex), grouped by family
+// and ordered light to deep. Every wheel color must be in exactly one family. The counts
+// come from wheel-counts.json, which `npm run build:chart` writes from the live catalogue.
+const WHEEL_FAMILIES = [
+  ['Red', ['Poppy','Vermilion','Signal Red','Raspberry Red','Classic Red','Tomato','Cherry','Ruby','Scarlet','Black Cherry','Oxblood','Brick']],
+  ['Pink', ['Ballet','Flamingo','Bubblegum','Rosy Pink','Tea Rose','Cerise','Azalea','Raspberry Sorbet','Magenta','Hot Magenta','Faded Rose','Dusty Cedar']],
+  ['Coral and peach', ['Apricot','Burnt Coral','Coral','Carnelian']],
+  ['Nude and brown', ['Rose Dawn','Canyon Clay','Terracotta','Nude Rose','Sable','Espresso','Old Rose','Rosewood']],
+  ['Berry and wine', ['Mauve','Deep Raspberry','Dark Rose','Burgundy','Syrah','Dark Wine','Holly Berry','Rose Wine']],
+  ['Black and grey', ['Charcoal','Onyx']],
+];
+const wheel = require('vm').runInNewContext(
+  fs.readFileSync(path.join(__dirname, 'lipstick-utils.js'), 'utf8') + '\n;({ LIPSTICK_DATA, hexToLab })', {});
+const wheelCounts = JSON.parse(fs.readFileSync(path.join(__dirname, 'wheel-counts.json'), 'utf8'));
+function wheelCards() {
+  const left = new Map(wheel.LIPSTICK_DATA.map(c => [c.name, c]));
+  const html = WHEEL_FAMILIES.map(([family, names]) => {
+    const colors = names.map(n => {
+      if (!left.has(n)) throw new Error(`build-pages: "${n}" is not a wheel color, or is listed twice`);
+      if (!Number.isInteger(wheelCounts[n])) throw new Error(`build-pages: no count for "${n}" in wheel-counts.json. Run npm run build:chart.`);
+      const c = left.get(n); left.delete(n); return c;
+    }).sort((a, b) => wheel.hexToLab(b.hex)[0] - wheel.hexToLab(a.hex)[0]);
+    return `
+    <p class="wheel-family">${family} lipstick shades</p>
+    <div class="wheel-cards">${colors.map(c => `
+      <a href="/color-wheel/?wheel=${c.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}"><span class="wheel-card-swatch" style="background:${c.hex}"></span><span class="wheel-card-name">${c.name}</span><span class="wheel-card-count">${wheelCounts[c.name].toLocaleString('en-US')} ${wheelCounts[c.name] === 1 ? 'lipstick' : 'lipsticks'}</span><span class="wheel-card-hex">${c.hex.toUpperCase()}</span></a>`).join('')}
+    </div>`;
+  }).join('');
+  if (left.size) throw new Error(`build-pages: wheel colors missing from WHEEL_FAMILIES: ${[...left.keys()].join(', ')}`);
+  return html;
+}
+
 const PAGES = [
   {
     dir: 'color-wheel',
@@ -19,23 +51,14 @@ const PAGES = [
     intro: 'Click any color on the wheel to see real lipsticks in that shade, from nearly 17,000 lip products. Go lighter or deeper, then filter by finish, brand, and price.',
     copy: `
     <h2>How the lipstick color wheel works</h2>
-    <p>The wheel holds 46 lipstick colors, from Ballet and Nude Rose through Classic Red and Coral to Burgundy and Black Cherry. Click a segment and the results show the lipsticks whose measured color is closest to it, closest first. From there you can step to lighter or deeper versions of the same color, and narrow the list by price, brand, format, finish, or undertone.</p>
+    <p>Explore 46 lipstick colors, from pale pinks to deep wines. Select a color to see real lipstick shades that match, then refine your search by depth, brand, finish, or price.</p>
     <h3>Why search by color instead of shade name?</h3>
     <p>Shade names like "Velvet Plum" or "Spiced Rosewood" say little about the color itself, and retailer filters like "Pink" or "Nude" each cover hundreds of very different shades. Here every product is placed by its measured color, so what you click is what you get. <a href="/about/">How I built it</a> explains how the colors are measured.</p>
-    <h3>What if I want an exact color?</h3>
+    <h3>What if I want an exact shade?</h3>
     <p>If you have a picture of it, use <a href="/photo-match/">photo match</a>. If you already own a lipstick in that color, the <a href="/dupe-finder/">dupe finder</a> starts from that shade. The Custom color tab above takes a hex code.</p>
-    <h3>Jump to a color</h3>
-    <p class="page-copy-links">
-      <a href="/color-wheel/?wheel=classic-red">Classic red</a>
-      <a href="/color-wheel/?wheel=cherry">Cherry</a>
-      <a href="/color-wheel/?wheel=coral">Coral</a>
-      <a href="/color-wheel/?wheel=nude-rose">Nude rose</a>
-      <a href="/color-wheel/?wheel=mauve">Mauve</a>
-      <a href="/color-wheel/?wheel=rosewood">Rosewood</a>
-      <a href="/color-wheel/?wheel=terracotta">Terracotta</a>
-      <a href="/color-wheel/?wheel=burgundy">Burgundy</a>
-    </p>
-    <p>See all 46 colors with their hex codes in the <a href="/lipstick-color-chart/">lipstick color chart</a>. For reds in depth, see the <a href="/guides/red-lipstick/">red lipstick guide</a>.</p>`,
+    <h3>The 46 lipstick shades on the wheel</h3>
+    <p>Each shade is shown with its hex code and the number of lipsticks nearest to it. The names are only labels for the wheel; click one to open it.</p>${wheelCards()}
+    <p class="wheel-after">The <a href="/lipstick-color-chart/">lipstick color chart</a> lists the same shades with example lipsticks for each. For reds in depth, see the <a href="/guides/red-lipstick/">red lipstick guide</a>.</p>`,
   },
   {
     dir: 'dupe-finder',
@@ -96,6 +119,15 @@ const PAGE_CSS = `<style>
   .page-copy-links { display: flex; flex-wrap: wrap; gap: 10px; }
   .page-copy-links a { padding: 7px 14px; border: 1px solid var(--border); border-radius: 20px; background: #fff; color: var(--espresso); text-decoration: none; font-size: 13px; }
   .page-copy-links a:hover { border-color: var(--blush); }
+  .page-copy .wheel-family { font-size: 11px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--espresso); margin: 22px 0 8px; }
+  .wheel-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(98px, 1fr)); gap: 8px; }
+  .page-copy .wheel-cards a { display: flex; flex-direction: column; border: 1px solid var(--border); border-radius: 10px; background: #fff; overflow: hidden; text-decoration: none; color: var(--espresso); }
+  .page-copy .wheel-cards a:hover { border-color: var(--blush); }
+  .wheel-card-swatch { height: 44px; }
+  .wheel-card-name { padding: 7px 9px 0; font-size: 13px; font-weight: 500; line-height: 1.25; color: var(--blush-deep); }
+  .wheel-card-count { padding: 2px 9px 0; font-size: 11px; color: var(--text-body); }
+  .wheel-card-hex { padding: 2px 9px 8px; font-family: ui-monospace, Menlo, monospace; font-size: 11px; color: var(--text-body); }
+  .page-copy .wheel-after { margin-top: 24px; }
   @media (max-width: 540px) { .page-copy { padding: 32px 16px 40px; } .page-copy h2 { font-size: 26px; } }
 </style>`;
 
