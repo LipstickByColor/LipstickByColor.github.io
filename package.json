@@ -4,7 +4,7 @@
   "scripts": {
     "build": "node build-numbers.js && babel app.jsx -o app.js && node build-pages.js",
     "numbers:fetch": "node build-numbers.js --fetch",
-    "build:chart": "node build-color-chart.js",
+    "build:counts": "node build-wheel-counts.js",
     "build:dupes": "node build-dupe-pages.js"
   },
   "devDependencies": {

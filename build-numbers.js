@@ -27,7 +27,7 @@ const FILES = [
   'index.html', 'about/index.html', 'color-science/index.html', 'privacy/index.html', '404.html',
   'guides/index.html',
   'color-wheel/index.html', 'dupe-finder/index.html', 'photo-match/index.html', 'lipstick-color-chart/index.html',
-  'app.jsx', 'build-pages.js', 'build-color-chart.js', 'build-dupe-pages.js', 'feed.xml', 'README.md',
+  'app.jsx', 'build-pages.js', 'build-dupe-pages.js', 'feed.xml', 'README.md',
 ];
 // Per-shade dupe pages: dupe-finder/<brand>/<shade>/index.html
 const dupeRoot = path.join(ROOT, 'dupe-finder');

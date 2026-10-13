@@ -80,6 +80,17 @@
   .results-col {
     flex: 1; display: flex; flex-direction: column; min-height: 0; min-width: 0;
   }
+  /* Custom color: the map on the left; its summary card, then the results, on the right */
+  .shade-top {
+    flex: 1; min-width: 0;
+    /* The right column is sized for three result cards across */
+    display: grid; grid-template-columns: minmax(0, 560px) minmax(0, 520px);
+    gap: 48px; justify-content: center; align-items: start;
+  }
+  .shade-picker { width: 100%; max-width: 560px; justify-self: center; }
+  /* Once there is room, the map gives way first so the results keep three across */
+  @media (min-width: 1080px) { .shade-top { grid-template-columns: minmax(0, 560px) 520px; } }
+  .shade-side { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
   .mobile-picker-tips { display: none; }
   .header-mobile-links { display: none; }
   /* Result cards: on hover, softly ring the save (♥) and compare (+) buttons.
@@ -129,6 +140,7 @@
       max-width: 380px; width: 100%;
     }
     .results-empty-state { display: none !important; }
+    .shade-top { grid-template-columns: minmax(0, 1fr); gap: 32px; }
     .app-header { padding: 20px 24px 16px; flex-wrap: wrap; }
     .mode-bar {
       padding: 0 24px; flex-wrap: nowrap !important;
@@ -277,7 +289,7 @@
     <h3>Why search by color instead of shade name?</h3>
     <p>Shade names like "Velvet Plum" or "Spiced Rosewood" say little about the color itself, and retailer filters like "Pink" or "Nude" each cover hundreds of very different shades. Here every product is placed by its measured color, so what you click is what you get. <a href="/about/">How I built it</a> explains how the colors are measured.</p>
     <h3>What if I want an exact shade?</h3>
-    <p>If you have a picture of it, use <a href="/photo-match/">photo match</a>. If you already own a lipstick in that color, the <a href="/dupe-finder/">dupe finder</a> starts from that shade. The Custom color tab above takes a hex code.</p>
+    <p>If you have a picture of it, use <a href="/photo-match/">photo match</a>. If you already own a lipstick in that color, the <a href="/dupe-finder/">dupe finder</a> starts from that shade. The <a href="/lipstick-color-chart/">lipstick color chart</a> takes a hex code.</p>
     <h3>The 46 lipstick shades on the wheel</h3>
     <p>Each shade is shown with its hex code and the number of lipsticks nearest to it. The names are only labels for the wheel; click one to open it.</p>
     <p class="wheel-family">Red lipstick shades</p>
@@ -344,7 +356,7 @@
       <a href="/color-wheel/?wheel=charcoal"><span class="wheel-card-swatch" style="background:#454048"></span><span class="wheel-card-name">Charcoal</span><span class="wheel-card-count">94 lipsticks</span><span class="wheel-card-hex">#454048</span></a>
       <a href="/color-wheel/?wheel=onyx"><span class="wheel-card-swatch" style="background:#170e12"></span><span class="wheel-card-name">Onyx</span><span class="wheel-card-count">68 lipsticks</span><span class="wheel-card-hex">#170E12</span></a>
     </div>
-    <p class="wheel-after">The <a href="/lipstick-color-chart/">lipstick color chart</a> lists the same shades with example lipsticks for each. For reds in depth, see the <a href="/guides/red-lipstick/">red lipstick guide</a>.</p>
+    <p class="wheel-after">To pick any color, not only these 46, use the <a href="/lipstick-color-chart/">lipstick color chart</a>. For reds in depth, see the <a href="/guides/red-lipstick/">red lipstick guide</a>.</p>
   </div>
 </section>
 </body>

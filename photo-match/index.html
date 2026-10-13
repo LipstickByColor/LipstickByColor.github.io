@@ -80,6 +80,17 @@
   .results-col {
     flex: 1; display: flex; flex-direction: column; min-height: 0; min-width: 0;
   }
+  /* Custom color: the map on the left; its summary card, then the results, on the right */
+  .shade-top {
+    flex: 1; min-width: 0;
+    /* The right column is sized for three result cards across */
+    display: grid; grid-template-columns: minmax(0, 560px) minmax(0, 520px);
+    gap: 48px; justify-content: center; align-items: start;
+  }
+  .shade-picker { width: 100%; max-width: 560px; justify-self: center; }
+  /* Once there is room, the map gives way first so the results keep three across */
+  @media (min-width: 1080px) { .shade-top { grid-template-columns: minmax(0, 560px) 520px; } }
+  .shade-side { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
   .mobile-picker-tips { display: none; }
   .header-mobile-links { display: none; }
   /* Result cards: on hover, softly ring the save (♥) and compare (+) buttons.
@@ -129,6 +140,7 @@
       max-width: 380px; width: 100%;
     }
     .results-empty-state { display: none !important; }
+    .shade-top { grid-template-columns: minmax(0, 1fr); gap: 32px; }
     .app-header { padding: 20px 24px 16px; flex-wrap: wrap; }
     .mode-bar {
       padding: 0 24px; flex-wrap: nowrap !important;

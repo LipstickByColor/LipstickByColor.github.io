@@ -1,4 +1,4 @@
-// Writes the tool pages (/color-wheel/, /dupe-finder/, /photo-match/) from
+// Writes the tool pages (/color-wheel/, /dupe-finder/, /photo-match/, /lipstick-color-chart/) from
 // index.html: the same app, opened in that mode (see MODE_PAGES in app.jsx),
 // with its own title, description, intro, and a write-up under the tool.
 // Edit the copy here, then `npm run build`. Don't edit the generated pages.
@@ -11,7 +11,7 @@ const esc = s => s.replace(/&/g, '&amp;').replace(/"/g, '&quot;');
 
 // The wheel's colors as small cards (swatch, name, lipstick count, hex), grouped by family
 // and ordered light to deep. Every wheel color must be in exactly one family. The counts
-// come from wheel-counts.json, which `npm run build:chart` writes from the live catalogue.
+// come from wheel-counts.json, which `npm run build:counts` writes from the live catalogue.
 const WHEEL_FAMILIES = [
   ['Red', ['Poppy','Vermilion','Signal Red','Raspberry Red','Classic Red','Tomato','Cherry','Ruby','Scarlet','Black Cherry','Oxblood','Brick']],
   ['Pink', ['Ballet','Flamingo','Bubblegum','Rosy Pink','Tea Rose','Cerise','Azalea','Raspberry Sorbet','Magenta','Hot Magenta','Faded Rose','Dusty Cedar']],
@@ -28,7 +28,7 @@ function wheelCards() {
   const html = WHEEL_FAMILIES.map(([family, names]) => {
     const colors = names.map(n => {
       if (!left.has(n)) throw new Error(`build-pages: "${n}" is not a wheel color, or is listed twice`);
-      if (!Number.isInteger(wheelCounts[n])) throw new Error(`build-pages: no count for "${n}" in wheel-counts.json. Run npm run build:chart.`);
+      if (!Number.isInteger(wheelCounts[n])) throw new Error(`build-pages: no count for "${n}" in wheel-counts.json. Run npm run build:counts.`);
       const c = left.get(n); left.delete(n); return c;
     }).sort((a, b) => wheel.hexToLab(b.hex)[0] - wheel.hexToLab(a.hex)[0]);
     return `
@@ -55,10 +55,10 @@ const PAGES = [
     <h3>Why search by color instead of shade name?</h3>
     <p>Shade names like "Velvet Plum" or "Spiced Rosewood" say little about the color itself, and retailer filters like "Pink" or "Nude" each cover hundreds of very different shades. Here every product is placed by its measured color, so what you click is what you get. <a href="/about/">How I built it</a> explains how the colors are measured.</p>
     <h3>What if I want an exact shade?</h3>
-    <p>If you have a picture of it, use <a href="/photo-match/">photo match</a>. If you already own a lipstick in that color, the <a href="/dupe-finder/">dupe finder</a> starts from that shade. The Custom color tab above takes a hex code.</p>
+    <p>If you have a picture of it, use <a href="/photo-match/">photo match</a>. If you already own a lipstick in that color, the <a href="/dupe-finder/">dupe finder</a> starts from that shade. The <a href="/lipstick-color-chart/">lipstick color chart</a> takes a hex code.</p>
     <h3>The 46 lipstick shades on the wheel</h3>
     <p>Each shade is shown with its hex code and the number of lipsticks nearest to it. The names are only labels for the wheel; click one to open it.</p>${wheelCards()}
-    <p class="wheel-after">The <a href="/lipstick-color-chart/">lipstick color chart</a> lists the same shades with example lipsticks for each. For reds in depth, see the <a href="/guides/red-lipstick/">red lipstick guide</a>.</p>`,
+    <p class="wheel-after">To pick any color, not only these 46, use the <a href="/lipstick-color-chart/">lipstick color chart</a>. For reds in depth, see the <a href="/guides/red-lipstick/">red lipstick guide</a>.</p>`,
   },
   {
     dir: 'dupe-finder',
@@ -105,6 +105,22 @@ const PAGES = [
     <p>Lighting, filters, and screens all shift color in a photo. Tap a part of the lip in even light, away from glossy highlights and shadows, and try a few spots to see how much the result moves.</p>
     <h3>Already know which lipstick it is?</h3>
     <p>The <a href="/dupe-finder/">dupe finder</a> starts from the lipstick's own measured color, which is more reliable than a photo. To browse by color family, use the <a href="/color-wheel/">color wheel</a>.</p>`,
+  },
+  {
+    dir: 'lipstick-color-chart',
+    name: 'Lipstick Color Chart',
+    title: 'Lipstick Color Chart: Find Any Shade',
+    description: 'Pick any color on the chart and see every lipstick that matches it, from deep cool reds to soft nude browns.',
+    h1: 'Lipstick color chart: find any shade',
+    intro: 'Explore lipstick colors on a two-dimensional map. Choose a spot to find matching shades from nearly 17,000 lip products, then adjust the depth to go lighter or deeper.',
+    copy: `
+    <h2>How the lipstick color chart works</h2>
+    <p>Explore lipstick colors on a two-dimensional map. Move horizontally to shift between redder and greener hues, and vertically to shift between yellower and bluer hues. Use the depth bar to make your selection lighter or darker.</p>
+    <p>Choose any point to find lip products with the closest measured colors. Open the matches to browse results, then filter by price, brand, format, finish, or undertone.</p>
+    <h3>Have a hex color code?</h3>
+    <p>Enter a hex code to jump directly to that color and find matching lipsticks.</p>
+    <h3>Prefer to browse named lipstick colors?</h3>
+    <p>Explore 46 named shades on the <a href="/color-wheel/">lipstick color wheel</a>. If you want to find a similar shade to a lipstick you already own, try the <a href="/dupe-finder/">lipstick dupe finder</a>.</p>`,
   },
 ];
 

@@ -1,6 +1,7 @@
 node_modules/
 CLAUDE.md
 DESIGN.md
+design/
 WHEEL_COLORS.md
 lipstick-data.js
 lipstick-images.js

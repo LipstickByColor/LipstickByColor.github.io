@@ -363,6 +363,22 @@ function generateToneSteps(anchorHex, perSide = 2, stepL = 13, baseName = 'This 
 // ordinary shades. (Well beyond "just noticeable"; equivalent to the old ΔE76
 // cutoff of 10, which reads as a clearly different color, not a slightly-off match.)
 const NO_MATCH_DELTA_E = 6.5;
+
+// How far from the color a result may be. Normally maxDeltaE past the closest match. The color
+// chart instead uses a fixed distance from the pick, so two picks the eye can't tell apart search
+// the same area and get the same lipsticks; only where the catalogue is thin (nothing that close)
+// does it reach a little past the closest match.
+const CHART_RADIUS = 2.25,
+  CHART_SPARSE = 1;
+function bandCut(best, maxDeltaE, chart) {
+  return chart ? Math.max(CHART_RADIUS, best + CHART_SPARSE) : best + maxDeltaE;
+}
+// What the results show: everything within the cut-off, and never fewer than five
+function matchBand(candidates, maxDeltaE, chart) {
+  const bestDist = candidates[0]?.distance ?? 0;
+  const inBand = candidates.filter(p => p.distance <= bandCut(bestDist, maxDeltaE, chart));
+  return inBand.length >= 5 ? inBand : candidates.slice(0, 5);
+}
 function nearestProductDistance(hex) {
   const lab = hexToLab(hex);
   let best = Infinity;
@@ -797,7 +813,8 @@ function ResultsTable({
   toneIdx,
   setToneIdx,
   initialFilterParams,
-  onFiltersChange
+  onFiltersChange,
+  hideHeader
 }) {
   const [activeBrands, setActiveBrands] = React.useState([]);
   const [activeTones, setActiveTones] = React.useState([]);
@@ -944,7 +961,7 @@ function ResultsTable({
       flexDirection: 'column',
       minHeight: 0
     }
-  }, /*#__PURE__*/React.createElement("div", {
+  }, !hideHeader && /*#__PURE__*/React.createElement("div", {
     style: {
       display: 'flex',
       alignItems: 'center',
@@ -2029,6 +2046,10 @@ const MODE_PAGES = {
   dupe: {
     path: '/dupe-finder/',
     title: 'Lipstick Dupe Finder — Find Dupes for Any Shade by Color'
+  },
+  hex: {
+    path: '/lipstick-color-chart/',
+    title: 'Lipstick Color Chart: Find Any Shade'
   }
 };
 const HOME_TITLE = 'Lipstick Color Finder — Search Lipstick by Color & Find Dupes';
@@ -3360,194 +3381,1068 @@ function PhotoPicker({
 // ── Hex Picker ──────────────────────────────────────────────────────────
 // Pick or paste a hex code directly. Useful for matching a specific color
 // (an outfit, a paint chip, a screen color) when the wheel doesn't cover it.
-function HexPicker({
-  sampledHex,
-  onColor
-}) {
-  // Starts empty like the other modes — nothing is searched until the user picks.
-  const [draft, setDraft] = React.useState(sampledHex || '');
-  const colorInputRef = React.useRef(null);
+// ── Shade explorer (Custom color tab, /lipstick-color-chart/) ────────────────
+// A map of every hue at one depth (CIELAB a* across, b* up) with a depth bar.
+// The draft color lives in App so the map and its summary — the card beside it on
+// desktop, the bar under it when the columns stack — describe the same pick.
+// Results only load when the visitor asks for them, and appear underneath.
+// ZOOM: half-width of the close-up; GRID: spacing of its dots, wide enough apart that neighbors look different
+const EXPLORER = {
+  LMIN: 8,
+  LMAX: 95,
+  SPAN: 80,
+  ZOOM: 20,
+  GRID: 5
+};
+// input: 16px keeps iOS from zooming the page on focus. title: the picked color's name on the card.
+const EXPLORER_TYPE = {
+  eyebrow: 11,
+  micro: 11,
+  link: 12,
+  body: 13,
+  caption: 14,
+  input: 16,
+  lede: 21,
+  title: 30
+};
+const EXPLORER_STARTS = [['Red', '#b5252c'], ['Pink', '#d66796'], ['Berry', '#7d2349'], ['Coral', '#d77749'], ['Brown', '#b4856b'], ['Plum', '#5c3069'], ['Blue', '#004590'], ['Black', '#1f1f1f']];
+// Sunflower layout, same spacing as the color guide card, carried out to the corners of the
+// square: the most vivid reds sit beyond the circle that would fit inside it.
+const EXPLORER_SEEDS = (() => {
+  const {
+      SPAN
+    } = EXPLORER,
+    RMAX = SPAN * Math.SQRT2,
+    N = Math.round(560 * 2 / (0.96 * 0.96)),
+    EDGE = SPAN * 0.97,
+    out = [];
+  for (let i = 0; i < N; i++) {
+    const r = RMAX * Math.sqrt((i + 0.5) / N),
+      t = i * 2.39996323;
+    const a = r * Math.cos(t),
+      b = r * Math.sin(t);
+    if (Math.abs(a) <= EDGE && Math.abs(b) <= EDGE) out.push([a, b]);
+  }
+  return out;
+})();
+function labInGamut(L, a, b) {
+  const {
+    x,
+    y,
+    z
+  } = labToXyz(L, a, b);
+  const rgb = xyzToLinearRgb(x, y, z);
+  return [rgb.r, rgb.g, rgb.b].every(c => c >= -0.002 && c <= 1.002);
+}
+// Pull a color toward gray until a screen can show it
+function fitToGamut(L, a, b) {
+  if (labInGamut(L, a, b)) return [a, b];
+  let lo = 0,
+    hi = 1;
+  for (let i = 0; i < 16; i++) {
+    const m = (lo + hi) / 2;
+    if (labInGamut(L, a * m, b * m)) lo = m;else hi = m;
+  }
+  return [a * lo, b * lo];
+}
 
-  // Don't overwrite what the user is typing when it already resolves to this
-  // color — otherwise "C04" (valid shorthand) snaps to "CC0044" mid-typing.
-  React.useEffect(() => {
-    if (sampledHex && normalize(draft) !== sampledHex.toLowerCase()) setDraft(sampledHex);
-  }, [sampledHex]);
-  function normalize(v) {
-    if (!v) return null;
-    let s = v.trim().replace(/^#/, '').toLowerCase();
-    if (/^[0-9a-f]{3}$/.test(s)) s = s.split('').map(c => c + c).join('');
-    if (/^[0-9a-f]{6}$/.test(s)) return '#' + s;
-    return null;
+// "Red" is only what the red guide counts as red (redKind). Reddish colors that miss it
+// (too muted, too light, too dark) take the name of the family beside them.
+function colorFamily(L, a, b) {
+  const C = Math.hypot(a, b);
+  let h = Math.atan2(b, a) * 180 / Math.PI;
+  if (h < 0) h += 360;
+  if (C < 12) return L < 22 ? 'black' : L > 88 ? 'white' : 'gray';
+  if (redKind(labToHex(L, a, b))) return 'red';
+  if (C < 24 && h < 90 || C < 30 && h >= 20 && h < 90) return 'brown';
+  if (C < 30 && (h >= 330 || h < 20)) return 'mauve';
+  if (h >= 305 && h < 335) return L < 40 ? 'plum' : 'purple';
+  if (h >= 335 || h < 14) return L < 40 ? 'berry' : 'pink';
+  if (h < 30) return L < 40 ? 'berry' : 'rose';
+  if (h < 60) return L < 45 ? 'brick' : 'coral';
+  if (h < 85) return L < 45 ? 'rust' : 'orange';
+  if (h < 115) return L >= 82 ? 'yellow' : 'olive';
+  if (h < 230) return 'green';
+  return 'blue';
+}
+// Very dark and nearly colorless. The eye can't tell these apart, though the distance formula
+// can, so a black pick on the map or the wheel is matched to every black lipstick (see shadeMatchInfo).
+function isBlackLab(lab) {
+  return !!lab && lab.every(Number.isFinite) && colorFamily(lab[0], lab[1], lab[2]) === 'black';
+}
+// Per family: [neutral center, "clearly leaning" threshold, band start, band end], in hue degrees.
+// A family only gets "warm"/"cool" when the hue is clearly off-center and at least 3° inside
+// its band, so a name never points back at the neighboring family.
+const FAMILY_TONE = {
+  pink: [354.5, 8, 335, 14],
+  berry: [358, 9, 335, 30],
+  coral: [51, 3, 30, 60],
+  brick: [51, 4, 30, 60],
+  rust: [72.5, 6, 60, 85],
+  orange: [72.5, 6, 60, 85],
+  brown: [55, 12, 20, 90],
+  mauve: [355, 10, 330, 20],
+  plum: [320, 6, 305, 335],
+  purple: [320, 6, 305, 335],
+  blue: [285, 10, 230, 305]
+};
+function familyTone(fam, h) {
+  const c = FAMILY_TONE[fam];
+  if (!c) return '';
+  const w = (c[3] - c[2] + 360) % 360,
+    d = (h - c[2] + 360) % 360;
+  if (d > w || Math.min(d, w - d) < 3) return '';
+  const off = (h - c[0] + 540) % 360 - 180;
+  return off > c[1] ? 'warm' : off < -c[1] ? 'cool' : '';
+}
+// "Deep cool berry", "Light coral", "Black"; a red is worded as the red guide does ("Classic true red")
+function describeColor(L, a, b) {
+  const fam = colorFamily(L, a, b);
+  if (fam === 'red') {
+    const red = redLabel(labToHex(L, a, b));
+    return red[0].toUpperCase() + red.slice(1);
   }
-  function handleTextChange(v) {
-    setDraft(v);
-    const hex = normalize(v);
-    if (hex) onColor(hex);else if (!v.trim()) onColor(null);
+  let h = Math.atan2(b, a) * 180 / Math.PI;
+  if (h < 0) h += 360;
+  const tone = familyTone(fam, h);
+  const name = ['black', 'white', 'gray'].includes(fam) ? fam : `${L < 45 ? 'deep' : L <= 60 ? 'medium' : 'light'} ${tone ? tone + ' ' : ''}${fam}`;
+  return name[0].toUpperCase() + name.slice(1);
+}
+
+// A draft is the depth plus the spot aimed at on the map; the color shown is that
+// spot pulled into what a screen can display at that depth.
+function draftFromLab([L, a, b]) {
+  return {
+    L: Math.max(EXPLORER.LMIN, Math.min(EXPLORER.LMAX, L)),
+    ta: a,
+    tb: b
+  };
+}
+function draftColor(draft) {
+  const [a, b] = fitToGamut(draft.L, draft.ta, draft.tb);
+  return {
+    L: draft.L,
+    a,
+    b,
+    hex: labToHex(draft.L, a, b),
+    name: describeColor(draft.L, a, b)
+  };
+}
+
+// How many lipsticks the results would show for this color, and the nearest one. Same
+// rule as the results (matchBand over the closest 500, minus discontinued shades, which
+// the results hide until asked). One pass and normally no sorting, so it can run while
+// the dot is dragged. A black pick counts every black lipstick instead, as the results do.
+function shadeMatchInfo(hex, maxDeltaE, keep) {
+  const lab = hexToLab(hex),
+    black = isBlackLab(lab);
+  let rows = [],
+    best = Infinity,
+    nearest = null,
+    blacks = 0;
+  for (const p of REAL_PRODUCTS) {
+    if (keep && !keep(p)) continue;
+    const d = deltaE(lab, p.lab);
+    rows.push([d, p.discontinued]);
+    if (d < best) {
+      best = d;
+      nearest = p;
+    }
+    if (black && !p.discontinued && isBlackLab(p.lab)) blacks++;
   }
-  function handlePickerChange(v) {
-    setDraft(v);
-    onColor(v.toLowerCase());
+  if (black) return {
+    hex,
+    best,
+    nearest,
+    black,
+    count: blacks
+  };
+  let band = rows.filter(r => r[0] <= bandCut(best, maxDeltaE, true));
+  // Fewer than five in the band shows the closest five; more than 500 shows the closest 500
+  if (band.length < 5 || band.length > 500) band = rows.sort((a, b) => a[0] - b[0]).slice(0, band.length < 5 ? 5 : 500);
+  return {
+    hex,
+    best,
+    nearest,
+    count: band.filter(r => !r[1]).length
+  };
+}
+// What the card and the bar say about the current pick
+function shadeSummary(info) {
+  if (!info) return {
+    loading: true,
+    text: 'Loading the catalogue…'
+  };
+  if (info.best > NO_MATCH_DELTA_E && !info.black || !info.count) return {
+    noMatch: true,
+    text: 'No close matches here.',
+    nearHex: info.nearest.hex
+  };
+  const n = info.count.toLocaleString('en-US');
+  return {
+    n,
+    text: `${n} close ${info.count === 1 ? 'match' : 'matches'}`,
+    cta: `See ${n} matching ${info.count === 1 ? 'lipstick' : 'lipsticks'} →`
+  };
+}
+const EXPLORER_CTA = {
+  fontFamily: 'DM Sans',
+  fontSize: EXPLORER_TYPE.link,
+  fontWeight: 500,
+  letterSpacing: '0.08em',
+  textTransform: 'uppercase',
+  background: 'var(--espresso)',
+  color: 'var(--cream)',
+  border: 'none',
+  borderRadius: 40,
+  cursor: 'pointer'
+};
+function ShadeExplorer({
+  draft,
+  color,
+  origin,
+  zoom,
+  onZoom,
+  info,
+  committed,
+  pinned,
+  onDraft,
+  onStep,
+  onCommit,
+  onJump
+}) {
+  const {
+      LMIN,
+      LMAX,
+      SPAN,
+      ZOOM,
+      GRID
+    } = EXPLORER,
+    TYPE = EXPLORER_TYPE;
+  const [stacked, setStacked] = useState(() => window.innerWidth <= 900);
+  const [depthFocus, setDepthFocus] = useState(false);
+  const [liveMsg, setLiveMsg] = useState('');
+  const mapEl = React.useRef(null);
+  const drag = React.useRef({}); // mouse: dragging the map · dot: dragging the marker · tap: a touch that may still be a tap
+
+  useEffect(() => {
+    const onResize = () => setStacked(window.innerWidth <= 900);
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+  const summary = shadeSummary(info);
+  const before = origin && draftColor(origin),
+    moved = !!before && before.hex !== color.hex;
+  const hexLabel = color.hex.toUpperCase();
+  // One announcement after the visitor pauses, not one per drag step
+  useEffect(() => {
+    const t = setTimeout(() => setLiveMsg(`${color.name}, ${summary.text}`), 700);
+    return () => clearTimeout(t);
+  }, [color.name, summary.text]);
+  const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+  // The map shows the whole a*b* square, or, zoomed, the close-up around where the pick was
+  const ca = zoom ? zoom.a : 0,
+    cb = zoom ? zoom.b : 0,
+    half = zoom ? ZOOM : SPAN;
+  const px = v => ((v - ca + half) / (2 * half) * 100).toFixed(2) + '%';
+  const py = v => ((cb + half - v) / (2 * half) * 100).toFixed(2) + '%';
+  // Picks made in the close-up are steps: they keep the color chosen before zooming for "Return to"
+  const send = zoom ? onStep : onDraft;
+  function moveTo(a, b) {
+    // Each dot stands for the colors around it: a pick on the map lands on the nearest dot, so two
+    // picks are either the same shade or visibly different (a typed hex code is still exact)
+    if (dots.length) {
+      const d = dots.reduce((best, dot) => Math.hypot(dot.a - a, dot.b - b) < Math.hypot(best.a - a, best.b - b) ? dot : best);
+      return send({
+        L: draft.L,
+        ta: d.a,
+        tb: d.b
+      });
+    }
+    const [fa, fb] = fitToGamut(draft.L, clamp(a, Math.max(-SPAN, ca - half), Math.min(SPAN, ca + half)), clamp(b, Math.max(-SPAN, cb - half), Math.min(SPAN, cb + half)));
+    send({
+      L: draft.L,
+      ta: fa,
+      tb: fb
+    });
   }
-  const QUICK = [{
-    hex: '#C04E62',
-    label: 'Classic rose'
-  }, {
-    hex: '#8B1A2E',
-    label: 'Bordeaux'
-  }, {
-    hex: '#DC3092',
-    label: 'Magenta'
-  }, {
-    hex: '#E85840',
-    label: 'Coral'
-  }, {
-    hex: '#7A3E28',
-    label: 'Cocoa'
-  }, {
-    hex: '#4A1820',
-    label: 'Wine'
-  }, {
-    hex: '#454048',
-    label: 'Charcoal'
-  }, {
-    hex: '#2D6850',
-    label: 'Teal'
-  }];
-  const empty = !draft.trim();
-  const valid = !!normalize(draft);
-  const previewHex = valid ? normalize(draft) : '#FAF6F1';
-  return /*#__PURE__*/React.createElement("div", {
+  function fromPoint(x, y) {
+    const r = mapEl.current.getBoundingClientRect();
+    moveTo(ca + ((x - r.left) / r.width * 2 - 1) * half, cb + (1 - (y - r.top) / r.height * 2) * half);
+  }
+  // A pick that lands outside the close-up (a chip, a hex code, a change of depth) brings the close-up with it
+  useEffect(() => {
+    if (zoom && (Math.abs(color.a - zoom.a) > ZOOM || Math.abs(color.b - zoom.b) > ZOOM)) onZoom({
+      a: color.a,
+      b: color.b
+    });
+  }, [color.a, color.b, zoom]);
+  const isTap = e => drag.current.tap && Math.hypot(e.clientX - drag.current.tap.x, e.clientY - drag.current.tap.y) <= 10;
+  const Lk = Math.round(draft.L);
+  const dots = React.useMemo(() => {
+    let seeds = EXPLORER_SEEDS;
+    if (zoom) {
+      // Close-up: a honeycomb of large dots, on fixed positions so they don't shift when the view moves
+      const row = GRID * 0.866;
+      seeds = [];
+      for (let j = Math.ceil((cb - half) / row); j * row <= cb + half; j++) {
+        const off = j % 2 ? GRID / 2 : 0;
+        for (let i = Math.ceil((ca - half - off) / GRID); i * GRID + off <= ca + half; i++) seeds.push([i * GRID + off, j * row]);
+      }
+      seeds = seeds.filter(([a, b]) => Math.abs(a) <= SPAN && Math.abs(b) <= SPAN);
+    }
+    return seeds.filter(([a, b]) => labInGamut(Lk, a, b)).map(([a, b]) => ({
+      a,
+      b,
+      x: px(a),
+      y: py(b),
+      c: labToHex(Lk, a, b)
+    }));
+  }, [Lk, zoom]);
+  const stops = [];
+  for (let l = LMAX; l >= LMIN; l -= 6) {
+    const [fa, fb] = fitToGamut(l, draft.ta, draft.tb);
+    stops.push(labToHex(l, fa, fb));
+  }
+  const axisWord = {
+    fontSize: TYPE.micro,
+    color: 'var(--espresso-mid)',
+    lineHeight: 1,
+    textAlign: 'center',
+    pointerEvents: 'none'
+  };
+  const depthBar = /*#__PURE__*/React.createElement("div", {
     style: {
-      width: '100%',
-      maxWidth: 440,
       display: 'flex',
       flexDirection: 'column',
-      alignItems: 'center',
-      gap: 20,
-      padding: '8px 0 4px'
+      gap: 8
     }
-  }, /*#__PURE__*/React.createElement("p", {
+  }, /*#__PURE__*/React.createElement("div", {
     style: {
-      fontFamily: 'Cormorant Garamond',
-      fontStyle: 'italic',
-      fontSize: 21,
+      display: 'flex',
+      justifyContent: 'space-between',
+      fontSize: TYPE.micro,
       color: 'var(--espresso-mid)',
-      textAlign: 'center',
-      maxWidth: 340,
-      lineHeight: 1.4
+      letterSpacing: '0.03em'
     }
-  }, "Pick any color you love or paste a hex, and we'll find the lipsticks closest to it."), /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("span", null, "Lighter"), /*#__PURE__*/React.createElement("span", null, "Deeper")), /*#__PURE__*/React.createElement("div", {
     style: {
       position: 'relative',
-      width: 192,
-      height: 192,
-      margin: 4,
-      borderRadius: '50%',
-      background: previewHex,
-      // White ring + hairline drawn as box-shadows instead of border + outline:
-      // Chrome on Android anti-aliases a rounded border over its own background
-      // and a fractional outline separately, leaving visible seams/lines.
-      boxShadow: ['inset 0 -4px 12px rgba(0,0,0,0.10)', '0 0 0 4px #fff', '0 0 0 5.5px var(--border)', valid ? `0 6px 28px ${previewHex}80` : '0 4px 16px rgba(42,26,20,0.10)'].join(', '),
-      overflow: 'hidden',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      transition: 'background 0.2s, box-shadow 0.2s',
-      cursor: 'pointer',
-      WebkitTapHighlightColor: 'transparent'
+      height: 36
     }
-  }, !valid && /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontFamily: 'Cormorant Garamond',
-      fontStyle: 'italic',
-      color: 'var(--text-muted)',
-      fontSize: 18,
-      pointerEvents: 'none'
-    }
-  }, empty ? 'Tap to pick a color' : 'Invalid hex'), /*#__PURE__*/React.createElement("label", {
-    htmlFor: "hex-color-picker",
+  }, /*#__PURE__*/React.createElement("div", {
     style: {
       position: 'absolute',
       inset: 0,
-      cursor: 'pointer',
-      borderRadius: '50%'
+      borderRadius: 10,
+      border: '1px solid var(--border)',
+      background: `linear-gradient(to right,${stops.join(',')})`,
+      boxShadow: depthFocus ? '0 0 0 2px var(--cream), 0 0 0 4px var(--espresso)' : 'none'
+    }
+  }), /*#__PURE__*/React.createElement("span", {
+    style: {
+      position: 'absolute',
+      top: -4,
+      bottom: -4,
+      left: `${(LMAX - draft.L) / (LMAX - LMIN) * 100}%`,
+      width: 10,
+      marginLeft: -5,
+      borderRadius: 5,
+      background: color.hex,
+      border: '2.5px solid #fff',
+      boxShadow: '0 0 0 1.5px var(--espresso)',
+      pointerEvents: 'none'
     }
   }), /*#__PURE__*/React.createElement("input", {
-    ref: colorInputRef,
-    id: "hex-color-picker",
-    type: "color",
-    value: valid ? previewHex : '#C04E62',
-    onChange: e => handlePickerChange(e.target.value),
+    type: "range",
+    min: LMIN,
+    max: LMAX,
+    step: "1",
+    value: Math.round(LMIN + LMAX - draft.L),
+    onChange: e => send({
+      ...draft,
+      L: LMIN + LMAX - +e.target.value
+    }),
+    onFocus: e => {
+      if (e.target.matches(':focus-visible')) setDepthFocus(true);
+    },
+    onBlur: () => setDepthFocus(false),
+    "aria-label": "Depth",
+    "aria-valuetext": `${draft.L < 45 ? 'deep' : draft.L <= 60 ? 'medium' : 'light'}, lightness ${Math.round(draft.L)} of 100`,
     style: {
       position: 'absolute',
       inset: 0,
       width: '100%',
       height: '100%',
+      margin: 0,
       opacity: 0,
-      border: 'none',
-      padding: 0,
-      borderRadius: '50%',
-      cursor: 'pointer',
-      WebkitAppearance: 'none',
-      appearance: 'none'
-    },
-    "aria-label": "Pick a color"
-  })), /*#__PURE__*/React.createElement("div", {
+      cursor: 'pointer'
+    }
+  })));
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: '100%',
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 16
+    }
+  }, /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontFamily: 'Cormorant Garamond',
+      fontStyle: 'italic',
+      fontSize: TYPE.lede,
+      color: 'var(--espresso-mid)',
+      textAlign: 'center',
+      lineHeight: 1.4,
+      maxWidth: 360,
+      alignSelf: 'center'
+    }
+  }, "Choose a spot on the map to find matching lipsticks, then go lighter or deeper."), /*#__PURE__*/React.createElement("p", {
+    "aria-live": "polite",
+    style: {
+      position: 'absolute',
+      width: 1,
+      height: 1,
+      margin: -1,
+      overflow: 'hidden',
+      clip: 'rect(0 0 0 0)',
+      whiteSpace: 'nowrap'
+    }
+  }, liveMsg), /*#__PURE__*/React.createElement("div", {
     style: {
       display: 'flex',
       alignItems: 'center',
-      gap: 6,
-      background: '#fff',
-      borderRadius: 10,
-      border: `1.5px solid ${valid || empty ? 'var(--border)' : 'var(--blush)'}`,
-      padding: '6px 10px',
-      boxShadow: '0 2px 8px var(--shadow)',
-      minWidth: 180
+      gap: 8,
+      padding: '2px 0',
+      flexWrap: stacked ? 'nowrap' : 'wrap',
+      overflowX: stacked ? 'auto' : 'visible',
+      scrollbarWidth: 'none'
     }
   }, /*#__PURE__*/React.createElement("span", {
     style: {
-      color: 'var(--text-muted)',
-      fontFamily: 'DM Sans',
-      fontSize: 14,
-      fontWeight: 500
+      flex: 'none',
+      fontSize: TYPE.eyebrow,
+      lineHeight: 1.15,
+      letterSpacing: '0.12em',
+      textTransform: 'uppercase',
+      color: 'var(--espresso-mid)',
+      fontWeight: 500,
+      marginRight: 4,
+      width: stacked ? 52 : 'auto'
     }
-  }, "#"), /*#__PURE__*/React.createElement("input", {
-    type: "text",
-    value: draft.replace(/^#/, '').toUpperCase(),
-    onChange: e => handleTextChange(e.target.value),
-    placeholder: "C04E62",
-    maxLength: 7,
+  }, "Start from"), EXPLORER_STARTS.map(([name, hex]) => {
+    const on = hex === color.hex;
+    return /*#__PURE__*/React.createElement("button", {
+      key: name,
+      type: "button",
+      "aria-pressed": on,
+      onClick: () => onDraft(draftFromLab(hexToLab(hex))),
+      style: {
+        flex: 'none',
+        whiteSpace: 'nowrap',
+        fontFamily: 'DM Sans',
+        fontSize: TYPE.body,
+        display: 'flex',
+        alignItems: 'center',
+        gap: 7,
+        minHeight: stacked ? 44 : 0,
+        padding: '6px 14px 6px 7px',
+        borderRadius: 20,
+        border: `1.5px solid ${on ? 'var(--espresso)' : 'var(--border)'}`,
+        background: '#fff',
+        color: 'var(--espresso)',
+        cursor: 'pointer'
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        width: 18,
+        height: 18,
+        borderRadius: '50%',
+        background: hex
+      }
+    }), name);
+  })), stacked && depthBar, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      gap: 4,
+      alignItems: 'stretch',
+      width: '100%'
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    "aria-hidden": "true",
+    style: {
+      ...axisWord,
+      writingMode: 'vertical-rl',
+      alignSelf: 'center',
+      flex: 'none',
+      transform: 'rotate(180deg)'
+    }
+  }, "greener"), /*#__PURE__*/React.createElement("div", {
     style: {
       flex: 1,
-      border: 'none',
-      outline: 'none',
-      background: 'transparent',
-      fontFamily: 'DM Sans',
-      fontSize: 13,
-      fontWeight: 500,
-      letterSpacing: '0.1em',
-      color: 'var(--espresso)',
-      textTransform: 'uppercase',
-      minWidth: 0
+      minWidth: 0,
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 4
     }
-  }), /*#__PURE__*/React.createElement("label", {
-    htmlFor: "hex-color-picker",
-    title: "Open color picker",
+  }, /*#__PURE__*/React.createElement("span", {
+    "aria-hidden": "true",
+    style: axisWord
+  }, "yellower"), /*#__PURE__*/React.createElement("div", {
+    ref: mapEl,
+    onPointerDown: e => {
+      // Mouse: drag anywhere. Touch and pen: the page scrolls over the map, a tap places the dot
+      if (e.pointerType === 'mouse') {
+        drag.current.mouse = true;
+        e.currentTarget.setPointerCapture(e.pointerId);
+        fromPoint(e.clientX, e.clientY);
+      } else drag.current.tap = {
+        x: e.clientX,
+        y: e.clientY
+      };
+    },
+    onPointerMove: e => {
+      if (drag.current.mouse) fromPoint(e.clientX, e.clientY);else if (drag.current.tap && !isTap(e)) drag.current.tap = null;
+    },
+    onPointerUp: e => {
+      if (isTap(e)) fromPoint(e.clientX, e.clientY);
+      drag.current.tap = null;
+      drag.current.mouse = false;
+    },
+    onPointerCancel: () => {
+      drag.current.tap = null;
+      drag.current.mouse = false;
+    },
     style: {
-      border: 'none',
-      background: 'var(--cream-dark)',
-      width: 26,
-      height: 26,
-      borderRadius: 6,
-      cursor: 'pointer',
+      position: 'relative',
+      width: '100%',
+      aspectRatio: '1 / 1',
+      background: 'var(--cream)',
+      borderRadius: 20,
+      overflow: 'hidden',
+      boxShadow: '0 0 0 1px var(--border)',
+      touchAction: stacked ? 'pan-y' : 'none',
+      cursor: 'crosshair'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: 'absolute',
+      left: px(0),
+      top: 0,
+      bottom: 0,
+      width: 1,
+      background: '#D8C8BC',
+      pointerEvents: 'none'
+    }
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: 'absolute',
+      top: py(0),
+      left: 0,
+      right: 0,
+      height: 1,
+      background: '#D8C8BC',
+      pointerEvents: 'none'
+    }
+  }), dots.map((d, i) => /*#__PURE__*/React.createElement("span", {
+    key: i,
+    style: {
+      position: 'absolute',
+      left: d.x,
+      top: d.y,
+      width: zoom ? '11%' : '3.2%',
+      aspectRatio: '1 / 1',
+      borderRadius: '50%',
+      transform: 'translate(-50%,-50%)',
+      background: d.c,
+      pointerEvents: 'none'
+    }
+  })), /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    "aria-label": `Color picker: ${color.name}, ${hexLabel}. Arrow keys move it; hold Shift for bigger steps.`,
+    "aria-describedby": "shade-map-help",
+    onKeyDown: e => {
+      const s = zoom ? GRID : e.shiftKey ? 12 : 6,
+        m = {
+          ArrowLeft: [-s, 0],
+          ArrowRight: [s, 0],
+          ArrowUp: [0, s],
+          ArrowDown: [0, -s]
+        }[e.key];
+      if (m) {
+        e.preventDefault();
+        moveTo(color.a + m[0], color.b + m[1]);
+      }
+    },
+    onPointerDown: e => {
+      e.stopPropagation();
+      drag.current.dot = true;
+      e.currentTarget.setPointerCapture(e.pointerId);
+    },
+    onPointerMove: e => {
+      if (drag.current.dot) {
+        e.stopPropagation();
+        fromPoint(e.clientX, e.clientY);
+      }
+    },
+    onPointerUp: e => {
+      e.stopPropagation();
+      drag.current.dot = false;
+      drag.current.tap = null;
+    },
+    onPointerCancel: e => {
+      e.stopPropagation();
+      drag.current.dot = false;
+      drag.current.tap = null;
+    },
+    style: {
+      touchAction: 'none',
+      position: 'absolute',
+      left: px(color.a),
+      top: py(color.b),
+      width: 34,
+      height: 34,
+      margin: '-17px 0 0 -17px',
+      padding: 0,
+      borderRadius: '50%',
+      border: '3px solid #fff',
+      background: color.hex,
+      boxShadow: '0 0 0 1.5px var(--espresso), 0 4px 14px rgba(42,26,20,0.35)',
+      cursor: 'grab',
+      outlineOffset: 4
+    }
+  })), /*#__PURE__*/React.createElement("span", {
+    "aria-hidden": "true",
+    style: axisWord
+  }, "bluer")), /*#__PURE__*/React.createElement("span", {
+    "aria-hidden": "true",
+    style: {
+      ...axisWord,
+      writingMode: 'vertical-rl',
+      alignSelf: 'center',
+      flex: 'none'
+    }
+  }, "redder")), !stacked && depthBar, /*#__PURE__*/React.createElement("p", {
+    id: "shade-map-help",
+    style: {
+      fontSize: TYPE.body,
+      lineHeight: 1.6,
+      color: 'var(--espresso-mid)',
+      textAlign: 'center'
+    }
+  }, zoom ? `Close-up of the shades around your pick. ${stacked ? 'Tap a spot to choose, or drag the dot.' : 'Select or drag to choose one.'}` : stacked ? 'Tap a spot to choose, or drag the dot. Use the bar above to go lighter or deeper.' : 'Select or drag across the map to explore colors. Use the depth bar to go lighter or deeper.'), stacked && /*#__PURE__*/React.createElement(ShadeZoomControl, {
+    color: color,
+    origin: origin,
+    zoom: zoom,
+    onZoom: onZoom,
+    onDraft: onDraft,
+    row: true
+  }), stacked && /*#__PURE__*/React.createElement(ShadeHexForm, {
+    id: "shade-hex",
+    big: true,
+    onDraft: onDraft
+  }), stacked && !committed && /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: pinned ? 'static' : 'sticky',
+      bottom: 12,
+      zIndex: 5,
       display: 'flex',
       alignItems: 'center',
-      justifyContent: 'center',
-      color: 'var(--espresso-mid)',
-      fontSize: 13
+      gap: 12,
+      padding: '10px 12px',
+      background: '#fff',
+      border: '1px solid var(--border)',
+      borderRadius: 16,
+      boxShadow: '0 4px 18px rgba(42,26,20,0.16)'
     }
-  }, "\uD83C\uDFA8")));
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 'none',
+      display: 'flex',
+      width: 44,
+      height: 44,
+      borderRadius: 10,
+      overflow: 'hidden',
+      boxShadow: '0 0 0 1px var(--border)'
+    }
+  }, moved && !summary.noMatch && /*#__PURE__*/React.createElement("span", {
+    style: {
+      flex: 1,
+      background: before.hex
+    }
+  }), /*#__PURE__*/React.createElement("span", {
+    style: {
+      flex: 1,
+      background: color.hex
+    }
+  }), summary.noMatch && /*#__PURE__*/React.createElement("span", {
+    style: {
+      flex: 1,
+      background: summary.nearHex
+    }
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1,
+      minWidth: 0,
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 2
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontFamily: 'Cormorant Garamond',
+      fontStyle: 'italic',
+      fontSize: TYPE.lede,
+      lineHeight: 1.1,
+      whiteSpace: 'nowrap',
+      overflow: 'hidden',
+      textOverflow: 'ellipsis'
+    }
+  }, color.name), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: TYPE.body,
+      color: 'var(--espresso-mid)'
+    }
+  }, summary.noMatch ? 'No close matches · nearest on right' : summary.text)), !summary.loading && /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    onClick: summary.noMatch ? onJump : onCommit,
+    style: {
+      ...EXPLORER_CTA,
+      flex: 'none',
+      minHeight: 44,
+      padding: '0 18px',
+      letterSpacing: '0.06em'
+    }
+  }, summary.noMatch ? 'Jump to nearest' : `See ${summary.n}`)));
+}
+
+// "Already know the hex?": a typed hex moves the dot to that color
+function ShadeHexForm({
+  id,
+  big,
+  onDraft
+}) {
+  const TYPE = EXPLORER_TYPE;
+  const [hexText, setHexText] = useState('');
+  const [hexBad, setHexBad] = useState(false);
+  function submitHex(e) {
+    e.preventDefault();
+    let s = hexText.trim().replace(/^#/, '');
+    if (/^[0-9a-f]{3}$/i.test(s)) s = s.split('').map(c => c + c).join('');
+    if (!/^[0-9a-f]{6}$/i.test(s)) return setHexBad(true);
+    setHexBad(false);
+    onDraft(draftFromLab(hexToLab('#' + s.toLowerCase())));
+  }
+  return /*#__PURE__*/React.createElement("form", {
+    onSubmit: submitHex,
+    style: {
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 8,
+      padding: '0 4px'
+    }
+  }, /*#__PURE__*/React.createElement("label", {
+    htmlFor: id,
+    style: {
+      fontFamily: 'Cormorant Garamond',
+      fontStyle: 'italic',
+      fontSize: TYPE.lede,
+      lineHeight: 1.2,
+      color: 'var(--espresso)'
+    }
+  }, "Already know the hex?"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      gap: 8
+    }
+  }, /*#__PURE__*/React.createElement("input", {
+    id: id,
+    value: hexText,
+    onChange: e => {
+      setHexText(e.target.value);
+      setHexBad(false);
+    },
+    placeholder: "#B5252C",
+    maxLength: 7,
+    spellCheck: false,
+    autoComplete: "off",
+    style: {
+      flex: 1,
+      minWidth: 0,
+      fontFamily: 'DM Sans',
+      fontSize: big ? TYPE.input : TYPE.caption,
+      minHeight: big ? 44 : 0,
+      padding: '10px 14px',
+      borderRadius: 12,
+      border: `1.5px solid ${hexBad ? 'var(--blush-deep)' : 'var(--border)'}`,
+      background: '#fff',
+      color: 'var(--espresso)',
+      letterSpacing: '0.04em'
+    }
+  }), /*#__PURE__*/React.createElement("button", {
+    type: "submit",
+    style: {
+      fontFamily: 'DM Sans',
+      fontSize: TYPE.body,
+      padding: '10px 18px',
+      borderRadius: 12,
+      border: '1.5px solid #C9B3A4',
+      background: 'transparent',
+      color: 'var(--espresso)',
+      cursor: 'pointer'
+    }
+  }, "Show")), hexBad && /*#__PURE__*/React.createElement("p", {
+    role: "alert",
+    style: {
+      fontSize: TYPE.body,
+      color: 'var(--blush-deep)'
+    }
+  }, "Use six characters, like #B5252C."));
+}
+
+// "Explore nearby shades" zooms the map in on the pick (and back out). After picking in the
+// close-up, "Return to #…" goes back to the color chosen before zooming. On the card on desktop,
+// under the map when the columns stack.
+function ShadeZoomControl({
+  color,
+  origin,
+  zoom,
+  onZoom,
+  onDraft,
+  row
+}) {
+  const TYPE = EXPLORER_TYPE,
+    back = origin && draftColor(origin);
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 'none',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: row ? 'center' : 'flex-end',
+      gap: 10
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    "aria-pressed": !!zoom,
+    onClick: () => onZoom(zoom ? null : {
+      a: color.a,
+      b: color.b
+    }),
+    style: {
+      fontFamily: 'DM Sans',
+      fontSize: TYPE.link,
+      fontWeight: 500,
+      letterSpacing: '0.06em',
+      textTransform: 'uppercase',
+      minHeight: row ? 44 : 0,
+      padding: '10px 18px',
+      borderRadius: 40,
+      border: '1.5px solid var(--espresso)',
+      background: zoom ? 'var(--espresso)' : '#fff',
+      color: zoom ? 'var(--cream)' : 'var(--espresso)',
+      cursor: 'pointer'
+    }
+  }, zoom ? 'Show full map' : 'Explore nearby shades'), back && back.hex !== color.hex && /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    onClick: () => onDraft(origin),
+    style: {
+      fontFamily: 'DM Sans',
+      fontSize: TYPE.link,
+      display: 'flex',
+      alignItems: 'center',
+      gap: 8,
+      minHeight: row ? 44 : 0,
+      padding: 0,
+      border: 'none',
+      background: 'none',
+      color: 'var(--espresso)',
+      cursor: 'pointer',
+      textDecoration: 'underline',
+      textUnderlineOffset: 3
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      width: 16,
+      height: 16,
+      borderRadius: 5,
+      background: back.hex,
+      boxShadow: '0 0 0 1px var(--border)'
+    }
+  }), "Return to ", back.hex.toUpperCase()));
+}
+
+// Desktop: the current pick, beside the map. Its matches appear right under it once asked for.
+function ShadeCard({
+  color,
+  origin,
+  zoom,
+  onZoom,
+  info,
+  committed,
+  onCommit,
+  onJump,
+  onDraft
+}) {
+  const TYPE = EXPLORER_TYPE,
+    summary = shadeSummary(info);
+  const before = origin && draftColor(origin),
+    moved = !!before && before.hex !== color.hex;
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: '100%',
+      background: '#fff',
+      border: '1px solid var(--border)',
+      borderRadius: 20,
+      padding: 24,
+      boxShadow: '0 2px 12px var(--shadow)',
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 18
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 6
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: 'relative',
+      display: 'flex',
+      height: 160,
+      borderRadius: 12,
+      overflow: 'hidden'
+    }
+  }, moved && /*#__PURE__*/React.createElement("span", {
+    style: {
+      flex: 1,
+      background: before.hex
+    }
+  }), /*#__PURE__*/React.createElement("span", {
+    style: {
+      flex: 1,
+      background: color.hex
+    }
+  }), /*#__PURE__*/React.createElement("span", {
+    style: {
+      position: 'absolute',
+      inset: 0,
+      boxShadow: 'inset 0 -2px 6px rgba(0,0,0,0.15)',
+      pointerEvents: 'none'
+    }
+  })), moved && /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      fontSize: TYPE.body,
+      color: 'var(--espresso-mid)'
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      flex: 1
+    }
+  }, "Your first pick \xB7 ", before.hex.toUpperCase()), /*#__PURE__*/React.createElement("span", {
+    style: {
+      flex: 1
+    }
+  }, "Now"))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      flexWrap: 'wrap',
+      alignItems: 'flex-start',
+      justifyContent: 'space-between',
+      gap: 16
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: '1 1 160px',
+      minWidth: 0,
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 4
+    }
+  }, /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontFamily: 'Cormorant Garamond',
+      fontStyle: 'italic',
+      fontSize: TYPE.title,
+      lineHeight: 1.1
+    }
+  }, color.name), /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontSize: TYPE.body,
+      color: 'var(--espresso-mid)',
+      letterSpacing: '0.04em'
+    }
+  }, color.hex.toUpperCase())), /*#__PURE__*/React.createElement(ShadeZoomControl, {
+    color: color,
+    origin: origin,
+    zoom: zoom,
+    onZoom: onZoom,
+    onDraft: onDraft
+  })), /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontSize: TYPE.caption,
+      lineHeight: 1.4,
+      color: 'var(--espresso)'
+    }
+  }, summary.text), summary.noMatch && /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 6
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      height: 48,
+      borderRadius: 10,
+      overflow: 'hidden',
+      boxShadow: '0 0 0 1px var(--border)'
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      flex: 1,
+      background: color.hex
+    }
+  }), /*#__PURE__*/React.createElement("span", {
+    style: {
+      flex: 1,
+      background: summary.nearHex
+    }
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      fontSize: TYPE.body,
+      color: 'var(--espresso-mid)'
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      flex: 1
+    }
+  }, "Your pick"), /*#__PURE__*/React.createElement("span", {
+    style: {
+      flex: 1
+    }
+  }, "Nearest lipstick"))), !summary.loading && !committed && /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    onClick: summary.noMatch ? onJump : onCommit,
+    onMouseEnter: e => {
+      e.currentTarget.style.background = 'var(--espresso-mid)';
+    },
+    onMouseLeave: e => {
+      e.currentTarget.style.background = 'var(--espresso)';
+    },
+    style: {
+      ...EXPLORER_CTA,
+      width: '100%',
+      padding: '15px 28px'
+    }
+  }, summary.noMatch ? 'Jump to the nearest lipstick' : summary.cta), committed && /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontSize: TYPE.body,
+      color: 'var(--espresso-mid)'
+    }
+  }, "Move the dot or the depth bar to start over."));
 }
 
 // ── Vibe Panel ──────────────────────────────────────────────────────────
@@ -4918,8 +5813,8 @@ function Landing({
     icon: MODE_ICONS.dupe()
   }, {
     id: 'hex',
-    title: 'Enter a hex code',
-    desc: 'Paste it or use the picker for a precise lipstick match.',
+    title: 'Pick any color',
+    desc: 'Choose a spot on the color chart or paste a hex code for a precise match.',
     icon: MODE_ICONS.hex()
   }];
   return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
@@ -5062,7 +5957,12 @@ function App() {
     }
   });
   const [photoHex, setPhotoHex] = useState(null);
+  // Custom color: hexDraft is where the dot sits on the map, hexHex the color whose matches were asked for
   const [hexHex, setHexHex] = useState(initialLink?.type === 'color' && !initialWheelColor ? initialLink.hex : null);
+  const [hexDraft, setHexDraft] = useState(() => draftFromLab(hexToLab(hexHex || EXPLORER_STARTS[0][1])));
+  const [hexOrigin, setHexOrigin] = useState(hexDraft);
+  const [shadeZoom, setShadeZoom] = useState(null); // center of the map's close-up, or null for the full map
+  const [shadeInfo, setShadeInfo] = useState(null);
   const [dupeProduct, setDupeProduct] = useState(null);
   // Bumped to remount DupeFinder, clearing its brand/shade search back to step 1
   const [dupeResetKey, setDupeResetKey] = useState(0);
@@ -5187,10 +6087,9 @@ function App() {
     if (hexHex) {
       setSelectedColor({
         id: '__hex__',
-        name: 'From hex',
+        name: describeColor(...hexToLab(hexHex)),
         hex: hexHex
       });
-      // The native color picker fires on every drag step; only log where it settles
       const t = setTimeout(() => window.gtag?.('event', 'select_color', {
         method: 'hex',
         hex: hexHex
@@ -5319,9 +6218,31 @@ function App() {
     return true;
   }
 
-  // Tonal strip — 5-step ramp (2 lighter, anchor, 2 deeper) for every entry point.
+  // Custom color: the pick on the map, and (shortly after it stops moving) how many matches it has
+  const draftCol = React.useMemo(() => draftColor(hexDraft), [hexDraft]);
+  useEffect(() => {
+    if (mode !== 'hex' || !dataReady) return;
+    const t = setTimeout(() => setShadeInfo(shadeMatchInfo(draftCol.hex, tweaks.maxDeltaE, matchesVibe)), 60);
+    return () => clearTimeout(t);
+  }, [draftCol.hex, mode, dataReady, tweaks.maxDeltaE, vibe]);
+  // Moving the dot starts over: the results (and their filters) belong to the last color asked for
+  // A pick made in the map's close-up is a step: it keeps hexOrigin, the color chosen before zooming, for "Return to"
+  function changeHexDraft(next, step) {
+    setHexDraft(next);
+    if (step !== true) setHexOrigin(next);
+    if (hexHex) {
+      setHexHex(null);
+      setFilterParams([]);
+    }
+  }
+  const jumpToNearestShade = () => {
+    if (shadeInfo?.nearest) changeHexDraft(draftFromLab(shadeInfo.nearest.lab));
+  };
+
+  // Tonal strip — 5-step ramp (2 lighter, anchor, 2 deeper) for every entry point
+  // except Custom color, which has its own depth bar.
   const toneRamp = React.useMemo(() => {
-    if (!selectedColor) return null;
+    if (!selectedColor || mode === 'hex') return null;
     const base = generateToneSteps(selectedColor.hex, 2, 13, selectedColor.name || 'This shade');
     const ramp = base.ramp.map((step, i) => ({
       ...step,
@@ -5387,11 +6308,17 @@ function App() {
   const matches = React.useMemo(() => {
     if (!selectedColor || !dataReady) return [];
     const hex = toneRamp && toneIdx != null && !onAnchor ? toneRamp.ramp[toneIdx].hex : selectedColor.hex;
+    // Custom color and the wheel (Onyx): every black lipstick answers a black pick, closest first
+    const target = hexToLab(hex);
+    if ((mode === 'hex' || mode === 'wheel') && isBlackLab(target)) {
+      return REAL_PRODUCTS.filter(p => isBlackLab(p.lab)).map(p => ({
+        ...p,
+        distance: deltaE(target, p.lab)
+      })).sort((a, b) => a.distance - b.distance).filter(matchesVibe);
+    }
     const candidates = getClosestColors(hex, 500).filter(p => !selectedColor.sourceKey || `${p.brand}|${p.shade}` !== selectedColor.sourceKey).filter(matchesVibe);
-    const bestDist = candidates[0]?.distance ?? 0;
-    const inBand = candidates.filter(p => p.distance <= bestDist + tweaks.maxDeltaE);
-    return inBand.length >= 5 ? inBand : candidates.slice(0, 5);
-  }, [selectedColor, toneRamp, toneIdx, tweaks.maxDeltaE, matchesVibe, dataReady]);
+    return matchBand(candidates, tweaks.maxDeltaE, mode === 'hex');
+  }, [selectedColor, toneRamp, toneIdx, tweaks.maxDeltaE, matchesVibe, dataReady, mode]);
   // matches: array of real products with .hex .brand .product .shade .finish .retailer .distance
   function togglePin(product) {
     setPinnedItems(prev => {
@@ -5410,6 +6337,23 @@ function App() {
   // Color wheel is now the only palette style
 
   if (dataStatus === 'error') return /*#__PURE__*/React.createElement(DataLoadError, null);
+
+  // Custom color shows its pick on the card above the results, so they skip their own color header
+  const resultsEl = selectedColor && !dataReady ? /*#__PURE__*/React.createElement(CatalogueLoading, null) : /*#__PURE__*/React.createElement(ResultsTable, {
+    selectedColor: effectiveColor,
+    matches: matches,
+    totalProducts: REAL_PRODUCTS.length,
+    pinnedItems: pinnedItems,
+    togglePin: togglePin,
+    wishlist: wishlist,
+    toggleWishlist: toggleWishlist,
+    toneRamp: toneRamp,
+    toneIdx: toneIdx,
+    setToneIdx: handleToneIdxChange,
+    initialFilterParams: filterParams,
+    onFiltersChange: setFilterParams,
+    hideHeader: mode === 'hex'
+  });
   return /*#__PURE__*/React.createElement("div", {
     style: {
       minHeight: '100vh',
@@ -5659,7 +6603,7 @@ function App() {
       transition: 'padding-bottom 0.35s ease'
     }
   }, /*#__PURE__*/React.createElement("div", {
-    className: "palette-col"
+    className: mode === 'hex' ? 'shade-top' : 'palette-col'
   }, mode === 'wheel' ? /*#__PURE__*/React.createElement("div", {
     style: {
       position: 'relative',
@@ -5681,10 +6625,48 @@ function App() {
   })) : mode === 'photo' ? /*#__PURE__*/React.createElement(PhotoPicker, {
     sampledHex: photoHex,
     onColor: setPhotoHex
-  }) : mode === 'hex' ? /*#__PURE__*/React.createElement(HexPicker, {
-    sampledHex: hexHex,
-    onColor: setHexHex
-  }) : mode === 'dupe' && !dataReady ? /*#__PURE__*/React.createElement(CatalogueLoading, null) : mode === 'dupe' ? /*#__PURE__*/React.createElement(DupeFinder, {
+  }) : mode === 'hex' ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+    className: "shade-picker"
+  }, /*#__PURE__*/React.createElement(ShadeExplorer, {
+    draft: hexDraft,
+    color: draftCol,
+    origin: hexOrigin,
+    zoom: shadeZoom,
+    onZoom: setShadeZoom,
+    onStep: d => changeHexDraft(d, true),
+    info: shadeInfo,
+    committed: !!hexHex,
+    pinned: pinnedItems.length > 0,
+    onDraft: changeHexDraft,
+    onCommit: () => setHexHex(draftCol.hex),
+    onJump: jumpToNearestShade
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "shade-side"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "results-empty-state"
+  }, /*#__PURE__*/React.createElement(ShadeCard, {
+    color: draftCol,
+    info: shadeInfo,
+    committed: !!hexHex,
+    onCommit: () => setHexHex(draftCol.hex),
+    onJump: jumpToNearestShade,
+    onDraft: changeHexDraft,
+    origin: hexOrigin,
+    zoom: shadeZoom,
+    onZoom: setShadeZoom
+  })), !hexHex && /*#__PURE__*/React.createElement("div", {
+    className: "results-empty-state"
+  }, /*#__PURE__*/React.createElement(ShadeHexForm, {
+    id: "shade-hex-side",
+    onDraft: changeHexDraft
+  })), hexHex && /*#__PURE__*/React.createElement("div", {
+    ref: resultsRef,
+    style: {
+      display: 'flex',
+      flexDirection: 'column',
+      minWidth: 0
+    }
+  }, resultsEl))) : mode === 'dupe' && !dataReady ? /*#__PURE__*/React.createElement(CatalogueLoading, null) : mode === 'dupe' ? /*#__PURE__*/React.createElement(DupeFinder, {
     key: dupeResetKey,
     product: dupeProduct,
     onSelect: setDupeProduct,
@@ -5708,7 +6690,7 @@ function App() {
         name: p.shade
       });
     }
-  }), selectedColor && /*#__PURE__*/React.createElement("div", {
+  }), selectedColor && mode !== 'hex' && /*#__PURE__*/React.createElement("div", {
     style: {
       marginTop: 28,
       display: 'flex',
@@ -5769,7 +6751,7 @@ function App() {
       marginTop: 8,
       textAlign: 'center'
     }
-  }, "Click a segment to browse matching lipstick shades"), !selectedColor && mode !== 'dupe' && /*#__PURE__*/React.createElement("div", {
+  }, "Click a segment to browse matching lipstick shades"), !selectedColor && mode !== 'dupe' && mode !== 'hex' && /*#__PURE__*/React.createElement("div", {
     className: "mobile-picker-tips",
     style: {
       justifyContent: 'center',
@@ -5782,23 +6764,10 @@ function App() {
       color: 'var(--text-muted)',
       letterSpacing: '0.02em'
     }
-  }, "Your matches will appear here"))), /*#__PURE__*/React.createElement("div", {
+  }, "Your matches will appear here"))), mode !== 'hex' && /*#__PURE__*/React.createElement("div", {
     className: "results-col",
     ref: resultsRef
-  }, selectedColor && !dataReady ? /*#__PURE__*/React.createElement(CatalogueLoading, null) : /*#__PURE__*/React.createElement(ResultsTable, {
-    selectedColor: effectiveColor,
-    matches: matches,
-    totalProducts: REAL_PRODUCTS.length,
-    pinnedItems: pinnedItems,
-    togglePin: togglePin,
-    wishlist: wishlist,
-    toggleWishlist: toggleWishlist,
-    toneRamp: toneRamp,
-    toneIdx: toneIdx,
-    setToneIdx: handleToneIdxChange,
-    initialFilterParams: filterParams,
-    onFiltersChange: setFilterParams
-  })))), /*#__PURE__*/React.createElement("div", {
+  }, resultsEl))), /*#__PURE__*/React.createElement("div", {
     style: {
       display: mode === PAGE_MODE ? 'block' : 'none'
     },
