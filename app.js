@@ -2675,22 +2675,22 @@ function useBackToClose(onClose, enabled = true) {
 const MODE_PAGES = {
   wheel: {
     path: '/color-wheel/',
-    title: 'Lipstick Color Wheel — Discover Lipstick Shades by Color'
+    title: 'Lipstick Color Wheel: Browse Shades by Color'
   },
   photo: {
     path: '/photo-match/',
-    title: 'Find Your Lipstick Shade from a Photo'
+    title: 'Find a Lipstick from a Photo: Match Any Lip Color'
   },
   dupe: {
     path: '/dupe-finder/',
-    title: 'Lipstick Dupe Finder — Find Dupes for Any Shade by Color'
+    title: 'Lipstick Dupe Finder: Same Color, Any Price'
   },
   hex: {
     path: '/lipstick-color-chart/',
-    title: 'Lipstick Color Chart: Find Any Shade'
+    title: 'Lipstick Color Chart: Nearly 17,000 Lipsticks by Color'
   }
 };
-const HOME_TITLE = 'Lipstick Color Finder — Search Lipstick by Color & Find Dupes';
+const HOME_TITLE = 'Lipstick Color Finder: Find Any Lipstick by Color';
 const PAGE_MODE = Object.keys(MODE_PAGES).find(m => window.location.pathname.startsWith(MODE_PAGES[m].path)) || null;
 function parseSharedLink(search) {
   const q = new URLSearchParams(search);

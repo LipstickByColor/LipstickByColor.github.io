@@ -1,6 +1,6 @@
 # Lipstick Color Finder
 
-A tool for discovering, searching, and comparing lipstick shades across 16,000+ products and 400+ brands by color, finish, and vibe.
+A tool for discovering, searching, and comparing lipstick shades across 16,000+ products and 430+ brands by color, finish, and vibe.
 
 **[lipstickbycolor.github.io](https://lipstickbycolor.github.io)**
 

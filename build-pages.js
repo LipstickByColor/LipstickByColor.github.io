@@ -6,7 +6,7 @@ const fs = require('fs');
 const path = require('path');
 
 const SITE = 'https://lipstickbycolor.github.io';
-const HOME_TITLE = 'Lipstick Color Finder — Search Lipstick by Color &amp; Find Dupes';
+const HOME_TITLE = 'Lipstick Color Finder: Find Any Lipstick by Color';
 const esc = s => s.replace(/&/g, '&amp;').replace(/"/g, '&quot;');
 
 // The wheel's colors as small cards (swatch, name, lipstick count, hex), grouped by family
@@ -45,10 +45,10 @@ const PAGES = [
   {
     dir: 'color-wheel',
     name: 'Lipstick Color Wheel',
-    title: 'Lipstick Color Wheel — Discover Lipstick Shades by Color',
-    description: 'Browse nearly 17,000 lip products by color, not by name. Click any shade on the color wheel, step lighter or deeper, and filter by undertone and finish.',
+    title: 'Lipstick Color Wheel: Browse Shades by Color',
+    description: 'Tap a color on the wheel and see the lipsticks that look like it. Go lighter or deeper, then filter by finish, undertone and price.',
     h1: 'Lipstick color wheel',
-    intro: 'Click any color on the wheel to see real lipsticks in that shade, from nearly 17,000 lip products. Go lighter or deeper, then filter by finish, brand, and price.',
+    intro: 'Not sure what you want yet? Start with a color and see real lipsticks in it, then go lighter, deeper, warmer or cooler until it feels right.',
     copy: `
     <h2>How the lipstick color wheel works</h2>
     <p>Explore 46 lipstick colors, from pale pinks to deep wines. Select a color to see real lipstick shades that match, then refine your search by depth, brand, finish, or price.</p>
@@ -63,10 +63,10 @@ const PAGES = [
   {
     dir: 'dupe-finder',
     name: 'Lipstick Dupe Finder',
-    title: 'Lipstick Dupe Finder — Find Dupes for Any Shade by Color',
-    description: 'Find lipstick dupes by measured color across nearly 17,000 products: cheaper alternatives, drugstore matches, and stand-ins for discontinued favorites.',
+    title: 'Lipstick Dupe Finder: Same Color, Any Price',
+    description: 'Name your lipstick and see the shades that look most like it, from nearly 17,000 lipsticks and nearly 450 brands. Discontinued? Find its closest twin.',
     h1: 'Lipstick dupe finder',
-    intro: 'Pick a lipstick you already love and see its closest color matches across brands and prices, from nearly 17,000 lip products.',
+    intro: 'Name a lipstick you love and see the shades that look most like it, from drugstore to luxury, across nearly 450 brands.',
     copy: `
     <h2>How the lipstick dupe finder works</h2>
     <p>Search the brand, then the shade. The finder takes that lipstick's measured color and ranks every other product in the catalogue by how close its color is, closest first. Narrow the list by price, brand, format, finish, or undertone to find a cheaper alternative, the same color in a different finish, or a stand-in for a shade you can no longer buy.</p>
@@ -92,10 +92,10 @@ const PAGES = [
   {
     dir: 'photo-match',
     name: 'Lipstick Photo Match',
-    title: 'Find Your Lipstick Shade from a Photo',
-    description: 'Saw a lip color on Instagram or Pinterest? Upload a photo, tap the lips, and match it against nearly 17,000 lip products. Your photo stays on your device.',
+    title: 'Find a Lipstick from a Photo: Match Any Lip Color',
+    description: 'Saw the perfect lip color on Instagram? Upload the photo, tap the lips, and find it among nearly 17,000 lipsticks. Your photo never leaves your phone.',
     h1: 'Find a lipstick color from a photo',
-    intro: 'Saw a lip color on Instagram or Pinterest? Upload a photo, tap the lips, and match it against nearly 17,000 lip products. Your photo stays on your device.',
+    intro: 'That lip color you screenshotted? Upload it, tap the lips, and see which lipsticks come closest. Your photo stays on your device.',
     copy: `
     <h2>How lipstick photo match works</h2>
     <p>Upload any photo or screenshot: a celebrity's red-carpet look, a selfie, a swatch, a product shot. Tap the spot whose color you want. The finder reads that color and ranks lipsticks by how close their measured color is, closest first. Then narrow the list by price, brand, format, finish, or undertone.</p>
@@ -109,10 +109,10 @@ const PAGES = [
   {
     dir: 'lipstick-color-chart',
     name: 'Lipstick Color Chart',
-    title: 'Lipstick Color Chart: Find Any Shade',
-    description: 'Pick any color on the chart and see every lipstick that matches it, from deep cool reds to soft nude browns.',
+    title: 'Lipstick Color Chart: Nearly 17,000 Lipsticks by Color',
+    description: 'Explore hundreds of shades on one chart. Tap a color or paste a hex code to match against nearly 17,000 lipsticks across 430+ brands at every price.',
     h1: 'Lipstick color chart: find any shade',
-    intro: 'Explore lipstick colors on a two-dimensional map. Choose a spot to find matching shades from nearly 17,000 lip products, then adjust the depth to go lighter or deeper.',
+    intro: 'Hundreds of shades on one map, from soft nudes to deep blue-reds, matched against nearly 17,000 lipsticks from 430+ brands. Tap a color to see the closest matches, then go lighter or deeper.',
     copy: `
     <h2>How to find the right lipstick color</h2>
     <p>The best way to find a lipstick shade depends on how much you already know about the color you want. A lipstick color chart lets you explore shades visually instead of relying only on brand names, which can describe similar colors differently.</p>

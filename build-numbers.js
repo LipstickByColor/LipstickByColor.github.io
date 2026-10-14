@@ -5,7 +5,7 @@
 // Each number can appear in three wordings, and each keeps its wording:
 //   exact   16,794
 //   round   nearly 17,000 / over 16,000 / about 16,000   (whichever is true)
-//   plus    16,000+
+//   plus    16,000+ / 430+ (under 1,000, to the ten)
 // site-numbers.lock.json records what the pages say right now, so the next run
 // knows what to look for. It is written by this script; don't edit it.
 //
@@ -48,7 +48,9 @@ function forms(n) {
   const floor = Math.floor(n / unit) * unit;
   // "nearly" only when it is close to the next round number
   const round = n % unit >= unit * 0.7 ? `nearly ${fmt(floor + unit)}` : n === floor ? `about ${fmt(n)}` : `over ${fmt(floor)}`;
-  return { exact: fmt(n), round, plus: `${fmt(floor)}+` };
+  // Under 1,000 the "+" wording rounds to tens, closer to the count: 437 is "430+", not "400+"
+  const plusFloor = n < 1000 ? Math.floor(n / 10) * 10 : floor;
+  return { exact: fmt(n), round, plus: `${fmt(plusFloor)}+` };
 }
 
 // Count products, reds (the red guide's rule, redKind in lipstick-utils.js) and brand names from the live catalogue

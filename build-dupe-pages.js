@@ -116,7 +116,7 @@ const row = p => `
 function page(s, src, srcImg, closest, budget, mid, others) {
   const url = `${SITE}${pageUrl(s)}`;
   const title = `${s.name} Dupes & Closest Color Matches`;
-  const description = `The closest color matches to ${s.name} from nearly 17,000 lip products, ranked by measured color difference, with cheaper alternatives at every price.`;
+  const description = `The lipsticks closest in color to ${s.name}, out of nearly 17,000, from drugstore to luxury. Closest first.`;
   const facts = [titleCase(src.product), src.finish, src.format, src.tier, src.discontinued && 'Discontinued'].filter(Boolean);
   const jsonLd = JSON.stringify({
     '@context': 'https://schema.org', '@type': 'BreadcrumbList',
@@ -217,7 +217,7 @@ h2{margin:0;font-family:'Cormorant Garamond',serif;font-weight:400;font-size:cla
 
   <p class="eyebrow">Dupe finder</p>
   <h1>${esc(s.name)} dupes</h1>
-  <p class="lede">The lipsticks whose measured color is closest to ${esc(s.name)}, out of nearly 17,000 lip products, closest first.</p>
+  <p class="lede">The lipsticks that look most like ${esc(s.name)}, from drugstore to luxury, closest first.</p>
 
   <div class="source">
     <div class="source-swatch" style="background:${src.hex}"></div>${srcImg ? `
