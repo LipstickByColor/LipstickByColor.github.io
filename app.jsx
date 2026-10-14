@@ -2760,6 +2760,14 @@ const EXPLORER_CTA = {
   background:'var(--espresso)', color:'var(--cream)', border:'none', borderRadius:40, cursor:'pointer',
 };
 
+// Custom color map use, so visitors who explore without asking for results still show up in analytics.
+// Moving the dot or the depth bar sends one event per visit, not one per drag step.
+const exploreSent = new Set();
+function trackExplore(action, params, once) {
+  if (once) { if (exploreSent.has(action)) return; exploreSent.add(action); }
+  window.gtag?.('event', 'shade_explore', { action, ...params });
+}
+
 function ShadeExplorer({ draft, color, origin, zoom, onZoom, info, committed, pinned, onDraft, onStep, onCommit, onJump }) {
   const { LMIN, LMAX, SPAN, ZOOM, GRID } = EXPLORER, TYPE = EXPLORER_TYPE;
   const [stacked, setStacked] = useState(() => window.innerWidth <= 900);
@@ -2808,6 +2816,7 @@ function ShadeExplorer({ draft, color, origin, zoom, onZoom, info, committed, pi
   function moveTo(a, b) {
     // Each dot stands for the colors around it: a pick on the map lands on the nearest dot, so two
     // picks are either the same shade or visibly different (a typed hex code is still exact)
+    trackExplore(zoom ? 'map_closeup' : 'map', {}, true);
     if (dots.length) {
       const d = dots.reduce((best, dot) => Math.hypot(dot.a - a, dot.b - b) < Math.hypot(best.a - a, best.b - b) ? dot : best);
       return send({ L: draft.L, ta: d.a, tb: d.b });
@@ -2842,8 +2851,9 @@ function ShadeExplorer({ draft, color, origin, zoom, onZoom, info, committed, pi
   const stops = [];
   for (let l = LMAX; l >= LMIN; l -= 6) { const [fa, fb] = fitToGamut(l, draft.ta, draft.tb); stops.push(labToHex(l, fa, fb)); }
 
-  function pickStart(fam, ti, di) {
+  function pickStart(fam, ti, di, row) {
     const lab = startLab(fam, ti, di);
+    trackExplore(row, { name: row === 'tone' ? START_TONES[ti] : row === 'depth_chip' ? (START_FAMILIES[fam].depths || START_DEPTHS)[di][0] : fam });
     setStart({ fam, ti, di, hex: labToHex(...lab) });
     onDraft(draftFromLab(lab));
   }
@@ -2888,7 +2898,7 @@ function ShadeExplorer({ draft, color, origin, zoom, onZoom, info, committed, pi
           borderRadius:5, background:color.hex, border:'2.5px solid #fff', boxShadow:'0 0 0 1.5px var(--espresso)', pointerEvents:'none',
         }} />
         <input type="range" min={LMIN} max={LMAX} step="1" value={Math.round(LMIN + LMAX - draft.L)}
-          onChange={e => send({ ...draft, L: LMIN + LMAX - +e.target.value })}
+          onChange={e => { trackExplore('depth_bar', {}, true); send({ ...draft, L: LMIN + LMAX - +e.target.value }); }}
           onFocus={e => { if (e.target.matches(':focus-visible')) setDepthFocus(true); }}
           onBlur={() => setDepthFocus(false)}
           aria-label="Depth" aria-valuetext={`${draft.L < 45 ? 'deep' : draft.L <= 60 ? 'medium' : 'light'}, lightness ${Math.round(draft.L)} of 100`}
@@ -2910,12 +2920,12 @@ function ShadeExplorer({ draft, color, origin, zoom, onZoom, info, committed, pi
       {/* Start from: a family, then (for most) its tone and depth */}
       <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
         {startRow('Start from', EXPLORER_STARTS.map(([name, hex]) => START_FAMILIES[name]
-          ? startChip(name, hex, sel?.fam === name, () => pickStart(name, 1, START_FAMILIES[name].open))
-          : startChip(name, hex, hex === color.hex, () => { setStart(null); onDraft(draftFromLab(hexToLab(hex))); })))}
+          ? startChip(name, hex, sel?.fam === name, () => pickStart(name, 1, START_FAMILIES[name].open, 'start_from'))
+          : startChip(name, hex, hex === color.hex, () => { setStart(null); trackExplore('start_from', { name }); onDraft(draftFromLab(hexToLab(hex))); })))}
         {sel && startRow('Tone', START_TONES.map((name, ti) =>
-          startChip(name, labToHex(...startLab(sel.fam, ti, sel.di)), onStart && sel.ti === ti, () => pickStart(sel.fam, ti, sel.di))), true)}
+          startChip(name, labToHex(...startLab(sel.fam, ti, sel.di)), onStart && sel.ti === ti, () => pickStart(sel.fam, ti, sel.di, 'tone'))), true)}
         {sel && (START_FAMILIES[sel.fam].depths || START_DEPTHS).length > 1 && startRow('Depth', (START_FAMILIES[sel.fam].depths || START_DEPTHS).map(([name], di) =>
-          startChip(name, labToHex(...startLab(sel.fam, sel.ti, di)), onStart && sel.di === di, () => pickStart(sel.fam, sel.ti, di))), true)}
+          startChip(name, labToHex(...startLab(sel.fam, sel.ti, di)), onStart && sel.di === di, () => pickStart(sel.fam, sel.ti, di, 'depth_chip'))), true)}
       </div>
 
       {stacked && depthBar}
@@ -3042,6 +3052,7 @@ function ShadeHexForm({ id, big, onDraft }) {
     if (/^[0-9a-f]{3}$/i.test(s)) s = s.split('').map(c => c + c).join('');
     if (!/^[0-9a-f]{6}$/i.test(s)) return setHexBad(true);
     setHexBad(false);
+    trackExplore('hex_typed', { hex: '#' + s.toLowerCase() });
     onDraft(draftFromLab(hexToLab('#' + s.toLowerCase())));
   }
   return (
@@ -3077,7 +3088,7 @@ function ShadeZoomControl({ color, origin, zoom, onZoom, onDraft, row, wide }) {
       // On the card once there are two colors to describe: one line across, under both
       ? { flex:1, display:'flex', flexWrap:'wrap', alignItems:'center', justifyContent:'space-between', gap:10 }
       : { flex:'none', display:'flex', flexDirection:'column', alignItems: row ? 'center' : 'flex-end', gap:10 }}>
-      <button type="button" aria-pressed={!!zoom} onClick={() => onZoom(zoom ? null : { a: color.a, b: color.b })} style={{
+      <button type="button" aria-pressed={!!zoom} onClick={() => { trackExplore(zoom ? 'zoom_out' : 'zoom_in'); onZoom(zoom ? null : { a: color.a, b: color.b }); }} style={{
         fontFamily:'DM Sans', fontSize:TYPE.link, fontWeight:500, letterSpacing:'0.06em', textTransform:'uppercase',
         minHeight: row ? 44 : 0, padding:'10px 18px', borderRadius:40, border:'1.5px solid var(--espresso)',
         background: zoom ? 'var(--espresso)' : '#fff', color: zoom ? 'var(--cream)' : 'var(--espresso)', cursor:'pointer',
@@ -3085,7 +3096,7 @@ function ShadeZoomControl({ color, origin, zoom, onZoom, onDraft, row, wide }) {
         {zoom ? 'Show full map' : 'Explore nearby shades'}
       </button>
       {back && back.hex !== color.hex && (
-        <button type="button" onClick={() => onDraft(origin)} style={{
+        <button type="button" onClick={() => { trackExplore('return_to_origin'); onDraft(origin); }} style={{
           fontFamily:'DM Sans', fontSize:TYPE.link, display:'flex', alignItems:'center', gap:8, minHeight: row ? 44 : 0,
           padding:0, border:'none', background:'none', color:'var(--espresso)', cursor:'pointer', textDecoration:'underline', textUnderlineOffset:3,
         }}>
@@ -3876,8 +3887,8 @@ function App() {
     if (mode !== 'hex') return;
     if (hexHex) {
       setSelectedColor({ id:'__hex__', name: describeColor(...hexToLab(hexHex)), hex: hexHex });
-      const t = setTimeout(() => window.gtag?.('event', 'select_color', { method: 'hex', hex: hexHex }), 800);
-      return () => clearTimeout(t);
+      // hexHex only changes when results are asked for, so this counts those requests, not map moves (shade_explore)
+      window.gtag?.('event', 'select_color', { method: 'hex', hex: hexHex });
     } else {
       setSelectedColor(null);
     }
@@ -3950,7 +3961,7 @@ function App() {
     setHexHex(null); setFilterParams([]);
     setTimeout(() => document.getElementById('shade-bar-cta')?.focus({ preventScroll: true }), 50);
   }
-  const jumpToNearestShade = () => { if (shadeInfo?.nearest) changeHexDraft(draftFromLab(shadeInfo.nearest.lab)); };
+  const jumpToNearestShade = () => { if (shadeInfo?.nearest) { trackExplore('jump_nearest'); changeHexDraft(draftFromLab(shadeInfo.nearest.lab)); } };
 
   // Tonal strip — 5-step ramp (2 lighter, anchor, 2 deeper) for every entry point
   // except Custom color, which has its own depth bar.
