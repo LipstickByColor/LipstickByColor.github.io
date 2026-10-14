@@ -20,7 +20,7 @@ function heartBtnStyle(isLiked) {
     width:30, height:30, display:'flex', alignItems:'center', justifyContent:'center',
     fontSize:15, lineHeight:1, fontFamily:'DM Sans', flexShrink:0,
     background: isLiked ? 'rgba(232,180,192,0.55)' : 'rgba(255,255,255,0.82)',
-    color: 'var(--blush)',
+    color: isLiked ? 'var(--blush-deep)' : 'var(--blush)', // the filled heart sits on pink
     border:'1px solid rgba(42,26,20,0.08)', borderRadius:'50%', cursor:'pointer',
     transition:'background 0.15s, color 0.15s, box-shadow 0.18s',
   };
@@ -98,7 +98,7 @@ const srOnly = { position:'absolute', width:1, height:1, overflow:'hidden', clip
 const MAX_COMPARE = 6;
 
 // Single result card — image, save/compare overlay, ΔE + % match
-function MatchCard({ p, wishlist, toggleWishlist, pinnedItems, togglePin }) {
+function MatchCard({ p, wishlist, toggleWishlist, pinnedItems, togglePin, onOpen }) {
   const isLiked = wishlist.some(x => x.brand === p.brand && x.shade === p.shade);
   const isPinned = pinnedItems.some(x => x.brand === p.brand && x.shade === p.shade);
   const isFull = pinnedItems.length >= MAX_COMPARE && !isPinned;
@@ -106,6 +106,7 @@ function MatchCard({ p, wishlist, toggleWishlist, pinnedItems, togglePin }) {
 
   return (
     <div className="match-card" style={{
+      position:'relative', cursor:'pointer',
       background:'#fff', border:'1px solid var(--border)', borderRadius:14,
       overflow:'hidden', display:'flex', flexDirection:'column', height:'100%',
       transition:'box-shadow 0.18s, transform 0.18s',
@@ -113,6 +114,12 @@ function MatchCard({ p, wishlist, toggleWishlist, pinnedItems, togglePin }) {
     onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 8px 22px var(--shadow)'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
     onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'none'; }}
     >
+      {/* The whole card opens the detail view; save and compare sit above this button */}
+      <button
+        onClick={onOpen}
+        aria-label={`See details for ${p.brand} ${p.shade}`}
+        style={{ position:'absolute', inset:0, zIndex:1, background:'none', border:0, padding:0, borderRadius:14, cursor:'pointer' }}
+      />
       <div style={{ position:'relative', height:106, background:'var(--cream-dark)' }}>
         <span role="img" aria-label={`Swatch ${p.hex}`} title={p.hex} style={{
           position:'absolute', left:0, top:0, bottom:0, width:18, background:p.hex,
@@ -120,7 +127,7 @@ function MatchCard({ p, wishlist, toggleWishlist, pinnedItems, togglePin }) {
         <div style={{ position:'absolute', inset:0, display:'flex', alignItems:'center', justifyContent:'center', paddingLeft:18 }}>
           <ProductThumb product={p} width="100%" height="100%" fit="contain" radius={0} ring={false} tint={false} />
         </div>
-        <div style={{ position:'absolute', right:5, top:5, bottom:5, display:'flex', flexDirection:'column', justifyContent:'center', gap:8 }}>
+        <div style={{ position:'absolute', right:5, top:5, bottom:5, zIndex:2, display:'flex', flexDirection:'column', justifyContent:'center', gap:8 }}>
           <button
             onClick={e => { e.stopPropagation(); toggleWishlist(p); }}
             aria-pressed={isLiked}
@@ -160,7 +167,7 @@ function MatchCard({ p, wishlist, toggleWishlist, pinnedItems, togglePin }) {
           <span style={{ fontFamily:'ui-monospace, Menlo, monospace', fontSize:10.5, color:'var(--text-muted)' }}>
             ΔE {p.distance.toFixed(1)}
           </span>
-          <span style={{ marginLeft:'auto', display:'flex', alignItems:'baseline', gap:3, color:'var(--blush)' }}>
+          <span style={{ marginLeft:'auto', display:'flex', alignItems:'baseline', gap:3, color:'var(--blush-deep)' }}>
             <span style={srOnly}>Match: </span>
             <span style={{ fontSize:12.5, fontWeight:500 }}>{pct}%</span>
             <span style={{ fontSize:10.5 }}>match</span>
@@ -168,6 +175,146 @@ function MatchCard({ p, wishlist, toggleWishlist, pinnedItems, togglePin }) {
         </div>
       </div>
     </div>
+  );
+}
+
+// What a result was matched against, for the detail view's side-by-side strip.
+// Wheel colors are left out: the strip is for holding a lipstick against the
+// one color or lipstick the visitor brought.
+const DETAIL_SOURCES = { __photo__:'photo', __hex__:'hex', __list__:'list', __dupe__:'dupe' };
+function detailSourceLabel(source) {
+  if (source.id === '__photo__') return 'Your photo';
+  if (source.id === '__hex__') return 'Your color';
+  const key = source.sourceKey || '';
+  return key.slice(key.indexOf('|') + 1) || 'Your shade';
+}
+
+const MATCH_DETAIL_TYPE = { eyebrow:11, brand:12, body:13, value:15, match:17, shade:26 };
+
+// A result card opened up: bottom sheet on phones, centered dialog on desktop
+// (.match-detail in index.html). `source` is the color it was matched against,
+// or null when the swatch shows the lipstick alone.
+function MatchDetail({ p, source, onClose, wishlist, toggleWishlist, pinnedItems, togglePin }) {
+  const TYPE = MATCH_DETAIL_TYPE;
+  const isLiked = wishlist.some(x => x.brand === p.brand && x.shade === p.shade);
+  const isPinned = pinnedItems.some(x => x.brand === p.brand && x.shade === p.shade);
+  const isFull = pinnedItems.length >= MAX_COMPARE && !isPinned;
+  const pct = Math.max(0, Math.round(100 - p.distance));
+  const ink = bandInk(p.hex);
+  const redName = redLabel(p.hex);
+  const dialogRef = useDialog(onClose);
+  useBackToClose(onClose);
+
+  const facts = [
+    ['Finish', (p.finish || '').trim() || 'Unlisted'],
+    ['Type', FORMAT_LABELS[p.format] || p.format],
+    ['Price', p.price_tier || '$$'],
+    p.discontinued && ['Status', 'Discontinued'],
+  ].filter(f => f && f[1]);
+  const stripHalf = { flex:1, minWidth:0, display:'flex', alignItems:'flex-end', padding:'8px 10px', fontSize:TYPE.body, fontWeight:600 };
+  const actionBtn = {
+    height:48, borderRadius:24, fontFamily:'DM Sans', fontSize:TYPE.value, fontWeight:500,
+    display:'flex', alignItems:'center', justifyContent:'center', gap:8,
+  };
+
+  return ReactDOM.createPortal(
+    <div className="match-detail-backdrop" onClick={onClose}>
+      <div ref={dialogRef} tabIndex={-1} className="match-detail" role="dialog" aria-modal="true" aria-label={`${p.brand} ${p.shade} details`} onClick={e => e.stopPropagation()}>
+        <div style={{ position:'relative', display:'flex', alignItems:'center', justifyContent:'center', height:44, flexShrink:0 }}>
+          <span className="match-detail-handle" aria-hidden="true" />
+          <button onClick={onClose} aria-label="Close details" style={{
+            position:'absolute', right:6, top:0, width:44, height:44, border:0, padding:0, cursor:'pointer',
+            background:'none', color:'var(--espresso-mid)', fontSize:20, lineHeight:1, fontFamily:'DM Sans',
+          }}>✕</button>
+        </div>
+
+        <div style={{ padding:'2px 18px 22px', display:'flex', flexDirection:'column', gap:16, fontFamily:'DM Sans' }}>
+          <div style={{ display:'flex', gap:14, alignItems:'stretch' }}>
+            <div className="match-detail-photo" style={{ position:'relative', flexShrink:0, borderRadius:12, background:'var(--cream-dark)' }}>
+              <div style={{ position:'absolute', inset:8 }}>
+                <ProductThumb product={p} width="100%" height="100%" fit="contain" radius={0} ring={false} tint={false} />
+              </div>
+            </div>
+            {/* Three levels: brand as a small label, the shade as the headline, the product line under it */}
+            <div style={{ flex:1, minWidth:0, display:'flex', flexDirection:'column', justifyContent:'center', gap:6, overflowWrap:'anywhere' }}>
+              <div style={{ fontSize:TYPE.brand, fontWeight:500, letterSpacing:'0.1em', textTransform:'uppercase', color:'var(--espresso-mid)' }}>
+                <span style={srOnly}>Brand: </span>{p.brand}
+              </div>
+              <div style={{
+                fontFamily:'Cormorant Garamond', fontWeight:600, fontSize:TYPE.shade, lineHeight:1.08, color:'var(--espresso)',
+                textTransform:'capitalize', fontVariantNumeric:'lining-nums',
+              }}>
+                <span style={srOnly}>Shade: </span>{p.shade}
+              </div>
+              <div style={{ fontSize:TYPE.value, lineHeight:1.35, color:'var(--text-body)', textTransform:'capitalize' }}>
+                <span style={srOnly}>Product: </span>{p.product}
+              </div>
+              {redName && <div style={{ ...RED_LABEL_STYLE, fontSize:TYPE.eyebrow }}>{redName}</div>}
+            </div>
+          </div>
+
+          <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
+            {/* This lipstick's color, beside what it was matched against when there is one.
+                The white gap keeps the two halves apart when the colors are nearly the same. */}
+            <div style={{ display:'flex', gap:3, height:64, borderRadius:12, overflow:'hidden', background:'#fff' }}>
+              {source && (
+                <div style={{ ...stripHalf, background:source.hex, color:bandInk(source.hex) }}>
+                  <span style={{ overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', textTransform: source.sourceKey ? 'capitalize' : 'none' }}>{detailSourceLabel(source)}</span>
+                </div>
+              )}
+              <div role={source ? undefined : 'img'} aria-label={source ? undefined : `Swatch ${p.hex}`} style={{ ...stripHalf, justifyContent:'flex-end', background:p.hex, color:ink }}>{source && 'This lipstick'}</div>
+            </div>
+            <div style={{ display:'flex', alignItems:'baseline', justifyContent:'space-between', gap:12 }}>
+              <span style={{ fontSize:TYPE.match, fontWeight:600, color:'var(--blush-deep)' }}>{pct}% match</span>
+              <span style={{ fontFamily:'ui-monospace, Menlo, monospace', fontSize:TYPE.body, color:'var(--espresso-mid)' }}>
+                {p.hex.toUpperCase()}
+              </span>
+            </div>
+          </div>
+
+          <dl style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(96px, 1fr))', gap:8, margin:0 }}>
+            {facts.map(([label, value]) => (
+              <div key={label} style={{ background:'var(--cream)', borderRadius:10, padding:'10px 12px', display:'flex', flexDirection:'column', gap:3 }}>
+                <dt style={{ fontSize:TYPE.eyebrow, letterSpacing:'0.08em', textTransform:'uppercase', color:'var(--espresso-mid)' }}>{label}</dt>
+                <dd style={{ margin:0, fontSize:TYPE.value, fontWeight:500, color:'var(--espresso)' }}>{value}</dd>
+              </div>
+            ))}
+          </dl>
+
+          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8 }}>
+            <button
+              onClick={() => toggleWishlist(p)}
+              aria-pressed={isLiked}
+              aria-label={`${isLiked ? 'Remove' : 'Save'} ${p.brand} ${p.shade} ${isLiked ? 'from' : 'to'} My Favorites`}
+              style={{
+                ...actionBtn, cursor:'pointer',
+                background: isLiked ? 'var(--blush-deep)' : 'var(--espresso)', color:'#FAF6F1',
+                border:`1px solid ${isLiked ? 'var(--blush-deep)' : 'var(--espresso)'}`,
+              }}
+            >
+              <span aria-hidden="true">{isLiked ? HEART : '♡'}</span>
+              {isLiked ? 'Saved' : <span>Save<span className="match-detail-long"> to My Favorites</span></span>}
+            </button>
+            <button
+              onClick={() => togglePin(p)}
+              disabled={isFull}
+              aria-pressed={isPinned}
+              aria-label={`${isPinned ? 'Remove' : 'Add'} ${p.brand} ${p.shade} ${isPinned ? 'from' : 'to'} comparison`}
+              title={isFull ? `Max ${MAX_COMPARE} items` : undefined}
+              style={{
+                ...actionBtn, cursor: isFull ? 'not-allowed' : 'pointer', opacity: isFull ? 0.4 : 1,
+                background: isPinned ? 'var(--cream-dark)' : '#fff', color:'var(--espresso)',
+                border:'1px solid var(--espresso)',
+              }}
+            >
+              <span aria-hidden="true">{isPinned ? '✓' : '+'}</span>
+              {isPinned ? 'Comparing' : 'Compare'}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>,
+    document.body
   );
 }
 
@@ -314,6 +461,36 @@ function ColorWheel({ colors, selectedId, onSelect, hoveredId, onHover }) {
     }
   }
 
+  // Keyboard: the wheel is one Tab stop. Arrow keys move the focus (left/right around the ring,
+  // up/down between the outer and inner ring), Enter or Space picks the color.
+  const [rovingId, setRovingId] = useState(null); // the segment Tab lands on
+  const [ringId, setRingId] = useState(null);     // the segment showing a keyboard focus ring
+  const cellEls = React.useRef({});
+  const around = [...segments].sort((p, q) => ((p.startDeg % 360) + 360) % 360 - ((q.startDeg % 360) + 360) % 360);
+  const hasCell = id => segments.some(sg => sg.outer.id === id || sg.inner?.id === id);
+  const tabId = hasCell(rovingId) ? rovingId : hasCell(selectedId) ? selectedId : around[0]?.outer.id;
+  function onCellKey(e, c) {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); return onSelect(c); }
+    const i = around.findIndex(sg => sg.outer.id === c.id || sg.inner?.id === c.id);
+    if (i < 0) return;
+    const onInner = around[i].inner?.id === c.id;
+    const step = { ArrowRight: 1, ArrowLeft: -1 }[e.key];
+    let next = null;
+    if (step) { const sg = around[(i + step + around.length) % around.length]; next = onInner && sg.inner ? sg.inner : sg.outer; }
+    else if (e.key === 'ArrowDown') next = around[i].inner || null;
+    else if (e.key === 'ArrowUp') next = around[i].outer;
+    if (!next || next.id === c.id) { if (next) e.preventDefault(); return; }
+    e.preventDefault(); setRovingId(next.id); cellEls.current[next.id]?.focus();
+  }
+  const cellProps = c => ({
+    ref: el => { cellEls.current[c.id] = el; },
+    role: 'button', tabIndex: c.id === tabId ? 0 : -1,
+    'aria-label': c.name, 'aria-pressed': c.id === selectedId,
+    onKeyDown: e => onCellKey(e, c),
+    onFocus: e => { setRovingId(c.id); if (e.target.matches(':focus-visible')) setRingId(c.id); },
+    onBlur: () => setRingId(null),
+  });
+
   function polarToXY(angleDeg, r) {
     const rad = (angleDeg - 90) * Math.PI / 180;
     return { x: CX + r * Math.cos(rad), y: CY + r * Math.sin(rad) };
@@ -354,6 +531,7 @@ function ColorWheel({ colors, selectedId, onSelect, hoveredId, onHover }) {
       <svg
         viewBox={`0 0 ${SIZE} ${SIZE}`}
         width="100%"
+        role="group" aria-label="Lipstick color wheel. Arrow keys move between colors; Enter picks one."
         style={{ filter:'drop-shadow(0 6px 24px rgba(42,26,20,0.14))', maxWidth: SIZE, height:'auto', display:'block' }}
       >
         {/* Outer background ring */}
@@ -391,7 +569,8 @@ function ColorWheel({ colors, selectedId, onSelect, hoveredId, onHover }) {
                 stroke={outerSelected ? '#2A1A14' : '#FAF6F1'}
                 strokeWidth={outerSelected ? 2 : 1}
                 opacity={outerHovered && !outerSelected ? 0.82 : 1}
-                style={{ cursor:'pointer', transition:'opacity 0.12s' }}
+                {...cellProps(outer)}
+                style={{ cursor:'pointer', transition:'opacity 0.12s', outline:'none' }}
                 onClick={() => onSelect(outer)}
                 onMouseEnter={() => onHover(outer.id)}
                 onMouseLeave={() => onHover(null)}
@@ -410,7 +589,8 @@ function ColorWheel({ colors, selectedId, onSelect, hoveredId, onHover }) {
                     stroke={innerSelected ? '#2A1A14' : '#FAF6F1'}
                     strokeWidth={innerSelected ? 2 : 1}
                     opacity={innerHovered && !innerSelected ? 0.82 : 1}
-                    style={{ cursor:'pointer', transition:'opacity 0.12s' }}
+                    {...cellProps(inner)}
+                    style={{ cursor:'pointer', transition:'opacity 0.12s', outline:'none' }}
                     onClick={() => onSelect(inner)}
                     onMouseEnter={() => onHover(inner.id)}
                     onMouseLeave={() => onHover(null)}
@@ -427,6 +607,21 @@ function ColorWheel({ colors, selectedId, onSelect, hoveredId, onHover }) {
             </g>
           );
         })}
+
+        {/* Keyboard focus ring, drawn over the segments so its neighbors can't cover it */}
+        {ringId && (() => {
+          const sg = segments.find(x => x.outer.id === ringId || x.inner?.id === ringId);
+          if (!sg) return null;
+          const d = sg.inner?.id === ringId
+            ? arcPath(sg.startDeg, sg.endDeg, R_INNER_OUT - 1, R_INNER_IN)
+            : arcPath(sg.startDeg, sg.endDeg, SINGLE_RING ? R_SINGLE_OUT : R_OUTER_OUT, SINGLE_RING ? R_SINGLE_IN : R_OUTER_IN + 1);
+          return (
+            <g style={{ pointerEvents:'none' }}>
+              <path d={d} fill="none" stroke="#fff" strokeWidth="7" strokeLinejoin="round" />
+              <path d={d} fill="none" stroke="#2A1A14" strokeWidth="3" strokeLinejoin="round" />
+            </g>
+          );
+        })()}
 
         {/* Center circle — shows selected color */}
         <circle cx={CX} cy={CY} r={(SINGLE_RING ? R_SINGLE_IN : R_INNER_IN) - 1}
@@ -466,8 +661,9 @@ function FilterDropdown({ label, count, onClear, isOpen, onOpen, children }) {
     return () => document.removeEventListener('mousedown', handle);
   }, [isOpen, onOpen]);
   return (
-    <div ref={ref} style={{ position:'relative' }}>
-      <button onClick={() => onOpen(isOpen ? null : label)} style={{
+    <div ref={ref} style={{ position:'relative' }}
+      onKeyDown={e => { if (e.key === 'Escape' && isOpen) { e.stopPropagation(); onOpen(null); ref.current.querySelector('button').focus(); } }}>
+      <button aria-expanded={isOpen} onClick={() => onOpen(isOpen ? null : label)} style={{
         display:'inline-flex', alignItems:'center', gap:7,
         fontSize:11, padding:'5px 12px', borderRadius:20,
         border:`1.5px solid ${count ? 'var(--espresso-mid)' : 'var(--border)'}`,
@@ -506,7 +702,7 @@ function FilterDropdown({ label, count, onClear, isOpen, onOpen, children }) {
                 onMouseLeave={e => { e.currentTarget.style.textDecoration = 'none'; }}
                 style={{
                   fontSize:12, padding:0, border:'none', background:'transparent',
-                  color:'var(--blush)', cursor:'pointer', fontFamily:'DM Sans', fontWeight:500,
+                  color:'var(--blush-deep)', cursor:'pointer', fontFamily:'DM Sans', fontWeight:500,
                   letterSpacing:'0.04em', textUnderlineOffset:3,
                 }}>Clear ✕</button>
             </div>
@@ -525,6 +721,7 @@ function FilterDropdown({ label, count, onClear, isOpen, onOpen, children }) {
 // (fbrand, not brand: ?brand= already names the lipstick in a dupe link)
 const FILTER_PARAMS = ['price', 'fbrand', 'finish', 'format', 'tone', 'discontinued'];
 const PRICE_TIERS = ['$', '$$', '$$$', '$$$$'];
+const FORMAT_LABELS = { 'Lip Liner & Pencil': 'Lip Crayon, Liner, & Pencil' };
 function filterParamsFrom(search) {
   return [...new URLSearchParams(search)].filter(([k]) => FILTER_PARAMS.includes(k));
 }
@@ -537,6 +734,13 @@ function ResultsTable({ selectedColor, matches, totalProducts, pinnedItems, togg
   const [activeFormats, setActiveFormats] = React.useState([]);
   const [hideDiscontinued, setHideDiscontinued] = React.useState(true);
   const [openFilter, setOpenFilter] = React.useState(null);
+  // The result whose detail view is open, if any
+  const [openProduct, setOpenProduct] = React.useState(null);
+  React.useEffect(() => { setOpenProduct(null); }, [selectedColor?.id, selectedColor?.hex]);
+  function openDetail(p) {
+    window.gtag?.('event', 'view_match_detail', { brand: p.brand, shade: p.shade, ui_source: DETAIL_SOURCES[selectedColor?.id] || 'wheel' });
+    setOpenProduct(p);
+  }
 
   // Filters the page was opened with (a shared link), waiting for the first results to apply to
   const linkFilters = React.useRef(initialFilterParams || []);
@@ -565,7 +769,7 @@ function ResultsTable({ selectedColor, matches, totalProducts, pinnedItems, togg
     ]);
   }, [selectedColor?.id, activeTiers, activeBrands, activeFinishes, activeFormats, activeTones, hideDiscontinued]);
 
-  // Classify undertone from LAB hue angle (matches Vibe panel logic)
+  // Classify undertone from LAB hue angle
   function toneOf(p) {
     const lab = p.cielab || p.lab;
     if (!lab || lab.length < 3) return 'neutral';
@@ -592,7 +796,6 @@ function ResultsTable({ selectedColor, matches, totalProducts, pinnedItems, togg
   const FINISH_ORDER = ['Cream','Glossy','Matte','Satin','Semi-Matte','Sheer','Shimmer','Unlisted'];
   const allFinishes = FINISH_ORDER.filter(f => matches.some(p => finishOf(p) === f));
   const FORMAT_ORDER = ['Bullet Lipstick','Liquid Lipstick','Lip Gloss','Lip Stain & Tint','Lip Liner & Pencil','Lip Oil','Lip Balm & Care'];
-  const FORMAT_LABELS = { 'Lip Liner & Pencil': 'Lip Crayon, Liner, & Pencil' };
   const allFormats  = FORMAT_ORDER.filter(f => matches.some(p => p.format === f));
   const hasDiscontinued = matches.some(p => p.discontinued);
 
@@ -657,6 +860,27 @@ function ResultsTable({ selectedColor, matches, totalProducts, pinnedItems, togg
     );
   }
 
+  function toggleDiscontinued() {
+    window.gtag?.('event', 'apply_filter', { filter_type: 'still_made', filter_value: hideDiscontinued ? 'include_discontinued' : 'still_made_only' });
+    setHideDiscontinued(v => !v);
+  }
+  const otherFilters = activeBrands.length + activeTones.length + activeTiers.length + activeFinishes.length + activeFormats.length;
+  function clearFilters() {
+    window.gtag?.('event', 'clear_filters', { filter_count: otherFilters });
+    setActiveBrands([]); setActiveTones([]); setActiveTiers([]); setActiveFinishes([]); setActiveFormats([]);
+  }
+  // Matches the other filters keep that are only missing because discontinued shades are hidden
+  const hiddenDiscontinued = hideDiscontinued ? matches.filter(p => p.discontinued &&
+    (activeBrands.length === 0   || activeBrands.includes(p.brand))   &&
+    (activeTones.length === 0    || activeTones.includes(toneOf(p)))   &&
+    (activeTiers.length === 0    || activeTiers.includes(tierOf(p)))   &&
+    (activeFinishes.length === 0 || activeFinishes.includes(finishOf(p))) &&
+    (activeFormats.length === 0  || activeFormats.includes(p.format))).length : 0;
+  const emptyBtn = {
+    fontFamily:'DM Sans', fontSize:12, fontWeight:500, letterSpacing:'0.06em', textTransform:'uppercase',
+    padding:'10px 18px', borderRadius:24, border:'1.5px solid var(--espresso)', background:'#fff', color:'var(--espresso)', cursor:'pointer',
+  };
+
   function toggleFormat(f) {
     if (!activeFormats.includes(f)) window.gtag?.('event', 'apply_filter', { filter_type: 'format', filter_value: f });
     setActiveFormats(prev =>
@@ -697,32 +921,42 @@ function ResultsTable({ selectedColor, matches, totalProducts, pinnedItems, togg
           marginBottom:12, padding:'9px 12px 10px', background:'#fff',
           borderRadius:12, border:'1px solid var(--border)', boxShadow:'0 2px 12px var(--shadow)',
         }}>
-          <div style={{ display:'flex', gap:5, alignItems:'center' }}>
-            <span style={{ fontSize:11, color:'var(--text-muted)', fontFamily:'DM Sans', letterSpacing:'0.03em', flexShrink:0 }}>Lighter</span>
+          <div role="group" aria-label="Lighter and deeper versions of this shade" style={{ display:'flex', gap:5, alignItems:'center' }}>
+            <span aria-hidden="true" style={{ fontSize:11, color:'var(--text-muted)', fontFamily:'DM Sans', letterSpacing:'0.03em', flexShrink:0 }}>Lighter</span>
             {toneRamp.ramp.map((step, i) => {
               const isAnchor = i === toneRamp.anchorIdx;
               const isActive = i === toneIdx;
               const disabled = !step.hasMatch;
+              const lighter = i < toneRamp.anchorIdx;
+              const label = isAnchor ? 'Your shade'
+                : lighter ? (i === 0 ? 'Lightest' : 'Lighter')
+                : (i === toneRamp.ramp.length - 1 ? 'Deepest' : 'Deeper');
+              // A step with no lipsticks stays reachable (aria-disabled, not disabled) so its reason can be read out
               return (
                 <button key={step.id} onClick={() => { if (!disabled) setToneIdx(i); }}
-                  disabled={disabled}
+                  aria-disabled={disabled || undefined}
+                  aria-pressed={isActive}
+                  aria-label={disabled ? `${label}, no lipsticks this ${lighter ? 'light' : 'deep'}` : label}
                   title={disabled ? 'No options available in this shade' : isAnchor ? `${step.name} (your shade)` : step.name}
                   style={{
-                    flex:1, height:32, borderRadius:7, cursor: disabled ? 'not-allowed' : 'pointer', padding:0,
-                    background: step.hex,
+                    flex:1, height:40, borderRadius:7, cursor: disabled ? 'not-allowed' : 'pointer', padding:0,
+                    // Struck through when there is nothing in that shade
+                    background: disabled
+                      ? `linear-gradient(to top right, transparent calc(50% - 1px), var(--espresso) calc(50% - 1px), var(--espresso) calc(50% + 1px), transparent calc(50% + 1px)), ${step.hex}`
+                      : step.hex,
                     border: isActive ? '2.5px solid var(--espresso)' : '2px solid #fff',
-                    outline: isAnchor && !isActive ? '1.5px dashed rgba(42,26,20,0.35)' : 'none',
-                    outlineOffset: -5,
+                    outline: isAnchor && !isActive ? '1.5px dashed rgba(42,26,20,0.35)' : undefined,
+                    outlineOffset: isAnchor && !isActive ? -5 : 2,
                     boxShadow: isActive ? '0 3px 10px rgba(42,26,20,0.28)' : '0 1px 3px rgba(42,26,20,0.12)',
                     transform: isActive ? 'translateY(-2px)' : 'none',
-                    opacity: disabled ? 0.35 : 1,
+                    opacity: disabled ? 0.5 : 1,
                     filter: disabled ? 'grayscale(0.7)' : 'none',
                     transition:'all 0.15s',
                   }}
                 />
               );
             })}
-            <span style={{ fontSize:11, color:'var(--text-muted)', fontFamily:'DM Sans', letterSpacing:'0.03em', flexShrink:0 }}>Deeper</span>
+            <span aria-hidden="true" style={{ fontSize:11, color:'var(--text-muted)', fontFamily:'DM Sans', letterSpacing:'0.03em', flexShrink:0 }}>Deeper</span>
           </div>
           <div style={{ marginTop:6, display:'flex', alignItems:'center', justifyContent:'space-between', minHeight:16 }}>
             <span style={{ fontSize:11, fontFamily:'DM Sans', color:'var(--text-muted)', letterSpacing:'0.03em' }}>
@@ -738,6 +972,17 @@ function ResultsTable({ selectedColor, matches, totalProducts, pinnedItems, togg
               }}>Reset to my shade</button>
             )}
           </div>
+          {/* Why some steps are struck through (touch screens have no tooltip to say so) */}
+          {(() => {
+            const noLight = toneRamp.ramp.some((st, i) => !st.hasMatch && i < toneRamp.anchorIdx);
+            const noDeep  = toneRamp.ramp.some((st, i) => !st.hasMatch && i > toneRamp.anchorIdx);
+            if (!noLight && !noDeep) return null;
+            return (
+              <p style={{ marginTop:4, fontSize:11, fontFamily:'DM Sans', color:'var(--text-muted)', letterSpacing:'0.03em' }}>
+                No lipsticks that {noLight && noDeep ? 'light or that deep' : noLight ? 'light' : 'deep'}
+              </p>
+            );
+          })()}
         </div>
       )}
 
@@ -857,18 +1102,26 @@ function ResultsTable({ selectedColor, matches, totalProducts, pinnedItems, togg
             </FilterDropdown>
           )}
 
+          {/* On by default. The box and its tick are what say this chip can be switched off. */}
           {hasDiscontinued && (
-            <button onClick={() => {
-              window.gtag?.('event', 'apply_filter', { filter_type: 'still_made', filter_value: hideDiscontinued ? 'include_discontinued' : 'still_made_only' });
-              setHideDiscontinued(v => !v);
-            }} style={{
-              fontSize:11, padding:'4px 12px', borderRadius:20,
+            <button aria-pressed={hideDiscontinued} onClick={toggleDiscontinued} style={{
+              display:'inline-flex', alignItems:'center', gap:7,
+              fontSize:11, padding:'5px 12px 5px 9px', borderRadius:20,
               border:`1.5px solid ${hideDiscontinued ? 'var(--espresso-mid)' : 'var(--border)'}`,
-              background: hideDiscontinued ? 'rgba(92,61,48,0.10)' : 'transparent',
+              background: hideDiscontinued ? 'rgba(92,61,48,0.08)' : 'transparent',
               color: hideDiscontinued ? 'var(--espresso-mid)' : 'var(--text-muted)',
               cursor:'pointer', fontFamily:'DM Sans', fontWeight: hideDiscontinued ? 500 : 400,
-              letterSpacing:'0.04em', transition:'all 0.15s', whiteSpace:'nowrap',
-            }}>Still Made</button>
+              letterSpacing:'0.06em', textTransform:'uppercase', transition:'all 0.15s', whiteSpace:'nowrap',
+            }}>
+              <span aria-hidden="true" style={{
+                width:14, height:14, borderRadius:4, flex:'none',
+                display:'flex', alignItems:'center', justifyContent:'center',
+                border:`1.5px solid ${hideDiscontinued ? 'var(--espresso-mid)' : 'var(--text-muted)'}`,
+                background: hideDiscontinued ? 'var(--espresso-mid)' : '#fff',
+                color:'#fff', fontSize:10, lineHeight:1,
+              }}>{hideDiscontinued ? '✓' : ''}</span>
+              Hide discontinued
+            </button>
           )}
 
           {(activeBrands.length > 0 || activeTones.length > 0 || activeTiers.length > 0 || activeFinishes.length > 0 || activeFormats.length > 0) && (
@@ -876,14 +1129,9 @@ function ResultsTable({ selectedColor, matches, totalProducts, pinnedItems, togg
               <span style={{ fontSize:11, color:'var(--text-muted)', fontFamily:'DM Sans' }}>
                 {filtered.length} of {matches.length} shown
               </span>
-              <button onClick={() => {
-                window.gtag?.('event', 'clear_filters', {
-                  filter_count: activeBrands.length + activeTones.length + activeTiers.length + activeFinishes.length + activeFormats.length,
-                });
-                setActiveBrands([]); setActiveTones([]); setActiveTiers([]); setActiveFinishes([]); setActiveFormats([]);
-              }} style={{
+              <button onClick={clearFilters} style={{
                 fontSize:11, padding:'3px 10px', borderRadius:20, border:'1px solid var(--border)',
-                background:'transparent', color:'var(--blush)', cursor:'pointer',
+                background:'transparent', color:'var(--blush-deep)', cursor:'pointer',
                 fontFamily:'DM Sans', letterSpacing:'0.04em',
               }}>Clear all</button>
             </div>
@@ -894,9 +1142,17 @@ function ResultsTable({ selectedColor, matches, totalProducts, pinnedItems, togg
       {/* Results grid */}
       <div style={{ flex:1, overflowY:'auto' }}>
         {filtered.length === 0 ? (
-          <p style={{ padding:'32px 16px', textAlign:'center', color:'var(--text-muted)', fontFamily:'Cormorant Garamond', fontSize:16, fontStyle:'italic' }}>
-            No matches for the selected filters — try clearing a filter
-          </p>
+          <div role="status" style={{ padding:'32px 16px', display:'flex', flexDirection:'column', alignItems:'center', gap:14, textAlign:'center' }}>
+            <p style={{ fontFamily:'DM Sans', fontSize:14, lineHeight:1.5, color:'var(--text-body)' }}>
+              {!hiddenDiscontinued ? 'No matches for the selected filters.'
+                : hiddenDiscontinued === 1 ? (otherFilters ? 'The only match for these filters is discontinued.' : 'The only match here is discontinued.')
+                : otherFilters ? `The ${hiddenDiscontinued} matches for these filters are discontinued.` : `All ${hiddenDiscontinued} matches here are discontinued.`}
+            </p>
+            <div style={{ display:'flex', flexWrap:'wrap', justifyContent:'center', gap:10 }}>
+              {hiddenDiscontinued > 0 && <button onClick={toggleDiscontinued} style={emptyBtn}>Show discontinued</button>}
+              {otherFilters > 0 && <button onClick={clearFilters} style={emptyBtn}>Clear filters</button>}
+            </div>
+          </div>
         ) : (
           <ul aria-label={`${filtered.length} closest lipstick matches, ordered by closeness`} style={{
             listStyle:'none', margin:0, padding:0,
@@ -904,12 +1160,20 @@ function ResultsTable({ selectedColor, matches, totalProducts, pinnedItems, togg
           }}>
             {filtered.map((p, i) => (
               <li key={i}>
-                <MatchCard p={p} wishlist={wishlist} toggleWishlist={toggleWishlist} pinnedItems={pinnedItems} togglePin={togglePin} />
+                <MatchCard p={p} wishlist={wishlist} toggleWishlist={toggleWishlist} pinnedItems={pinnedItems} togglePin={togglePin} onOpen={() => openDetail(p)} />
               </li>
             ))}
           </ul>
         )}
       </div>
+      {openProduct && (
+        <MatchDetail
+          p={openProduct}
+          source={DETAIL_SOURCES[selectedColor?.id] ? selectedColor : null}
+          onClose={() => setOpenProduct(null)}
+          wishlist={wishlist} toggleWishlist={toggleWishlist} pinnedItems={pinnedItems} togglePin={togglePin}
+        />
+      )}
     </div>
   );
 }
@@ -1218,6 +1482,7 @@ function ShareImageModal({ wishlist, onClose }) {
   const canvasRef = React.useRef(null);
   const [status, setStatus] = useState(null);
   const [busy, setBusy] = useState(true);
+  const dialogRef = useDialog(onClose);
 
   React.useEffect(() => {
     let cancelled = false;
@@ -1289,7 +1554,7 @@ function ShareImageModal({ wishlist, onClose }) {
         display:'flex', alignItems:'center', justifyContent:'center',
         padding:'24px', pointerEvents:'none',
       }}>
-        <div style={{
+        <div ref={dialogRef} tabIndex={-1} role="dialog" aria-modal="true" aria-label="Share your shortlist" style={{
           background:'var(--cream)', borderRadius:20,
           boxShadow:'0 24px 60px rgba(42,26,20,0.32)',
           padding:'28px 32px 24px',
@@ -1303,7 +1568,7 @@ function ShareImageModal({ wishlist, onClose }) {
             <h3 style={{ fontFamily:'Cormorant Garamond', fontWeight:500, fontSize:22, color:'var(--espresso)' }}>
               Share your shortlist
             </h3>
-            <button onClick={onClose} style={{
+            <button onClick={onClose} aria-label="Close" style={{
               marginLeft:'auto', width:32, height:32, borderRadius:'50%',
               border:'1px solid var(--border)', background:'#fff',
               cursor:'pointer', color:'var(--text-muted)', fontSize:14,
@@ -1362,7 +1627,7 @@ function ShareImageModal({ wishlist, onClose }) {
 
           {status && (
             <p style={{
-              fontSize:12, color:'var(--blush)', fontFamily:'DM Sans',
+              fontSize:12, color:'var(--blush-deep)', fontFamily:'DM Sans',
               textAlign:'center', letterSpacing:'0.06em',
             }}>{status}</p>
           )}
@@ -1393,6 +1658,86 @@ function GuidesNewTag({ top = -8, right = -10 }) {
       boxShadow:'0 0 0 2px var(--cream)',
     }}>new</span>
   );
+}
+
+// ── Dialogs ───────────────────────────────────────────────────────────────────
+// What every panel that covers the page shares (the detail view, My Favorites, a shared list, the
+// share card): Escape closes it, Tab stays inside it, the page behind does not scroll, and focus goes
+// in when it opens and back to where it was when it closes. Only the topmost one answers the keys.
+// Returns the ref for the panel's own element.
+const dialogs = { open: [], pageOverflow: '' };
+function useDialog(onClose) {
+  const ref = React.useRef(null);
+  const close = React.useRef(onClose);
+  close.current = onClose;
+  useEffect(() => {
+    const el = ref.current, opener = document.activeElement, me = {};
+    if (dialogs.open.push(me) === 1) { dialogs.pageOverflow = document.body.style.overflow; document.body.style.overflow = 'hidden'; }
+    const stops = () => [...el.querySelectorAll('a[href], button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])')]
+      .filter(n => n.getClientRects().length);
+    (stops()[0] || el).focus({ preventScroll: true });
+    const onKey = e => {
+      if (dialogs.open[dialogs.open.length - 1] !== me) return;
+      if (e.key === 'Escape') return close.current();
+      if (e.key !== 'Tab') return;
+      const f = stops(), first = f[0], last = f[f.length - 1], at = document.activeElement;
+      if (!first) return e.preventDefault();
+      if (!el.contains(at) || (e.shiftKey ? at === first : at === last)) { e.preventDefault(); (e.shiftKey && el.contains(at) ? last : first).focus(); }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      dialogs.open.splice(dialogs.open.indexOf(me), 1);
+      if (!dialogs.open.length) document.body.style.overflow = dialogs.pageOverflow;
+      if (opener && document.contains(opener)) opener.focus?.({ preventScroll: true });
+    };
+  }, []);
+  return ref;
+}
+
+// ── Back button ───────────────────────────────────────────────────────────────
+// Changing tool adds a history entry, so Back returns to the previous tool instead of leaving
+// the site (App, "Mirror what's on screen in the URL"). An open panel or sheet adds one too
+// (useBackToClose), so Back closes it; closing it on screen takes that entry away again.
+const backNav = {
+  open: [],        // open panels, innermost last
+  leaving: 0,      // panels closed on screen whose entries are still to be taken off
+  skip: 0,         // pops we caused ourselves by taking those entries off
+  afterLeave: null,// a tool change that waits for those entries to go
+  onTool: null,    // App: Back or Forward landed on another tool
+  syncUrl: null,   // App: write the current view to the address bar
+};
+window.addEventListener('popstate', e => {
+  if (backNav.skip > 0) {
+    // Panels can close a render apart (the detail view follows My Favorites); wait until the last entry is off
+    if (--backNav.skip > 0 || backNav.leaving > 0) return;
+    const then = backNav.afterLeave; backNav.afterLeave = null;
+    if (then) then(); else backNav.syncUrl?.();
+    return;
+  }
+  const top = backNav.open.pop();
+  if (!top) return backNav.onTool?.(e);
+  top.popped = true; top.close();
+  backNav.syncUrl?.();
+});
+function useBackToClose(onClose, enabled = true) {
+  const close = React.useRef(onClose);
+  close.current = onClose;
+  useEffect(() => {
+    if (!enabled) return;
+    const entry = { close: () => close.current(), popped: false };
+    backNav.open.push(entry);
+    history.pushState(history.state, '');
+    return () => {
+      if (entry.popped) return;
+      backNav.open.splice(backNav.open.indexOf(entry), 1);
+      // Taken off after this render's effects, so a tool change made by the same click can wait its turn
+      if (backNav.leaving++ === 0) queueMicrotask(() => {
+        const n = backNav.leaving; backNav.leaving = 0;
+        backNav.skip++; history.go(-n);
+      });
+    };
+  }, [enabled]);
 }
 
 // ── Shared links ──────────────────────────────────────────────────────────────
@@ -1479,13 +1824,13 @@ function bandInk(hex) {
 // Sizes, each with one job: title 18 for the brand, shade 15 for the shade name,
 // body 13 for the product, micro 11 for facts and the red label.
 const SHADE_ITEM_TYPE = { micro:11, body:13, shade:15, title:18 };
-function ShadeListItem({ p, action }) {
+function ShadeListItem({ p, action, glow }) {
   const TYPE = SHADE_ITEM_TYPE;
   const redName = redLabel(p.hex);
   const facts = [(p.finish || '').trim(), p.price_tier, p.hex.toUpperCase(), p.discontinued && 'Discontinued'].filter(Boolean);
   const ink = bandInk(p.hex);
   return (
-    <li style={{
+    <li className={glow ? 'first-heart-glow' : undefined} style={{
       display:'flex', alignItems:'stretch', background:'#fff',
       borderRadius:14, border:'1px solid var(--border)', overflow:'hidden',
     }}>
@@ -1524,9 +1869,14 @@ function ShadeListItem({ p, action }) {
 }
 
 // ── Wishlist Panel ────────────────────────────────────────────────────────────
-function WishlistPanel({ wishlist, onClose, onRemove, onClear }) {
+// `glowKey` ("brand|shade") is set the first time a visitor ever hearts a
+// shade: the panel opens by itself, that row glows and a line says where the
+// list lives.
+function WishlistPanel({ wishlist, onClose, onRemove, onClear, onFindSimilar, glowKey }) {
   const [copied, setCopied] = useState(null);
   const [showShareImage, setShowShareImage] = useState(false);
+  useBackToClose(onClose);
+  const dialogRef = useDialog(onClose);
 
   // Format the list as plain text for export / clipboard / email
   function formatAsText() {
@@ -1604,7 +1954,8 @@ function WishlistPanel({ wishlist, onClose, onRemove, onClear }) {
     { id:'image',    label:'Share as image',icon:'📸', onClick: () => { window.gtag?.('event', 'share_wishlist', { method: 'share_image' }); setShowShareImage(true); }, done: null },
   ];
 
-  return (
+  // In <body>, like MatchDetail, so the panel can open over a result's detail view (the first heart does that)
+  return ReactDOM.createPortal(
     <>
       {/* Backdrop */}
       <div onClick={onClose} style={{
@@ -1613,14 +1964,24 @@ function WishlistPanel({ wishlist, onClose, onRemove, onClear }) {
       }} />
 
       {/* Panel */}
-      <div style={{
+      <div ref={dialogRef} tabIndex={-1} role="dialog" aria-modal="true" aria-label="My Favorites" style={{
         position:'fixed', top:0, right:0, bottom:0, width:'min(480px, 100%)',
         background:'var(--cream)', zIndex:201,
         boxShadow:'-8px 0 32px rgba(42,26,20,0.18)',
         display:'flex', flexDirection:'column',
         animation:'slideInRight 0.3s ease-out',
       }}>
-        <style>{`@keyframes slideInRight { from { transform: translateX(100%); } to { transform: translateX(0); } }`}</style>
+        <style>{`
+          @keyframes slideInRight { from { transform: translateX(100%); } to { transform: translateX(0); } }
+          @keyframes firstHeartGlow {
+            0%, 100% { box-shadow: 0 0 0 2px var(--blush), 0 0 0 0 var(--blush); }
+            50%      { box-shadow: 0 0 0 2px var(--blush), 0 0 22px 4px var(--blush); }
+          }
+          .first-heart-glow { border-color: var(--blush) !important; animation: firstHeartGlow 1.3s ease-in-out 0.3s 3 both; }
+          @media (prefers-reduced-motion: reduce) {
+            .first-heart-glow { animation: none; box-shadow: 0 0 0 2px var(--blush); }
+          }
+        `}</style>
 
         {/* Header */}
         <div style={{
@@ -1634,7 +1995,7 @@ function WishlistPanel({ wishlist, onClose, onRemove, onClear }) {
           <span style={{ fontSize:11, color:'var(--text-muted)', letterSpacing:'0.06em' }}>
             {wishlist.length} {wishlist.length === 1 ? 'shade' : 'shades'} saved
           </span>
-          <button onClick={onClose} style={{
+          <button onClick={onClose} aria-label="Close My Favorites" style={{
             marginLeft:'auto', width:32, height:32, borderRadius:'50%',
             border:'1px solid var(--border)', background:'#fff',
             cursor:'pointer', color:'var(--text-muted)', fontSize:14,
@@ -1655,11 +2016,29 @@ function WishlistPanel({ wishlist, onClose, onRemove, onClear }) {
             </div>
           ) : (
             <ul style={{ listStyle:'none', display:'flex', flexDirection:'column', gap:10 }}>
+              {glowKey && (
+                <li role="status" style={{
+                  fontFamily:'Cormorant Garamond', fontSize:18, fontStyle:'italic', lineHeight:1.4,
+                  color:'var(--espresso)', marginBottom:6,
+                }}>
+                  Saved. Every shade you heart is kept here — open it any time from My Favorites at the top.
+                </li>
+              )}
               {wishlist.map((p, i) => (
-                <ShadeListItem key={i} p={p} action={
+                <ShadeListItem key={i} p={p} glow={glowKey === `${p.brand}|${p.shade}`} action={
                   <button onClick={() => onRemove(p)} title="Remove from My Favorites" aria-label={`Remove ${p.brand} ${p.shade} from My Favorites`} style={heartBtnStyle(true)}>{HEART}</button>
                 } />
               ))}
+              {/* Last in the list: over to the From Favorites tab */}
+              <li style={{ textAlign:'center', padding:'10px 0 4px' }}>
+                <button onClick={onFindSimilar} style={{
+                  border:'none', background:'none', padding:'6px 4px', cursor:'pointer',
+                  color:'var(--blush-deep)', fontFamily:'DM Sans', fontSize:13, fontWeight:500,
+                  textDecoration:'underline', textUnderlineOffset:3,
+                }}>
+                  Find shades similar to {wishlist.length === 1 ? 'this one' : 'these'} →
+                </button>
+              </li>
             </ul>
           )}
         </div>
@@ -1684,7 +2063,7 @@ function WishlistPanel({ wishlist, onClose, onRemove, onClear }) {
                   fontFamily:'DM Sans', fontSize:13, fontWeight:500,
                   textAlign:'left', transition:'all 0.15s',
                 }}
-                onMouseEnter={e => { e.currentTarget.style.borderColor='var(--blush)'; e.currentTarget.style.color='var(--blush)'; }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor='var(--blush)'; e.currentTarget.style.color='var(--blush-deep)'; }}
                 onMouseLeave={e => { e.currentTarget.style.borderColor='var(--border)'; e.currentTarget.style.color='var(--espresso)'; }}
                 >
                   <span style={{ fontSize:16 }}>{a.icon}</span>
@@ -1712,7 +2091,8 @@ function WishlistPanel({ wishlist, onClose, onRemove, onClear }) {
           onClose={() => setShowShareImage(false)}
         />
       )}
-    </>
+    </>,
+    document.body
   );
 }
 
@@ -1723,6 +2103,7 @@ function SharedListPanel({ items, missing, loading, wishlist, toggleWishlist, on
   const key = p => `${p.brand}|${p.shade}`;
   const saved = new Set(wishlist.map(key));
   const unsaved = (items || []).filter(p => !saved.has(key(p)));
+  const dialogRef = useDialog(onClose);
 
   return (
     <>
@@ -1730,7 +2111,7 @@ function SharedListPanel({ items, missing, loading, wishlist, toggleWishlist, on
         position:'fixed', inset:0, background:'rgba(42,26,20,0.35)',
         zIndex:200, backdropFilter:'blur(2px)',
       }} />
-      <div style={{
+      <div ref={dialogRef} tabIndex={-1} role="dialog" aria-modal="true" aria-label="Shared list" style={{
         position:'fixed', top:0, right:0, bottom:0, width:'min(480px, 100%)',
         background:'var(--cream)', zIndex:201,
         boxShadow:'-8px 0 32px rgba(42,26,20,0.18)',
@@ -1751,7 +2132,7 @@ function SharedListPanel({ items, missing, loading, wishlist, toggleWishlist, on
               {items.length} {items.length === 1 ? 'shade' : 'shades'}
             </span>
           )}
-          <button onClick={onClose} style={{
+          <button onClick={onClose} aria-label="Close shared list" style={{
             marginLeft:'auto', width:32, height:32, borderRadius:'50%',
             border:'1px solid var(--border)', background:'#fff',
             cursor:'pointer', color:'var(--text-muted)', fontSize:14,
@@ -1769,7 +2150,7 @@ function SharedListPanel({ items, missing, loading, wishlist, toggleWishlist, on
                   const isSaved = saved.has(key(p));
                   return (
                     <ShadeListItem key={key(p)} p={p} action={
-                      <button onClick={() => toggleWishlist(p)} title={isSaved ? 'Remove from favorites' : 'Save to favorites'} aria-pressed={isSaved} style={heartBtnStyle(isSaved)}>{isSaved ? HEART : '♡'}</button>
+                      <button onClick={() => toggleWishlist(p)} title={isSaved ? 'Remove from favorites' : 'Save to favorites'} aria-pressed={isSaved} aria-label={`${isSaved ? 'Remove' : 'Save'} ${p.brand} ${p.shade} ${isSaved ? 'from' : 'to'} My Favorites`} style={heartBtnStyle(isSaved)}>{isSaved ? HEART : '♡'}</button>
                     } />
                   );
                 })}
@@ -1787,9 +2168,9 @@ function SharedListPanel({ items, missing, loading, wishlist, toggleWishlist, on
           <div style={{ borderTop:'1px solid var(--border)', padding:'20px 32px 24px', background:'#fff' }}>
             <button onClick={onSaveAll} disabled={!unsaved.length} style={{
               width:'100%', padding:'12px 14px', borderRadius:12,
-              border:'1.5px solid var(--blush)',
-              background: unsaved.length ? 'var(--blush)' : 'transparent',
-              color: unsaved.length ? '#fff' : 'var(--blush)',
+              border:'1.5px solid var(--blush-deep)',
+              background: unsaved.length ? 'var(--blush-deep)' : 'transparent',
+              color: unsaved.length ? '#fff' : 'var(--blush-deep)',
               cursor: unsaved.length ? 'pointer' : 'default',
               fontFamily:'DM Sans', fontSize:13, fontWeight:500,
             }}>
@@ -1803,7 +2184,9 @@ function SharedListPanel({ items, missing, loading, wishlist, toggleWishlist, on
 }
 
 // ── Comparison Tray ────────────────────────────────────────────────────────────
+const TRAY_TYPE = { micro:11, body:13, title:18 };
 function ComparisonTray({ pinnedItems, onRemove, onClear }) {
+  const TYPE = TRAY_TYPE;
   const [expanded, setExpanded] = useState(false);
   const isVisible = pinnedItems.length > 0;
 
@@ -1811,7 +2194,9 @@ function ComparisonTray({ pinnedItems, onRemove, onClear }) {
     <div style={{
       position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 100,
       transform: isVisible ? 'translateY(0)' : 'translateY(100%)',
-      transition: 'transform 0.35s cubic-bezier(0.34,1.26,0.64,1)',
+      // Hidden once it has slid away, so its buttons can't be tabbed to while it is off-screen
+      visibility: isVisible ? 'visible' : 'hidden',
+      transition: 'transform 0.35s cubic-bezier(0.34,1.26,0.64,1)' + (isVisible ? '' : ', visibility 0s linear 0.35s'),
       pointerEvents: isVisible ? 'all' : 'none',
     }}>
       {/* Handle bar */}
@@ -1831,112 +2216,101 @@ function ComparisonTray({ pinnedItems, onRemove, onClear }) {
         background: '#fff',
         borderTop: '1.5px solid var(--border)',
         boxShadow: '0 -4px 24px rgba(42,26,20,0.12)',
-        padding: expanded ? '24px 40px 32px' : '16px 40px 20px',
+        padding: expanded ? '20px 40px 24px' : '12px 40px 14px',
         transition: 'padding 0.25s ease',
       }}>
         {/* Tray header */}
-        <div style={{ display:'flex', alignItems:'center', gap:12, marginBottom: expanded ? 24 : 16 }}>
+        <div style={{ display:'flex', alignItems:'center', gap:12, marginBottom: expanded ? 20 : 12 }}>
           <span style={{
-            fontFamily:'Cormorant Garamond', fontSize:18, fontWeight:500, color:'var(--espresso)',
+            fontFamily:'Cormorant Garamond', fontSize:TYPE.title, fontWeight:500, color:'var(--espresso)', whiteSpace:'nowrap',
           }}>
             Comparing {pinnedItems.length} shade{pinnedItems.length !== 1 ? 's' : ''}
           </span>
-          <span style={{ fontSize:11, color:'var(--text-muted)', letterSpacing:'0.05em' }}>
-            · up to {MAX_COMPARE} · click a row to pin
+          <span style={{ fontSize:TYPE.micro, color:'var(--text-muted)', letterSpacing:'0.05em', whiteSpace:'nowrap' }}>
+            · up to {MAX_COMPARE}
           </span>
           <div style={{ marginLeft:'auto', display:'flex', gap:10, alignItems:'center' }}>
-            <button onClick={() => setExpanded(e => !e)} style={{
-              fontSize:11, padding:'4px 12px', borderRadius:20,
+            <button onClick={() => setExpanded(e => !e)} aria-expanded={expanded} style={{
+              fontSize:TYPE.micro, padding:'4px 12px', borderRadius:20,
               border:'1px solid var(--border)', background:'transparent',
-              color:'var(--text-muted)', cursor:'pointer', fontFamily:'DM Sans',
+              color:'var(--text-muted)', cursor:'pointer', fontFamily:'DM Sans', whiteSpace:'nowrap',
             }}>
               {expanded ? 'Collapse' : 'Expand'}
             </button>
             <button onClick={onClear} style={{
-              fontSize:11, padding:'4px 12px', borderRadius:20,
-              border:'1px solid var(--blush)', background:'transparent',
-              color:'var(--blush)', cursor:'pointer', fontFamily:'DM Sans',
+              fontSize:TYPE.micro, padding:'4px 12px', borderRadius:20,
+              border:'1px solid var(--blush-deep)', background:'transparent',
+              color:'var(--blush-deep)', cursor:'pointer', fontFamily:'DM Sans', whiteSpace:'nowrap',
             }}>
               Clear all
             </button>
           </div>
         </div>
 
-        {/* Swatches row — sorted by ΔE ascending */}
-        {(() => { const sortedPins = [...pinnedItems].sort((a,b) => a.distance - b.distance); return (
-        <div style={{ display:'flex', gap: expanded ? 24 : 16, alignItems:'flex-start', flexWrap:'wrap' }}>
-          {sortedPins.map((p, i) => (
-            <div key={i} style={{
-              display:'flex', flexDirection:'column', alignItems:'center', gap: expanded ? 12 : 8,
-              cursor:'pointer', position:'relative',
-              animation:'fadeUp 0.2s ease',
-            }} onClick={() => onRemove(p)}>
-              {/* Remove hint */}
-              <div style={{
-                position:'absolute', top:-6, right:-6, zIndex:2,
-                width:18, height:18, borderRadius:'50%',
-                background:'var(--espresso)', color:'#FAF6F1',
-                fontSize:10, display:'flex', alignItems:'center', justifyContent:'center',
-                opacity:0, transition:'opacity 0.15s',
-              }} className="remove-btn">×</div>
-
-              {/* Swatch */}
-              <div style={{
-                width: expanded ? 80 : 52,
-                height: expanded ? 80 : 52,
-                borderRadius:'50%',
-                background: p.hex,
-                boxShadow: `0 4px 16px ${p.hex}80, inset 0 -2px 4px rgba(0,0,0,0.12)`,
-                border: '2.5px solid #fff',
-                outline: '1.5px solid var(--border)',
-                transition: 'width 0.25s, height 0.25s',
-                flexShrink: 0,
-              }} />
-
-              {/* Info */}
-              {expanded ? (
-                <div style={{ textAlign:'center', maxWidth:100 }}>
-                  <div style={{
-                    fontFamily:'Cormorant Garamond', fontSize:15, fontStyle:'italic',
-                    color:'var(--espresso)', lineHeight:1.3, marginBottom:4,
-                  }}>{p.shade}</div>
-                  <div style={{ fontSize:11, color:'var(--text-muted)', fontFamily:'DM Sans', marginBottom:4 }}>
-                    {p.brand}
-                  </div>
-                  <div style={{ fontSize:10, color:'var(--text-muted)', fontFamily:'DM Sans' }}>
-                    ΔE {p.distance.toFixed(1)}
-                  </div>
-                </div>
-              ) : (
-                <div style={{ textAlign:'center', maxWidth:72 }}>
-                  <div style={{ fontSize:10, color:'var(--text-muted)', fontFamily:'DM Sans', lineHeight:1.3 }}>
-                    {p.shade}
-                  </div>
-                </div>
+        {/* One row, closest match first; it scrolls sideways when the shades don't fit.
+            Each shade is a button that takes it out, with the × always showing (touch has no hover). */}
+        {(() => { const sortedPins = [...pinnedItems].sort((a,b) => a.distance - b.distance); const box = expanded ? 80 : 52; return (
+        <div className="compare-row" style={{ display:'flex', gap: expanded ? 20 : 14, alignItems:'flex-start', overflowX:'auto', padding:'6px 6px 2px 0' }}>
+          {sortedPins.map(p => (
+            <button key={`${p.brand}|${p.shade}`} type="button" onClick={() => onRemove(p)}
+              aria-label={`Remove ${p.brand} ${p.shade} from comparison`} title="Remove from comparison"
+              style={{
+                flex:'none', width: expanded ? 96 : 76, padding:0, border:'none', background:'none', cursor:'pointer',
+                display:'flex', flexDirection:'column', alignItems:'center', gap: expanded ? 8 : 6,
+                fontFamily:'DM Sans', textAlign:'center', animation:'fadeUp 0.2s ease',
+              }}>
+              <span style={{ position:'relative', display:'block', width:box, height:box }}>
+                <span style={{
+                  display:'block', width:'100%', height:'100%',
+                  borderRadius: expanded ? 16 : 12,
+                  background: p.hex,
+                  boxShadow: `0 4px 16px ${p.hex}80, inset 0 -2px 4px rgba(0,0,0,0.12)`,
+                  border: '2.5px solid #fff',
+                  outline: '1.5px solid var(--border)',
+                }} />
+                <span aria-hidden="true" style={{
+                  position:'absolute', top:-6, right:-6,
+                  width:20, height:20, borderRadius:'50%',
+                  background:'var(--espresso)', color:'#FAF6F1', boxShadow:'0 0 0 2px #fff',
+                  fontSize:TYPE.body, lineHeight:1, display:'flex', alignItems:'center', justifyContent:'center',
+                }}>×</span>
+              </span>
+              {/* Expanded: the product photo under its color */}
+              {expanded && (
+                <span style={{ display:'block', width:box, height:64, borderRadius:10, overflow:'hidden', background:'var(--cream-dark)' }}>
+                  <ProductThumb product={p} width="100%" height="100%" fit="contain" radius={0} ring={false} tint={false} />
+                </span>
               )}
-            </div>
+              <span style={{ display:'flex', flexDirection:'column', gap:2, width:'100%' }}>
+                <span style={{
+                  fontSize:TYPE.body, color:'var(--espresso)', lineHeight:1.25, textTransform:'capitalize',
+                  display:'-webkit-box', WebkitLineClamp: expanded ? 2 : 1, WebkitBoxOrient:'vertical', overflow:'hidden', overflowWrap:'anywhere',
+                }}>{p.shade}</span>
+                <span style={{
+                  fontSize:TYPE.micro, color:'var(--text-muted)', letterSpacing:'0.04em', textTransform:'uppercase',
+                  whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis',
+                }}>{p.brand}</span>
+                {expanded && (
+                  <span style={{ fontSize:TYPE.micro, color:'var(--text-muted)' }}>ΔE {p.distance.toFixed(1)}</span>
+                )}
+              </span>
+            </button>
           ))}
 
-          {/* Empty slots */}
+          {/* Empty slots (hidden once the columns stack: .compare-empty in index.html) */}
           {Array.from({ length: Math.max(0, MAX_COMPARE - pinnedItems.length) }).map((_, i) => (
-            <div key={`empty-${i}`} style={{
-              width: expanded ? 80 : 52,
-              height: expanded ? 80 : 52,
-              borderRadius:'50%',
+            <div key={`empty-${i}`} className="compare-empty" style={{
+              width:box, height:box, margin: expanded ? '0 8px' : '0 12px',
+              borderRadius: expanded ? 16 : 12,
               border: '2px dashed var(--border)',
               background: 'transparent',
               flexShrink: 0,
-              transition: 'width 0.25s, height 0.25s',
               opacity: 0.4,
             }} />
           ))}
         </div>
         ); })()}
       </div>
-
-      <style>{`
-        div:hover > .remove-btn { opacity: 1 !important; }
-      `}</style>
     </div>
   );
 }
@@ -1987,7 +2361,7 @@ function ListPicker({ wishlist, selectedKey, onPick }) {
                 }}>{p.brand}</div>
                 <div style={{
                   fontFamily:'Cormorant Garamond', fontSize:15, fontStyle:'italic',
-                  color: isSel ? 'var(--blush)' : 'var(--espresso)', lineHeight:1.2,
+                  color: isSel ? 'var(--blush-deep)' : 'var(--espresso)', lineHeight:1.2,
                   overflow:'hidden', textOverflow:'ellipsis',
                   display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical',
                 }}>{p.shade}</div>
@@ -2027,13 +2401,21 @@ function PhotoPicker({ sampledHex, onColor }) {
   const fileInputRef = React.useRef(null);
   const containerRef = React.useRef(null);
   const [dragOver, setDragOver] = React.useState(false);
+  // Shown in the drop zone when a file is not a picture, or is one this browser cannot open (HEIC outside Safari)
+  const [error, setError] = React.useState(false);
 
   function handleFile(file) {
-    if (!file || !file.type.startsWith('image/')) return;
+    if (!file) return;
+    if (!file.type.startsWith('image/')) { window.gtag?.('event', 'photo_upload_error', { reason: 'not_image' }); return setError(true); }
     window.gtag?.('event', 'photo_uploaded');
     const reader = new FileReader();
-    reader.onload = e => { setSrc(e.target.result); setPoint(null); onColor(null); };
+    reader.onload = e => { setError(false); setSrc(e.target.result); setPoint(null); onColor(null); };
+    reader.onerror = () => setError(true);
     reader.readAsDataURL(file);
+  }
+  function onImgError() {
+    window.gtag?.('event', 'photo_upload_error', { reason: 'cannot_open' });
+    setSrc(null); setPoint(null); onColor(null); setError(true);
   }
 
   function onDrop(e) {
@@ -2074,11 +2456,15 @@ function PhotoPicker({ sampledHex, onColor }) {
   function onImgClick(e) {
     const img = imgRef.current; const canvas = canvasRef.current; if (!img || !canvas) return;
     const rect = img.getBoundingClientRect();
-    const sx = canvas.width  / rect.width;
-    const sy = canvas.height / rect.height;
-    const px = (e.clientX - rect.left) * sx;
-    const py = (e.clientY - rect.top)  * sy;
-    setPoint({ x: px, y: py, displayX: e.clientX - rect.left, displayY: e.clientY - rect.top });
+    // The photo is fitted inside the square box (objectFit: contain), so a tall or wide one
+    // has empty bands beside it: measure the tap from the photo's own edge, not the box's
+    const scale = Math.min(rect.width / canvas.width, rect.height / canvas.height);
+    const x = e.clientX - rect.left - (rect.width  - canvas.width  * scale) / 2;
+    const y = e.clientY - rect.top  - (rect.height - canvas.height * scale) / 2;
+    const px = x / scale, py = y / scale;
+    if (px < 0 || py < 0 || px > canvas.width || py > canvas.height) return; // a tap on an empty band
+    // The marker is placed in percent of the box so it stays on its spot when the box resizes
+    setPoint({ x: px, y: py, left: (e.clientX - rect.left) / rect.width * 100, top: (e.clientY - rect.top) / rect.height * 100 });
     sampleAt(px, py);
   }
 
@@ -2107,8 +2493,10 @@ function PhotoPicker({ sampledHex, onColor }) {
         onDragLeave={() => setDragOver(false)}
         onDrop={onDrop}
         onClick={() => fileInputRef.current?.click()}
+        role="button" tabIndex={0} aria-label="Upload a photo or screenshot"
+        onKeyDown={e => { if (e.target === e.currentTarget && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); fileInputRef.current?.click(); } }}
         style={{
-          width:'100%', maxWidth:380, aspectRatio:'1/1',
+          width:'100%', maxWidth:380, aspectRatio:'1/1', outlineOffset:4,
           border:`2px dashed ${dragOver ? 'var(--blush)' : 'var(--border)'}`,
           borderRadius:16, background: dragOver ? 'rgba(200,120,144,0.06)' : '#fff',
           display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center',
@@ -2123,15 +2511,21 @@ function PhotoPicker({ sampledHex, onColor }) {
         <div style={{ fontFamily:'DM Sans', fontSize:12, color:'var(--text-muted)', letterSpacing:'0.04em' }}>
           or click to upload · JPG, PNG, HEIC
         </div>
-        <div style={{ fontFamily:'DM Sans', fontSize:12, color:'var(--text-muted)', maxWidth:260, marginTop:8, lineHeight:1.5 }}>
-          Tap anywhere on the photo to pick a shade.
-        </div>
+        {error ? (
+          <div role="alert" style={{ fontFamily:'DM Sans', fontSize:13, fontWeight:500, color:'var(--blush-deep)', maxWidth:280, marginTop:8, lineHeight:1.5 }}>
+            We couldn't open that file. Try a JPG or PNG, or take a screenshot of it and upload that.
+          </div>
+        ) : (
+          <div style={{ fontFamily:'DM Sans', fontSize:12, color:'var(--text-muted)', maxWidth:260, marginTop:8, lineHeight:1.5 }}>
+            Tap anywhere on the photo to pick a shade.
+          </div>
+        )}
         <div style={{ fontFamily:'DM Sans', fontSize:12, color:'var(--text-muted)', maxWidth:260, marginTop:14, lineHeight:1.5, display:'flex', alignItems:'center', gap:6 }}>
           <span style={{ fontSize:11, fontStyle:'normal' }}>🔒</span>
           <span style={{ fontStyle:'italic' }}>Your photo stays on your device — we never upload or store it.</span>
         </div>
         <input ref={fileInputRef} type="file" accept="image/*" style={{ display:'none' }}
-          onChange={e => handleFile(e.target.files?.[0])}
+          onChange={e => { handleFile(e.target.files?.[0]); e.target.value = ''; }}
         />
       </div>
     );
@@ -2144,6 +2538,7 @@ function PhotoPicker({ sampledHex, onColor }) {
           ref={imgRef}
           src={src}
           onLoad={onImgLoad}
+          onError={onImgError}
           onClick={onImgClick}
           alt="Uploaded"
           style={{ display:'block', width:'100%', height:'100%', objectFit:'contain', cursor:'crosshair' }}
@@ -2152,7 +2547,7 @@ function PhotoPicker({ sampledHex, onColor }) {
         {point && (
           <div style={{
             position:'absolute',
-            left: point.displayX, top: point.displayY,
+            left: `${point.left}%`, top: `${point.top}%`,
             width: Math.max(12, radius * 1.6), height: Math.max(12, radius * 1.6),
             transform:'translate(-50%, -50%)',
             border:'2px solid #fff', borderRadius:'50%',
@@ -2227,6 +2622,20 @@ const EXPLORER = { LMIN: 8, LMAX: 95, SPAN: 80, ZOOM: 20, GRID: 5 };
 // input: 16px keeps iOS from zooming the page on focus. title: the picked color's name on the card.
 const EXPLORER_TYPE = { eyebrow:11, micro:11, link:12, body:13, caption:14, input:16, lede:21, title:30 };
 const EXPLORER_STARTS = [['Red', '#b5252c'], ['Pink', '#d66796'], ['Berry', '#7d2349'], ['Coral', '#d77749'], ['Brown', '#b4856b'], ['Plum', '#5c3069'], ['Blue', '#004590'], ['Black', '#1f1f1f']];
+// Start-from families that open a Tone and a Depth row: hue (degrees) for [warm, neutral, cool], chroma,
+// and which depth a tap on the family opens on. The numbers are chosen so the card names each pick the
+// way its chips do (describeColor); Red has its own depths, the red guide's bright / classic / deep.
+// Blue and Black have no rows: they jump to their EXPLORER_STARTS color.
+const START_TONES = ['Warm', 'Neutral', 'Cool'];
+const START_DEPTHS = [['Light', 68], ['Medium', 52], ['Deep', 34]];
+const START_FAMILIES = {
+  Red:   { hues: [37, 30, 23], C: 64, depths: [['Bright', 50], ['Medium', 42], ['Deep', 32]], open: 1 },
+  Pink:  { hues: [5.5, 354.5, 343.5], C: 45, open: 1 },
+  Berry: { hues: [10, 358, 346], C: 40, open: 2 },
+  Coral: { hues: [56, 51, 46], C: 50, open: 1 },
+  Brown: { hues: [70, 55, 40], C: 20, open: 1 },
+  Plum:  { hues: [329, 320, 311], C: 35, open: 2 },
+};
 // Sunflower layout, same spacing as the color guide card, carried out to the corners of the
 // square: the most vivid reds sit beyond the circle that would fit inside it.
 const EXPLORER_SEEDS = (() => {
@@ -2289,10 +2698,11 @@ function familyTone(fam, h) {
   const off = ((h - c[0] + 540) % 360) - 180;
   return off > c[1] ? 'warm' : off < -c[1] ? 'cool' : '';
 }
-// "Deep cool berry", "Light coral", "Black"; a red is worded as the red guide does ("Classic true red")
+// "Deep cool berry", "Light coral", "Black"; a red is worded as the red guide does, minus
+// its middle depth word: "classic" read as a tone here, so that depth is just "True red", "Blue-red"
 function describeColor(L, a, b) {
   const fam = colorFamily(L, a, b);
-  if (fam === 'red') { const red = redLabel(labToHex(L, a, b)); return red[0].toUpperCase() + red.slice(1); }
+  if (fam === 'red') { const red = redLabel(labToHex(L, a, b)).replace(/^classic /, ''); return red[0].toUpperCase() + red.slice(1); }
   let h = Math.atan2(b, a) * 180 / Math.PI; if (h < 0) h += 360;
   const tone = familyTone(fam, h);
   const name = ['black', 'white', 'gray'].includes(fam) ? fam
@@ -2310,15 +2720,20 @@ function draftColor(draft) {
   return { L: draft.L, a, b, hex: labToHex(draft.L, a, b), name: describeColor(draft.L, a, b) };
 }
 
+// The color a Start-from family gives at one tone (index into START_TONES) and depth (index into its depths)
+function startLab(fam, ti, di) {
+  const f = START_FAMILIES[fam], L = (f.depths || START_DEPTHS)[di][1], r = f.hues[ti] * Math.PI / 180;
+  return [L, ...fitToGamut(L, f.C * Math.cos(r), f.C * Math.sin(r))];
+}
+
 // How many lipsticks the results would show for this color, and the nearest one. Same
 // rule as the results (matchBand over the closest 500, minus discontinued shades, which
 // the results hide until asked). One pass and normally no sorting, so it can run while
 // the dot is dragged. A black pick counts every black lipstick instead, as the results do.
-function shadeMatchInfo(hex, maxDeltaE, keep) {
+function shadeMatchInfo(hex, maxDeltaE) {
   const lab = hexToLab(hex), black = isBlackLab(lab);
   let rows = [], best = Infinity, nearest = null, blacks = 0;
   for (const p of REAL_PRODUCTS) {
-    if (keep && !keep(p)) continue;
     const d = deltaE(lab, p.lab);
     rows.push([d, p.discontinued]);
     if (d < best) { best = d; nearest = p; }
@@ -2348,6 +2763,11 @@ function ShadeExplorer({ draft, color, origin, zoom, onZoom, info, committed, pi
   const [stacked, setStacked] = useState(() => window.innerWidth <= 900);
   const [depthFocus, setDepthFocus] = useState(false);
   const [liveMsg, setLiveMsg] = useState('');
+  // The last Start-from family pick. Its Tone and Depth rows stay until another family is chosen: they sit
+  // above the map, so taking them away while the dot is dragged would slide the map out from under the pointer.
+  // Their chips are only marked while the dot is still on the color they picked (onStart).
+  const [start, setStart] = useState(null); // { fam, ti, di, hex }
+  const sel = start, onStart = !!start && start.hex === color.hex;
   const mapEl = React.useRef(null);
   const drag = React.useRef({}); // mouse: dragging the map · dot: dragging the marker · tap: a touch that may still be a tap
 
@@ -2356,6 +2776,16 @@ function ShadeExplorer({ draft, color, origin, zoom, onZoom, info, committed, pi
     window.addEventListener('resize', onResize);
     return () => window.removeEventListener('resize', onResize);
   }, []);
+  // Stacked layout: when the results sheet opens, bring the map to the top of the screen so it shows above the sheet
+  useEffect(() => {
+    if (!committed || !stacked) return;
+    const t = setTimeout(() => {
+      if (!mapEl.current) return;
+      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      window.scrollTo({ top: mapEl.current.getBoundingClientRect().top + window.scrollY - 12, behavior: reduce ? 'auto' : 'smooth' });
+    }, 80);
+    return () => clearTimeout(t);
+  }, [committed]);
 
   const summary = shadeSummary(info);
   const before = origin && draftColor(origin), moved = !!before && before.hex !== color.hex;
@@ -2410,6 +2840,35 @@ function ShadeExplorer({ draft, color, origin, zoom, onZoom, info, committed, pi
   const stops = [];
   for (let l = LMAX; l >= LMIN; l -= 6) { const [fa, fb] = fitToGamut(l, draft.ta, draft.tb); stops.push(labToHex(l, fa, fb)); }
 
+  function pickStart(fam, ti, di) {
+    const lab = startLab(fam, ti, di);
+    setStart({ fam, ti, di, hex: labToHex(...lab) });
+    onDraft(draftFromLab(lab));
+  }
+  const startChip = (name, hex, on, onClick) => (
+    <button key={name} type="button" aria-pressed={on} onClick={onClick} style={{
+      flex:'none', whiteSpace:'nowrap', fontFamily:'DM Sans', fontSize:TYPE.body,
+      display:'flex', alignItems:'center', gap:7, minHeight: stacked ? 44 : 0, padding:'6px 14px 6px 7px',
+      borderRadius:20, border:`1.5px solid ${on ? 'var(--espresso)' : 'var(--border)'}`,
+      background:'#fff', color:'var(--espresso)', cursor:'pointer',
+    }}>
+      <span style={{ width:18, height:18, borderRadius:'50%', background:hex }} />{name}
+    </button>
+  );
+  // The label has a fixed width so the chips of the three rows line up
+  const startRow = (label, chips, group) => (
+    <div role={group ? 'group' : undefined} aria-label={group ? label : undefined} style={{
+      display:'flex', alignItems:'center', gap:8, padding:'2px 0',
+      flexWrap: stacked ? 'nowrap' : 'wrap', overflowX: stacked ? 'auto' : 'visible', scrollbarWidth:'none',
+    }}>
+      <span style={{
+        flex:'none', fontSize:TYPE.eyebrow, lineHeight:1.15, letterSpacing:'0.12em', textTransform:'uppercase',
+        color:'var(--espresso-mid)', fontWeight:500, width: stacked ? 52 : 72,
+      }}>{label}</span>
+      {chips}
+    </div>
+  );
+
   const axisWord = { fontSize:TYPE.micro, color:'var(--espresso-mid)', lineHeight:1, textAlign:'center', pointerEvents:'none' };
   const depthBar = (
     <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
@@ -2446,28 +2905,15 @@ function ShadeExplorer({ draft, color, origin, zoom, onZoom, info, committed, pi
       </p>
       <p aria-live="polite" style={{ position:'absolute', width:1, height:1, margin:-1, overflow:'hidden', clip:'rect(0 0 0 0)', whiteSpace:'nowrap' }}>{liveMsg}</p>
 
-      {/* Start from */}
-      <div style={{
-        display:'flex', alignItems:'center', gap:8, padding:'2px 0',
-        flexWrap: stacked ? 'nowrap' : 'wrap', overflowX: stacked ? 'auto' : 'visible', scrollbarWidth:'none',
-      }}>
-        <span style={{
-          flex:'none', fontSize:TYPE.eyebrow, lineHeight:1.15, letterSpacing:'0.12em', textTransform:'uppercase',
-          color:'var(--espresso-mid)', fontWeight:500, marginRight:4, width: stacked ? 52 : 'auto',
-        }}>Start from</span>
-        {EXPLORER_STARTS.map(([name, hex]) => {
-          const on = hex === color.hex;
-          return (
-            <button key={name} type="button" aria-pressed={on} onClick={() => onDraft(draftFromLab(hexToLab(hex)))} style={{
-              flex:'none', whiteSpace:'nowrap', fontFamily:'DM Sans', fontSize:TYPE.body,
-              display:'flex', alignItems:'center', gap:7, minHeight: stacked ? 44 : 0, padding:'6px 14px 6px 7px',
-              borderRadius:20, border:`1.5px solid ${on ? 'var(--espresso)' : 'var(--border)'}`,
-              background:'#fff', color:'var(--espresso)', cursor:'pointer',
-            }}>
-              <span style={{ width:18, height:18, borderRadius:'50%', background:hex }} />{name}
-            </button>
-          );
-        })}
+      {/* Start from: a family, then (for most) its tone and depth */}
+      <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
+        {startRow('Start from', EXPLORER_STARTS.map(([name, hex]) => START_FAMILIES[name]
+          ? startChip(name, hex, sel?.fam === name, () => pickStart(name, 1, START_FAMILIES[name].open))
+          : startChip(name, hex, hex === color.hex, () => { setStart(null); onDraft(draftFromLab(hexToLab(hex))); })))}
+        {sel && startRow('Tone', START_TONES.map((name, ti) =>
+          startChip(name, labToHex(...startLab(sel.fam, ti, sel.di)), onStart && sel.ti === ti, () => pickStart(sel.fam, ti, sel.di))), true)}
+        {sel && startRow('Depth', (START_FAMILIES[sel.fam].depths || START_DEPTHS).map(([name], di) =>
+          startChip(name, labToHex(...startLab(sel.fam, sel.ti, di)), onStart && sel.di === di, () => pickStart(sel.fam, sel.ti, di))), true)}
       </div>
 
       {stacked && depthBar}
@@ -2505,10 +2951,21 @@ function ShadeExplorer({ draft, color, origin, zoom, onZoom, info, committed, pi
                 const s = zoom ? GRID : e.shiftKey ? 12 : 6, m = { ArrowLeft: [-s, 0], ArrowRight: [s, 0], ArrowUp: [0, s], ArrowDown: [0, -s] }[e.key];
                 if (m) { e.preventDefault(); moveTo(color.a + m[0], color.b + m[1]); }
               }}
-              onPointerDown={e => { e.stopPropagation(); drag.current.dot = true; e.currentTarget.setPointerCapture(e.pointerId); }}
-              onPointerMove={e => { if (drag.current.dot) { e.stopPropagation(); fromPoint(e.clientX, e.clientY); } }}
-              onPointerUp={e => { e.stopPropagation(); drag.current.dot = false; drag.current.tap = null; }}
-              onPointerCancel={e => { e.stopPropagation(); drag.current.dot = false; drag.current.tap = null; }}
+              onPointerDown={e => {
+                // Remember where on the marker it was grabbed, so the drag moves its center, not the fingertip's spot
+                const r = e.currentTarget.getBoundingClientRect();
+                e.stopPropagation(); e.currentTarget.setPointerCapture(e.pointerId);
+                drag.current.dot = { x: e.clientX, y: e.clientY, dx: e.clientX - (r.left + r.width / 2), dy: e.clientY - (r.top + r.height / 2), moved: false };
+              }}
+              onPointerMove={e => {
+                const g = drag.current.dot; if (!g) return;
+                e.stopPropagation();
+                // A press that barely moves is not a drag: the marker stays where it is
+                if (!g.moved && Math.hypot(e.clientX - g.x, e.clientY - g.y) < 6) return;
+                g.moved = true; fromPoint(e.clientX - g.dx, e.clientY - g.dy);
+              }}
+              onPointerUp={e => { e.stopPropagation(); drag.current.dot = null; drag.current.tap = null; }}
+              onPointerCancel={e => { e.stopPropagation(); drag.current.dot = null; drag.current.tap = null; }}
               style={{
                 touchAction:'none', position:'absolute', left:px(color.a), top:py(color.b), width:34, height:34, margin:'-17px 0 0 -17px', padding:0,
                 borderRadius:'50%', border:'3px solid #fff', background:color.hex,
@@ -2533,12 +2990,19 @@ function ShadeExplorer({ draft, color, origin, zoom, onZoom, info, committed, pi
       {/* Hex entry: here when stacked, under the card on desktop */}
       {stacked && <ShadeHexForm id="shade-hex" big onDraft={onDraft} />}
 
-      {/* Stacked layout: the pick and its button ride at the bottom of the screen while the map is in view */}
+      {/* Stacked layout: the pick and its button are fixed to the bottom of the screen, over the page.
+          With the comparison tray open (it owns the bottom edge) the bar sits here in the page instead. */}
       {stacked && !committed && (
-        <div style={{
-          position: pinned ? 'static' : 'sticky', bottom:12, zIndex:5,
-          display:'flex', alignItems:'center', gap:12, padding:'10px 12px',
-          background:'#fff', border:'1px solid var(--border)', borderRadius:16, boxShadow:'0 4px 18px rgba(42,26,20,0.16)',
+        <div className={pinned ? undefined : 'shade-bar'} style={{
+          display:'flex', alignItems:'center', gap:12,
+          background:'#fff',
+          ...(pinned
+            ? { padding:'10px 12px', border:'1px solid var(--border)', borderRadius:16, boxShadow:'0 4px 18px rgba(42,26,20,0.16)' }
+            : {
+                position:'fixed', left:0, right:0, bottom:0, zIndex:90,
+                padding:'12px 16px calc(12px + env(safe-area-inset-bottom))',
+                borderTop:'1px solid var(--border)', boxShadow:'0 -4px 16px rgba(42,26,20,0.10)',
+              }),
         }}>
           <div style={{ flex:'none', display:'flex', width:44, height:44, borderRadius:10, overflow:'hidden', boxShadow:'0 0 0 1px var(--border)' }}>
             {moved && !summary.noMatch && <span style={{ flex:1, background:before.hex }} />}
@@ -2555,7 +3019,7 @@ function ShadeExplorer({ draft, color, origin, zoom, onZoom, info, committed, pi
             </span>
           </div>
           {!summary.loading && (
-            <button type="button" onClick={summary.noMatch ? onJump : onCommit} style={{ ...EXPLORER_CTA, flex:'none', minHeight:44, padding:'0 18px', letterSpacing:'0.06em' }}>
+            <button id="shade-bar-cta" type="button" onClick={summary.noMatch ? onJump : onCommit} style={{ ...EXPLORER_CTA, flex:'none', minHeight:44, padding:'0 18px', letterSpacing:'0.06em' }}>
               {summary.noMatch ? 'Jump to nearest' : `See ${summary.n}`}
             </button>
           )}
@@ -2604,10 +3068,13 @@ function ShadeHexForm({ id, big, onDraft }) {
 // "Explore nearby shades" zooms the map in on the pick (and back out). After picking in the
 // close-up, "Return to #…" goes back to the color chosen before zooming. On the card on desktop,
 // under the map when the columns stack.
-function ShadeZoomControl({ color, origin, zoom, onZoom, onDraft, row }) {
+function ShadeZoomControl({ color, origin, zoom, onZoom, onDraft, row, wide }) {
   const TYPE = EXPLORER_TYPE, back = origin && draftColor(origin);
   return (
-    <div style={{ flex:'none', display:'flex', flexDirection:'column', alignItems: row ? 'center' : 'flex-end', gap:10 }}>
+    <div style={wide
+      // On the card once there are two colors to describe: one line across, under both
+      ? { flex:1, display:'flex', flexWrap:'wrap', alignItems:'center', justifyContent:'space-between', gap:10 }
+      : { flex:'none', display:'flex', flexDirection:'column', alignItems: row ? 'center' : 'flex-end', gap:10 }}>
       <button type="button" aria-pressed={!!zoom} onClick={() => onZoom(zoom ? null : { a: color.a, b: color.b })} style={{
         fontFamily:'DM Sans', fontSize:TYPE.link, fontWeight:500, letterSpacing:'0.06em', textTransform:'uppercase',
         minHeight: row ? 44 : 0, padding:'10px 18px', borderRadius:40, border:'1.5px solid var(--espresso)',
@@ -2644,18 +3111,27 @@ function ShadeCard({ color, origin, zoom, onZoom, info, committed, onCommit, onJ
           <span style={{ flex:1, background:color.hex }} />
           <span style={{ position:'absolute', inset:0, boxShadow:'inset 0 -2px 6px rgba(0,0,0,0.15)', pointerEvents:'none' }} />
         </div>
+        {/* Each half of the swatch is described right under it: what it is called and its hex */}
         {moved && (
-          <div style={{ display:'flex', fontSize:TYPE.body, color:'var(--espresso-mid)' }}>
-            <span style={{ flex:1 }}>Your first pick · {before.hex.toUpperCase()}</span><span style={{ flex:1 }}>Now</span>
+          <div style={{ display:'flex', paddingTop:6 }}>
+            {[['Your first pick', before], ['Now', color]].map(([label, c]) => (
+              <div key={label} style={{ flex:1, minWidth:0, display:'flex', flexDirection:'column', gap:4, paddingRight:12 }}>
+                <p style={{ fontSize:TYPE.eyebrow, fontWeight:500, letterSpacing:'0.12em', textTransform:'uppercase', color:'var(--espresso-mid)' }}>{label}</p>
+                <p style={{ fontFamily:'Cormorant Garamond', fontStyle:'italic', fontSize:TYPE.lede, lineHeight:1.15 }}>{c.name}</p>
+                <p style={{ fontSize:TYPE.body, color:'var(--espresso-mid)', letterSpacing:'0.04em' }}>{c.hex.toUpperCase()}</p>
+              </div>
+            ))}
           </div>
         )}
       </div>
       <div style={{ display:'flex', flexWrap:'wrap', alignItems:'flex-start', justifyContent:'space-between', gap:16 }}>
-        <div style={{ flex:'1 1 160px', minWidth:0, display:'flex', flexDirection:'column', gap:4 }}>
-          <p style={{ fontFamily:'Cormorant Garamond', fontStyle:'italic', fontSize:TYPE.title, lineHeight:1.1 }}>{color.name}</p>
-          <p style={{ fontSize:TYPE.body, color:'var(--espresso-mid)', letterSpacing:'0.04em' }}>{color.hex.toUpperCase()}</p>
-        </div>
-        <ShadeZoomControl color={color} origin={origin} zoom={zoom} onZoom={onZoom} onDraft={onDraft} />
+        {!moved && (
+          <div style={{ flex:'1 1 160px', minWidth:0, display:'flex', flexDirection:'column', gap:4 }}>
+            <p style={{ fontFamily:'Cormorant Garamond', fontStyle:'italic', fontSize:TYPE.title, lineHeight:1.1 }}>{color.name}</p>
+            <p style={{ fontSize:TYPE.body, color:'var(--espresso-mid)', letterSpacing:'0.04em' }}>{color.hex.toUpperCase()}</p>
+          </div>
+        )}
+        <ShadeZoomControl color={color} origin={origin} zoom={zoom} onZoom={onZoom} onDraft={onDraft} wide={moved} />
       </div>
       <p style={{ fontSize:TYPE.caption, lineHeight:1.4, color:'var(--espresso)' }}>{summary.text}</p>
       {summary.noMatch && (
@@ -2677,157 +3153,52 @@ function ShadeCard({ color, origin, zoom, onZoom, info, committed, onCommit, onJ
           {summary.noMatch ? 'Jump to the nearest lipstick' : summary.cta}
         </button>
       )}
-      {committed && <p style={{ fontSize:TYPE.body, color:'var(--espresso-mid)' }}>Move the dot or the depth bar to start over.</p>}
     </div>
   );
 }
 
-// ── Vibe Panel ──────────────────────────────────────────────────────────
-function VibePanel({ vibe, setVibe, onClose }) {
-  const toggle = (key, value) => {
-    setVibe(v => {
-      const cur = v[key] || [];
-      const next = cur.includes(value) ? cur.filter(x => x !== value) : [...cur, value];
-      return { ...v, [key]: next };
-    });
+// The results for the pick. Stacked layout: a sheet over the bottom of the screen (`.shade-sheet` in
+// index.html) with the map still in use above it; swipe its header down, press × or Escape to close.
+// On desktop the header is hidden and the results sit under the card.
+function ShadeSheet({ color, info, pinned, onClose, children }) {
+  const TYPE = EXPLORER_TYPE, summary = shadeSummary(info);
+  const [dy, setDy] = useState(0);
+  const drag = React.useRef(null);
+  const closeBtn = React.useRef(null);
+  const [isSheet] = useState(() => window.innerWidth <= 900);
+  useBackToClose(onClose, isSheet);
+  useEffect(() => { if (window.innerWidth <= 900) closeBtn.current?.focus({ preventScroll: true }); }, []);
+  const endDrag = () => {
+    if (!drag.current) return;
+    drag.current = null;
+    if (dy > 80) onClose(); else setDy(0);
   };
-  const clearAll = () => setVibe({ finishes:[], temps:[], depths:[] });
-  const FINISHES = ['Cream','Glossy','Matte','Satin','Semi-Matte','Sheer','Shimmer','Unlisted'];
-  const TEMPS    = [
-    { id:'cool',    label:'Cool'    },
-    { id:'neutral', label:'Neutral' },
-    { id:'warm',    label:'Warm'    },
-  ];
-  const DEPTHS = [
-    { id:'light',  label:'Light'  },
-    { id:'medium', label:'Medium' },
-    { id:'deep',   label:'Deep'   },
-  ];
-  const active = (vibe.finishes?.length || 0) + (vibe.temps?.length || 0) + (vibe.depths?.length || 0);
-
-  // Reusable chip
-  const Chip = ({ on, label, sub, onClick }) => (
-    <button onClick={onClick} style={{
-      flex:'1 1 0', minWidth:0,
-      padding:'12px 14px', borderRadius:14,
-      border:`1.5px solid ${on ? 'var(--blush)' : 'var(--border)'}`,
-      background: on ? 'rgba(200,120,144,0.10)' : '#fff',
-      color: on ? 'var(--blush)' : 'var(--espresso)',
-      cursor:'pointer', textAlign:'left',
-      fontFamily:'DM Sans', transition:'all 0.15s',
-    }}>
-      <div style={{ fontSize:12, fontWeight:500, letterSpacing:'0.04em', textTransform:'uppercase' }}>{label}</div>
-      {sub && <div style={{ fontSize:10, color:'var(--text-muted)', marginTop:3, letterSpacing:'0.02em' }}>{sub}</div>}
-    </button>
-  );
-
   return (
-    <div onClick={onClose} style={{
-      position:'fixed', inset:0, zIndex:300,
-      background:'rgba(42,26,20,0.32)',
-      display:'flex', alignItems:'center', justifyContent:'center',
-      backdropFilter:'blur(2px)',
-    }}>
-      <div onClick={e => e.stopPropagation()} style={{
-        background:'var(--cream)', borderRadius:18,
-        width:'min(560px, 92vw)', maxHeight:'88vh', overflowY:'auto',
-        boxShadow:'0 20px 60px rgba(42,26,20,0.3)',
-        border:'1px solid var(--border)',
-      }}>
-        <div style={{
-          padding:'24px 32px 16px',
-          borderBottom:'1px solid var(--border)',
-          display:'flex', alignItems:'center', gap:12,
-        }}>
-          <span style={{ color:'var(--blush)', fontSize:20 }}>✦</span>
-          <h2 style={{ fontFamily:'Cormorant Garamond', fontWeight:400, fontSize:24, color:'var(--espresso)' }}>
-            My Lipstick Vibe
-          </h2>
-          <button onClick={onClose} style={{
-            marginLeft:'auto', width:32, height:32, borderRadius:'50%',
-            border:'1px solid var(--border)', background:'#fff',
-            cursor:'pointer', color:'var(--text-muted)', fontSize:14,
+    <section className={`shade-sheet${pinned ? ' tray-open' : ''}`} role="region" aria-labelledby="shade-sheet-title"
+      onKeyDown={e => { if (e.key === 'Escape' && window.innerWidth <= 900) { e.preventDefault(); onClose(); } }}
+      style={{ transform: dy ? `translateY(${dy}px)` : undefined, transition: drag.current ? 'none' : 'transform 0.2s ease' }}>
+      <div className="shade-sheet-head"
+        onPointerDown={e => { if (e.target.closest('button')) return; drag.current = { y: e.clientY }; e.currentTarget.setPointerCapture(e.pointerId); }}
+        onPointerMove={e => { if (drag.current) setDy(Math.max(0, e.clientY - drag.current.y)); }}
+        onPointerUp={endDrag} onPointerCancel={endDrag}>
+        <span aria-hidden="true" style={{ alignSelf:'center', width:40, height:5, borderRadius:3, background:'#D8C8BC' }} />
+        <div style={{ display:'flex', alignItems:'center', gap:12 }}>
+          <span style={{ width:40, height:40, borderRadius:10, flex:'none', background:color.hex, boxShadow:'inset 0 -2px 4px rgba(0,0,0,0.12)' }} />
+          <div style={{ flex:1, minWidth:0, display:'flex', flexDirection:'column', gap:2 }}>
+            <h2 id="shade-sheet-title" style={{
+              fontFamily:'Cormorant Garamond', fontStyle:'italic', fontWeight:400, fontSize:TYPE.lede, lineHeight:1.1,
+              whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis',
+            }}>{color.name}</h2>
+            <span style={{ fontSize:TYPE.body, color:'var(--espresso-mid)' }}>{summary.text}{summary.n ? ' · closest first' : ''}</span>
+          </div>
+          <button ref={closeBtn} type="button" aria-label="Close results" onClick={onClose} style={{
+            flex:'none', width:44, height:44, borderRadius:'50%', border:'1px solid var(--border)',
+            background:'#fff', color:'var(--espresso)', fontFamily:'DM Sans', fontSize:20, lineHeight:1, cursor:'pointer',
           }}>×</button>
         </div>
-        <div style={{ padding:'18px 32px 8px', fontSize:12, color:'var(--text-muted)', fontFamily:'DM Sans', letterSpacing:'0.02em', lineHeight:1.5 }}>
-          Tell us what you love — we'll quietly filter every search to shades that fit. Pick any combination, or skip a row for "anything goes."
-        </div>
-
-        <Section title="Finish">
-          <p style={{
-            margin:'0 0 10px', fontFamily:'Cormorant Garamond', fontStyle:'italic',
-            fontSize:14, color:'var(--text-muted)', lineHeight:1.35,
-          }}>
-            Finish isn't listed for every product — pick "Unlisted" to still include those.
-          </p>
-          <div style={{ display:'flex', flexWrap:'wrap', gap:8 }}>
-            {FINISHES.map(f => (
-              <Chip key={f} on={(vibe.finishes||[]).includes(f)} label={f}
-                onClick={() => toggle('finishes', f)} />
-            ))}
-          </div>
-        </Section>
-
-        <Section title="Undertone">
-          <div style={{ display:'flex', gap:8 }}>
-            {TEMPS.map(t => (
-              <Chip key={t.id} on={(vibe.temps||[]).includes(t.id)} label={t.label} sub={t.sub}
-                onClick={() => toggle('temps', t.id)} />
-            ))}
-          </div>
-        </Section>
-
-        <Section title="Depth">
-          <div style={{ display:'flex', gap:8 }}>
-            {DEPTHS.map(d => (
-              <Chip key={d.id} on={(vibe.depths||[]).includes(d.id)} label={d.label} sub={d.sub}
-                onClick={() => toggle('depths', d.id)} />
-            ))}
-          </div>
-        </Section>
-
-        <div style={{
-          padding:'18px 32px 24px', display:'flex', alignItems:'center', gap:12,
-          borderTop:'1px solid var(--border)', marginTop:8,
-        }}>
-          <span style={{ fontSize:11, color:'var(--text-muted)', fontFamily:'DM Sans', letterSpacing:'0.04em' }}>
-            {active === 0 ? 'No filters — showing all shades' : `${active} filter${active===1?'':'s'} active`}
-          </span>
-          <a href="/color-science/#undertone"
-            onClick={() => window.gtag?.('event', 'nav_link_click', { target: 'color_guide', location: 'undertone_panel' })}
-            style={{
-            fontSize:11, color:'var(--blush)', fontFamily:'DM Sans',
-            letterSpacing:'0.04em', textDecoration:'none',
-            borderBottom:'1px solid var(--blush)',
-            paddingBottom:1,
-          }}>What do these mean? →</a>
-          <button onClick={clearAll} disabled={active === 0} style={{
-            marginLeft:'auto', padding:'8px 16px',
-            fontFamily:'DM Sans', fontSize:11, letterSpacing:'0.08em', textTransform:'uppercase', fontWeight:500,
-            background:'transparent', color: active === 0 ? 'var(--border)' : 'var(--blush)',
-            border:`1px solid ${active === 0 ? 'var(--border)' : 'var(--blush)'}`,
-            borderRadius:20, cursor: active === 0 ? 'default' : 'pointer',
-          }}>Clear my vibe</button>
-          <button onClick={onClose} style={{
-            padding:'8px 20px',
-            fontFamily:'DM Sans', fontSize:11, letterSpacing:'0.08em', textTransform:'uppercase', fontWeight:500,
-            background:'var(--espresso)', color:'var(--cream)',
-            border:'1px solid var(--espresso)', borderRadius:20, cursor:'pointer',
-          }}>Done</button>
-        </div>
       </div>
-    </div>
-  );
-}
-function Section({ title, children }) {
-  return (
-    <div style={{ padding:'14px 32px' }}>
-      <div style={{
-        fontFamily:'DM Sans', fontSize:10, color:'var(--text-muted)',
-        letterSpacing:'0.1em', textTransform:'uppercase', marginBottom:10,
-      }}>{title}</div>
-      {children}
-    </div>
+      <div className="shade-sheet-body">{children}</div>
+    </section>
   );
 }
 
@@ -2950,7 +3321,7 @@ function DupeFinder({ product, onSelect, onUsePhoto }) {
   const chip = { display:'inline-flex', alignItems:'center', gap:8, padding:'7px 8px 7px 14px', background:'#fff', borderRadius:40, border:'1px solid var(--border)', boxShadow:'0 2px 8px var(--shadow)' };
   const chipX = { width:20, height:20, borderRadius:'50%', border:'none', background:'var(--cream-dark)', color:'var(--text-muted)', cursor:'pointer', fontSize:13, lineHeight:1, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 };
   const emptyNote = { fontFamily:'Cormorant Garamond', fontStyle:'italic', fontSize:TYPE.caption, color:'var(--text-muted)', textAlign:'center', padding:'8px 0' };
-  const photoFallbackBtn = { marginTop:6, fontFamily:'DM Sans', fontSize:TYPE.link, letterSpacing:'0.06em', textTransform:'uppercase', color:'var(--blush)', background:'transparent', border:'1px solid var(--blush)', borderRadius:20, padding:'6px 14px', cursor:'pointer' };
+  const photoFallbackBtn = { marginTop:6, fontFamily:'DM Sans', fontSize:TYPE.link, letterSpacing:'0.06em', textTransform:'uppercase', color:'var(--blush-deep)', background:'transparent', border:'1px solid var(--blush-deep)', borderRadius:20, padding:'6px 14px', cursor:'pointer' };
   const hov = () => ({ onMouseEnter: e => e.currentTarget.style.background = 'var(--cream)', onMouseLeave: e => e.currentTarget.style.background = 'transparent' });
 
   return (
@@ -2962,7 +3333,7 @@ function DupeFinder({ product, onSelect, onUsePhoto }) {
         <p style={{ fontFamily:'DM Sans', fontSize:TYPE.body, color:'var(--text-muted)', letterSpacing:'0.02em', marginTop:4 }}>
           Search the brand, then the shade name
         </p>
-        <button onClick={() => { window.gtag?.('event', 'dupe_photo_fallback', { step: 'header' }); onUsePhoto(); }} style={{ marginTop:8, fontFamily:'DM Sans', fontSize:TYPE.link, letterSpacing:'0.05em', color:'var(--blush)', background:'transparent', border:'none', borderBottom:'1px solid var(--blush)', paddingBottom:1, cursor:'pointer' }}>
+        <button onClick={() => { window.gtag?.('event', 'dupe_photo_fallback', { step: 'header' }); onUsePhoto(); }} style={{ marginTop:8, fontFamily:'DM Sans', fontSize:TYPE.link, letterSpacing:'0.05em', color:'var(--blush-deep)', background:'transparent', border:'none', borderBottom:'1px solid var(--blush-deep)', paddingBottom:1, cursor:'pointer' }}>
           Can't find your lipstick? Match it from a photo →
         </button>
       </div>
@@ -2973,13 +3344,13 @@ function DupeFinder({ product, onSelect, onUsePhoto }) {
             <span style={stepNum}>1</span>
             <span style={stepLabel}>Brand</span>
           </div>
-          <div style={inputWrap}>
+          <div className="dupe-input" style={inputWrap}>
             <span style={{ color:'var(--text-muted)', fontSize:22, lineHeight:1 }}>⌕</span>
             <input autoFocus value={brandQuery}
               onChange={e => setBrandQuery(e.target.value)}
               onKeyDown={e => { if (e.key === 'Enter' && brandMatches[0]) pickBrand(brandMatches[0]); }}
-              placeholder="MAC, Charlotte Tilbury…" style={inputStyle} />
-            {brandQuery && <button onClick={() => setBrandQuery('')} style={clearBtn}>×</button>}
+              placeholder="MAC, Charlotte Tilbury…" aria-label="Brand" style={inputStyle} />
+            {brandQuery && <button onClick={() => setBrandQuery('')} aria-label="Clear search" style={clearBtn}>×</button>}
           </div>
           {brandQuery && brandMatches.length === 0 && (
             <p style={emptyNote}>No brands match "{brandQuery}".</p>
@@ -3023,13 +3394,13 @@ function DupeFinder({ product, onSelect, onUsePhoto }) {
                 <span style={stepNum}>2</span>
                 <span style={stepLabel}>Shade</span>
               </div>
-              <div style={inputWrap}>
+              <div className="dupe-input" style={inputWrap}>
                 <span style={{ color:'var(--text-muted)', fontSize:22, lineHeight:1 }}>⌕</span>
                 <input autoFocus value={shadeQuery}
                   onChange={e => setShadeQuery(e.target.value)}
                   onKeyDown={e => { if (e.key === 'Enter' && shadeMatches[0]) pickShade(shadeMatches[0]); }}
-                  placeholder="Search a shade or product…" style={inputStyle} />
-                {shadeQuery && <button onClick={() => setShadeQuery('')} style={clearBtn}>×</button>}
+                  placeholder="Search a shade or product…" aria-label="Shade or product" style={inputStyle} />
+                {shadeQuery && <button onClick={() => setShadeQuery('')} aria-label="Clear search" style={clearBtn}>×</button>}
               </div>
               {!shadeQuery.trim() ? (
                 <p style={{ fontFamily:'Cormorant Garamond', fontStyle:'italic', fontSize:TYPE.caption, color:'var(--text-muted)', textAlign:'center', lineHeight:1.5, marginTop:2 }}>
@@ -3098,12 +3469,13 @@ function DupeFinder({ product, onSelect, onUsePhoto }) {
               </div>
               <button onClick={() => onSelect(null)} style={{
                 alignSelf:'flex-start', fontSize:11, fontFamily:'DM Sans',
-                letterSpacing:'0.06em', textTransform:'uppercase', color:'var(--blush)',
-                background:'transparent', border:'1px solid var(--blush)', borderRadius:20,
+                letterSpacing:'0.06em', textTransform:'uppercase', color:'var(--blush-deep)',
+                background:'transparent', border:'1px solid var(--blush-deep)', borderRadius:20,
                 padding:'6px 14px', cursor:'pointer',
               }}>← Pick another shade</button>
               <p style={{ fontFamily:'Cormorant Garamond', fontStyle:'italic', fontSize:14, color:'var(--text-muted)', textAlign:'center', marginTop:2 }}>
-                Closest dupes are ranked on the right →
+                <span className="only-wide">Closest dupes are ranked on the right →</span>
+                <span className="only-stacked">Closest dupes are ranked below ↓</span>
               </p>
             </div>
           )}
@@ -3137,134 +3509,194 @@ function DupeFinder({ product, onSelect, onUsePhoto }) {
   );
 }
 
-// Shared mode icons — used on the landing cards and the in-app mode bar
-// so a user sees the same glyph for "color wheel" etc. everywhere.
+// Mode icons for the in-app mode bar: one-color line versions of the landing card pictures,
+// drawn in currentColor, with lighter tints standing in for the pictures' colors
+const wheelRing = (r, width, opacity) => {
+  const seg = 2 * Math.PI * r / 8;
+  return <circle cx="10" cy="10" r={r} fill="none" stroke="currentColor" strokeWidth={width} opacity={opacity} strokeDasharray={`${seg - 0.9} 0.9`} />;
+};
+const iconBullet = (x, tilt) => (
+  <g transform={`rotate(${tilt} ${x + 2.5} 18)`}>
+    <path d={`M${x + 1} 8V5Q${x + 1} 1.8 ${x + 4} 1.5V8Z`} fill="currentColor" />
+    <rect x={x + 0.5} y="8" width="4" height="3" fill="currentColor" opacity="0.4" />
+    <rect x={x} y="11" width="5" height="7" rx="0.8" fill="currentColor" opacity="0.75" />
+  </g>
+);
 const MODE_ICONS = {
   wheel: (s = 26) => (
-    <svg width={s} height={s} viewBox="0 0 20 20" fill="none">
-      <path d="M 10 10 L 18 10 A 8 8 0 0 1 10 18 Z" fill="#F5C5C5" stroke="#D4B8AC" strokeWidth="0.5"/>
-      <path d="M 10 10 L 10 18 A 8 8 0 0 1 2 10 Z" fill="#C87890" stroke="#D4B8AC" strokeWidth="0.5"/>
-      <path d="M 10 10 L 2 10 A 8 8 0 0 1 10 2 Z" fill="#8B4558" stroke="#D4B8AC" strokeWidth="0.5"/>
-      <path d="M 10 10 L 10 2 A 8 8 0 0 1 18 10 Z" fill="#E8C8B8" stroke="#D4B8AC" strokeWidth="0.5"/>
-    </svg>
-  ),
-  photo: (s = 26) => (
-    <svg width={s} height={s} viewBox="0 0 20 20" fill="none">
-      <rect x="2" y="7" width="16" height="10" rx="2" fill="#EDD8CE" stroke="#D4B8AC" strokeWidth="1"/>
-      <rect x="6" y="5" width="7" height="3" rx="1" fill="#EDD8CE" stroke="#D4B8AC" strokeWidth="1"/>
-      <circle cx="10" cy="12" r="3" fill="#F0D8D0" stroke="#C87890" strokeWidth="1.2"/>
+    <svg width={s} height={s} viewBox="0 0 20 20" aria-hidden="true">
+      {wheelRing(8.2, 2.2, 0.5)}{wheelRing(5.4, 2, 0.75)}{wheelRing(2.8, 1.8, 1)}
     </svg>
   ),
   dupe: (s = 26) => (
-    <svg width={s} height={s} viewBox="0 0 20 20" fill="none">
-      <rect x="2" y="13" width="6" height="6" rx="1" fill="#EDD8CE" stroke="#D4B8AC" strokeWidth="0.8"/>
-      <rect x="2" y="15.5" width="6" height="2" fill="#E4C8BC" stroke="#D4B8AC" strokeWidth="0.5"/>
-      <rect x="3" y="7.5" width="4" height="5.5" rx="0.5" fill="#F0DED8" stroke="#D4B8AC" strokeWidth="0.8"/>
-      <rect x="3" y="4" width="4" height="3.5" fill="#C87890" stroke="#A86878" strokeWidth="0.6"/>
-      <path d="M3 4 Q3.5 1 5 0.5 Q6.5 1 7 4 Z" fill="#C87890" stroke="#A86878" strokeWidth="0.6" strokeLinejoin="round"/>
-      <line x1="3" y1="2.8" x2="7" y2="1.5" stroke="#A86878" strokeWidth="0.5"/>
-      <rect x="12" y="13" width="6" height="6" rx="1" fill="#EDD8CE" stroke="#D4B8AC" strokeWidth="0.8"/>
-      <rect x="12" y="15.5" width="6" height="2" fill="#E4C8BC" stroke="#D4B8AC" strokeWidth="0.5"/>
-      <rect x="13" y="7.5" width="4" height="5.5" rx="0.5" fill="#F0DED8" stroke="#D4B8AC" strokeWidth="0.8"/>
-      <rect x="13" y="4" width="4" height="3.5" fill="#C87890" stroke="#A86878" strokeWidth="0.6"/>
-      <path d="M13 4 Q13.5 1 15 0.5 Q16.5 1 17 4 Z" fill="#C87890" stroke="#A86878" strokeWidth="0.6" strokeLinejoin="round"/>
-      <line x1="13" y1="2.8" x2="17" y2="1.5" stroke="#A86878" strokeWidth="0.5"/>
+    <svg width={s} height={s} viewBox="0 0 20 20" aria-hidden="true">
+      {iconBullet(1.5, -6)}{iconBullet(13.5, 6)}
+      <path d="M8.3 9.2q.85-.8 1.7 0t1.7 0M8.3 11.4q.85-.8 1.7 0t1.7 0" fill="none" stroke="currentColor" strokeWidth="0.9" strokeLinecap="round" />
+    </svg>
+  ),
+  photo: (s = 26) => (
+    <svg width={s} height={s} viewBox="0 0 20 20" aria-hidden="true">
+      <path d="M2 6V4.5Q2 3 3.5 3H5M15 3h1.5Q18 3 18 4.5V6M18 14v1.5Q18 17 16.5 17H15M5 17H3.5Q2 17 2 15.5V14" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+      <path transform="translate(4.5 6.15) scale(0.11)" fill="currentColor" d="M1 34C8 20 20 3 34 3C42 3 46 9 50 12C54 9 58 3 66 3C80 3 92 20 99 34C82 33 66 30 50 32C34 30 18 33 1 34Z M2 37C18 38 34 37 50 38C66 37 82 38 98 37C90 56 72 68 50 68C28 68 10 56 2 37Z" />
     </svg>
   ),
   hex: (s = 26) => (
-    <svg width={s} height={s} viewBox="0 0 20 20" fill="none">
-      <circle cx="14" cy="5" r="3.5" fill="#EDD8CE" stroke="#D4B8AC" strokeWidth="1"/>
-      <line x1="12" y1="7.5" x2="5.5" y2="14" stroke="#D4B8AC" strokeWidth="2" strokeLinecap="round"/>
-      <circle cx="4" cy="15.5" r="2" fill="#C87890"/>
+    <svg width={s} height={s} viewBox="0 0 20 20" aria-hidden="true">
+      <rect x="2" y="2" width="16" height="16" rx="3" fill="none" stroke="currentColor" strokeWidth="1.2" opacity="0.6" />
+      <path d="M10 2.6v14.8M2.6 10h14.8" stroke="currentColor" strokeWidth="0.7" opacity="0.35" />
+      {[5.5, 8.5, 11.5, 14.5].flatMap(x => [5.5, 8.5, 11.5, 14.5].map(y =>
+        <circle key={`${x}-${y}`} cx={x} cy={y} r="0.95" fill="currentColor" opacity="0.45" />))}
+      <circle cx="13" cy="7" r="2.6" fill="currentColor" stroke="#fff" strokeWidth="1.2" />
     </svg>
   ),
   list: (s = 26) => (
-    <svg width={s} height={s} viewBox="0 0 20 20" fill="none">
-      <path d="M10 17 C10 17 2.5 12.4 2.5 7.3 C2.5 4.7 4.5 3 6.7 3 C8.1 3 9.3 3.7 10 4.9 C10.7 3.7 11.9 3 13.3 3 C15.5 3 17.5 4.7 17.5 7.3 C17.5 12.4 10 17 10 17 Z" fill="#F0D8D0" stroke="#C87890" strokeWidth="1.2" strokeLinejoin="round"/>
+    <svg width={s} height={s} viewBox="0 0 20 20" aria-hidden="true">
+      <path d="M10 17 C10 17 2.5 12.4 2.5 7.3 C2.5 4.7 4.5 3 6.7 3 C8.1 3 9.3 3.7 10 4.9 C10.7 3.7 11.9 3 13.3 3 C15.5 3 17.5 4.7 17.5 7.3 C17.5 12.4 10 17 10 17 Z" fill="currentColor" fillOpacity="0.25" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round" />
     </svg>
   ),
 };
 
-function LandingCard({ icon, title, desc, href, onClick }) {
-  const [hovered, setHovered] = useState(false);
+// Landing card pictures: each mode drawn as its own small object (Claude Design "Search landing" 3a)
+// Three depth rings of twelve wheel colors, light outside to deep inside
+const LANDING_WHEEL_RINGS = [
+  { inner:70, outer:100, colors:['#E3454D','#DE2A21','#EA8E83','#D9A083','#C48C7F','#C26F67','#AF5F64','#B24F5C','#A3487A','#F89FB5','#EFBFBB','#CA7780'] },
+  { inner:47, outer:68, colors:['#B5252C','#B12D1E','#D85D5B','#C47159','#B07774','#AA6155','#92515A','#883042','#A22956','#DC5391','#ED7491','#CC4C63'] },
+  { inner:22.5, outer:44, colors:['#9C0822','#7E1C11','#BA5250','#945C55','#76433D','#50332C','#6B272B','#6C3348','#801628','#DC3092','#D23658','#A4333E'] },
+];
+const ringGradient = colors => `conic-gradient(from -15deg, ${colors.map((c, i) =>
+  `${c} ${i * 30}deg ${i * 30 + 27.5}deg, var(--cream) ${i * 30 + 27.5}deg ${i * 30 + 30}deg`).join(', ')})`;
+
+function LandingWheelArt() {
+  return (
+    <div style={{ position:'relative', width:'72%', aspectRatio:'1', borderRadius:'50%', background:'var(--cream)', boxShadow:'0 0 0 1px var(--border), 0 6px 24px rgba(42,26,20,0.10)' }}>
+      {LANDING_WHEEL_RINGS.map(({ inner, outer, colors }) => {
+        const mask = outer === 100
+          ? `radial-gradient(circle closest-side, transparent ${inner}%, #000 ${inner + 0.5}%)`
+          : `radial-gradient(circle closest-side, transparent ${inner - 0.5}%, #000 ${inner}%, #000 ${outer}%, transparent ${outer + 0.5}%)`;
+        return <div key={inner} style={{ position:'absolute', inset:'3%', borderRadius:'50%', background:ringGradient(colors), WebkitMask:mask, mask }} />;
+      })}
+      <div style={{ position:'absolute', left:'50%', top:'50%', width:'19%', aspectRatio:'1', transform:'translate(-50%,-50%)', borderRadius:'50%', background:'var(--cream)', boxShadow:'0 0 0 1px #D8C8B8' }} />
+    </div>
+  );
+}
+
+// The picker dot shared by the photo and chart pictures
+const landingPickDot = (left, top, size, color) => ({
+  position:'absolute', left, top, width:size, height:size, margin:-size / 2, borderRadius:'50%',
+  border:'3px solid #fff', background:color, boxShadow:'0 0 0 1.5px var(--espresso), 0 4px 12px rgba(42,26,20,0.32)',
+});
+
+function LandingPhotoArt() {
+  const corner = (pos, sides) => ({ position:'absolute', ...pos, width:16, height:16, ...sides });
+  const line = '2px solid var(--espresso)';
+  return (
+    <div style={{ position:'relative', width:'66%', aspectRatio:'4/3', background:'var(--cream)', borderRadius:14, boxShadow:'0 0 0 1px var(--border), 0 8px 20px rgba(42,26,20,0.08)', display:'flex', alignItems:'center', justifyContent:'center' }}>
+      <span className="landing-corner" style={corner({ left:10, top:10 }, { borderLeft:line, borderTop:line, borderTopLeftRadius:4 })} />
+      <span className="landing-corner" style={corner({ right:10, top:10 }, { borderRight:line, borderTop:line, borderTopRightRadius:4 })} />
+      <span className="landing-corner" style={corner({ left:10, bottom:10 }, { borderLeft:line, borderBottom:line, borderBottomLeftRadius:4 })} />
+      <span className="landing-corner" style={corner({ right:10, bottom:10 }, { borderRight:line, borderBottom:line, borderBottomRightRadius:4 })} />
+      <svg viewBox="0 0 100 70" style={{ width:'62%' }} aria-hidden="true">
+        <path fill="#C41E3A" d="M1 34C8 20 20 3 34 3C42 3 46 9 50 12C54 9 58 3 66 3C80 3 92 20 99 34C82 33 66 30 50 32C34 30 18 33 1 34Z M2 37C18 38 34 37 50 38C66 37 82 38 98 37C90 56 72 68 50 68C28 68 10 56 2 37Z" />
+      </svg>
+      <span className="landing-pick" style={landingPickDot('58%', '60%', 26, '#C41E3A')} />
+    </div>
+  );
+}
+
+function LandingBullet({ bullet, sleeve, base, tilt, label }) {
+  return (
+    <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:10 }}>
+      <div style={{ display:'flex', flexDirection:'column', alignItems:'center', transform:`rotate(${tilt}deg)`, transformOrigin:'bottom center' }}>
+        <div style={{ width:28, height:44, background:bullet, borderRadius:'26px 3px 0 0 / 38px 3px 0 0' }} />
+        <div style={{ width:36, height:30, background:sleeve, borderRadius:'3px 3px 0 0' }} />
+        <div style={{ width:44, height:70, background:base, borderRadius:'4px 4px 10px 10px' }} />
+      </div>
+      <span style={{ fontSize:11, letterSpacing:'0.12em', textTransform:'uppercase', color:'var(--espresso-mid)' }}>{label}</span>
+    </div>
+  );
+}
+
+function LandingDupeArt() {
+  return (
+    <div className="landing-art-dupe" style={{ display:'flex', alignItems:'flex-end', justifyContent:'center', gap:22 }}>
+      <LandingBullet bullet="#B5263A" sleeve="#D9B98A" base="var(--espresso)" tilt={-6} label="Yours" />
+      <span style={{ fontFamily:'Cormorant Garamond', fontSize:40, lineHeight:1, color:'var(--text-muted)', alignSelf:'center' }}>≈</span>
+      <LandingBullet bullet="#BA2A3C" sleeve="#E6CFC2" base="var(--blush)" tilt={6} label="Its twin" />
+    </div>
+  );
+}
+
+// A slice of the color chart: dots on a sunflower spiral across the a*/b* plane at L 50,
+// keeping only those inside the sRGB gamut
+const LANDING_CHART_DOTS = (() => {
+  const S = 80, N = 300, R = S * 0.96;
+  const gam = c => c <= 0.0031308 ? 12.92 * c : 1.055 * Math.pow(c, 1 / 2.4) - 0.055;
+  const k = t => { const c = t * t * t; return c > 0.008856 ? c : (t - 16 / 116) / 7.787; };
+  const out = [];
+  for (let i = 0; i < N; i++) {
+    const r = R * Math.sqrt((i + 0.5) / N), t = i * 2.39996323, a = r * Math.cos(t), b = r * Math.sin(t);
+    const fy = (50 + 16) / 116, X = 0.95047 * k(fy + a / 500), Y = k(fy), Z = 1.08883 * k(fy - b / 200);
+    const rgb = [3.2406 * X - 1.5372 * Y - 0.4986 * Z, -0.9689 * X + 1.8758 * Y + 0.0415 * Z, 0.0557 * X - 0.204 * Y + 1.057 * Z];
+    if (!rgb.every(c => c >= -0.002 && c <= 1.002)) continue;
+    const hex = rgb.map(c => ('0' + Math.round(Math.max(0, Math.min(1, gam(c))) * 255).toString(16)).slice(-2)).join('');
+    out.push({ x:`${((a + S) / (2 * S) * 100).toFixed(2)}%`, y:`${((S - b) / (2 * S) * 100).toFixed(2)}%`, c:'#' + hex });
+  }
+  return out;
+})();
+
+function LandingChartArt() {
+  return (
+    <div style={{ position:'relative', width:'82%', aspectRatio:'1', background:'var(--cream)', borderRadius:16, overflow:'hidden', boxShadow:'0 0 0 1px var(--border)' }}>
+      <span style={{ position:'absolute', left:'50%', top:0, bottom:0, width:1, background:'#D8C8BC' }} />
+      <span style={{ position:'absolute', top:'50%', left:0, right:0, height:1, background:'#D8C8BC' }} />
+      {LANDING_CHART_DOTS.map((d, i) => (
+        <span key={i} style={{ position:'absolute', left:d.x, top:d.y, width:'4.6%', aspectRatio:'1', transform:'translate(-50%,-50%)', borderRadius:'50%', background:d.c }} />
+      ))}
+      <span className="landing-pick" style={landingPickDot('78%', '34%', 28, '#B0243A')} />
+    </div>
+  );
+}
+
+function LandingCard({ art, title, desc, href, onClick }) {
   // A real link where the tool has its own page (crawlable, opens in a new tab);
   // a plain click still switches in place
   const Tag = href ? 'a' : 'div';
   return (
     <Tag
       href={href}
+      className="landing-card"
       onClick={e => { if (e.metaKey || e.ctrlKey || e.shiftKey) return; e.preventDefault(); onClick(); }}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      style={{
-        display:'flex', flexDirection:'column', gap:14,
-        padding:'28px 26px 24px', background:'#fff',
-        border:'1px solid', borderColor: hovered ? 'var(--blush)' : 'var(--border)',
-        borderRadius:16, cursor:'pointer', textDecoration:'none', color:'inherit',
-        transform: hovered ? 'translateY(-4px)' : 'none',
-        boxShadow: hovered ? '0 14px 34px var(--shadow)' : 'none',
-        transition:'transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease',
-      }}
     >
-      <span style={{
-        width:52, height:52, borderRadius:'50%', display:'flex',
-        alignItems:'center', justifyContent:'center', flexShrink:0,
-        background:'rgba(200,120,144,0.10)',
-      }}>{icon}</span>
-      <h2 style={{ fontFamily:'Cormorant Garamond', fontWeight:400, fontSize:24, letterSpacing:'-0.01em', color:'var(--espresso)' }}>{title}</h2>
-      <p style={{ fontSize:14, lineHeight:1.6, color:'var(--text-muted)', flex:1 }}>{desc}</p>
-      <span style={{
-        display:'flex', alignItems:'center', gap:8,
-        fontSize:11, letterSpacing:'0.12em', textTransform:'uppercase',
-        color:'var(--blush)', fontWeight:500,
-      }}>
-        Start here
-        <span style={{ transition:'transform 0.18s ease', transform: hovered ? 'translateX(5px)' : 'none' }}>→</span>
-      </span>
+      <div className="landing-art" aria-hidden="true">{art}</div>
+      <div className="landing-card-text">
+        <h2 style={{ fontFamily:'Cormorant Garamond', fontWeight:400, fontSize:26, lineHeight:1.1, color:'var(--espresso)' }}>{title}</h2>
+        <p style={{ fontSize:14, lineHeight:1.55, color:'var(--espresso-mid)', textWrap:'pretty' }}>{desc}</p>
+      </div>
     </Tag>
   );
 }
 
 function Landing({ onPick }) {
   const cards = [
-    {
-      id:'wheel', title:'Explore by color',
-      desc:'Browse a color wheel of lipstick shades and zoom into lighter and deeper tones.',
-      icon: MODE_ICONS.wheel(),
-    },
-    {
-      id:'photo', title:'Match a photo',
-      desc:'Upload any photo or screenshot and tap the lipstick shade you want.',
-      icon: MODE_ICONS.photo(),
-    },
-    {
-      id:'dupe', title:'Find a dupe',
-      desc:'Search a lipstick you own and find matches at any price.',
-      icon: MODE_ICONS.dupe(),
-    },
-    {
-      id:'hex', title:'Pick any color',
-      desc:'Choose a spot on the color chart or paste a hex code for a precise match.',
-      icon: MODE_ICONS.hex(),
-    },
+    { id:'wheel', title:'Explore by color', desc:'Start from 46 shades on a color wheel, then go lighter or deeper.', art:<LandingWheelArt /> },
+    { id:'dupe', title:'Find a dupe', desc:'Name a lipstick you own and see what matches.', art:<LandingDupeArt /> },
+    { id:'photo', title:'Match a photo', desc:'Drop in any photo and tap the shade you want.', art:<LandingPhotoArt /> },
+    { id:'hex', title:'Use the color chart', desc:'Pinpoint from hundreds of shades, or paste a hex code.', art:<LandingChartArt /> },
   ];
 
   return (
     <>
-      <div>
-        <p style={{
-          fontSize:11, letterSpacing:'0.18em', textTransform:'uppercase',
-          color:'var(--text-muted)', textAlign:'center', marginBottom:14,
-        }}>
-          Perceptual color matching · Nearly 17,000 lip products
-        </p>
+      <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:14, textAlign:'center' }}>
         <h2 className="landing-lede">
-          Let's find your <em style={{ fontStyle:'italic', color:'var(--espresso-mid)' }}>shade</em>.
+          How do you want <em style={{ fontStyle:'italic', fontWeight:400, color:'var(--espresso-mid)' }}>to search?</em>
         </h2>
+        <p style={{ fontSize:15, lineHeight:1.5, color:'var(--espresso-mid)' }}>
+          Nearly 17,000 lip products at every price, matched by how they actually look.
+        </p>
       </div>
       <div className="landing-grid">
         {cards.map(c => (
-          <LandingCard key={c.id} icon={c.icon} title={c.title} desc={c.desc} href={MODE_PAGES[c.id]?.path} onClick={() => onPick(c.id)} />
+          <LandingCard key={c.id} art={c.art} title={c.title} desc={c.desc} href={MODE_PAGES[c.id]?.path} onClick={() => onPick(c.id)} />
         ))}
       </div>
     </>
@@ -3358,8 +3790,13 @@ function App() {
     catch { return []; }
   });
   const [showWishlist, setShowWishlist] = useState(false);
+  // "brand|shade" of a visitor's first-ever heart, while My Favorites shows it off
+  const [firstHeartKey, setFirstHeartKey] = useState(null);
   const [sharedListKeys, setSharedListKeys] = useState(initialLink?.type === 'list' ? initialLink.keys : null);
   const [showTweaks, setShowTweaks] = useState(false);
+
+  // "My Lipstick Vibe" (saved finish, undertone and depth preferences) is gone; drop what it stored
+  useEffect(() => { try { localStorage.removeItem('lipstick-vibe'); } catch {} }, []);
 
   // Persist wishlist
   useEffect(() => {
@@ -3378,6 +3815,19 @@ function App() {
   }
 
   function toggleWishlist(product) {
+    const productKey = `${product.brand}|${product.shade}`;
+    if (!wishlist.some(p => `${p.brand}|${p.shade}` === productKey)) {
+      // First heart ever: open My Favorites with the new row glowing, so the
+      // visitor learns where saved shades go. Not while a shared list is open.
+      let seen = true;
+      try { seen = !!localStorage.getItem('lipstick-heart-intro'); localStorage.setItem('lipstick-heart-intro', '1'); } catch {}
+      if (!seen && wishlist.length === 0 && !sharedListKeys) {
+        window.gtag?.('event', 'first_heart_intro');
+        setFirstHeartKey(productKey);
+        // a beat, so the heart is seen filling in before the panel covers it
+        setTimeout(() => setShowWishlist(true), 350);
+      }
+    }
     setWishlist(prev => {
       const key = p => `${p.brand}|${p.shade}`;
       const exists = prev.some(p => key(p) === key(product));
@@ -3479,64 +3929,24 @@ function App() {
     });
   }
 
-  // ── Vibe profile (persistent shopper preferences) ───────────────────────
-  const [vibe, setVibe] = useState(() => {
-    try {
-      const saved = JSON.parse(localStorage.getItem('lipstick-vibe') || 'null') || { finishes:[], temps:[], depths:[] };
-      // "Gloss" was renamed "Glossy" in the catalogue; carry saved preferences over
-      if (saved.finishes) saved.finishes = saved.finishes.map(f => f === 'Gloss' ? 'Glossy' : f);
-      return saved;
-    }
-    catch { return { finishes:[], temps:[], depths:[] }; }
-  });
-  const [showVibe, setShowVibe] = useState(false);
-  React.useEffect(() => {
-    localStorage.setItem('lipstick-vibe', JSON.stringify(vibe));
-  }, [vibe]);
-  const vibeActive = (vibe.finishes?.length || 0) + (vibe.temps?.length || 0) + (vibe.depths?.length || 0);
-
-  // Classify a product's undertone (cool/neutral/warm) from LAB hue angle.
-  // Hue angle h = atan2(b*, a*) in degrees — for reds (a*>0):
-  //   h < 12°  → cool (blue/pink-leaning red, berry, fuchsia)
-  //   12°–28°  → neutral (true red, balanced)
-  //   h > 28°  → warm (orange/coral/brick, brown, nude)
-  function classifyTemp(lab) {
-    if (!lab || lab.length < 3) return 'neutral';
-    const [, a, b] = lab;
-    if (a <= 0) return 'neutral';
-    const h = Math.atan2(b, a) * 180 / Math.PI;
-    if (h < 12) return 'cool';
-    if (h > 28) return 'warm';
-    return 'neutral';
-  }
-  function classifyDepth(lab) {
-    if (!lab || lab.length < 1) return 'medium';
-    const L = lab[0];
-    if (L >= 55) return 'light';
-    if (L <= 32) return 'deep';
-    return 'medium';
-  }
-  function matchesVibe(p) {
-    if (vibe.finishes?.length && !vibe.finishes.includes((p.finish || '').trim() || 'Unlisted')) return false;
-    const lab = p.cielab || p.lab;
-    if (vibe.temps?.length && !vibe.temps.includes(classifyTemp(lab))) return false;
-    if (vibe.depths?.length && !vibe.depths.includes(classifyDepth(lab))) return false;
-    return true;
-  }
-
   // Custom color: the pick on the map, and (shortly after it stops moving) how many matches it has
   const draftCol = React.useMemo(() => draftColor(hexDraft), [hexDraft]);
   useEffect(() => {
     if (mode !== 'hex' || !dataReady) return;
-    const t = setTimeout(() => setShadeInfo(shadeMatchInfo(draftCol.hex, tweaks.maxDeltaE, matchesVibe)), 60);
+    const t = setTimeout(() => setShadeInfo(shadeMatchInfo(draftCol.hex, tweaks.maxDeltaE)), 60);
     return () => clearTimeout(t);
-  }, [draftCol.hex, mode, dataReady, tweaks.maxDeltaE, vibe]);
+  }, [draftCol.hex, mode, dataReady, tweaks.maxDeltaE]);
   // Moving the dot starts over: the results (and their filters) belong to the last color asked for
   // A pick made in the map's close-up is a step: it keeps hexOrigin, the color chosen before zooming, for "Return to"
   function changeHexDraft(next, step) {
     setHexDraft(next);
     if (step !== true) setHexOrigin(next);
     if (hexHex) { setHexHex(null); setFilterParams([]); }
+  }
+  // Closing the results sheet (stacked layout) starts over the same way, and hands focus back to the bar's button
+  function closeShadeResults() {
+    setHexHex(null); setFilterParams([]);
+    setTimeout(() => document.getElementById('shade-bar-cta')?.focus({ preventScroll: true }), 50);
   }
   const jumpToNearestShade = () => { if (shadeInfo?.nearest) changeHexDraft(draftFromLab(shadeInfo.nearest.lab)); };
 
@@ -3569,7 +3979,8 @@ function App() {
 
   React.useEffect(() => {
     if (!effectiveColor || !resultsRef.current) return;
-    if (window.innerWidth > 900) return;
+    // Custom color opens its results in a sheet and scrolls the map into view itself (ShadeExplorer)
+    if (window.innerWidth > 900 || mode === 'hex') return;
     const timer = setTimeout(() => {
       resultsRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }, 80);
@@ -3586,11 +3997,33 @@ function App() {
     if (q.has('color') || q.has('dupe')) filterParams.forEach(([k, v]) => q.append(k, v));
     const search = q.toString() ? `?${q}` : '';
     const path = MODE_PAGES[mode]?.path || '/';
-    if (search !== window.location.search || path !== window.location.pathname) {
-      history.replaceState(null, '', path + search + window.location.hash);
-    }
+    const url = path + search + window.location.hash;
+    const write = () => {
+      if (search !== window.location.search || path !== window.location.pathname) history.replaceState(history.state, '', url);
+    };
+    backNav.syncUrl = write;
+    // A change of tool is a new history entry (not when Back or Forward brought us here: that entry exists)
+    const newTool = mode !== urlMode.current && !fromPop.current;
+    urlMode.current = mode; fromPop.current = false;
+    const push = () => history.pushState({ mode }, '', url);
+    if (!newTool) write();
+    else if (backNav.leaving || backNav.skip) backNav.afterLeave = push; // a panel closed by the same click goes first
+    else push();
     document.title = MODE_PAGES[mode]?.title || HOME_TITLE;
   }, [sharedListKeys, mode, dupeProduct, effectiveColor?.hex, dataReady, filterParams]);
+
+  // Back or Forward onto another tool's entry: show that tool, nothing picked
+  const [firstMode] = useState(mode);
+  const urlMode = React.useRef(mode), fromPop = React.useRef(false);
+  useEffect(() => {
+    backNav.onTool = e => {
+      const next = e.state?.mode || Object.keys(MODE_PAGES).find(m => window.location.pathname.startsWith(MODE_PAGES[m].path)) || firstMode;
+      if (next === urlMode.current) return;
+      fromPop.current = true;
+      setMode(next); setSelectedColor(null); setPhotoHex(null); setHexHex(null); setDupeProduct(null); setFilterParams([]);
+    };
+    return () => { backNav.onTool = null; };
+  }, []);
 
   const matches = React.useMemo(() => {
     if (!selectedColor || !dataReady) return [];
@@ -3599,13 +4032,12 @@ function App() {
     const target = hexToLab(hex);
     if ((mode === 'hex' || mode === 'wheel') && isBlackLab(target)) {
       return REAL_PRODUCTS.filter(p => isBlackLab(p.lab)).map(p => ({ ...p, distance: deltaE(target, p.lab) }))
-        .sort((a, b) => a.distance - b.distance).filter(matchesVibe);
+        .sort((a, b) => a.distance - b.distance);
     }
     const candidates = getClosestColors(hex, 500)
-      .filter(p => !selectedColor.sourceKey || `${p.brand}|${p.shade}` !== selectedColor.sourceKey)
-      .filter(matchesVibe);
+      .filter(p => !selectedColor.sourceKey || `${p.brand}|${p.shade}` !== selectedColor.sourceKey);
     return matchBand(candidates, tweaks.maxDeltaE, mode === 'hex');
-  }, [selectedColor, toneRamp, toneIdx, tweaks.maxDeltaE, matchesVibe, dataReady, mode]);
+  }, [selectedColor, toneRamp, toneIdx, tweaks.maxDeltaE, dataReady, mode]);
   // matches: array of real products with .hex .brand .product .shade .finish .retailer .distance
   function togglePin(product) {
     setPinnedItems(prev => {
@@ -3638,14 +4070,25 @@ function App() {
           letterSpacing:'0.16em', textTransform:'uppercase',
           color:'var(--espresso)',
         }}>
-          Lipstick Color Finder
+          {/* Back to the four-tool overview. A plain click stays in the app; a new-tab click opens the home address. */}
+          <a href="/" aria-current={mode === 'landing' ? 'page' : undefined}
+            onClick={e => {
+              if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+              e.preventDefault();
+              if (mode !== 'landing') { switchMode('landing', 'title'); window.scrollTo({ top: 0 }); }
+            }}
+            onMouseEnter={e => { e.currentTarget.style.color = 'var(--espresso-mid)'; }}
+            onMouseLeave={e => { e.currentTarget.style.color = 'inherit'; }}
+            style={{ display:'inline-block', padding:'8px 0', margin:'-8px 0', color:'inherit', textDecoration:'none', transition:'color 0.15s' }}>
+            Lipstick Color Finder
+          </a>
         </h1>
         <span className="header-product-count" style={{
           fontFamily:'DM Sans', fontSize:11, color:'var(--text-muted)', letterSpacing:'0.02em',
         }}>
           · Nearly 17,000 lip products
         </span>
-        <div style={{ marginLeft:'auto', display:'flex', alignItems:'center', gap:16 }}>
+        <div className="header-actions" style={{ marginLeft:'auto', display:'flex', alignItems:'center', gap:16 }}>
           <a href="/guides/" className="header-how-it-works"
             onClick={() => window.gtag?.('event', 'nav_link_click', { target: 'guides', location: 'header' })}
             style={{
@@ -3658,7 +4101,7 @@ function App() {
               fontFamily:'DM Sans', fontSize:12, fontWeight:500, letterSpacing:'0.06em',
               textTransform:'uppercase', transition:'all 0.15s',
             }}
-            onMouseEnter={e => { e.currentTarget.style.borderColor='var(--blush)'; e.currentTarget.style.color='var(--blush)'; }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor='var(--blush)'; e.currentTarget.style.color='var(--blush-deep)'; }}
             onMouseLeave={e => { e.currentTarget.style.borderColor='var(--border)'; e.currentTarget.style.color='var(--espresso)'; }}
           >
             Guides
@@ -3675,12 +4118,12 @@ function App() {
               fontFamily:'DM Sans', fontSize:12, fontWeight:500, letterSpacing:'0.06em',
               textTransform:'uppercase', transition:'all 0.15s',
             }}
-            onMouseEnter={e => { e.currentTarget.style.borderColor='var(--blush)'; e.currentTarget.style.color='var(--blush)'; }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor='var(--blush)'; e.currentTarget.style.color='var(--blush-deep)'; }}
             onMouseLeave={e => { e.currentTarget.style.borderColor='var(--border)'; e.currentTarget.style.color='var(--espresso)'; }}
           >
             How I Built It
           </a>
-          <button
+          <button className="header-fav"
             onClick={() => setShowWishlist(true)}
             style={{
               display:'flex', alignItems:'center', gap:8,
@@ -3690,19 +4133,20 @@ function App() {
               fontFamily:'DM Sans', fontSize:12, fontWeight:500, letterSpacing:'0.06em',
               textTransform:'uppercase', transition:'all 0.15s',
             }}
-            onMouseEnter={e => { e.currentTarget.style.borderColor='var(--blush)'; e.currentTarget.style.color='var(--blush)'; }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor='var(--blush)'; e.currentTarget.style.color='var(--blush-deep)'; }}
             onMouseLeave={e => { e.currentTarget.style.borderColor='var(--border)'; e.currentTarget.style.color='var(--espresso)'; }}
           >
             <span style={{ color:'var(--blush)' }}>{HEART}</span> My Favorites
             {wishlist.length > 0 && (
               <span style={{
-                background:'var(--blush)', color:'#fff',
+                background:'var(--blush-deep)', color:'#fff',
                 fontSize:10, padding:'1px 7px', borderRadius:20, marginLeft:2,
               }}>{wishlist.length}</span>
             )}
           </button>
         </div>
-        {/* Phones: the two page links drop to a second line under My Favorites */}
+        {/* Phones: the title takes the first line; the two page links share the second with My Favorites
+            (links left, button right; .header-mobile-links in index.html puts them ahead of the button) */}
         <nav className="header-mobile-links" aria-label="Pages">
           {[['/guides/', 'Guides', 'guides'], ['/about/', 'How I Built It', 'about']].map(([href, label, target]) => (
             <a key={target} href={href}
@@ -3713,7 +4157,7 @@ function App() {
                 borderBottom:'1px solid var(--border)', paddingBottom:2,
               }}>
               {label}
-              {target === 'guides' && <GuidesNewTag top={-13} right={-16} />}
+              {target === 'guides' && <GuidesNewTag top={-3} right={-12} />}
             </a>
           ))}
         </nav>
@@ -3733,9 +4177,9 @@ function App() {
       }}>
         {[
           {id:'wheel', label:'Color wheel'},
-          {id:'photo', label:'Upload photo'},
-          {id:'hex', label:'Custom color'},
           {id:'dupe', label:'Dupe finder'},
+          {id:'photo', label:'Upload photo'},
+          {id:'hex', label:'Color chart'},
           ...(wishlist.length > 0 ? [{id:'list', label:'From Favorites'}] : []),
         ].map(t => {
           const active = mode === t.id;
@@ -3755,14 +4199,15 @@ function App() {
                 width:30, height:30, borderRadius:'50%', flexShrink:0,
                 background:'rgba(200,120,144,0.10)',
                 display:'flex', alignItems:'center', justifyContent:'center',
-              }}>{MODE_ICONS[t.id](16)}</span>
+                color: active ? 'var(--blush-deep)' : 'var(--text-muted)',
+              }}>{MODE_ICONS[t.id](22)}</span>
               <span style={{ fontSize:14.5, color: active ? 'var(--espresso)' : 'var(--text-body)', whiteSpace:'nowrap' }}>{t.label}</span>
             </button>
           );
         })}
       </div>
       <main className="app-main" style={{
-        paddingBottom: pinnedItems.length > 0 ? 140 : undefined,
+        paddingBottom: pinnedItems.length > 0 ? 190 : undefined,
         transition:'padding-bottom 0.35s ease',
       }}>
         {/* Left: Palette */}
@@ -3789,10 +4234,11 @@ function App() {
                 {/* Desktop only (the class hides it when the columns stack, where the bar under the map does this job) */}
                 <div className="results-empty-state">
                   <ShadeCard color={draftCol} info={shadeInfo} committed={!!hexHex} onCommit={() => setHexHex(draftCol.hex)} onJump={jumpToNearestShade} onDraft={changeHexDraft} origin={hexOrigin} zoom={shadeZoom} onZoom={setShadeZoom} />
+                  {hexHex && <p style={{ fontSize:EXPLORER_TYPE.body, color:'var(--espresso-mid)', textAlign:'center', marginTop:12 }}>Move the dot or the depth bar to start over.</p>}
                 </div>
                 {/* Desktop: the hex field sits under the card until results take its place */}
                 {!hexHex && <div className="results-empty-state"><ShadeHexForm id="shade-hex-side" onDraft={changeHexDraft} /></div>}
-                {hexHex && <div ref={resultsRef} style={{ display:'flex', flexDirection:'column', minWidth:0 }}>{resultsEl}</div>}
+                {hexHex && <ShadeSheet color={draftCol} info={shadeInfo} pinned={pinnedItems.length > 0} onClose={closeShadeResults}>{resultsEl}</ShadeSheet>}
               </div>
             </>
           ) : mode === 'dupe' && !dataReady ? (
@@ -3856,7 +4302,7 @@ function App() {
               fontSize:11, color:'var(--text-muted)', letterSpacing:'0.05em',
               fontFamily:'DM Sans', marginTop:8, textAlign:'center',
             }}>
-              Click a segment to browse matching lipstick shades
+              Select a color to browse matching lipstick shades
             </p>
           )}
 
@@ -3890,22 +4336,25 @@ function App() {
         borderTop:'1px solid var(--border)',
         display:'flex', gap:24, alignItems:'center',
       }}>
-        <span style={{ fontSize:11, color:'var(--text-muted)', letterSpacing:'0.05em' }}>
-          Showing closest matches by color distance (ΔE)
-        </span>
-        <a href="/color-science/"
-          onClick={() => window.gtag?.('event', 'nav_link_click', { target: 'color_guide', location: 'footer' })}
-          style={{
-          fontSize:11, color:'var(--blush)', letterSpacing:'0.05em',
-          textDecoration:'none', borderBottom:'1px solid currentColor', paddingBottom:1,
-          transition:'opacity 0.15s',
-        }}>
-          What is ΔE?
-        </a>
+        {/* About the results, so not on the landing page, which has none */}
+        {mode !== 'landing' && <>
+          <span style={{ fontSize:11, color:'var(--text-muted)', letterSpacing:'0.05em' }}>
+            Showing closest matches by color distance (ΔE)
+          </span>
+          <a href="/color-science/"
+            onClick={() => window.gtag?.('event', 'nav_link_click', { target: 'color_guide', location: 'footer' })}
+            style={{
+            fontSize:11, color:'var(--blush-deep)', letterSpacing:'0.05em',
+            textDecoration:'none', borderBottom:'1px solid currentColor', paddingBottom:1,
+            transition:'opacity 0.15s',
+          }}>
+            What is ΔE?
+          </a>
+        </>}
         <a href="/about/"
           onClick={() => window.gtag?.('event', 'nav_link_click', { target: 'about', location: 'footer' })}
           style={{
-          fontSize:11, color:'var(--blush)', letterSpacing:'0.05em',
+          fontSize:11, color:'var(--blush-deep)', letterSpacing:'0.05em',
           textDecoration:'none', borderBottom:'1px solid currentColor', paddingBottom:1,
           transition:'opacity 0.15s',
         }}>
@@ -3914,14 +4363,14 @@ function App() {
         <a href="/guides/"
           onClick={() => window.gtag?.('event', 'nav_link_click', { target: 'guides', location: 'footer' })}
           style={{
-          fontSize:11, color:'var(--blush)', letterSpacing:'0.05em',
+          fontSize:11, color:'var(--blush-deep)', letterSpacing:'0.05em',
           textDecoration:'none', borderBottom:'1px solid currentColor', paddingBottom:1,
           transition:'opacity 0.15s',
         }}>
           Guides
         </a>
         <a href="/privacy/" style={{
-          fontSize:11, color:'var(--blush)', letterSpacing:'0.05em',
+          fontSize:11, color:'var(--blush-deep)', letterSpacing:'0.05em',
           textDecoration:'none', borderBottom:'1px solid currentColor', paddingBottom:1,
           transition:'opacity 0.15s',
         }}>
@@ -3949,15 +4398,6 @@ function App() {
         onClear={() => setPinnedItems([])}
       />
 
-      {/* Vibe panel */}
-      {showVibe && (
-        <VibePanel
-          vibe={vibe}
-          setVibe={setVibe}
-          onClose={() => setShowVibe(false)}
-        />
-      )}
-
       {/* Shared list (opened from a link) */}
       {sharedListKeys && (
         <SharedListPanel
@@ -3975,9 +4415,15 @@ function App() {
       {showWishlist && (
         <WishlistPanel
           wishlist={wishlist}
-          onClose={() => setShowWishlist(false)}
+          glowKey={firstHeartKey}
+          onClose={() => { setShowWishlist(false); setFirstHeartKey(null); }}
           onRemove={p => toggleWishlist(p)}
           onClear={() => setWishlist([])}
+          onFindSimilar={() => {
+            setShowWishlist(false); setFirstHeartKey(null);
+            switchMode('list', 'favorites_panel');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
         />
       )}
 

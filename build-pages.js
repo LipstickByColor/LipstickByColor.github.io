@@ -114,11 +114,38 @@ const PAGES = [
     h1: 'Lipstick color chart: find any shade',
     intro: 'Explore lipstick colors on a two-dimensional map. Choose a spot to find matching shades from nearly 17,000 lip products, then adjust the depth to go lighter or deeper.',
     copy: `
-    <h2>How the lipstick color chart works</h2>
-    <p>Explore lipstick colors on a two-dimensional map. Move horizontally to shift between redder and greener hues, and vertically to shift between yellower and bluer hues. Use the depth bar to make your selection lighter or darker.</p>
-    <p>Choose any point to find lip products with the closest measured colors. Open the matches to browse results, then filter by price, brand, format, finish, or undertone.</p>
-    <h3>Have a hex color code?</h3>
-    <p>Enter a hex code to jump directly to that color and find matching lipsticks.</p>
+    <h2>How to find the right lipstick color</h2>
+    <p>The best way to find a lipstick shade depends on how much you already know about the color you want. A lipstick color chart lets you explore shades visually instead of relying only on brand names, which can describe similar colors differently.</p>
+    <p><strong>If you know the color family:</strong> start with red, pink, berry, coral, brown, plum, blue, or black under "Start from", then adjust the tone and depth.</p>
+    <p><strong>If you know the exact color you want:</strong> enter a hex color code to find lipsticks with the closest measured colors.</p>
+    <p><strong>If you want a lighter or darker shade:</strong> keep the hue and move the depth bar to compare lighter and deeper lipsticks.</p>
+    <p><strong>If you are choosing between similar shades:</strong> use "Explore nearby shades" to zoom in and compare colors that differ only slightly.</p>
+    <p><strong>If you have a lipstick you love:</strong> use the <a href="/dupe-finder/">lipstick dupe finder</a> to look for similar shades in other products.</p>
+    <h3>Colors to start from</h3>
+    <p class="page-copy-links">
+      <a href="/lipstick-color-chart/?color=a3172e"><span class="chart-chip-swatch" style="background:#a3172e"></span>Blue red lipsticks</a>
+      <a href="/lipstick-color-chart/?color=d03a26"><span class="chart-chip-swatch" style="background:#d03a26"></span>Orange red lipsticks</a>
+      <a href="/lipstick-color-chart/?color=d77749"><span class="chart-chip-swatch" style="background:#d77749"></span>Coral lipsticks</a>
+      <a href="/lipstick-color-chart/?color=c96b84"><span class="chart-chip-swatch" style="background:#c96b84"></span>Rose pink lipsticks</a>
+      <a href="/lipstick-color-chart/?color=9c6b7a"><span class="chart-chip-swatch" style="background:#9c6b7a"></span>Mauve lipsticks</a>
+      <a href="/lipstick-color-chart/?color=c39482"><span class="chart-chip-swatch" style="background:#c39482"></span>Nude lipsticks</a>
+      <a href="/lipstick-color-chart/?color=8a5545"><span class="chart-chip-swatch" style="background:#8a5545"></span>Brown lipsticks</a>
+      <a href="/lipstick-color-chart/?color=7d2349"><span class="chart-chip-swatch" style="background:#7d2349"></span>Berry lipsticks</a>
+      <a href="/lipstick-color-chart/?color=5c3069"><span class="chart-chip-swatch" style="background:#5c3069"></span>Plum lipsticks</a>
+      <a href="/lipstick-color-chart/?color=1f1f1f"><span class="chart-chip-swatch" style="background:#1f1f1f"></span>Black lipsticks</a>
+    </p>
+    <h3>How to choose between warm and cool lipstick shades</h3>
+    <p>Warm and cool lipstick shades can look similar at first, but small differences in undertone change their overall appearance. Warm reds lean toward orange, while blue-reds lean toward cooler, pinker or bluer tones. Coral shades combine red and orange, while berry and plum shades move toward purple.</p>
+    <p>Use the chart to compare these differences directly: warmer shades sit toward the top of the map and cooler ones toward the bottom. Move between neighboring shades to find a red that is more orange or more blue, a pink that is warmer or cooler, or a nude that is more peachy or more brown.</p>
+    <h3>How to find a lipstick in a specific color</h3>
+    <p>If you have a color in mind but don't know which brands sell it, select that color on the chart. The results show lip products whose measured colors fall within the chart's matching distance, ordered from closest to farthest.</p>
+    <p>You can then narrow the results by brand, price, product format, finish, or undertone, and compare products across brands without relying on shade names.</p>
+    <h3>Can you find a lipstick using a hex color code?</h3>
+    <p>Yes. If you have a hex color code from a website, an image, or a design tool, enter it into the lipstick color chart. The chart uses that color as the target and finds the lipsticks in its catalogue with the closest measured colors.</p>
+    <p>A hex match is a starting point for comparison, not a guarantee that the lipstick will look identical on your lips. Product photography, lighting, skin tone, and the lipstick's formula all affect the final look.</p>
+    <h3>Why use measured color instead of lipstick shade names?</h3>
+    <p>Lipstick shade names are not standardized across brands. One brand's rose, nude, or brick red may look quite different from another brand's version of the same name, and retailer color filters group products into broad categories.</p>
+    <p>This chart compares products by color measured from their product images, using the same method for every brand. That helps you discover visually similar shades across brands, including colors you might not find by searching for a shade name. <a href="/about/">How I built it</a> explains the method, and the <a href="/color-science/">color science page</a> explains how closeness is measured.</p>
     <h3>Prefer to browse named lipstick colors?</h3>
     <p>Explore 46 named shades on the <a href="/color-wheel/">lipstick color wheel</a>. If you want to find a similar shade to a lipstick you already own, try the <a href="/dupe-finder/">lipstick dupe finder</a>.</p>`,
   },
@@ -135,6 +162,8 @@ const PAGE_CSS = `<style>
   .page-copy-links { display: flex; flex-wrap: wrap; gap: 10px; }
   .page-copy-links a { padding: 7px 14px; border: 1px solid var(--border); border-radius: 20px; background: #fff; color: var(--espresso); text-decoration: none; font-size: 13px; }
   .page-copy-links a:hover { border-color: var(--blush); }
+  .page-copy-links a:has(.chart-chip-swatch) { display: inline-flex; align-items: center; gap: 8px; padding-left: 8px; }
+  .chart-chip-swatch { width: 16px; height: 16px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(42,26,20,0.12); }
   .page-copy .wheel-family { font-size: 11px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--espresso); margin: 22px 0 8px; }
   .wheel-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(98px, 1fr)); gap: 8px; }
   .page-copy .wheel-cards a { display: flex; flex-direction: column; border: 1px solid var(--border); border-radius: 10px; background: #fff; overflow: hidden; text-decoration: none; color: var(--espresso); }

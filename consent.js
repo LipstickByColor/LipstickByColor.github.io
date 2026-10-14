@@ -21,9 +21,12 @@ function gtag(){dataLayer.push(arguments);}
   var askFirst = !tz || /^Europe\/|^Atlantic\/(Reykjavik|Canary|Madeira|Azores|Faroe)$|^Arctic\//.test(tz);
   var gpc = navigator.globalPrivacyControl === true;
 
+  // Local previews (npm exec serve, file://) never load analytics, so testing stays out of the reports
+  var local = /^(localhost|127\.0\.0\.1|\[::1\]|0\.0\.0\.0|)$/.test(location.hostname) || /^192\.168\.|^10\.|\.local$/.test(location.hostname);
+
   var loaded = false;
   function loadAnalytics() {
-    if (loaded) return;
+    if (loaded || local) return;
     loaded = true;
     var s = document.createElement('script');
     s.async = true;

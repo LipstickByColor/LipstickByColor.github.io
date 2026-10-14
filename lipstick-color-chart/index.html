@@ -91,7 +91,43 @@
   /* Once there is room, the map gives way first so the results keep three across */
   @media (min-width: 1080px) { .shade-top { grid-template-columns: minmax(0, 560px) 520px; } }
   .shade-side { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
+  /* Custom color results (ShadeSheet): under the card on desktop, a bottom sheet once the columns stack */
+  .shade-sheet, .shade-sheet-body { display: flex; flex-direction: column; min-width: 0; }
+  .shade-sheet-head { display: none; }
+  @media (max-width: 900px) {
+    .shade-sheet {
+      position: fixed; left: 0; right: 0; bottom: 0; z-index: 90; height: 56vh;
+      background: #fff; border-radius: 22px 22px 0 0; box-shadow: 0 -8px 32px rgba(42,26,20,0.22);
+      animation: matchDetailUp 0.25s ease-out;
+    }
+    .shade-sheet-head {
+      flex: none; display: flex; flex-direction: column; gap: 12px; padding: 10px 16px 12px;
+      border-bottom: 1px solid var(--border); touch-action: none; cursor: grab;
+    }
+    /* The filters stay put and the result cards scroll under them (ResultsTable's own scroller) */
+    .shade-sheet-body {
+      flex: 1; min-height: 0; overflow-y: auto;
+      padding: 12px 16px calc(16px + env(safe-area-inset-bottom));
+    }
+    .shade-sheet-body, .shade-sheet-body * { overscroll-behavior: contain; }
+    .shade-sheet.tray-open .shade-sheet-body { padding-bottom: 140px; }
+    /* Room at the end of the page so the fixed bar or the sheet never covers the last of it */
+    body:has(.shade-bar) { padding-bottom: 88px; }
+    body:has(.shade-sheet) { padding-bottom: 56vh; }
+  }
+  @media (prefers-reduced-motion: reduce) { .shade-sheet { animation: none; } }
+  /* Dupe finder search fields: the input has no outline of its own, so its frame shows focus.
+     !important because the frame's border and shadow are inline styles in app.jsx. */
+  .dupe-input:focus-within { border-color: var(--espresso) !important; box-shadow: 0 0 0 3px rgba(42,26,20,0.18) !important; }
   .mobile-picker-tips { display: none; }
+  /* Wording that depends on the layout: side by side, or stacked (results under the picker) */
+  .only-stacked { display: none; }
+  @media (max-width: 900px) {
+    .only-wide { display: none; }
+    .only-stacked { display: inline; }
+    /* Comparison tray: no placeholder slots on small screens, so it stays one short row */
+    .compare-empty { display: none; }
+  }
   .header-mobile-links { display: none; }
   /* Result cards: on hover, softly ring the save (♥) and compare (+) buttons.
      Hover-capable pointers only, so touch screens never get a stuck ring. */
@@ -99,6 +135,33 @@
     .match-card-action { transition: box-shadow 0.18s ease, background 0.15s, color 0.15s; }
     .match-card:hover .match-card-action:not(:disabled) { box-shadow: 0 0 0 2px rgba(200,120,144,0.28); }
   }
+  /* A result card opened up (MatchDetail): centered dialog on desktop, bottom
+     sheet once the columns stack. Sits above the comparison tray and under My
+     Favorites, so the first-heart intro panel can open over it. */
+  .match-detail-backdrop {
+    position: fixed; inset: 0; z-index: 150; background: rgba(42,26,20,0.48);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .match-detail {
+    width: min(520px, 92vw); max-height: 88vh; overflow-y: auto;
+    display: flex; flex-direction: column;
+    background: #fff; border-radius: 18px; box-shadow: 0 24px 60px rgba(42,26,20,0.32);
+    animation: fadeUp 0.2s ease;
+  }
+  .match-detail-photo { width: 160px; height: 170px; }
+  .match-detail-handle { display: none; width: 40px; height: 4px; border-radius: 2px; background: var(--border); }
+  @keyframes matchDetailUp { from { transform: translateY(100%); } to { transform: none; } }
+  @media (max-width: 900px) {
+    .match-detail-backdrop { align-items: flex-end; }
+    .match-detail {
+      width: 100%; border-radius: 22px 22px 0 0; box-shadow: 0 -10px 30px rgba(42,26,20,0.22);
+      padding-bottom: env(safe-area-inset-bottom); animation: matchDetailUp 0.25s ease-out;
+    }
+    .match-detail-photo { width: 124px; height: 132px; }
+    .match-detail-long { display: none; }
+    .match-detail-handle { display: block; }
+  }
+  @media (prefers-reduced-motion: reduce) { .match-detail { animation: none; } }
   /* Dupe finder selected-shade card: large image layout on desktop only */
   .dupe-card-desktop { display: flex; }
   .dupe-card-mobile { display: none; }
@@ -113,13 +176,30 @@
     padding: 48px 48px 56px; gap: 38px;
   }
   .landing-lede {
-    font-family: 'Cormorant Garamond', serif; font-weight: 300; font-size: 52px;
+    font-family: 'Cormorant Garamond', serif; font-weight: 300; font-size: 60px;
     line-height: 1.1; letter-spacing: -0.015em; text-align: center;
   }
+  .landing-lede em { font-weight: 400; }
   .landing-grid {
-    display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;
-    width: 100%; max-width: 820px;
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px;
+    width: 100%; max-width: 1104px;
   }
+  /* Landing cards: a square picture of the mode over its name */
+  .landing-card {
+    display: flex; flex-direction: column; overflow: hidden;
+    background: #fff; border: 1px solid var(--border); border-radius: 16px;
+    color: inherit; text-decoration: none; cursor: pointer;
+    transition: border-color 0.18s ease, box-shadow 0.18s ease;
+  }
+  .landing-card:hover { border-color: var(--blush); box-shadow: 0 14px 34px rgba(42,26,20,0.10); }
+  .landing-card:focus-visible { outline: 2px solid var(--espresso); outline-offset: 3px; }
+  .landing-art {
+    aspect-ratio: 1; background: #F3ECE4;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .landing-card-text { display: flex; flex-direction: column; gap: 8px; padding: 22px 22px 24px; }
+  /* Below this the four squares get too small: two across */
+  @media (max-width: 1000px) { .landing-grid { grid-template-columns: repeat(2, 1fr); max-width: 640px; } }
 
   /* Dupe finder "popular shade" tiles read small on desktop — bump them up.
      !important because the base sizes are inline styles in app.jsx. */
@@ -148,6 +228,7 @@
     }
     .mode-tab { padding: 10px 14px !important; gap: 8px !important; }
     .mode-tab-icon { width: 24px !important; height: 24px !important; }
+    .mode-tab-icon svg { width: 18px; height: 18px; }
     .app-main {
       flex-direction: column;
       padding: 24px 24px 32px;
@@ -162,15 +243,27 @@
   }
 
   @media (max-width: 540px) {
-    .landing-grid { grid-template-columns: 1fr; }
+    /* One column of rows: a small picture beside the name, so all four fit on a phone screen */
+    .landing-grid { grid-template-columns: 1fr; gap: 12px; }
+    .landing-card { flex-direction: row; align-items: stretch; }
+    .landing-art { width: 112px; flex: none; }
+    .landing-art-dupe { zoom: 0.42; }
+    .landing-pick { transform: scale(0.55); }
+    .landing-corner { transform: scale(0.6); } /* drawn in fixed sizes, unlike the other pictures */
+    .landing-card-text { justify-content: center; gap: 4px; padding: 14px 16px; }
+    .landing-card-text h2 { font-size: 22px !important; }
     .landing-lede { font-size: 28px; }
     .app-header { padding: 14px 16px 10px; gap: 6px 8px; }
     .header-how-it-works { display: none !important; }
-    /* …and return as a line of text links under My Favorites */
-    .header-mobile-links {
-      display: flex; flex-basis: 100%; justify-content: flex-end; gap: 22px;
-      padding: 6px 2px 2px;
-    }
+    /* …and return as text links on the second line, left of My Favorites. The title has the first
+       line to itself, so the header is two lines whatever the button's count. Spacing is trimmed so
+       both fit down to 360px wide; narrower than that the button wraps under the links. */
+    .app-header { column-gap: 8px !important; } /* the header's inline gap is wider */
+    .app-header h1 { flex-basis: 100%; }
+    .header-mobile-links { display: flex; order: 1; align-items: center; gap: clamp(14px, 12vw - 24px, 22px); }
+    .header-mobile-links a { padding-top: 10px; }
+    .header-actions { order: 2; }
+    .header-fav { padding: 8px 9px !important; gap: 6px !important; letter-spacing: 0.04em !important; }
     .header-product-count { display: none !important; }
     .mode-bar {
       display: grid !important; grid-template-columns: 1fr 1fr;
@@ -182,7 +275,6 @@
     .app-main { padding: 16px 12px 24px; }
     .app-footer { padding: 10px 16px; font-size: 10px; }
     .compare-tray-body { padding-left: 16px !important; padding-right: 16px !important; }
-    .compare-tray-body .compare-row { overflow-x: auto; }
   }
 
   /* Default footer padding (matches earlier 12px 48px) */
@@ -253,6 +345,8 @@
   .page-copy-links { display: flex; flex-wrap: wrap; gap: 10px; }
   .page-copy-links a { padding: 7px 14px; border: 1px solid var(--border); border-radius: 20px; background: #fff; color: var(--espresso); text-decoration: none; font-size: 13px; }
   .page-copy-links a:hover { border-color: var(--blush); }
+  .page-copy-links a:has(.chart-chip-swatch) { display: inline-flex; align-items: center; gap: 8px; padding-left: 8px; }
+  .chart-chip-swatch { width: 16px; height: 16px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(42,26,20,0.12); }
   .page-copy .wheel-family { font-size: 11px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--espresso); margin: 22px 0 8px; }
   .wheel-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(98px, 1fr)); gap: 8px; }
   .page-copy .wheel-cards a { display: flex; flex-direction: column; border: 1px solid var(--border); border-radius: 10px; background: #fff; overflow: hidden; text-decoration: none; color: var(--espresso); }
@@ -284,11 +378,38 @@
 </div>
 <section id="page-copy" class="page-copy">
   <div class="page-copy-inner">
-    <h2>How the lipstick color chart works</h2>
-    <p>Explore lipstick colors on a two-dimensional map. Move horizontally to shift between redder and greener hues, and vertically to shift between yellower and bluer hues. Use the depth bar to make your selection lighter or darker.</p>
-    <p>Choose any point to find lip products with the closest measured colors. Open the matches to browse results, then filter by price, brand, format, finish, or undertone.</p>
-    <h3>Have a hex color code?</h3>
-    <p>Enter a hex code to jump directly to that color and find matching lipsticks.</p>
+    <h2>How to find the right lipstick color</h2>
+    <p>The best way to find a lipstick shade depends on how much you already know about the color you want. A lipstick color chart lets you explore shades visually instead of relying only on brand names, which can describe similar colors differently.</p>
+    <p><strong>If you know the color family:</strong> start with red, pink, berry, coral, brown, plum, blue, or black under "Start from", then adjust the tone and depth.</p>
+    <p><strong>If you know the exact color you want:</strong> enter a hex color code to find lipsticks with the closest measured colors.</p>
+    <p><strong>If you want a lighter or darker shade:</strong> keep the hue and move the depth bar to compare lighter and deeper lipsticks.</p>
+    <p><strong>If you are choosing between similar shades:</strong> use "Explore nearby shades" to zoom in and compare colors that differ only slightly.</p>
+    <p><strong>If you have a lipstick you love:</strong> use the <a href="/dupe-finder/">lipstick dupe finder</a> to look for similar shades in other products.</p>
+    <h3>Colors to start from</h3>
+    <p class="page-copy-links">
+      <a href="/lipstick-color-chart/?color=a3172e"><span class="chart-chip-swatch" style="background:#a3172e"></span>Blue red lipsticks</a>
+      <a href="/lipstick-color-chart/?color=d03a26"><span class="chart-chip-swatch" style="background:#d03a26"></span>Orange red lipsticks</a>
+      <a href="/lipstick-color-chart/?color=d77749"><span class="chart-chip-swatch" style="background:#d77749"></span>Coral lipsticks</a>
+      <a href="/lipstick-color-chart/?color=c96b84"><span class="chart-chip-swatch" style="background:#c96b84"></span>Rose pink lipsticks</a>
+      <a href="/lipstick-color-chart/?color=9c6b7a"><span class="chart-chip-swatch" style="background:#9c6b7a"></span>Mauve lipsticks</a>
+      <a href="/lipstick-color-chart/?color=c39482"><span class="chart-chip-swatch" style="background:#c39482"></span>Nude lipsticks</a>
+      <a href="/lipstick-color-chart/?color=8a5545"><span class="chart-chip-swatch" style="background:#8a5545"></span>Brown lipsticks</a>
+      <a href="/lipstick-color-chart/?color=7d2349"><span class="chart-chip-swatch" style="background:#7d2349"></span>Berry lipsticks</a>
+      <a href="/lipstick-color-chart/?color=5c3069"><span class="chart-chip-swatch" style="background:#5c3069"></span>Plum lipsticks</a>
+      <a href="/lipstick-color-chart/?color=1f1f1f"><span class="chart-chip-swatch" style="background:#1f1f1f"></span>Black lipsticks</a>
+    </p>
+    <h3>How to choose between warm and cool lipstick shades</h3>
+    <p>Warm and cool lipstick shades can look similar at first, but small differences in undertone change their overall appearance. Warm reds lean toward orange, while blue-reds lean toward cooler, pinker or bluer tones. Coral shades combine red and orange, while berry and plum shades move toward purple.</p>
+    <p>Use the chart to compare these differences directly: warmer shades sit toward the top of the map and cooler ones toward the bottom. Move between neighboring shades to find a red that is more orange or more blue, a pink that is warmer or cooler, or a nude that is more peachy or more brown.</p>
+    <h3>How to find a lipstick in a specific color</h3>
+    <p>If you have a color in mind but don't know which brands sell it, select that color on the chart. The results show lip products whose measured colors fall within the chart's matching distance, ordered from closest to farthest.</p>
+    <p>You can then narrow the results by brand, price, product format, finish, or undertone, and compare products across brands without relying on shade names.</p>
+    <h3>Can you find a lipstick using a hex color code?</h3>
+    <p>Yes. If you have a hex color code from a website, an image, or a design tool, enter it into the lipstick color chart. The chart uses that color as the target and finds the lipsticks in its catalogue with the closest measured colors.</p>
+    <p>A hex match is a starting point for comparison, not a guarantee that the lipstick will look identical on your lips. Product photography, lighting, skin tone, and the lipstick's formula all affect the final look.</p>
+    <h3>Why use measured color instead of lipstick shade names?</h3>
+    <p>Lipstick shade names are not standardized across brands. One brand's rose, nude, or brick red may look quite different from another brand's version of the same name, and retailer color filters group products into broad categories.</p>
+    <p>This chart compares products by color measured from their product images, using the same method for every brand. That helps you discover visually similar shades across brands, including colors you might not find by searching for a shade name. <a href="/about/">How I built it</a> explains the method, and the <a href="/color-science/">color science page</a> explains how closeness is measured.</p>
     <h3>Prefer to browse named lipstick colors?</h3>
     <p>Explore 46 named shades on the <a href="/color-wheel/">lipstick color wheel</a>. If you want to find a similar shade to a lipstick you already own, try the <a href="/dupe-finder/">lipstick dupe finder</a>.</p>
   </div>
