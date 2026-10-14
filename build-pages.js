@@ -44,9 +44,11 @@ function wheelCards() {
 const PAGES = [
   {
     dir: 'color-wheel',
+    image: 'share-card-color-wheel.png',
+    imageAlt: 'The color wheel: tap a shade on the wheel and see the lipsticks that look like it',
     name: 'Lipstick Color Wheel',
     title: 'Lipstick Color Wheel: Browse Shades by Color',
-    description: 'Tap a color on the wheel and see the lipsticks that look like it. Go lighter or deeper, then filter by finish, undertone and price.',
+    description: 'Explore lipstick shades by color. Tap the color wheel to find matching lipsticks, then browse lighter, deeper, warmer or cooler shades and filter by price, finish and undertone.',
     h1: 'Lipstick color wheel',
     intro: 'Not sure what you want yet? Start with a color and see real lipsticks in it, then go lighter, deeper, warmer or cooler until it feels right.',
     copy: `
@@ -62,9 +64,11 @@ const PAGES = [
   },
   {
     dir: 'dupe-finder',
+    image: 'share-card-dupe-finder.png',
+    imageAlt: 'The dupe finder: two lipsticks side by side, yours and its twin',
     name: 'Lipstick Dupe Finder',
     title: 'Lipstick Dupe Finder: Same Color, Any Price',
-    description: 'Name your lipstick and see the shades that look most like it, from nearly 17,000 lipsticks and nearly 450 brands. Discontinued? Find its closest twin.',
+    description: 'Find lipstick dupes across nearly 17,000 lip products and 430+ brands. Compare shades from drugstore to luxury, including alternatives to discontinued lipsticks.',
     h1: 'Lipstick dupe finder',
     intro: 'Name a lipstick you love and see the shades that look most like it, from drugstore to luxury, across nearly 450 brands.',
     copy: `
@@ -91,6 +95,8 @@ const PAGES = [
   },
   {
     dir: 'photo-match',
+    image: 'share-card-photo-match.png',
+    imageAlt: 'Photo match: red lips in a camera frame, with a picker on the color',
     name: 'Lipstick Photo Match',
     title: 'Find a Lipstick from a Photo: Match Any Lip Color',
     description: 'Saw the perfect lip color on Instagram? Upload the photo, tap the lips, and find it among nearly 17,000 lipsticks. Your photo never leaves your phone.',
@@ -108,9 +114,11 @@ const PAGES = [
   },
   {
     dir: 'lipstick-color-chart',
+    image: 'share-card-color-chart.png',
+    imageAlt: 'The color chart: hundreds of shades on one chart, with one picked',
     name: 'Lipstick Color Chart',
     title: 'Lipstick Color Chart: Nearly 17,000 Lipsticks by Color',
-    description: 'Explore hundreds of shades on one chart. Tap a color or paste a hex code to match against nearly 17,000 lipsticks across 430+ brands at every price.',
+    description: 'Explore hundreds of lipstick shades on an interactive chart. Tap a shade or enter a hex code to find matching lipsticks from nearly 17,000 products across 430+ brands.',
     h1: 'Lipstick color chart: find any shade',
     intro: 'Hundreds of shades on one map, from soft nudes to deep blue-reds, matched against nearly 17,000 lipsticks from 430+ brands. Tap a color to see the closest matches, then go lighter or deeper.',
     copy: `
@@ -178,6 +186,7 @@ const PAGE_CSS = `<style>
 
 const template = fs.readFileSync(path.join(__dirname, 'index.html'), 'utf8');
 const homeDescription = template.match(/<meta name="description" content="([^"]*)"/)[1];
+const homeImageAlt = template.match(/<meta property="og:image:alt" content="([^"]*)"/)[1];
 
 // Replace every occurrence, and fail loudly if index.html no longer has it
 function swap(html, from, to) {
@@ -210,6 +219,9 @@ for (const page of PAGES) {
   html = swap(html, homeDescription, esc(page.description));
   html = swap(html, `content="${SITE}/"`, `content="${url}"`);
   html = swap(html, `<link rel="canonical" href="${SITE}/"`, `<link rel="canonical" href="${url}"`);
+  // Each tool has its own share card (assets/share-card-*.png, drawn from its landing-page picture)
+  html = swap(html, `${SITE}/assets/share-card.png`, `${SITE}/assets/${page.image}`);
+  html = swap(html, homeImageAlt, esc(page.imageAlt));
   html = swapRe(html, /<script type="application\/ld\+json">[\s\S]*<\/script>\n(?=<\/head>)/,
     `<script type="application/ld+json">\n${jsonLd}\n</script>\n${PAGE_CSS}\n`);
   html = swapRe(html, /<h1>[\s\S]*?(?=\s*<div class="preload-spinner")/, `<h1>${page.h1}</h1>\n    <p>${page.intro}</p>`);
