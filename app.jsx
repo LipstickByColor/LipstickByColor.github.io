@@ -2625,13 +2625,15 @@ const EXPLORER_STARTS = [['Red', '#b5252c'], ['Pink', '#d66796'], ['Berry', '#7d
 // Start-from families that open a Tone and a Depth row: hue (degrees) for [warm, neutral, cool], chroma,
 // and which depth a tap on the family opens on. The numbers are chosen so the card names each pick the
 // way its chips do (describeColor); Red has its own depths, the red guide's bright / classic / deep.
+// No chip may land on another family: a pink below lightness 40 is named berry, so Pink's Deep stops
+// at 43, and Berry has only its deep depth (lighter ones are pinks) and so no Depth row.
 // Blue and Black have no rows: they jump to their EXPLORER_STARTS color.
 const START_TONES = ['Warm', 'Neutral', 'Cool'];
 const START_DEPTHS = [['Light', 68], ['Medium', 52], ['Deep', 34]];
 const START_FAMILIES = {
   Red:   { hues: [37, 30, 23], C: 64, depths: [['Bright', 50], ['Medium', 42], ['Deep', 32]], open: 1 },
-  Pink:  { hues: [5.5, 354.5, 343.5], C: 45, open: 1 },
-  Berry: { hues: [10, 358, 346], C: 40, open: 2 },
+  Pink:  { hues: [5.5, 354.5, 343.5], C: 45, depths: [['Light', 68], ['Medium', 52], ['Deep', 43]], open: 1 },
+  Berry: { hues: [10, 358, 346], C: 40, depths: [['Deep', 34]], open: 0 },
   Coral: { hues: [56, 51, 46], C: 50, open: 1 },
   Brown: { hues: [70, 55, 40], C: 20, open: 1 },
   Plum:  { hues: [329, 320, 311], C: 35, open: 2 },
@@ -2912,7 +2914,7 @@ function ShadeExplorer({ draft, color, origin, zoom, onZoom, info, committed, pi
           : startChip(name, hex, hex === color.hex, () => { setStart(null); onDraft(draftFromLab(hexToLab(hex))); })))}
         {sel && startRow('Tone', START_TONES.map((name, ti) =>
           startChip(name, labToHex(...startLab(sel.fam, ti, sel.di)), onStart && sel.ti === ti, () => pickStart(sel.fam, ti, sel.di))), true)}
-        {sel && startRow('Depth', (START_FAMILIES[sel.fam].depths || START_DEPTHS).map(([name], di) =>
+        {sel && (START_FAMILIES[sel.fam].depths || START_DEPTHS).length > 1 && startRow('Depth', (START_FAMILIES[sel.fam].depths || START_DEPTHS).map(([name], di) =>
           startChip(name, labToHex(...startLab(sel.fam, sel.ti, di)), onStart && sel.di === di, () => pickStart(sel.fam, sel.ti, di))), true)}
       </div>
 
