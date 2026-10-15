@@ -2697,6 +2697,18 @@ function parseSharedLink(search) {
   const color = q.get('color'),
     brand = q.get('brand'),
     dupe = q.get('dupe');
+  // The From Favorites tab: favorites live in this browser, so it is an address to come back to, not to share
+  if (q.get('mode') === 'favorites') {
+    const pick = q.get('pick') || '',
+      i = pick.indexOf('|');
+    return {
+      type: 'favorites',
+      pick: i > 0 ? {
+        brand: pick.slice(0, i),
+        shade: pick.slice(i + 1)
+      } : null
+    };
+  }
   if (color && /^[0-9a-f]{6}$/i.test(color)) return {
     type: 'color',
     hex: '#' + color.toLowerCase()
@@ -3657,7 +3669,8 @@ function ComparisonTray({
 }
 
 // ── List Picker ─────────────────────────────────────────────────────────
-// Grid of saved-shade swatches; clicking one uses its color as the seed.
+// Grid of saved-shade tiles; clicking one uses its color as the seed. Kept
+// compact so the selected shade's card fits below.
 function ListPicker({
   wishlist,
   selectedKey,
@@ -3682,9 +3695,8 @@ function ListPicker({
   }, "Pick a saved shade to find similar ones"), /*#__PURE__*/React.createElement("div", {
     style: {
       display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fill, minmax(96px, 1fr))',
-      gap: 14,
-      padding: '4px 4px 16px'
+      gridTemplateColumns: 'repeat(auto-fill, minmax(124px, 1fr))',
+      gap: 10
     }
   }, wishlist.map((p, i) => {
     const key = `${p.brand}|${p.shade}`;
@@ -3692,64 +3704,60 @@ function ListPicker({
     return /*#__PURE__*/React.createElement("button", {
       key: i,
       onClick: () => onPick(p),
+      "aria-pressed": isSel,
       style: {
         display: 'flex',
         flexDirection: 'column',
-        alignItems: 'center',
-        gap: 8,
-        background: 'transparent',
-        border: 'none',
+        textAlign: 'left',
+        background: isSel ? 'var(--cream-dark)' : '#fff',
         cursor: 'pointer',
-        padding: 6,
+        padding: 0,
         borderRadius: 12,
+        overflow: 'hidden',
+        border: isSel ? '2px solid var(--blush-deep)' : '1px solid var(--border)',
+        margin: isSel ? 0 : 1,
+        // keeps tiles the same size whichever border they have
         transition: 'background 0.15s'
-      },
-      onMouseEnter: e => {
-        if (!isSel) e.currentTarget.style.background = 'rgba(200,120,144,0.06)';
-      },
-      onMouseLeave: e => {
-        if (!isSel) e.currentTarget.style.background = 'transparent';
       }
-    }, /*#__PURE__*/React.createElement("div", {
+    }, /*#__PURE__*/React.createElement("span", {
       style: {
-        width: 56,
-        height: 56,
-        borderRadius: '50%',
+        display: 'block',
+        width: '100%',
+        height: 36,
         background: p.hex,
-        boxShadow: isSel ? `0 0 0 2px #fff, 0 0 0 4px var(--blush), 0 4px 14px ${p.hex}88` : `0 3px 12px ${p.hex}66, inset 0 -2px 4px rgba(0,0,0,0.12)`,
-        border: '1.5px solid rgba(42,26,20,0.06)',
-        transition: 'all 0.15s'
+        flexShrink: 0
       }
-    }), /*#__PURE__*/React.createElement("div", {
+    }), /*#__PURE__*/React.createElement("span", {
       style: {
-        textAlign: 'center',
-        maxWidth: '100%'
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 2,
+        padding: '8px 10px 10px'
       }
-    }, /*#__PURE__*/React.createElement("div", {
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontFamily: 'DM Sans',
+        fontSize: 11,
+        color: 'var(--text-muted)',
+        letterSpacing: '0.06em',
+        textTransform: 'uppercase'
+      }
+    }, p.brand), /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontFamily: 'DM Sans',
+        fontSize: 13,
+        fontWeight: 500,
+        color: 'var(--espresso)',
+        lineHeight: 1.25
+      }
+    }, p.shade), /*#__PURE__*/React.createElement("span", {
       style: {
         fontFamily: 'DM Sans',
         fontSize: 12,
-        color: 'var(--text-muted)',
-        letterSpacing: '0.08em',
-        textTransform: 'uppercase',
-        overflow: 'hidden',
-        textOverflow: 'ellipsis',
-        whiteSpace: 'nowrap'
+        color: 'var(--espresso-mid)',
+        lineHeight: 1.3
       }
-    }, p.brand), /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontFamily: 'Cormorant Garamond',
-        fontSize: 15,
-        fontStyle: 'italic',
-        color: isSel ? 'var(--blush-deep)' : 'var(--espresso)',
-        lineHeight: 1.2,
-        overflow: 'hidden',
-        textOverflow: 'ellipsis',
-        display: '-webkit-box',
-        WebkitLineClamp: 2,
-        WebkitBoxOrient: 'vertical'
-      }
-    }, p.shade)));
+    }, chartColorName(p.hex))));
   })));
 }
 
@@ -4354,6 +4362,10 @@ function draftFromLab([L, a, b]) {
     ta: a,
     tb: b
   };
+}
+// The color chart's name for a hex ("Medium warm pink"), as its card shows it
+function chartColorName(hex) {
+  return draftColor(draftFromLab(hexToLab(hex))).name;
 }
 function draftColor(draft) {
   const [a, b] = fitToGamut(draft.L, draft.ta, draft.tb);
@@ -6952,7 +6964,7 @@ function App() {
   // Result filters as URL pairs — from the link at first, then whatever ResultsTable reports
   const [filterParams, setFilterParams] = useState(() => filterParamsFrom(window.location.search));
   useEffect(() => {
-    if (initialLink) window.gtag?.('event', 'open_shared_link', {
+    if (initialLink && initialLink.type !== 'favorites') window.gtag?.('event', 'open_shared_link', {
       link_type: initialLink.type
     });
   }, []);
@@ -6961,7 +6973,20 @@ function App() {
   // segment selected (that's how a wheel pick is shared); any other hex opens
   // the custom-color picker
   const [initialWheelColor] = useState(() => initialLink?.type === 'color' ? LIPSTICK_DATA.find(c => c.hex.toLowerCase() === initialLink.hex) || null : null);
-  const [selectedColor, setSelectedColor] = useState(initialWheelColor);
+  // A From Favorites address reopens the tab on the shade it showed, or the last one saved if that is gone
+  const [initialFavorite] = useState(() => {
+    if (initialLink?.type !== 'favorites') return null;
+    let saved = [];
+    try {
+      saved = JSON.parse(localStorage.getItem('lipstick-wishlist') || '[]');
+    } catch {}
+    const k = initialLink.pick && `${initialLink.pick.brand}|${initialLink.pick.shade}`;
+    return saved.find(p => `${p.brand}|${p.shade}` === k) || saved[saved.length - 1] || null;
+  });
+  const [selectedColor, setSelectedColor] = useState(() => initialWheelColor || initialFavorite && {
+    ...listSeed(initialFavorite),
+    auto: true
+  });
   const [hoveredId, setHoveredId] = useState(null);
   const resultsRef = React.useRef(null);
   const [toneIdx, setToneIdx] = useState(null);
@@ -6969,6 +6994,7 @@ function App() {
     // 'landing' | 'wheel' | 'photo' | 'hex' | 'dupe' | 'list'
     if (initialLink?.type === 'color') return initialWheelColor ? 'wheel' : 'hex';
     if (initialLink?.type === 'dupe') return 'dupe';
+    if (initialLink?.type === 'favorites') return initialFavorite ? 'list' : 'wheel';
     if (PAGE_MODE) return PAGE_MODE;
     try {
       return localStorage.getItem('lipstick-visited') ? 'wheel' : 'landing';
@@ -7037,11 +7063,25 @@ function App() {
       setHexHex(null);
       setDupeProduct(null);
     } else {
-      setSelectedColor(null);
+      // From Favorites opens on the last shade saved, so there are results straight away
+      const last = wishlist[wishlist.length - 1];
+      setSelectedColor(last ? {
+        ...listSeed(last),
+        auto: true
+      } : null);
       setPhotoHex(null);
       setHexHex(null);
       setDupeProduct(null);
     }
+  }
+  function listSeed(p) {
+    return {
+      id: '__list__',
+      name: `Similar to ${p.shade}`,
+      hex: p.hex,
+      sourceKey: `${p.brand}|${p.shade}`,
+      item: p
+    };
   }
   function toggleWishlist(product) {
     const productKey = `${product.brand}|${product.shade}`;
@@ -7234,6 +7274,22 @@ function App() {
       preventScroll: true
     }), 50);
   }
+  // From Favorites → the color chart, zoomed into the shades around a saved one
+  function exploreOnChart(hex) {
+    const d = draftFromLab(hexToLab(hex)),
+      c = draftColor(d);
+    switchMode('hex', 'favorites_explore');
+    setHexDraft(d);
+    setHexOrigin(d);
+    setShadeZoom({
+      a: c.a,
+      b: c.b
+    });
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  }
   const jumpToNearestShade = () => {
     if (shadeInfo?.nearest) {
       trackExplore('jump_nearest');
@@ -7281,6 +7337,8 @@ function App() {
     if (!effectiveColor || !resultsRef.current) return;
     // Custom color opens its results in a sheet and scrolls the map into view itself (ShadeExplorer)
     if (window.innerWidth > 900 || mode === 'hex') return;
+    // A pick made for the visitor on opening From Favorites leaves the saved shades in view
+    if (effectiveColor.auto) return;
     const timer = setTimeout(() => {
       resultsRef.current.scrollIntoView({
         behavior: 'smooth',
@@ -7299,8 +7357,11 @@ function App() {
     } else if (mode === 'dupe' && !dataReady && initialLink?.type === 'dupe') {
       q.set('brand', initialLink.brand);
       q.set('dupe', initialLink.shade);
+    } else if (mode === 'list') {
+      q.set('mode', 'favorites');
+      if (selectedColor?.item) q.set('pick', selectedColor.sourceKey);
     } else if (mode !== 'dupe' && effectiveColor) q.set('color', effectiveColor.hex.slice(1).toLowerCase());
-    if (q.has('color') || q.has('dupe')) filterParams.forEach(([k, v]) => q.append(k, v));
+    if (q.has('color') || q.has('dupe') || q.has('pick')) filterParams.forEach(([k, v]) => q.append(k, v));
     const search = q.toString() ? `?${q}` : '';
     const path = MODE_PAGES[mode]?.path || '/';
     const url = path + search + window.location.hash;
@@ -7318,7 +7379,7 @@ function App() {
     if (!newTool) write();else if (backNav.leaving || backNav.skip) backNav.afterLeave = push; // a panel closed by the same click goes first
     else push();
     document.title = MODE_PAGES[mode]?.title || HOME_TITLE;
-  }, [sharedListKeys, mode, dupeProduct, effectiveColor?.hex, dataReady, filterParams]);
+  }, [sharedListKeys, mode, dupeProduct, effectiveColor?.hex, selectedColor?.sourceKey, dataReady, filterParams]);
 
   // Back or Forward onto another tool's entry: show that tool, nothing picked
   const [firstMode] = useState(mode);
@@ -7748,19 +7809,14 @@ function App() {
     wishlist: wishlist,
     selectedKey: selectedColor?.sourceKey,
     onPick: p => {
-      setSelectedColor({
-        id: '__list__',
-        name: `Similar to ${p.shade}`,
-        hex: p.hex,
-        sourceKey: `${p.brand}|${p.shade}`
-      });
+      setSelectedColor(listSeed(p));
       window.gtag?.('event', 'select_color', {
         method: 'list',
         hex: p.hex,
         name: p.shade
       });
     }
-  }), selectedColor && mode !== 'hex' && /*#__PURE__*/React.createElement("div", {
+  }), selectedColor && mode !== 'hex' && mode !== 'list' && /*#__PURE__*/React.createElement("div", {
     style: {
       marginTop: 28,
       display: 'flex',
@@ -7812,7 +7868,93 @@ function App() {
       lineHeight: 1,
       padding: '2px 4px'
     }
-  }, "\xD7")), mode === 'wheel' && /*#__PURE__*/React.createElement("p", {
+  }, "\xD7")), selectedColor && mode === 'list' && (() => {
+    const p = selectedColor.item;
+    return /*#__PURE__*/React.createElement("div", {
+      style: {
+        width: '100%',
+        maxWidth: 440,
+        marginTop: 20,
+        background: '#fff',
+        borderRadius: 16,
+        border: '1px solid var(--border)',
+        boxShadow: '0 2px 12px var(--shadow)',
+        overflow: 'hidden',
+        animation: 'fadeUp 0.2s ease'
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: 14,
+        padding: '14px 16px'
+      }
+    }, /*#__PURE__*/React.createElement(ShadeChip, {
+      hex: p.hex,
+      height: 72,
+      width: 9
+    }), /*#__PURE__*/React.createElement(ProductThumb, {
+      product: p,
+      size: 72,
+      tint: false
+    }), /*#__PURE__*/React.createElement("div", {
+      style: {
+        flex: 1,
+        minWidth: 0
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontFamily: 'DM Sans',
+        fontSize: 12,
+        color: 'var(--text-muted)',
+        letterSpacing: '0.06em',
+        textTransform: 'uppercase'
+      }
+    }, p.brand), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontFamily: 'DM Sans',
+        fontSize: 16,
+        fontWeight: 500,
+        color: 'var(--espresso)',
+        lineHeight: 1.25,
+        marginTop: 2
+      }
+    }, p.shade))), /*#__PURE__*/React.createElement("div", {
+      style: {
+        padding: '14px 16px 16px',
+        borderTop: '1px solid var(--border)',
+        background: 'var(--cream)',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'flex-start',
+        gap: 12
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontFamily: 'DM Sans',
+        fontSize: 13,
+        color: 'var(--text-body)',
+        lineHeight: 1.5
+      }
+    }, "Want it a little warmer or cooler? See the shades around it on the color chart."), /*#__PURE__*/React.createElement("button", {
+      type: "button",
+      onClick: () => exploreOnChart(p.hex),
+      style: {
+        fontFamily: 'DM Sans',
+        fontSize: 12,
+        fontWeight: 500,
+        letterSpacing: '0.06em',
+        textTransform: 'uppercase',
+        minHeight: 44,
+        padding: '10px 18px',
+        borderRadius: 40,
+        border: 'none',
+        background: 'var(--espresso)',
+        color: 'var(--cream)',
+        cursor: 'pointer'
+      }
+    }, "Explore shades near ", p.shade, " \u2192")));
+  })(), mode === 'wheel' && /*#__PURE__*/React.createElement("p", {
     style: {
       fontSize: 11,
       color: 'var(--text-muted)',
