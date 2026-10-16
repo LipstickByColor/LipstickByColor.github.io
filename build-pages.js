@@ -58,6 +58,8 @@ const PAGES = [
     <p>Shade names like "Velvet Plum" or "Spiced Rosewood" say little about the color itself, and retailer filters like "Pink" or "Nude" each cover hundreds of very different shades. Here every product is placed by its measured color, so what you click is what you get. <a href="/about/">How I built it</a> explains how the colors are measured.</p>
     <h3>What if I want an exact shade?</h3>
     <p>If you have a picture of it, use <a href="/photo-match/">photo match</a>. If you already own a lipstick in that color, the <a href="/dupe-finder/">dupe finder</a> starts from that shade. The <a href="/lipstick-color-chart/">lipstick color chart</a> takes a hex code.</p>
+    <h3>Does it include lip liner, gloss, and liquid lipstick?</h3>
+    <p>Yes. Results cover bullet and liquid lipsticks, glosses, stains and tints, liners and pencils, and lip oils. After picking a color, narrow by format, or by finish such as matte, satin, or sheer.</p>
     <h3>The 46 lipstick shades on the wheel</h3>
     <p>Each shade is shown with its hex code and the number of lipsticks nearest to it. The names are only labels for the wheel; click one to open it.</p>${wheelCards()}
     <p class="wheel-after">To pick any color, not only these 46, use the <a href="/lipstick-color-chart/">lipstick color chart</a>. For reds in depth, see the <a href="/guides/red-lipstick/">red lipstick guide</a>.</p>`,
@@ -79,6 +81,9 @@ const PAGES = [
     <p>Color is only part of a dupe. Finish and formula also change how a shade looks on your lips, so use the finish and format filters to keep the comparison fair.</p>
     <h3>Where do the colors come from?</h3>
     <p>Each shade's color is measured from its product images, not taken from the brand's shade name or a retailer's color filter. <a href="/about/">How I built it</a> explains the method.</p>
+    <h3>Does it include lip liner, gloss, and liquid lipstick?</h3>
+    <p>Yes. Results cover bullet and liquid lipsticks, glosses, stains and tints, liners and pencils, and lip oils. After picking a color, narrow by format, or by finish such as matte, satin, or sheer.</p>
+    <p>To find a lip liner that matches your lipstick, search your lipstick, then filter the results to liners and pencils.</p>
     <h3>What if my lipstick isn't listed?</h3>
     <p>Use <a href="/photo-match/">photo match</a>: upload a picture of it, tap the color, and search from there. Or find the closest color on the <a href="/color-wheel/">color wheel</a> or the <a href="/lipstick-color-chart/">lipstick color chart</a>.</p>
     <h3>Popular shades to start from</h3>
@@ -109,6 +114,8 @@ const PAGES = [
     <p>No. The image is read by your browser. It is never uploaded or stored. See the <a href="/privacy/">privacy page</a>.</p>
     <h3>How do I get a better match?</h3>
     <p>Lighting, filters, and screens all shift color in a photo. Tap a part of the lip in even light, away from glossy highlights and shadows, and try a few spots to see how much the result moves.</p>
+    <h3>Does it include lip liner, gloss, and liquid lipstick?</h3>
+    <p>Yes. Results cover bullet and liquid lipsticks, glosses, stains and tints, liners and pencils, and lip oils. After picking a color, narrow by format, or by finish such as matte, satin, or sheer.</p>
     <h3>Already know which lipstick it is?</h3>
     <p>The <a href="/dupe-finder/">dupe finder</a> starts from the lipstick's own measured color, which is more reliable than a photo. To browse by color family, use the <a href="/color-wheel/">color wheel</a>. To pick any color, use the <a href="/lipstick-color-chart/">lipstick color chart</a>.</p>`,
   },
@@ -148,6 +155,8 @@ const PAGES = [
     <h3>How to find a lipstick in a specific color</h3>
     <p>If you have a color in mind but don't know which brands sell it, select that color on the chart. The results show lip products whose measured colors fall within the chart's matching distance, ordered from closest to farthest.</p>
     <p>You can then narrow the results by brand, price, product format, finish, or undertone, and compare products across brands without relying on shade names.</p>
+    <h3>Does it include lip liner, gloss, and liquid lipstick?</h3>
+    <p>Yes. Results cover bullet and liquid lipsticks, glosses, stains and tints, liners and pencils, and lip oils. After picking a color, narrow by format, or by finish such as matte, satin, or sheer.</p>
     <h3>Can you find a lipstick using a hex color code?</h3>
     <p>Yes. If you have a hex color code from a website, an image, or a design tool, enter it into the lipstick color chart. The chart uses that color as the target and finds the lipsticks in its catalogue with the closest measured colors.</p>
     <p>A hex match is a starting point for comparison, not a guarantee that the lipstick will look identical on your lips. Product photography, lighting, skin tone, and the lipstick's formula all affect the final look.</p>
