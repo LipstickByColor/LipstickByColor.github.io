@@ -80,7 +80,7 @@ const PAGES = [
     <h3>Where do the colors come from?</h3>
     <p>Each shade's color is measured from its product images, not taken from the brand's shade name or a retailer's color filter. <a href="/about/">How I built it</a> explains the method.</p>
     <h3>What if my lipstick isn't listed?</h3>
-    <p>Use <a href="/photo-match/">photo match</a>: upload a picture of it, tap the color, and search from there. Or find the closest color on the <a href="/color-wheel/">color wheel</a>.</p>
+    <p>Use <a href="/photo-match/">photo match</a>: upload a picture of it, tap the color, and search from there. Or find the closest color on the <a href="/color-wheel/">color wheel</a> or the <a href="/lipstick-color-chart/">lipstick color chart</a>.</p>
     <h3>Popular shades to start from</h3>
     <p class="page-copy-links">
       <a href="/dupe-finder/mac/ruby-woo/">MAC Ruby Woo dupes</a>
@@ -110,7 +110,7 @@ const PAGES = [
     <h3>How do I get a better match?</h3>
     <p>Lighting, filters, and screens all shift color in a photo. Tap a part of the lip in even light, away from glossy highlights and shadows, and try a few spots to see how much the result moves.</p>
     <h3>Already know which lipstick it is?</h3>
-    <p>The <a href="/dupe-finder/">dupe finder</a> starts from the lipstick's own measured color, which is more reliable than a photo. To browse by color family, use the <a href="/color-wheel/">color wheel</a>.</p>`,
+    <p>The <a href="/dupe-finder/">dupe finder</a> starts from the lipstick's own measured color, which is more reliable than a photo. To browse by color family, use the <a href="/color-wheel/">color wheel</a>. To pick any color, use the <a href="/lipstick-color-chart/">lipstick color chart</a>.</p>`,
   },
   {
     dir: 'lipstick-color-chart',
