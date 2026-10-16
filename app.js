@@ -5550,6 +5550,12 @@ function ShadeSheet({
 }
 
 // ── Dupe Finder ──────────────────────────────────────────────────────────────
+// Lowercase with accents, spaces and punctuation removed, for forgiving search.
+const normSearch = s => (s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '');
+// Shade names keep their word gaps, so a search can't join two words ("colorbar"
+// shouldn't match "lip color | bare it all").
+const normShade = s => (s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+
 // Quick-start options shown under the dupe search for anyone who
 // doesn't have a specific lipstick in mind yet.
 const POPULAR_DUPE_PICKS = [{
@@ -5598,17 +5604,68 @@ function DupeFinder({
     for (const p of REAL_PRODUCTS) m[p.brand] = (m[p.brand] || 0) + 1;
     return m;
   }, []);
+
+  // Brand search ignores case, accents, spaces and punctuation, so "smash box",
+  // "loreal" and "elf" still find their brands.
+  const brandKeys = React.useMemo(() => brands.map(b => {
+    const first = normSearch(b.split(' ')[0]);
+    return {
+      b,
+      key: normSearch(b),
+      first: first.length >= 3 ? first : null
+    };
+  }), [brands]);
+  const shadeIndex = React.useMemo(() => REAL_PRODUCTS.map(p => ({
+    p,
+    key: normShade(p.shade)
+  })), []);
   const brandMatches = React.useMemo(() => {
-    const q = brandQuery.trim().toLowerCase();
+    const q = normSearch(brandQuery);
     if (!q) return [];
     const starts = [],
       incl = [];
-    for (const b of brands) {
-      const lb = b.toLowerCase();
-      if (lb.startsWith(q)) starts.push(b);else if (lb.includes(q)) incl.push(b);
+    for (const {
+      b,
+      key
+    } of brandKeys) {
+      if (key.startsWith(q)) starts.push(b);else if (key.includes(q)) incl.push(b);
     }
     return [...starts, ...incl].slice(0, 12);
-  }, [brandQuery, brands]);
+  }, [brandQuery, brandKeys]);
+
+  // Shades offered from the brand box: "mac ruby woo" (a brand, or its first
+  // word, then a shade) lists that brand's shades; a shade name on its own
+  // ("pillow talk") lists that shade across brands. Either skips step 2.
+  const quickShades = React.useMemo(() => {
+    const words = brandQuery.trim().toLowerCase().split(/\s+/).filter(Boolean);
+    for (let k = words.length - 1; k >= 1; k--) {
+      const head = normSearch(words.slice(0, k).join(' '));
+      const rest = normShade(words.slice(k).join(' '));
+      const hit = new Set(brandKeys.filter(x => x.key === head || x.first === head).map(x => x.b));
+      if (!hit.size || !rest) continue;
+      const list = shadeIndex.filter(x => hit.has(x.p.brand) && x.key.includes(rest)).map(x => x.p);
+      if (list.length) return {
+        route: 'brand_shade',
+        list: list.sort((a, b) => a.shade.localeCompare(b.shade)).slice(0, 40)
+      };
+    }
+    const q = normShade(brandQuery);
+    if (q.length < 3) return null;
+    const starts = [],
+      incl = [];
+    for (const {
+      p,
+      key
+    } of shadeIndex) {
+      if (key.startsWith(q)) starts.push(p);else if (key.includes(q)) incl.push(p);
+    }
+    const byShade = (a, b) => a.shade.localeCompare(b.shade) || a.brand.localeCompare(b.brand);
+    const list = [...starts.sort(byShade), ...incl.sort(byShade)].slice(0, 40);
+    return list.length ? {
+      route: 'shade',
+      list
+    } : null;
+  }, [brandQuery, brandKeys, shadeIndex]);
   const shadeMatches = React.useMemo(() => {
     if (!brand) return [];
     const q = shadeQuery.trim().toLowerCase();
@@ -5635,8 +5692,21 @@ function DupeFinder({
     window.gtag?.('event', 'dupe_shade_select', {
       brand: p.brand,
       shade: p.shade,
-      hex: p.hex
+      hex: p.hex,
+      route: 'brand'
     });
+    onSelect(p);
+  }
+  function pickQuickShade(p) {
+    window.gtag?.('event', 'dupe_shade_select', {
+      brand: p.brand,
+      shade: p.shade,
+      hex: p.hex,
+      route: quickShades.route
+    });
+    setBrand(p.brand);
+    setBrandQuery('');
+    setShadeQuery('');
     onSelect(p);
   }
   const popularProducts = React.useMemo(() => POPULAR_DUPE_PICKS.map(({
@@ -5661,7 +5731,7 @@ function DupeFinder({
   // don't inflate the metric with repeats of the same dead-end search.
   React.useEffect(() => {
     const q = brandQuery.trim().toLowerCase();
-    if (q.length < 3 || brandMatches.length > 0 || brandNoResultFired.current) return;
+    if (q.length < 3 || brandMatches.length > 0 || quickShades || brandNoResultFired.current) return;
     const t = setTimeout(() => {
       brandNoResultFired.current = true;
       window.gtag?.('event', 'dupe_brand_no_results', {
@@ -5669,7 +5739,7 @@ function DupeFinder({
       });
     }, 600);
     return () => clearTimeout(t);
-  }, [brandQuery, brandMatches.length]);
+  }, [brandQuery, brandMatches.length, quickShades]);
   React.useEffect(() => {
     const q = shadeQuery.trim().toLowerCase();
     if (q.length < 3 || shadeMatches.length > 0 || !brand || shadeNoResultFired.current.has(brand)) return;
@@ -5890,7 +5960,8 @@ function DupeFinder({
     value: brandQuery,
     onChange: e => setBrandQuery(e.target.value),
     onKeyDown: e => {
-      if (e.key === 'Enter' && brandMatches[0]) pickBrand(brandMatches[0]);
+      if (e.key !== 'Enter') return;
+      if (brandMatches[0]) pickBrand(brandMatches[0]);else if (quickShades) pickQuickShade(quickShades.list[0]);
     },
     placeholder: "MAC, Charlotte Tilbury\u2026",
     "aria-label": "Brand",
@@ -5899,11 +5970,33 @@ function DupeFinder({
     onClick: () => setBrandQuery(''),
     "aria-label": "Clear search",
     style: clearBtn
-  }, "\xD7")), brandQuery && brandMatches.length === 0 && /*#__PURE__*/React.createElement("p", {
+  }, "\xD7")), brandQuery.trim() && brandMatches.length === 0 && !quickShades && normSearch(brandQuery).length >= 3 && /*#__PURE__*/React.createElement("div", {
+    style: {
+      textAlign: 'center',
+      padding: '8px 0'
+    }
+  }, /*#__PURE__*/React.createElement("p", {
     style: emptyNote
-  }, "No brands match \"", brandQuery, "\"."), brandMatches.length > 0 && /*#__PURE__*/React.createElement("div", {
-    style: suggestBox
-  }, brandMatches.map(b => /*#__PURE__*/React.createElement("button", _extends({
+  }, "No brand or shade matches \"", brandQuery.trim(), "\". It may not be in the catalogue."), /*#__PURE__*/React.createElement("button", {
+    onClick: () => {
+      window.gtag?.('event', 'dupe_photo_fallback', {
+        step: 'brand_no_results',
+        query: brandQuery.trim().toLowerCase()
+      });
+      onUsePhoto();
+    },
+    style: photoFallbackBtn
+  }, "Match it from a photo \u2192")), (brandMatches.length > 0 || quickShades) && /*#__PURE__*/React.createElement("div", {
+    style: {
+      ...suggestBox,
+      maxHeight: 308
+    }
+  }, brandMatches.length > 0 && quickShades && /*#__PURE__*/React.createElement("span", {
+    style: {
+      ...stepLabel,
+      padding: '6px 12px 2px'
+    }
+  }, "Brands"), brandMatches.map(b => /*#__PURE__*/React.createElement("button", _extends({
     key: b,
     onClick: () => pickBrand(b)
   }, hov(), {
@@ -5935,7 +6028,74 @@ function DupeFinder({
       marginLeft: 'auto',
       flexShrink: 0
     }
-  }, brandCounts[b], " shade", brandCounts[b] !== 1 ? 's' : '')))), !brandQuery && /*#__PURE__*/React.createElement("p", {
+  }, brandCounts[b], " shade", brandCounts[b] !== 1 ? 's' : ''))), brandMatches.length > 0 && quickShades && /*#__PURE__*/React.createElement("span", {
+    style: {
+      ...stepLabel,
+      padding: '10px 12px 2px'
+    }
+  }, "Shades"), quickShades?.list.map((p, i) => /*#__PURE__*/React.createElement("button", _extends({
+    key: i,
+    onTouchStart: e => {
+      touchStartY.current = e.touches[0].clientY;
+    },
+    onTouchEnd: e => {
+      if (Math.abs(e.changedTouches[0].clientY - touchStartY.current) < 10) {
+        e.preventDefault();
+        pickQuickShade(p);
+      }
+    },
+    onClick: () => pickQuickShade(p)
+  }, hov(), {
+    style: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: 11,
+      width: '100%',
+      padding: '8px 10px',
+      borderRadius: 9,
+      border: 'none',
+      background: 'transparent',
+      cursor: 'pointer',
+      transition: 'background 0.12s'
+    }
+  }), /*#__PURE__*/React.createElement("span", {
+    style: {
+      width: 24,
+      height: 24,
+      borderRadius: '50%',
+      background: p.hex,
+      flexShrink: 0,
+      boxShadow: `0 1px 4px ${p.hex}66`,
+      border: '1px solid rgba(42,26,20,0.08)'
+    }
+  }), /*#__PURE__*/React.createElement("span", {
+    style: {
+      display: 'flex',
+      flexDirection: 'column',
+      minWidth: 0,
+      textAlign: 'left'
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontFamily: 'Cormorant Garamond',
+      fontStyle: 'italic',
+      fontSize: 15,
+      color: 'var(--espresso)',
+      lineHeight: 1.2,
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      whiteSpace: 'nowrap'
+    }
+  }, p.shade), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontFamily: 'DM Sans',
+      fontSize: TYPE.micro,
+      color: 'var(--text-muted)',
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      whiteSpace: 'nowrap'
+    }
+  }, p.brand, " \xB7 ", p.product))))), !brandQuery && /*#__PURE__*/React.createElement("p", {
     style: {
       fontFamily: 'Cormorant Garamond',
       fontStyle: 'italic',
