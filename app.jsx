@@ -3297,11 +3297,11 @@ function DupeFinder({ product, onSelect, onUsePhoto }) {
 
   const shadeMatches = React.useMemo(() => {
     if (!brand) return [];
+    // An empty box lists every shade of the brand, so it can be browsed
     const q = shadeQuery.trim().toLowerCase();
-    if (!q) return [];
-    const list = REAL_PRODUCTS.filter(p => p.brand === brand &&
-      (p.shade.toLowerCase().includes(q) || (p.product || '').toLowerCase().includes(q)));
-    return list.sort((a, b) => a.shade.localeCompare(b.shade)).slice(0, 80);
+    const list = REAL_PRODUCTS.filter(p => p.brand === brand && (!q ||
+      p.shade.toLowerCase().includes(q) || (p.product || '').toLowerCase().includes(q)));
+    return list.sort((a, b) => a.shade.localeCompare(b.shade));
   }, [brand, shadeQuery]);
 
   function pickBrand(b) {
@@ -3482,11 +3482,7 @@ function DupeFinder({ product, onSelect, onUsePhoto }) {
                   placeholder="Search a shade or product…" aria-label="Shade or product" style={inputStyle} />
                 {shadeQuery && <button onClick={() => setShadeQuery('')} aria-label="Clear search" style={clearBtn}>×</button>}
               </div>
-              {!shadeQuery.trim() ? (
-                <p style={{ fontFamily:'Cormorant Garamond', fontStyle:'italic', fontSize:TYPE.caption, color:'var(--text-muted)', textAlign:'center', lineHeight:1.5, marginTop:2 }}>
-                  Start typing the shade name to see matches.
-                </p>
-              ) : shadeMatches.length === 0 ? (
+              {shadeMatches.length === 0 ? (
                 <div style={{ textAlign:'center', padding:'8px 0' }}>
                   <p style={emptyNote}>No shades match "{shadeQuery}".</p>
                   <button onClick={() => { window.gtag?.('event', 'dupe_photo_fallback', { step: 'shade_no_results', brand, query: shadeQuery.trim().toLowerCase() }); onUsePhoto(); }} style={photoFallbackBtn}>

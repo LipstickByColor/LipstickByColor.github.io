@@ -5668,10 +5668,10 @@ function DupeFinder({
   }, [brandQuery, brandKeys, shadeIndex]);
   const shadeMatches = React.useMemo(() => {
     if (!brand) return [];
+    // An empty box lists every shade of the brand, so it can be browsed
     const q = shadeQuery.trim().toLowerCase();
-    if (!q) return [];
-    const list = REAL_PRODUCTS.filter(p => p.brand === brand && (p.shade.toLowerCase().includes(q) || (p.product || '').toLowerCase().includes(q)));
-    return list.sort((a, b) => a.shade.localeCompare(b.shade)).slice(0, 80);
+    const list = REAL_PRODUCTS.filter(p => p.brand === brand && (!q || p.shade.toLowerCase().includes(q) || (p.product || '').toLowerCase().includes(q)));
+    return list.sort((a, b) => a.shade.localeCompare(b.shade));
   }, [brand, shadeQuery]);
   function pickBrand(b) {
     window.gtag?.('event', 'dupe_brand_select', {
@@ -6171,17 +6171,7 @@ function DupeFinder({
     onClick: () => setShadeQuery(''),
     "aria-label": "Clear search",
     style: clearBtn
-  }, "\xD7")), !shadeQuery.trim() ? /*#__PURE__*/React.createElement("p", {
-    style: {
-      fontFamily: 'Cormorant Garamond',
-      fontStyle: 'italic',
-      fontSize: TYPE.caption,
-      color: 'var(--text-muted)',
-      textAlign: 'center',
-      lineHeight: 1.5,
-      marginTop: 2
-    }
-  }, "Start typing the shade name to see matches.") : shadeMatches.length === 0 ? /*#__PURE__*/React.createElement("div", {
+  }, "\xD7")), shadeMatches.length === 0 ? /*#__PURE__*/React.createElement("div", {
     style: {
       textAlign: 'center',
       padding: '8px 0'
