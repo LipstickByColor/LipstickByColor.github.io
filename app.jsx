@@ -1228,7 +1228,8 @@ const SITE_URL = 'lipstickbycolor.github.io';
 // wsrv.nl covers most hosts; Sephora blocks it, but i0.wp.com (Jetpack's image
 // CDN) can fetch Sephora. It takes a bare host+path, without the source query.
 function corsProxies(url) {
-  const proxies = ['https://wsrv.nl/?url=' + encodeURIComponent(url) + '&output=jpg'];
+  // bg=white: a transparent PNG would otherwise come back on black
+  const proxies = ['https://wsrv.nl/?url=' + encodeURIComponent(url) + '&output=jpg&bg=white'];
   try {
     const u = new URL(url);
     proxies.push('https://i0.wp.com/' + u.host + u.pathname);
@@ -1264,208 +1265,122 @@ function loadWishlistImages(wishlist) {
   return Promise.all(wishlist.map(p => loadCorsImage(getProductImage(p))));
 }
 
-// Draws a clean 4:5 portrait card (1080×1350) of the user's wishlist to a
-// canvas, then lets them preview, download, or copy it to clipboard.
+// The site's lips (same shape as favicon.svg and the share cards), drawn on the
+// shortlist card. Its box runs x 1..99, y 3..68.
+const SHARE_LIP = typeof Path2D !== 'undefined' ? new Path2D('M1 34C8 20 20 3 34 3C42 3 46 9 50 12C54 9 58 3 66 3C80 3 92 20 99 34C82 33 66 30 50 32C34 30 18 33 1 34Z M2 37C18 38 34 37 50 38C66 37 82 38 98 37C90 56 72 68 50 68C28 68 10 56 2 37Z') : null;
+const SHARE_LIP_RATIO = 65 / 98;
+
+// Draws a 4:5 portrait card (1080×1350) of the user's wishlist to a canvas,
+// then lets them preview, download, or copy it to clipboard. Dark background,
+// a row of lips in the list's own shades, and one tile per shade: its photo
+// over a band of its color with the name and brand.
 // `images` is the aligned array from loadWishlistImages (optional).
 function drawShareImage(canvas, wishlist, images) {
-  const W = 1080, H = 1350;
+  const W = 1080, H = 1350, M = 40;
+  const INK = '#2A1A14', CREAM = '#FBF7F2';
   canvas.width = W; canvas.height = H;
   const ctx = canvas.getContext('2d');
+  const n = wishlist.length;
 
-  // Background — cream with subtle vertical wash
-  const bgGrad = ctx.createLinearGradient(0, 0, 0, H);
-  bgGrad.addColorStop(0, '#FBF7F2');
-  bgGrad.addColorStop(1, '#F4ECE2');
-  ctx.fillStyle = bgGrad;
+  function lip(x, y, w, color, alpha = 1) {
+    const s = w / 98;
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.translate(x - s, y - 3 * s);
+    ctx.scale(s, s);
+    ctx.fillStyle = color;
+    ctx.fill(SHARE_LIP);
+    ctx.restore();
+  }
+  const onColor = hex => luminance(hex) > 0.62 ? INK : '#FFFFFF';
+  // Largest font size (down to min) at which the text fits, then clipped with …
+  function fit(text, maxW, font, size, min) {
+    while (size > min) { ctx.font = font(size); if (ctx.measureText(text).width <= maxW) break; size -= 1; }
+    ctx.font = font(size);
+    return clipToWidth(ctx, text, maxW);
+  }
+
+  ctx.fillStyle = INK;
   ctx.fillRect(0, 0, W, H);
 
-  // Very soft noise dots for paper feel
-  ctx.save();
-  ctx.globalAlpha = 0.04;
-  for (let i = 0; i < 1400; i++) {
-    ctx.fillStyle = Math.random() > 0.5 ? '#2A1A14' : '#FAF6F1';
-    const x = Math.random() * W, y = Math.random() * H;
-    ctx.fillRect(x, y, 1, 1);
+  // Row of lips across the top, cycling through the list's shades
+  const lipW = 54, lipCount = 12, lipStep = (W - 2 * M) / lipCount;
+  for (let i = 0; i < lipCount; i++) {
+    lip(M + i * lipStep + (lipStep - lipW) / 2, 34, lipW, wishlist[i % n].hex);
   }
-  ctx.restore();
 
-  // Top border accent line
-  ctx.strokeStyle = '#E0D0C4';
-  ctx.lineWidth = 1;
-  ctx.beginPath();
-  ctx.moveTo(80, 140); ctx.lineTo(W - 80, 140);
-  ctx.stroke();
-
-  // Header eyebrow (manually letterspaced)
-  ctx.fillStyle = '#8C6858';
-  ctx.font = '500 18px "DM Sans", sans-serif';
+  // Title + count/date
   ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  const eyebrow = 'L I P  ·  C O L O R  ·  F I N D E R';
-  ctx.fillText(eyebrow, W / 2, 105);
+  ctx.textBaseline = 'alphabetic';
+  ctx.fillStyle = CREAM;
+  ctx.font = '400 italic 80px "Cormorant Garamond", serif';
+  ctx.fillText('my lipstick shortlist', W / 2, 160);
+  ctx.fillStyle = '#C9B3A6';
+  ctx.font = '500 22px "DM Sans", sans-serif';
+  const subtitle = `${n} ${n === 1 ? 'shade' : 'shades'}  ·  ${new Date().toLocaleDateString('en-US', { month:'long', day:'numeric', year:'numeric' })}`;
+  ctx.fillText(subtitle, W / 2, 200);
 
-  // Title — Cormorant Garamond italic, one line, shrunk to fit the card width
-  ctx.fillStyle = '#2A1A14';
-  const titleText = 'my lipstick shortlist';
-  const titleMaxW = W - 180;
-  let titleSize = 86;
-  do {
-    ctx.font = `400 italic ${titleSize}px "Cormorant Garamond", serif`;
-    if (ctx.measureText(titleText).width <= titleMaxW) break;
-    titleSize -= 2;
-  } while (titleSize > 44);
-  ctx.fillText(titleText, W / 2, 235);
+  // ── Tiles ────────────────────────────────────────────────────────────────
+  const gTop = 236, gBot = H - 116;
+  const cols = n <= 1 ? 1 : n <= 4 ? 2 : n <= 9 ? 3 : n <= 16 ? 4 : Math.ceil(Math.sqrt(n));
+  const rows = Math.ceil(n / cols);
+  const gap = cols >= 4 ? 12 : 18;
+  const cw = (W - 2 * M - gap * (cols - 1)) / cols;
+  // Tiles stop at 1.3× as tall as wide so photos aren't cropped to strips;
+  // a short grid sits in the middle of the space.
+  const ch = Math.min(cw * 1.3, (gBot - gTop - gap * (rows - 1)) / rows);
+  const gY = gTop + (gBot - gTop - rows * ch - gap * (rows - 1)) / 2;
+  const sc = Math.min(1.25, Math.max(0.6, cw / 400));
+  const band = Math.min(ch * 0.45, Math.max(86, 100 * sc));
 
-  // Date / count subtitle
-  ctx.fillStyle = '#8C6858';
-  ctx.font = '400 20px "DM Sans", sans-serif';
-  const subtitle = `${wishlist.length} ${wishlist.length === 1 ? 'shade' : 'shades'}  ·  ${new Date().toLocaleDateString('en-US', { month:'long', day:'numeric', year:'numeric' })}`;
-  ctx.fillText(subtitle, W / 2, 300);
-
-  // ── Shade list ───────────────────────────────────────────────────────────
-  const LIST_TOP = 360;
-  const LIST_BOTTOM = H - 150;
-  const LIST_LEFT = 110;
-  const LIST_RIGHT = W - 110;
-  const listW = LIST_RIGHT - LIST_LEFT;
-  const listSpan = LIST_BOTTOM - LIST_TOP;
-
-  // Layout: single column up to 8 items, two columns otherwise
-  const twoCol = wishlist.length > 8;
-  const cols = twoCol ? 2 : 1;
-  const rows = Math.ceil(wishlist.length / cols);
-  const colW = listW / cols;
-  // Let rows grow to fill the card when the list is short (keeps the blank gap
-  // above the footer small), capped so a 1–2 item list doesn't look enormous.
-  // Two-column lists are already near-full, so they barely grow — and their
-  // narrow columns can't take much bigger type without clipping brand names.
-  const rowHMax = twoCol ? 150 : 200;
-  const rowH = Math.min(rowHMax, listSpan / Math.max(rows, 1));
-  // Scale swatch, photo and type off the final row height (1 = the old 120px row).
-  const k = Math.max(1, Math.min(twoCol ? 1.06 : 1.45, rowH / 120));
-  const swatchR = Math.min(twoCol ? 38 : 48, rowH * 0.30);
-  // Product photo sits between the shade circle and the text. Reserve the slot
-  // whenever any shade *has* a photo (not just the ones that loaded in time),
-  // so text stays put if a slow image fills in on a later redraw.
-  const anyImg = wishlist.some(p => getProductImage(p));
-  const photoS = anyImg ? swatchR * 2 : 0;
-  const photoGap = anyImg ? 18 : 0;
-  // Anchor the list near the top of the available span with only a small top
-  // inset, so any leftover slack on a short list pools above the footer instead
-  // of opening a gap between the header and the first row.
-  const listY = LIST_TOP + Math.min(40, Math.max(0, listSpan - rows * rowH) * 0.25);
-
-  ctx.textBaseline = 'middle';
-  for (let i = 0; i < wishlist.length; i++) {
+  for (let i = 0; i < n; i++) {
     const p = wishlist[i];
-    const col = twoCol ? i % 2 : 0;
-    const row = twoCol ? Math.floor(i / 2) : i;
-    const cx = LIST_LEFT + col * colW + 16;
-    const cy = listY + row * rowH + rowH / 2;
-
-    // Color swatch — circle with soft shadow
+    const row = Math.floor(i / cols), inRow = Math.min(cols, n - row * cols);
+    const x = M + (cols - inRow) * (cw + gap) / 2 + (i % cols) * (cw + gap);
+    const y = gY + row * (ch + gap);
+    const photoH = ch - band;
     ctx.save();
-    ctx.shadowColor = p.hex + '88';
-    ctx.shadowBlur = 14;
-    ctx.shadowOffsetY = 4;
+    ctx.beginPath(); ctx.roundRect(x, y, cw, ch, 18); ctx.clip();
     ctx.fillStyle = p.hex;
-    ctx.beginPath();
-    ctx.arc(cx + swatchR, cy, swatchR, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.restore();
-    // Subtle outer ring
-    ctx.strokeStyle = 'rgba(42,26,20,0.10)';
-    ctx.lineWidth = 1.5;
-    ctx.beginPath();
-    ctx.arc(cx + swatchR, cy, swatchR, 0, Math.PI * 2);
-    ctx.stroke();
-
-    // Product photo — rounded square, tinted with the shade underneath
-    const photoImg = images && images[i];
-    if (photoImg) {
-      const px = cx + swatchR * 2 + photoGap;
-      const py = cy - photoS / 2;
+    ctx.fillRect(x, y, cw, ch);
+    const img = images && images[i];
+    if (img) {
+      // Cover the photo area, on white so transparent photos keep a plain
+      // background instead of showing the shade color through
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(x, y, cw, photoH);
+      const s = Math.max(cw / img.naturalWidth, photoH / img.naturalHeight);
+      const dw = img.naturalWidth * s, dh = img.naturalHeight * s;
+      // Pinned to the top, so a tall photo loses its bottom rather than the
+      // bullet or pencil tip; clipped so the cut edge doesn't spill over the band
       ctx.save();
-      ctx.beginPath();
-      ctx.roundRect(px, py, photoS, photoS, 10);
-      ctx.clip();
-      ctx.fillStyle = p.hex;
-      ctx.fillRect(px, py, photoS, photoS);
-      const s = Math.max(photoS / photoImg.naturalWidth, photoS / photoImg.naturalHeight) * 1.12;
-      const dw = photoImg.naturalWidth * s, dh = photoImg.naturalHeight * s;
-      ctx.drawImage(photoImg, px + (photoS - dw) / 2, cy - dh / 2, dw, dh);
+      ctx.beginPath(); ctx.rect(x, y, cw, photoH); ctx.clip();
+      ctx.drawImage(img, x + (cw - dw) / 2, y, dw, dh);
       ctx.restore();
-      ctx.strokeStyle = 'rgba(42,26,20,0.10)';
-      ctx.lineWidth = 1.5;
-      ctx.beginPath();
-      ctx.roundRect(px, py, photoS, photoS, 10);
-      ctx.stroke();
+    } else {
+      // No photo: a faded lip on the shade's color
+      const lw = Math.min(cw * 0.5, photoH * 0.8 / SHARE_LIP_RATIO);
+      lip(x + (cw - lw) / 2, y + (photoH - lw * SHARE_LIP_RATIO) / 2, lw, onColor(p.hex), 0.3);
     }
-
-    // Text block
-    const tx = cx + swatchR * 2 + photoGap + photoS + 22;
-    const textMaxW = colW - swatchR * 2 - photoGap - photoS - 50;
-
-    // Brand
-    ctx.fillStyle = '#2A1A14';
+    const fg = onColor(p.hex);
+    const tx = x + 18 * sc, tw = cw - 36 * sc;
     ctx.textAlign = 'left';
-    ctx.font = `500 ${Math.round((twoCol ? 17 : 23) * k)}px "DM Sans", sans-serif`;
-    ctx.fillText(clipToWidth(ctx, p.brand, textMaxW), tx, cy - (twoCol ? 16 : 22) * k);
-
-    // Shade — italic serif
-    ctx.fillStyle = '#5C3D30';
-    ctx.font = `400 italic ${Math.round((twoCol ? 21 : 29) * k)}px "Cormorant Garamond", serif`;
-    ctx.fillText(clipToWidth(ctx, p.shade, textMaxW), tx, cy + (twoCol ? 7 : 10) * k);
-
-    // Finish + hex meta
-    ctx.fillStyle = '#A08878';
-    ctx.font = `400 ${Math.round((twoCol ? 12 : 15) * k)}px "DM Sans", sans-serif`;
-    const meta = `${(p.finish || '').toUpperCase()}  ·  ${p.hex.toUpperCase()}`;
-    ctx.fillText(meta, tx, cy + (twoCol ? 28 : 40) * k);
+    ctx.fillStyle = fg;
+    ctx.fillText(fit(p.shade, tw, s => `500 ${s}px "Cormorant Garamond", serif`, Math.max(26, Math.round(38 * sc)), 18), tx, y + photoH + band * 0.46);
+    ctx.globalAlpha = 0.85;
+    ctx.fillText(fit(p.brand.toUpperCase(), tw, s => `600 ${s}px "DM Sans", sans-serif`, Math.max(15, Math.round(18 * sc)), 12), tx, y + photoH + band * 0.78);
+    ctx.restore();
   }
 
-  // ── Footer ────────────────────────────────────────────────────────────────
-  ctx.strokeStyle = '#E0D0C4';
-  ctx.beginPath();
-  ctx.moveTo(80, H - 118); ctx.lineTo(W - 80, H - 118);
-  ctx.stroke();
-
-  // Credit + site link, centered as one group. Sized for legibility on the card.
-  const fy = H - 74;
-  const creditFont = '500 23px "DM Sans", sans-serif';
-  const urlFont = '600 22px "DM Sans", sans-serif';
-  const iconSlot = 44;
-  ctx.textAlign = 'left';
+  // ── Footer: credit + site link ─────────────────────────────────────────────
+  ctx.textAlign = 'center';
   ctx.textBaseline = 'alphabetic';
-  ctx.font = creditFont;
-  const creditText = 'made with Lipstick Color Finder';
-  const groupW = iconSlot + ctx.measureText(creditText).width;
-  const gx = (W - groupW) / 2;
-
-  // Lipstick icon (1.5× the old bullet), vertically centered on the two lines
-  ctx.save();
-  ctx.translate(gx, fy + 4);
-  ctx.scale(1.5, 1.5);
-  ctx.fillStyle = '#C87890';
-  ctx.beginPath();
-  ctx.moveTo(0, 6);
-  ctx.lineTo(0, -8);
-  ctx.quadraticCurveTo(0, -20, 8, -22);
-  ctx.quadraticCurveTo(16, -20, 16, -8);
-  ctx.lineTo(16, 6);
-  ctx.closePath();
-  ctx.fill();
-  ctx.fillStyle = '#2A1A14';
-  ctx.fillRect(-2, 6, 20, 5);
-  ctx.restore();
-
-  const textX = gx + iconSlot;
-  ctx.fillStyle = '#5C3D30';
-  ctx.font = creditFont;
-  ctx.fillText(creditText, textX, fy);
-  ctx.fillStyle = '#8C6858';
-  ctx.font = urlFont;
-  ctx.fillText(SITE_URL, textX, fy + 30);
+  ctx.fillStyle = CREAM;
+  ctx.font = '500 24px "DM Sans", sans-serif';
+  ctx.fillText('made with Lipstick Color Finder', W / 2, H - 62);
+  ctx.fillStyle = '#E7A9BF';
+  ctx.font = '600 24px "DM Sans", sans-serif';
+  ctx.fillText(SITE_URL, W / 2, H - 30);
 }
 
 // Truncate text with an ellipsis to fit a max width.
