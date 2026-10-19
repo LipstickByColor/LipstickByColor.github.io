@@ -3841,7 +3841,7 @@ function App() {
   // A ?color= link that is exactly a wheel color opens on the wheel with that
   // segment selected (that's how a wheel pick is shared); any other hex opens
   // the custom-color picker
-  const [initialWheelColor] = useState(() => initialLink?.type === 'color'
+  const [initialWheelColor] = useState(() => initialLink?.type === 'color' && PAGE_MODE !== 'hex'
     ? LIPSTICK_DATA.find(c => c.hex.toLowerCase() === initialLink.hex) || null : null);
   // A From Favorites address reopens the tab on the shade it showed, or the last one saved if that is gone
   const [initialFavorite] = useState(() => {
@@ -4034,10 +4034,19 @@ function App() {
     const t = setTimeout(() => setShadeInfo(shadeMatchInfo(draftCol.hex, tweaks.maxDeltaE)), 60);
     return () => clearTimeout(t);
   }, [draftCol.hex, mode, dataReady, tweaks.maxDeltaE]);
+  // The pick goes in the URL as ?color= once the visitor has made one (or opened a link to one), so it
+  // can be shared before results are asked for; written once the dot stops, as browsers limit how often it can change
+  const [chartPicked, setChartPicked] = useState(!!hexHex);
+  const [chartLinkHex, setChartLinkHex] = useState(hexHex);
+  useEffect(() => {
+    if (mode !== 'hex' || !chartPicked) return;
+    const t = setTimeout(() => setChartLinkHex(draftCol.hex), 400);
+    return () => clearTimeout(t);
+  }, [draftCol.hex, mode, chartPicked]);
   // Moving the dot starts over: the results (and their filters) belong to the last color asked for
   // A pick made in the map's close-up is a step: it keeps hexOrigin, the color chosen before zooming, for "Return to"
   function changeHexDraft(next, step) {
-    setHexDraft(next);
+    setHexDraft(next); setChartPicked(true);
     if (step !== true) setHexOrigin(next);
     if (hexHex) { setHexHex(null); setFilterParams([]); }
   }
@@ -4050,7 +4059,7 @@ function App() {
   function exploreOnChart(hex) {
     const d = draftFromLab(hexToLab(hex)), c = draftColor(d);
     switchMode('hex', 'favorites_explore');
-    setHexDraft(d); setHexOrigin(d); setShadeZoom({ a: c.a, b: c.b });
+    setHexDraft(d); setHexOrigin(d); setShadeZoom({ a: c.a, b: c.b }); setChartPicked(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
   const jumpToNearestShade = () => { if (shadeInfo?.nearest) { trackExplore('jump_nearest'); changeHexDraft(draftFromLab(shadeInfo.nearest.lab)); } };
@@ -4102,6 +4111,7 @@ function App() {
     else if (mode === 'dupe' && !dataReady && initialLink?.type === 'dupe') { q.set('brand', initialLink.brand); q.set('dupe', initialLink.shade); }
     else if (mode === 'list') { q.set('mode', 'favorites'); if (selectedColor?.item) q.set('pick', selectedColor.sourceKey); }
     else if (mode !== 'dupe' && effectiveColor) q.set('color', effectiveColor.hex.slice(1).toLowerCase());
+    else if (mode === 'hex' && chartPicked && chartLinkHex) q.set('color', chartLinkHex.slice(1).toLowerCase());
     if (q.has('color') || q.has('dupe') || q.has('pick')) filterParams.forEach(([k, v]) => q.append(k, v));
     const search = q.toString() ? `?${q}` : '';
     const path = MODE_PAGES[mode]?.path || '/';
@@ -4118,7 +4128,7 @@ function App() {
     else if (backNav.leaving || backNav.skip) backNav.afterLeave = push; // a panel closed by the same click goes first
     else push();
     document.title = MODE_PAGES[mode]?.title || HOME_TITLE;
-  }, [sharedListKeys, mode, dupeProduct, effectiveColor?.hex, selectedColor?.sourceKey, dataReady, filterParams]);
+  }, [sharedListKeys, mode, dupeProduct, effectiveColor?.hex, selectedColor?.sourceKey, dataReady, filterParams, chartPicked, chartLinkHex]);
 
   // Back or Forward onto another tool's entry: show that tool, nothing picked
   const [firstMode] = useState(mode);
