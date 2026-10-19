@@ -63,7 +63,10 @@ function gtag(){dataLayer.push(arguments);}
     ad_storage: 'denied', ad_user_data: 'denied', ad_personalization: 'denied',
   });
   gtag('js', new Date());
-  gtag('config', GA_ID);
+  // The page view carries the address the visitor arrived on: the finder rewrites the URL to mirror what's
+  // on screen, which drops utm_ tags (e.g. from Pinterest pins) before GA loads, or before an EU visitor accepts
+  gtag('config', GA_ID, { send_page_view: false });
+  gtag('event', 'page_view', { page_location: location.href });
   if (state() === 'granted') loadAnalytics();
 
   // state() is 'granted' | 'denied'; chosen() is false until the visitor has picked one
