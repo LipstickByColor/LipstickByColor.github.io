@@ -3130,20 +3130,38 @@ const normSearch = s => (s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLow
 // shouldn't match "lip color | bare it all").
 const normShade = s => (s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
 // Fewest typing slips (wrong, missing, extra or swapped letter) to turn `q`
-// into the start of `key`, so "jefr" is 1 away from "jeffreestar".
-function prefixDistance(q, key) {
-  let prev2 = null, prev = Array.from({ length: key.length + 1 }, (_, j) => j);
+// into the start of `key`, so "jefr" is 1 away from "jeffreestar"; with
+// `whole`, into all of `key`. Gives up (Infinity) once it's past `max`, so
+// scanning every shade stays quick.
+function typoDistance(q, key, whole = false, max = Infinity) {
+  if (whole && Math.abs(q.length - key.length) > max) return Infinity;
+  // A start of `key` longer than this is already more than `max` away
+  const n = whole ? key.length : Math.min(key.length, q.length + max);
+  let prev2 = null, prev = Array.from({ length: n + 1 }, (_, j) => j);
   for (let i = 1; i <= q.length; i++) {
     const row = [i];
-    for (let j = 1; j <= key.length; j++) {
+    let low = i;
+    for (let j = 1; j <= n; j++) {
       let d = Math.min(prev[j] + 1, row[j - 1] + 1, prev[j - 1] + (q[i - 1] === key[j - 1] ? 0 : 1));
       if (prev2 && j > 1 && q[i - 1] === key[j - 2] && q[i - 2] === key[j - 1]) d = Math.min(d, prev2[j - 2] + 1);
       row.push(d);
+      if (d < low) low = d;
     }
+    if (low > max) return Infinity;
     prev2 = prev; prev = row;
   }
-  return Math.min(...prev);
+  return whole ? prev[n] : Math.min(...prev);
 }
+// Slips allowed in a search that matches nothing as typed: none under 4
+// letters, one ("rimmell", "naes"), or two from 6 letters ("limectim").
+const typoLimit = q => q.length < 4 ? -1 : q.length >= 6 ? 2 : 1;
+// How close `q` comes to a name, given the name from each word on ("tilbury"
+// for "charlotte tilbury"); a match from a later word ranks after the start.
+const typoScore = (q, tails, max) => Math.min(...tails.map((t, i) => typoDistance(q, t, false, max) + (i ? 0.5 : 0)));
+const wordTails = s => {
+  const words = s.split(/\s+/);
+  return words.map((_, i) => normSearch(words.slice(i).join(' '))).filter(Boolean);
+};
 
 // Quick-start options shown under the dupe search for anyone who
 // doesn't have a specific lipstick in mind yet.
@@ -3181,16 +3199,24 @@ function DupeFinder({ product, onSelect, onUsePhoto }) {
   // Brand search ignores case, accents, spaces and punctuation, so "smash box",
   // "loreal" and "elf" still find their brands.
   const brandKeys = React.useMemo(() => brands.map(b => {
-    const words = b.split(/\s+/);
-    const first = normSearch(words[0]);
-    // The name from each word on ("tilbury"), for typo matching
-    const tails = words.map((_, i) => normSearch(words.slice(i).join(' '))).filter(Boolean);
-    return { b, key: normSearch(b), first: first.length >= 3 ? first : null, tails };
+    const first = normSearch(b.split(' ')[0]);
+    return { b, key: normSearch(b), first: first.length >= 3 ? first : null, tails: wordTails(b) };
   }), [brands]);
   const shadeIndex = React.useMemo(
-    () => REAL_PRODUCTS.map(p => ({ p, key: normShade(p.shade) })),
+    () => REAL_PRODUCTS.map(p => ({ p, key: normShade(p.shade), tails: wordTails(normShade(p.shade)) })),
     []
   );
+  // Shades `q` is a typo or two away from, closest first
+  const nearShades = (q, items) => {
+    const max = typoLimit(q), near = [];
+    if (max < 0) return near;
+    for (const { p, tails } of items) {
+      const d = typoScore(q, tails, max);
+      if (d <= max) near.push({ p, d });
+    }
+    return near.sort((x, y) => x.d - y.d || x.p.shade.localeCompare(y.p.shade) || x.p.brand.localeCompare(y.p.brand))
+      .slice(0, 40).map(x => x.p);
+  };
 
   const brandMatches = React.useMemo(() => {
     const q = normSearch(brandQuery);
@@ -3201,13 +3227,11 @@ function DupeFinder({ product, onSelect, onUsePhoto }) {
       else if (key.includes(q)) incl.push(b);
     }
     if (starts.length || incl.length || q.length < 4) return [...starts, ...incl].slice(0, 12);
-    // Nothing matches as typed: allow one slip ("rimmell", "naes"), or two
-    // from 6 letters ("limectim", "romans"). Closest first, then bigger brands;
-    // a match from a later word ("tilbery") ranks after one from the start.
-    const max = q.length >= 6 ? 2 : 1;
+    // Nothing matches as typed: list brands a typo or two away, then bigger brands first
+    const max = typoLimit(q);
     const near = [];
     for (const { b, tails } of brandKeys) {
-      const d = Math.min(...tails.map((t, i) => prefixDistance(q, t) + (i ? 0.5 : 0)));
+      const d = typoScore(q, tails, max);
       if (d <= max) near.push({ b, d });
     }
     return near.sort((x, y) => x.d - y.d || brandCounts[y.b] - brandCounts[x.b]).slice(0, 5).map(x => x.b);
@@ -3216,16 +3240,32 @@ function DupeFinder({ product, onSelect, onUsePhoto }) {
   // Shades offered from the brand box: "mac ruby woo" (a brand, or its first
   // word, then a shade) lists that brand's shades; a shade name on its own
   // ("pillow talk") lists that shade across brands. Either skips step 2.
+  // When neither matches as typed and no brand does either, typos are allowed
+  // in both parts ("nars gols", "rimmel's 136 balistic").
   const quickShades = React.useMemo(() => {
     const words = brandQuery.trim().toLowerCase().split(/\s+/).filter(Boolean);
-    for (let k = words.length - 1; k >= 1; k--) {
-      const head = normSearch(words.slice(0, k).join(' '));
-      const rest = normShade(words.slice(k).join(' '));
-      const hit = new Set(brandKeys.filter(x => x.key === head || x.first === head).map(x => x.b));
-      if (!hit.size || !rest) continue;
-      const list = shadeIndex.filter(x => hit.has(x.p.brand) && x.key.includes(rest)).map(x => x.p);
-      if (list.length) return { route: 'brand_shade', list: list.sort((a, b) => a.shade.localeCompare(b.shade)).slice(0, 40) };
-    }
+    const brandShade = typos => {
+      for (let k = words.length - 1; k >= 1; k--) {
+        const head = normSearch(words.slice(0, k).join(' '));
+        const rest = normShade(words.slice(k).join(' '));
+        if (!rest) continue;
+        const hit = new Set(brandKeys.filter(x => x.key === head || x.first === head).map(x => x.b));
+        if (typos && !hit.size) {
+          const max = typoLimit(head);
+          for (const x of brandKeys) {
+            if (typoDistance(head, x.key, true, max) <= max || (x.first && typoDistance(head, x.first, true, max) <= max)) hit.add(x.b);
+          }
+        }
+        if (!hit.size) continue;
+        const items = shadeIndex.filter(x => hit.has(x.p.brand));
+        let list = items.filter(x => x.key.includes(rest)).map(x => x.p).sort((a, b) => a.shade.localeCompare(b.shade)).slice(0, 40);
+        if (typos && !list.length) list = nearShades(normSearch(rest), items);
+        if (list.length) return { route: 'brand_shade', list };
+      }
+      return null;
+    };
+    const exact = brandShade(false);
+    if (exact) return exact;
     const q = normShade(brandQuery);
     if (q.length < 3) return null;
     const starts = [], incl = [];
@@ -3235,8 +3275,13 @@ function DupeFinder({ product, onSelect, onUsePhoto }) {
     }
     const byShade = (a, b) => a.shade.localeCompare(b.shade) || a.brand.localeCompare(b.brand);
     const list = [...starts.sort(byShade), ...incl.sort(byShade)].slice(0, 40);
-    return list.length ? { route: 'shade', list } : null;
-  }, [brandQuery, brandKeys, shadeIndex]);
+    if (list.length) return { route: 'shade', list };
+    if (brandMatches.length) return null;
+    const near = brandShade(true);
+    if (near) return near;
+    const nearList = nearShades(normSearch(brandQuery), shadeIndex);
+    return nearList.length ? { route: 'shade', list: nearList } : null;
+  }, [brandQuery, brandKeys, shadeIndex, brandMatches]);
 
   const shadeMatches = React.useMemo(() => {
     if (!brand) return [];
@@ -3244,8 +3289,10 @@ function DupeFinder({ product, onSelect, onUsePhoto }) {
     const q = shadeQuery.trim().toLowerCase();
     const list = REAL_PRODUCTS.filter(p => p.brand === brand && (!q ||
       p.shade.toLowerCase().includes(q) || (p.product || '').toLowerCase().includes(q)));
-    return list.sort((a, b) => a.shade.localeCompare(b.shade));
-  }, [brand, shadeQuery]);
+    if (list.length || !q) return list.sort((a, b) => a.shade.localeCompare(b.shade));
+    // Nothing matches as typed: shades of the brand a typo or two away
+    return nearShades(normSearch(q), shadeIndex.filter(x => x.p.brand === brand));
+  }, [brand, shadeQuery, shadeIndex]);
 
   function pickBrand(b) {
     window.gtag?.('event', 'dupe_brand_select', { brand: b });
