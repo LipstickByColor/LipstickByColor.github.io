@@ -314,14 +314,16 @@
   // Two queries per search: one boxed to roughly-red Lab values so reds aren't
   // crowded out of a big brand's rows, one unboxed so near-misses still show up
   // (greyed out, with the reason). redCheck() makes the real call on each row.
-  async function fetchRows(toks, redBox) {
+  // With `brands`, only those brands' rows, and `toks` are the other words.
+  async function fetchRows(toks, redBox, brands) {
     const pattern = t => t.replace(/[aceinou]/g, c => ACCENTS[c]);
     const params = new URLSearchParams({
       select: 'id,brand,product,shade,lab_l,lab_a,lab_b,hex,price_tier',
-      and: '(' + toks.map(pattern).map(t => `or(brand.imatch."${t}",product.imatch."${t}",shade.imatch."${t}")`).join(',') + ')',
       order: 'brand,shade,id',
       limit: redBox ? 300 : 60,
     });
+    if (toks.length) params.set('and', '(' + toks.map(pattern).map(t => `or(brand.imatch."${t}",product.imatch."${t}",shade.imatch."${t}")`).join(',') + ')');
+    if (brands) params.set('brand', 'in.(' + brands.map(b => `"${b.replace(/["\\]/g, '\\$&')}"`).join(',') + ')');
     if (redBox) { params.append('lab_l', 'gte.20'); params.append('lab_l', 'lte.55'); params.append('lab_a', 'gte.33'); params.append('lab_b', 'gte.13'); }
     const res = await fetch(`${SUPABASE_URL}/rest/v1/lipstic-data-update-oct26?${params}`, {
       headers: { apikey: SUPABASE_KEY, Authorization: 'Bearer ' + SUPABASE_KEY },
@@ -330,11 +332,41 @@
     return res.json();
   }
 
-  function showResults(rows, down, toks) {
+  // Brand names (search-utils.js has the other names), fetched on the first search
+  let brandList = null;
+  const loadBrands = () => brandList ||= fetch('/brands.json').then(r => r.json()).then(list => list.map(b => {
+    const first = normSearch(b.split(' ')[0]);
+    return { b, names: [normSearch(b), first.length >= 3 ? first : null, ...brandAliases(b)].filter(Boolean) };
+  })).catch(() => { brandList = null; return []; });
+
+  // For a search that finds nothing as typed: ways to read it as a brand its
+  // first or last words name another way ("ysl", "loreal", "kat von d"), then
+  // with a typo or two ("naybelline"), plus the words left over for the shade.
+  // The whole search can also be the start of a brand's name ("kat von").
+  function* readBrand(toks, brands) {
+    const n = toks.length;
+    for (const typos of [false, true]) {
+      for (let k = n; k >= 1; k--) {
+        for (const brandLast of k < n ? [false, true] : [false]) {
+          const head = normSearch((brandLast ? toks.slice(n - k) : toks.slice(0, k)).join(''));
+          const max = typos ? typoLimit(head) : 0;
+          if (max < 0 || head.length < 2) continue;
+          const whole = !(k === n && head.length >= 3);
+          const hit = brands.filter(x => x.names.some(nm => typoDistance(head, nm, whole, max) <= max)).map(x => x.b);
+          if (hit.length) yield { brands: hit.slice(0, 10), rest: brandLast ? toks.slice(0, n - k) : toks.slice(k) };
+        }
+      }
+    }
+  }
+
+  const search = (toks, brands) => Promise.all([fetchRows(toks, true, brands), fetchRows(toks, false, brands)]).then(r => r.flat());
+
+  // `rankToks` are the words left once a brand was read from the search
+  function showResults(rows, down, toks, rankToks = toks) {
     resultsEl.querySelectorAll('li:not([data-if])').forEach(li => li.remove());
     const seen = new Set();
     const items = rows.filter(r => r.hex && !seen.has(r.id) && seen.add(r.id))
-      .map(r => ({ r, rc: redCheck(r.lab_l, r.lab_a, r.lab_b), score: rank(r, toks) }))
+      .map(r => ({ r, rc: redCheck(r.lab_l, r.lab_a, r.lab_b), score: rank(r, rankToks) }))
       .sort((x, y) => y.score - x.score || y.rc.ok - x.rc.ok)
       .slice(0, SHOWN);
     const first = resultsEl.firstElementChild;
@@ -366,11 +398,22 @@
     clearTimeout(searchTimer);
     setIf('hasQ', qInput.value.length > 0);
     if (q.length < 2 || !toks.length) { setIf('showResults', false); setText('searchStatus', ''); return; }
+    loadBrands();
     searchTimer = setTimeout(async () => {
-      let rows = [], down = false;
-      try { rows = (await Promise.all([fetchRows(toks, true), fetchRows(toks, false)])).flat(); }
+      let rows = [], down = false, rankToks = toks;
+      try {
+        rows = await search(toks);
+        // "kay von" reads first as Kay Beauty, which has no "von", so a few readings are tried
+        if (!rows.length) {
+          let tries = 0;
+          for (const read of readBrand(toks, await loadBrands())) {
+            rows = await search(read.rest, read.brands); rankToks = read.rest;
+            if (rows.length || ++tries === 3) break;
+          }
+        }
+      }
       catch (err) { down = true; }
-      if (seq === searchSeq) showResults(rows, down, toks); // drop answers to an older query
+      if (seq === searchSeq) showResults(rows, down, toks, rankToks); // drop answers to an older query
     }, 250);
   }
   qInput.addEventListener('input', onQuery);

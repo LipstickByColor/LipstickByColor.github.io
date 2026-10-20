@@ -18,6 +18,7 @@ const vm = require('vm');
 const ROOT = __dirname;
 const NUMBERS = path.join(ROOT, 'site-numbers.json');
 const LOCK = path.join(ROOT, 'site-numbers.lock.json');
+const BRANDS = path.join(ROOT, 'brands.json');
 
 // Hand-written sources plus the generated pages (so they stay right between rebuilds)
 // Not here: guides/red-lipstick/index.html. Its figures (17,141 lipsticks, 2,668 reds) are the
@@ -53,7 +54,8 @@ function forms(n) {
   return { exact: fmt(n), round, plus: `${fmt(plusFloor)}+` };
 }
 
-// Count products, reds (the red guide's rule, redKind in lipstick-utils.js) and brand names from the live catalogue
+// Count products, reds (the red guide's rule, redKind in lipstick-utils.js) and brand names from the live catalogue,
+// and list the brand names
 async function fetchNumbers() {
   const src = fs.readFileSync(path.join(ROOT, 'supabase-data.js'), 'utf8');
   const url = src.match(/_SUPABASE_URL = '([^']+)'/)[1], key = src.match(/_SUPABASE_KEY = '([^']+)'/)[1];
@@ -70,15 +72,19 @@ async function fetchNumbers() {
     page.forEach(r => r.brand && brands.add(r.brand));
     if (page.length < 1000) break;
   }
-  return { products, reds, brands: brands.size };
+  return { numbers: { products, reds, brands: brands.size }, brandNames: [...brands].sort() };
 }
 
 (async () => {
   const numbers = JSON.parse(fs.readFileSync(NUMBERS, 'utf8'));
   if (process.argv.includes('--fetch')) {
-    Object.assign(numbers, await fetchNumbers());
+    const fetched = await fetchNumbers();
+    Object.assign(numbers, fetched.numbers);
     fs.writeFileSync(NUMBERS, JSON.stringify(numbers, null, 2) + '\n');
     console.log('site-numbers.json updated from the catalogue:', JSON.stringify(numbers));
+    // The red guide's search corrects brand typos against this list
+    fs.writeFileSync(BRANDS, JSON.stringify(fetched.brandNames) + '\n');
+    console.log(`brands.json updated: ${fetched.brandNames.length} brands`);
   }
   const lock = JSON.parse(fs.readFileSync(LOCK, 'utf8'));
 
