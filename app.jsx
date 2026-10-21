@@ -3924,7 +3924,7 @@ function App() {
   React.useEffect(() => {
     if (mode !== 'photo') return;
     if (photoHex) {
-      setSelectedColor({ id:'__photo__', name:'Upload photo', hex: photoHex });
+      setSelectedColor({ id:'__photo__', name:'Your photo', hex: photoHex });
       window.gtag?.('event', 'select_color', { method: 'photo', hex: photoHex });
     } else {
       setSelectedColor(null);

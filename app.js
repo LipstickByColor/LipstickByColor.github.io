@@ -7303,7 +7303,7 @@ function App() {
     if (photoHex) {
       setSelectedColor({
         id: '__photo__',
-        name: 'Upload photo',
+        name: 'Your photo',
         hex: photoHex
       });
       window.gtag?.('event', 'select_color', {
