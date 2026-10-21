@@ -2616,7 +2616,7 @@ const MODE_PAGES = {
     title: 'Lipstick Color Chart: Nearly 17,000 Lipsticks by Color'
   }
 };
-const HOME_TITLE = 'Lipstick Dupe & Color Finder: Find Any Lipstick by Color';
+const HOME_TITLE = 'Lipstick Color Finder: Any Lipstick or Dupe by Color';
 const PAGE_MODE = Object.keys(MODE_PAGES).find(m => window.location.pathname.startsWith(MODE_PAGES[m].path)) || null;
 function parseSharedLink(search) {
   const q = new URLSearchParams(search);

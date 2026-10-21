@@ -6,7 +6,7 @@ const fs = require('fs');
 const path = require('path');
 
 const SITE = 'https://lipstickbycolor.github.io';
-const HOME_TITLE = 'Lipstick Dupe & Color Finder: Find Any Lipstick by Color';
+const HOME_TITLE = 'Lipstick Color Finder: Any Lipstick or Dupe by Color';
 const esc = s => s.replace(/&/g, '&amp;').replace(/"/g, '&quot;');
 
 // The wheel's colors as small cards (swatch, name, lipstick count, hex), grouped by family
