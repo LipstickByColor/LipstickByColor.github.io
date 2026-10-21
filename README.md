@@ -33,7 +33,13 @@ The ML pipeline behind the color clustering and product data is described in the
 
 **Lighter and deeper options could lead nowhere.** Each shade offers lighter and deeper versions to explore, but for some very light or very deep colors, no lipstick came close. Picking one of those showed poor matches. These options are now grayed out, so every option you can pick leads to real matches.
 
-**The dupe finder search missed lipsticks it had.** Google Analytics logs every search in the dupe finder that finds nothing. Over the last three months there were about 150 of these, and many were for lipsticks the site already had. People type the way they talk about makeup, not the way the catalogue spells it. "ysl" and "kat von d" found nothing because those brands are listed as Yves Saint Laurent and KVD Beauty. "smash box" missed Smashbox because of the space. Small typos like "rimmell" or "colourpip" came up empty, and so did searches that put the brand after the shade, like "black cherry revlon". The search now knows brands' other names, ignores spacing, forgives small typos and finds a brand wherever it appears in the search, so all of these now find the right lipstick. The red lipstick guide's search works the same way.
+**Making lipstick search more forgiving.** Google Analytics showed that the dupe finder returned no results for 95 of about 262 searches over five days in mid-October. Most of these weren't because we lacked the brand: 62 searches were for brands already in the catalogue, while only 18 were for brands we don't carry.
+
+The problem was how people searched. They used familiar names, added spaces, made small typos, or entered the shade before the brand. For example, "ysl" didn't match Yves Saint Laurent, "kat von d" missed KVD Beauty, and "smash box" didn't match Smashbox. Even small typos like "rimmell" and "colourpip" returned nothing. A search like "black cherry revlon" also failed because the brand appeared after the shade.
+
+In 34 failed searches, people left without selecting a brand or shade. That suggested the search was getting in the way of finding a lipstick, even when the right products were available.
+
+I updated the search to recognize brand aliases, ignore spacing differences, tolerate small typos, and find brands anywhere in the query. All of these examples now return the correct lipstick results. You can also include a shade name in the brand search bar to narrow down your options. The red lipstick guide uses the same search logic.
 
 ---
 
