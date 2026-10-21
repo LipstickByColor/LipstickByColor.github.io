@@ -39,7 +39,7 @@ The problem was how people searched. They used familiar names, added spaces, mad
 
 In 34 failed searches, people left without selecting a brand or shade. That suggested the search was getting in the way of finding a lipstick, even when the right products were available.
 
-I updated the search to recognize brand aliases, ignore spacing differences, tolerate small typos, and find brands anywhere in the query. All of these examples now return the correct lipstick results. You can also include a shade name in the brand search bar to narrow down your options. The red lipstick guide uses the same search logic.
+I updated the search to recognize brand aliases, ignore spacing differences, tolerate small typos, and find brands anywhere in the query. All of these examples now return the correct lipstick results. You can also include a shade name in the brand search bar because some users remember the shade name rather than the brand. The red lipstick guide uses the same search logic.
 
 ---
 
