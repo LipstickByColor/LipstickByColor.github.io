@@ -3932,12 +3932,15 @@ function App() {
   }, [photoHex, mode]);
 
   // Same plumbing for the hex-picker mode
+  // A ?color= link sets hexHex on load: ui_source tells those apart from presses of the results button
+  const hexFromLink = React.useRef(!!hexHex);
   React.useEffect(() => {
     if (mode !== 'hex') return;
     if (hexHex) {
       setSelectedColor({ id:'__hex__', name: describeColor(...hexToLab(hexHex)), hex: hexHex });
       // hexHex only changes when results are asked for, so this counts those requests, not map moves (shade_explore)
-      window.gtag?.('event', 'select_color', { method: 'hex', hex: hexHex });
+      window.gtag?.('event', 'select_color', { method: 'hex', hex: hexHex, ui_source: hexFromLink.current ? 'shared_link' : 'button' });
+      hexFromLink.current = false;
     } else {
       setSelectedColor(null);
     }
