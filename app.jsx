@@ -354,15 +354,19 @@ const NO_MATCH_DELTA_E = 6.5;
 // How far from the color a result may be. Normally maxDeltaE past the closest match. The color
 // chart instead uses a fixed distance from the pick, so two picks the eye can't tell apart search
 // the same area and get the same lipsticks; only where the catalogue is thin (nothing that close)
-// does it reach a little past the closest match.
-const CHART_RADIUS = 2.25, CHART_SPARSE = 1;
-function bandCut(best, maxDeltaE, chart) {
-  return chart ? Math.max(CHART_RADIUS, best + CHART_SPARSE) : best + maxDeltaE;
+// does it reach a little past the closest match. Blues and greens are so rare (a few dozen in the
+// catalogue) that a blue or green pick searches a much wider area, so navy also finds blue-black.
+const CHART_RADIUS = 2.25, CHART_SPARSE = 1, CHART_RARE_RADIUS = 9, CHART_RARE = ['blue', 'green'];
+// chartLab is the chart's pick (null elsewhere)
+function bandCut(best, maxDeltaE, chartLab) {
+  if (!chartLab) return best + maxDeltaE;
+  const radius = CHART_RARE.includes(colorFamily(...chartLab)) ? CHART_RARE_RADIUS : CHART_RADIUS;
+  return Math.max(radius, best + CHART_SPARSE);
 }
 // What the results show: everything within the cut-off, and never fewer than five
-function matchBand(candidates, maxDeltaE, chart) {
+function matchBand(candidates, maxDeltaE, chartLab) {
   const bestDist = candidates[0]?.distance ?? 0;
-  const inBand = candidates.filter(p => p.distance <= bandCut(bestDist, maxDeltaE, chart));
+  const inBand = candidates.filter(p => p.distance <= bandCut(bestDist, maxDeltaE, chartLab));
   return inBand.length >= 5 ? inBand : candidates.slice(0, 5);
 }
 
@@ -2650,7 +2654,7 @@ function shadeMatchInfo(hex, maxDeltaE) {
     if (black && !p.discontinued && isBlackLab(p.lab)) blacks++;
   }
   if (black) return { hex, best, nearest, black, count: blacks };
-  let band = rows.filter(r => r[0] <= bandCut(best, maxDeltaE, true));
+  let band = rows.filter(r => r[0] <= bandCut(best, maxDeltaE, lab));
   // Fewer than five in the band shows the closest five; more than 500 shows the closest 500
   if (band.length < 5 || band.length > 500) band = rows.sort((a, b) => a[0] - b[0]).slice(0, band.length < 5 ? 5 : 500);
   return { hex, best, nearest, count: band.filter(r => !r[1]).length };
@@ -4121,7 +4125,7 @@ function App() {
     }
     const candidates = getClosestColors(hex, 500)
       .filter(p => !selectedColor.sourceKey || `${p.brand}|${p.shade}` !== selectedColor.sourceKey);
-    return matchBand(candidates, tweaks.maxDeltaE, mode === 'hex');
+    return matchBand(candidates, tweaks.maxDeltaE, mode === 'hex' ? target : null);
   }, [selectedColor, toneRamp, toneIdx, tweaks.maxDeltaE, dataReady, mode]);
   // matches: array of real products with .hex .brand .product .shade .finish .retailer .distance
   function togglePin(product) {
