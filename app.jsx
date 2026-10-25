@@ -893,7 +893,7 @@ function ResultsTable({ selectedColor, matches, totalProducts, pinnedItems, togg
   }
 
   return (
-    <div style={{ flex:1, display:'flex', flexDirection:'column', minHeight:0 }}>
+    <div className="results-table" style={{ flex:1, display:'flex', flexDirection:'column', minHeight:0 }}>
       {/* Selected color header */}
       {!hideHeader && <div style={{
         display:'flex', alignItems:'center', gap:12, marginBottom:18,
@@ -992,7 +992,7 @@ function ResultsTable({ selectedColor, matches, totalProducts, pinnedItems, togg
 
       {/* Compact filter bar */}
       {(orderedTones.length >= 1 || allBrands.length > 1 || allTiers.length > 1 || allFormats.length > 1 || hasDiscontinued) && (
-        <div style={{ display:'flex', flexWrap:'wrap', alignItems:'center', gap:8, marginBottom:14 }}>
+        <div className="results-filters" style={{ display:'flex', flexWrap:'wrap', alignItems:'center', gap:8, marginBottom:14 }}>
           <span style={{ fontSize:11, color:'var(--text-muted)', letterSpacing:'0.1em', textTransform:'uppercase', fontFamily:'DM Sans', marginRight:2 }}>
             Filter
           </span>
@@ -1144,7 +1144,7 @@ function ResultsTable({ selectedColor, matches, totalProducts, pinnedItems, togg
       )}
 
       {/* Results grid */}
-      <div style={{ flex:1, overflowY:'auto' }}>
+      <div className="results-scroll" style={{ flex:1, overflowY:'auto' }}>
         {filtered.length === 0 ? (
           <div role="status" style={{ padding:'32px 16px', display:'flex', flexDirection:'column', alignItems:'center', gap:14, textAlign:'center' }}>
             <p style={{ fontFamily:'DM Sans', fontSize:14, lineHeight:1.5, color:'var(--text-body)' }}>

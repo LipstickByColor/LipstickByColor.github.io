@@ -1424,6 +1424,7 @@ function ResultsTable({
     setActiveFormats(prev => prev.includes(f) ? prev.filter(x => x !== f) : [...prev, f]);
   }
   return /*#__PURE__*/React.createElement("div", {
+    className: "results-table",
     style: {
       flex: 1,
       display: 'flex',
@@ -1589,6 +1590,7 @@ function ResultsTable({
       }
     }, "No lipsticks that ", noLight && noDeep ? 'light or that deep' : noLight ? 'light' : 'deep');
   })()), (orderedTones.length >= 1 || allBrands.length > 1 || allTiers.length > 1 || allFormats.length > 1 || hasDiscontinued) && /*#__PURE__*/React.createElement("div", {
+    className: "results-filters",
     style: {
       display: 'flex',
       flexWrap: 'wrap',
@@ -1834,6 +1836,7 @@ function ResultsTable({
       letterSpacing: '0.04em'
     }
   }, "Clear all"))), /*#__PURE__*/React.createElement("div", {
+    className: "results-scroll",
     style: {
       flex: 1,
       overflowY: 'auto'

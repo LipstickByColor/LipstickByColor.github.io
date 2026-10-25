@@ -98,7 +98,7 @@
   .shade-sheet-head { display: none; }
   @media (max-width: 900px) {
     .shade-sheet {
-      position: fixed; left: 0; right: 0; bottom: 0; z-index: 90; height: 56vh;
+      position: fixed; left: 0; right: 0; bottom: 0; z-index: 90; height: 56vh; height: 56dvh;
       background: #fff; border-radius: 22px 22px 0 0; box-shadow: 0 -8px 32px rgba(42,26,20,0.22);
       animation: matchDetailUp 0.25s ease-out;
     }
@@ -106,16 +106,30 @@
       flex: none; display: flex; flex-direction: column; gap: 12px; padding: 10px 16px 12px;
       border-bottom: 1px solid var(--border); touch-action: none; cursor: grab;
     }
-    /* The filters stay put and the result cards scroll under them (ResultsTable's own scroller) */
+    /* The sheet body is the one scroller, so a swipe on the filters scrolls the results too.
+       ResultsTable's own scroller is turned off here: Firefox passes a swipe on an element with
+       nothing to scroll on to the page behind, so the filters used to move the map instead.
+       The filters stay put (sticky) and the result cards scroll under them. */
     .shade-sheet-body {
       flex: 1; min-height: 0; overflow-y: auto;
       padding: 12px 16px calc(16px + env(safe-area-inset-bottom));
+    }
+    .shade-sheet-body .results-table { flex: none !important; }
+    .shade-sheet-body .results-scroll { overflow-y: visible !important; }
+    .shade-sheet-body .results-filters {
+      position: sticky; top: -12px; z-index: 3; background: #fff; /* above the cards' buttons (2) */
+      margin: -12px 0 0 !important; padding: 12px 0 12px;
     }
     .shade-sheet-body, .shade-sheet-body * { overscroll-behavior: contain; }
     .shade-sheet.tray-open .shade-sheet-body { padding-bottom: 140px; }
     /* Room at the end of the page so the fixed bar or the sheet never covers the last of it */
     body:has(.shade-bar) { padding-bottom: 88px; }
-    body:has(.shade-sheet) { padding-bottom: 56vh; }
+    body:has(.shade-sheet) { padding-bottom: 56vh; padding-bottom: 56dvh; }
+  }
+  /* Short screens (landscape phones): the results get most of the height */
+  @media (max-width: 900px) and (max-height: 600px) {
+    .shade-sheet { height: 75vh; height: 75dvh; }
+    body:has(.shade-sheet) { padding-bottom: 75vh; padding-bottom: 75dvh; }
   }
   @media (prefers-reduced-motion: reduce) { .shade-sheet { animation: none; } }
   /* Dupe finder search fields: the input has no outline of its own, so its frame shows focus.
