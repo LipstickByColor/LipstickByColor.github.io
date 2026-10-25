@@ -4489,6 +4489,15 @@ function App() {
         }}>
           Privacy
         </a>
+        <a href="https://www.pinterest.com/lipstickbycolor/" target="_blank" rel="noopener noreferrer"
+          onClick={() => window.gtag?.('event', 'nav_link_click', { target: 'pinterest', location: 'footer' })}
+          style={{
+          fontSize:11, color:'var(--blush-deep)', letterSpacing:'0.05em',
+          textDecoration:'none', borderBottom:'1px solid currentColor', paddingBottom:1,
+          transition:'opacity 0.15s',
+        }}>
+          Pinterest
+        </a>
         {selectedColor && matches.length > 0 && (
           <span style={{ fontSize:11, color:'var(--text-muted)' }}>
             · {matches.length} closest match{matches.length !== 1 ? 'es' : ''} from {REAL_PRODUCTS.length} products

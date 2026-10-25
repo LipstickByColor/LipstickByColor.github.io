@@ -8230,7 +8230,24 @@ function App() {
       paddingBottom: 1,
       transition: 'opacity 0.15s'
     }
-  }, "Privacy"), selectedColor && matches.length > 0 && /*#__PURE__*/React.createElement("span", {
+  }, "Privacy"), /*#__PURE__*/React.createElement("a", {
+    href: "https://www.pinterest.com/lipstickbycolor/",
+    target: "_blank",
+    rel: "noopener noreferrer",
+    onClick: () => window.gtag?.('event', 'nav_link_click', {
+      target: 'pinterest',
+      location: 'footer'
+    }),
+    style: {
+      fontSize: 11,
+      color: 'var(--blush-deep)',
+      letterSpacing: '0.05em',
+      textDecoration: 'none',
+      borderBottom: '1px solid currentColor',
+      paddingBottom: 1,
+      transition: 'opacity 0.15s'
+    }
+  }, "Pinterest"), selectedColor && matches.length > 0 && /*#__PURE__*/React.createElement("span", {
     style: {
       fontSize: 11,
       color: 'var(--text-muted)'
