@@ -1280,9 +1280,11 @@ function ResultsTable({
   setToneIdx,
   initialFilterParams,
   onFiltersChange,
-  hideHeader
+  hideHeader,
+  collapsibleFilters
 }) {
   const [activeBrands, setActiveBrands] = React.useState([]);
+  const [filtersShown, setFiltersShown] = React.useState(false);
   const [activeTones, setActiveTones] = React.useState([]);
   const [activeTiers, setActiveTiers] = React.useState([]);
   const [activeFinishes, setActiveFinishes] = React.useState([]);
@@ -1630,7 +1632,7 @@ function ResultsTable({
       }
     }, "No lipsticks that ", noLight && noDeep ? 'light or that deep' : noLight ? 'light' : 'deep');
   })()), (orderedTones.length >= 1 || allBrands.length > 1 || allTiers.length > 1 || allFormats.length > 1 || hasDiscontinued) && /*#__PURE__*/React.createElement("div", {
-    className: "results-filters",
+    className: `results-filters${collapsibleFilters && !filtersShown ? ' filters-collapsed' : ''}`,
     style: {
       display: 'flex',
       flexWrap: 'wrap',
@@ -1639,6 +1641,7 @@ function ResultsTable({
       marginBottom: 14
     }
   }, /*#__PURE__*/React.createElement("span", {
+    className: "filter-label",
     style: {
       fontSize: 11,
       color: 'var(--text-muted)',
@@ -1647,7 +1650,48 @@ function ResultsTable({
       fontFamily: 'DM Sans',
       marginRight: 2
     }
-  }, "Filter"), allTiers.length > 1 && /*#__PURE__*/React.createElement(FilterDropdown, {
+  }, "Filter"), collapsibleFilters && /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "filter-toggle",
+    "aria-expanded": filtersShown,
+    onClick: () => {
+      setOpenFilter(null);
+      setFiltersShown(v => !v);
+    },
+    style: {
+      alignItems: 'center',
+      gap: 7,
+      fontSize: 11,
+      padding: '5px 12px',
+      borderRadius: 20,
+      border: `1.5px solid ${otherFilters ? 'var(--espresso-mid)' : 'var(--border)'}`,
+      background: otherFilters ? 'rgba(92,61,48,0.08)' : filtersShown ? 'var(--cream-dark)' : 'transparent',
+      color: otherFilters ? 'var(--espresso-mid)' : 'var(--text-muted)',
+      cursor: 'pointer',
+      fontFamily: 'DM Sans',
+      fontWeight: otherFilters ? 500 : 400,
+      letterSpacing: '0.06em',
+      textTransform: 'uppercase',
+      transition: 'all 0.15s'
+    }
+  }, "Filters", otherFilters > 0 && /*#__PURE__*/React.createElement("span", {
+    style: {
+      background: 'var(--espresso-mid)',
+      color: '#fff',
+      fontSize: 11,
+      padding: '1px 6px',
+      borderRadius: 20,
+      lineHeight: 1.6
+    }
+  }, otherFilters), /*#__PURE__*/React.createElement("span", {
+    "aria-hidden": "true",
+    style: {
+      fontSize: 10,
+      opacity: 0.55,
+      transform: filtersShown ? 'rotate(180deg)' : 'none',
+      transition: 'transform 0.15s'
+    }
+  }, "\u25BC")), allTiers.length > 1 && /*#__PURE__*/React.createElement(FilterDropdown, {
     label: "Price",
     count: activeTiers.length,
     isOpen: openFilter === 'Price',
@@ -1850,6 +1894,7 @@ function ResultsTable({
       lineHeight: 1
     }
   }, hideDiscontinued ? '✓' : ''), "Hide discontinued"), (activeBrands.length > 0 || activeTones.length > 0 || activeTiers.length > 0 || activeFinishes.length > 0 || activeFormats.length > 0) && /*#__PURE__*/React.createElement("div", {
+    className: "filter-summary",
     style: {
       display: 'flex',
       alignItems: 'center',
@@ -7663,7 +7708,8 @@ function App() {
     setToneIdx: handleToneIdxChange,
     initialFilterParams: filterParams,
     onFiltersChange: setFilterParams,
-    hideHeader: mode === 'hex'
+    hideHeader: mode === 'hex',
+    collapsibleFilters: mode === 'hex'
   });
   return /*#__PURE__*/React.createElement("div", {
     style: {

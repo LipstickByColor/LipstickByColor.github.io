@@ -100,7 +100,7 @@
   .shade-side { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
   /* Custom color results (ShadeSheet): under the card on desktop, a bottom sheet once the columns stack */
   .shade-sheet, .shade-sheet-body { display: flex; flex-direction: column; min-width: 0; }
-  .shade-sheet-head { display: none; }
+  .shade-sheet-head, .filter-toggle { display: none; }
   @media (max-width: 900px) {
     .shade-sheet {
       position: fixed; left: 0; right: 0; bottom: 0; z-index: 90; height: 56vh; height: 56dvh;
@@ -125,6 +125,10 @@
       position: sticky; top: -12px; z-index: 3; background: #fff; /* above the cards' buttons (2) */
       margin: -12px 0 0 !important; padding: 12px 0 12px;
     }
+    /* The filters fold behind a Filters button so the results get the room */
+    .shade-sheet-body .filter-label { display: none; }
+    .shade-sheet-body .filter-toggle { display: inline-flex !important; }
+    .shade-sheet-body .filters-collapsed > :not(.filter-toggle):not(.filter-summary) { display: none !important; }
     .shade-sheet-body, .shade-sheet-body * { overscroll-behavior: contain; }
     .shade-sheet.tray-open .shade-sheet-body { padding-bottom: 140px; }
     /* Room at the end of the page so the fixed bar or the sheet never covers the last of it */

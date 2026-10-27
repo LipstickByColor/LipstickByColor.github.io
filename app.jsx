@@ -757,8 +757,9 @@ function filterParamsFrom(search) {
   return [...new URLSearchParams(search)].filter(([k]) => FILTER_PARAMS.includes(k));
 }
 
-function ResultsTable({ selectedColor, matches, totalProducts, pinnedItems, togglePin, wishlist, toggleWishlist, toneRamp, toneIdx, setToneIdx, initialFilterParams, onFiltersChange, hideHeader }) {
+function ResultsTable({ selectedColor, matches, totalProducts, pinnedItems, togglePin, wishlist, toggleWishlist, toneRamp, toneIdx, setToneIdx, initialFilterParams, onFiltersChange, hideHeader, collapsibleFilters }) {
   const [activeBrands, setActiveBrands] = React.useState([]);
+  const [filtersShown, setFiltersShown] = React.useState(false);
   const [activeTones, setActiveTones] = React.useState([]);
   const [activeTiers, setActiveTiers] = React.useState([]);
   const [activeFinishes, setActiveFinishes] = React.useState([]);
@@ -1019,10 +1020,29 @@ function ResultsTable({ selectedColor, matches, totalProducts, pinnedItems, togg
 
       {/* Compact filter bar */}
       {(orderedTones.length >= 1 || allBrands.length > 1 || allTiers.length > 1 || allFormats.length > 1 || hasDiscontinued) && (
-        <div className="results-filters" style={{ display:'flex', flexWrap:'wrap', alignItems:'center', gap:8, marginBottom:14 }}>
-          <span style={{ fontSize:11, color:'var(--text-muted)', letterSpacing:'0.1em', textTransform:'uppercase', fontFamily:'DM Sans', marginRight:2 }}>
+        <div className={`results-filters${collapsibleFilters && !filtersShown ? ' filters-collapsed' : ''}`} style={{ display:'flex', flexWrap:'wrap', alignItems:'center', gap:8, marginBottom:14 }}>
+          <span className="filter-label" style={{ fontSize:11, color:'var(--text-muted)', letterSpacing:'0.1em', textTransform:'uppercase', fontFamily:'DM Sans', marginRight:2 }}>
             Filter
           </span>
+          {/* Color chart sheet on phones: the filters fold away behind this button (CSS shows it there only) */}
+          {collapsibleFilters && (
+            <button type="button" className="filter-toggle" aria-expanded={filtersShown}
+              onClick={() => { setOpenFilter(null); setFiltersShown(v => !v); }} style={{
+              alignItems:'center', gap:7,
+              fontSize:11, padding:'5px 12px', borderRadius:20,
+              border:`1.5px solid ${otherFilters ? 'var(--espresso-mid)' : 'var(--border)'}`,
+              background: otherFilters ? 'rgba(92,61,48,0.08)' : (filtersShown ? 'var(--cream-dark)' : 'transparent'),
+              color: otherFilters ? 'var(--espresso-mid)' : 'var(--text-muted)',
+              cursor:'pointer', fontFamily:'DM Sans', fontWeight: otherFilters ? 500 : 400,
+              letterSpacing:'0.06em', textTransform:'uppercase', transition:'all 0.15s',
+            }}>
+              Filters
+              {otherFilters > 0 && (
+                <span style={{ background:'var(--espresso-mid)', color:'#fff', fontSize:11, padding:'1px 6px', borderRadius:20, lineHeight:1.6 }}>{otherFilters}</span>
+              )}
+              <span aria-hidden="true" style={{ fontSize:10, opacity:0.55, transform: filtersShown ? 'rotate(180deg)':'none', transition:'transform 0.15s' }}>▼</span>
+            </button>
+          )}
 
           {allTiers.length > 1 && (
             <FilterDropdown label="Price" count={activeTiers.length}
@@ -1156,7 +1176,7 @@ function ResultsTable({ selectedColor, matches, totalProducts, pinnedItems, togg
           )}
 
           {(activeBrands.length > 0 || activeTones.length > 0 || activeTiers.length > 0 || activeFinishes.length > 0 || activeFormats.length > 0) && (
-            <div style={{ display:'flex', alignItems:'center', gap:10, marginLeft:'auto' }}>
+            <div className="filter-summary" style={{ display:'flex', alignItems:'center', gap:10, marginLeft:'auto' }}>
               <span style={{ fontSize:11, color:'var(--text-muted)', fontFamily:'DM Sans' }}>
                 {filtered.length} of {matches.length} shown
               </span>
@@ -4172,7 +4192,7 @@ function App() {
   if (dataStatus === 'error') return <DataLoadError />;
 
   // Custom color shows its pick on the card above the results, so they skip their own color header
-  const resultsEl = selectedColor && !dataReady ? <CatalogueLoading /> : <ResultsTable selectedColor={effectiveColor} matches={matches} totalProducts={REAL_PRODUCTS.length} pinnedItems={pinnedItems} togglePin={togglePin} wishlist={wishlist} toggleWishlist={toggleWishlist} toneRamp={toneRamp} toneIdx={toneIdx} setToneIdx={handleToneIdxChange} initialFilterParams={filterParams} onFiltersChange={setFilterParams} hideHeader={mode === 'hex'} />;
+  const resultsEl = selectedColor && !dataReady ? <CatalogueLoading /> : <ResultsTable selectedColor={effectiveColor} matches={matches} totalProducts={REAL_PRODUCTS.length} pinnedItems={pinnedItems} togglePin={togglePin} wishlist={wishlist} toggleWishlist={toggleWishlist} toneRamp={toneRamp} toneIdx={toneIdx} setToneIdx={handleToneIdxChange} initialFilterParams={filterParams} onFiltersChange={setFilterParams} hideHeader={mode === 'hex'} collapsibleFilters={mode === 'hex'} />;
 
   return (
     <div style={{ minHeight:'100vh', display:'flex', flexDirection:'column', position:'relative', zIndex:1 }}>
