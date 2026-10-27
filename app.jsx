@@ -12,6 +12,30 @@ function getProductImage(p) {
   return window.LIPSTICK_IMAGES[key] || null;
 }
 
+// Most photos are retailer originals (1000-3000px) shown at 56-252px. Their
+// CDNs resize on request, so ask for `px` wide; other hosts are left as they are.
+function sizedImageUrl(url, px) {
+  let u;
+  try { u = new URL(url); } catch { return url; }
+  const host = u.hostname, q = u.searchParams, s = String(px);
+  if (host === 'cdn.shopify.com' || u.pathname.includes('/cdn/shop/')) q.set('width', s);
+  else if (host === 'm.media-amazon.com') {
+    u.pathname = u.pathname.replace(/(\._[^/.]*_)?\.(jpe?g|png|webp)$/i, `._SL${px}_.$2`);
+    u.search = '';
+  }
+  else if (host === 'media.ulta.com') { q.set('w', s); q.set('h', s); q.set('fmt', 'auto'); }
+  else if (host === 'images.ulta.com') {
+    // Old Scene7 links redirect to media.ulta.com at 800px; go there directly
+    const id = u.pathname.match(/\/is\/image\/Ulta\/([^/?]+)/)?.[1];
+    return id ? `https://media.ulta.com/i/ulta/${id}?w=${px}&h=${px}&fmt=auto` : url;
+  }
+  else if (host.endsWith('sephora.com')) q.set('imwidth', s);
+  else if (host.endsWith('.scene7.com')) { q.set('wid', s); q.set('hei', s); }
+  else if (u.pathname.includes('/dw/image/v2/')) { q.set('sw', s); q.set('sh', s); }
+  else return url;
+  return u.toString();
+}
+
 // Product thumb: real swatch/bullet photo. The extracted color shows immediately
 // as a placeholder; the photo crossfades in once loaded.
 // Round heart toggle — shared by result cards, My Favorites, and shared lists
@@ -26,7 +50,7 @@ function heartBtnStyle(isLiked) {
   };
 }
 
-function ProductThumb({ product, size = 56, width, height, zoom = 1.18, fit = 'cover', radius = 10, ring = true, tint = true }) {
+function ProductThumb({ product, size = 56, width, height, zoom = 1.18, fit = 'cover', radius = 10, ring = true, tint = true, photoPx = 400 }) {
   // Image URLs are fetched per product on screen (see supabase-data.js); re-render when this one arrives
   const [, setImagesVersion] = useState(0);
   const url = getProductImage(product);
@@ -39,11 +63,13 @@ function ProductThumb({ product, size = 56, width, height, zoom = 1.18, fit = 'c
   }, [product, url]);
   const [loaded, setLoaded] = useState(false);
   const [failed, setFailed] = useState(false);
+  const [fullSize, setFullSize] = useState(false); // the resized photo failed; try the original
   const w = width ?? size, h = height ?? size;
 
-  useEffect(() => { setLoaded(false); setFailed(false); }, [url]);
+  useEffect(() => { setLoaded(false); setFailed(false); setFullSize(false); }, [url]);
 
   const showImg = url && !failed;
+  const src = url && (fullSize ? url : sizedImageUrl(url, photoPx));
   return (
     <div style={{
       width:w, height:h, flexShrink:0,
@@ -55,13 +81,13 @@ function ProductThumb({ product, size = 56, width, height, zoom = 1.18, fit = 'c
     }}>
       {showImg && (
         <img
-          key={url}
-          src={url}
+          key={src}
+          src={src}
           alt={`${product.brand} ${product.shade}`}
           loading="lazy"
           decoding="async"
           onLoad={() => setLoaded(true)}
-          onError={() => setFailed(true)}
+          onError={() => src !== url ? setFullSize(true) : setFailed(true)}
           style={{
             width:'100%', height:'100%', objectFit:fit,
             transform: fit === 'cover' ? `scale(${zoom})` : 'none',
@@ -3496,7 +3522,7 @@ function DupeFinder({ product, onSelect, onUsePhoto }) {
                 <div style={{ position:'relative', height:252, background:'var(--cream-dark)' }}>
                   <span role="img" aria-label={`Swatch ${product.hex}`} title={product.hex} style={{ position:'absolute', left:0, top:0, bottom:0, width:22, background:product.hex }} />
                   <div style={{ position:'absolute', top:16, right:16, bottom:16, left:38 }}>
-                    <ProductThumb product={product} width="100%" height="100%" fit="contain" radius={0} ring={false} tint={false} />
+                    <ProductThumb product={product} width="100%" height="100%" fit="contain" radius={0} ring={false} tint={false} photoPx={600} />
                   </div>
                 </div>
                 <div style={{ padding:'16px 20px 18px', borderTop:'1px solid var(--border)' }}>
