@@ -5,7 +5,8 @@
     "build": "node build-numbers.js && babel app.jsx -o app.js && node build-pages.js",
     "numbers:fetch": "node build-numbers.js --fetch",
     "build:counts": "node build-wheel-counts.js",
-    "build:dupes": "node build-dupe-pages.js"
+    "build:dupes": "node build-dupe-pages.js",
+    "build:catalogue": "node build-catalogue.js"
   },
   "devDependencies": {
     "@babel/cli": "^7.24.0",

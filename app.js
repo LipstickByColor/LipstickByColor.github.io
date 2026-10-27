@@ -50,15 +50,18 @@ function ProductThumb({
   ring = true,
   tint = true
 }) {
-  // Image URLs arrive after the catalogue (see supabase-data.js); re-render when they do
+  // Image URLs are fetched per product on screen (see supabase-data.js); re-render when this one arrives
   const [, setImagesVersion] = useState(0);
-  useEffect(() => {
-    if (window.LIPSTICK_IMAGES_READY) return;
-    const onImages = () => setImagesVersion(v => v + 1);
-    window.addEventListener('lipstick-images', onImages);
-    return () => window.removeEventListener('lipstick-images', onImages);
-  }, []);
   const url = getProductImage(product);
+  useEffect(() => {
+    if (url || !product) return;
+    const onImages = () => {
+      if (getProductImage(product)) setImagesVersion(v => v + 1);
+    };
+    window.addEventListener('lipstick-images', onImages);
+    window.requestLipstickImages?.([product]);
+    return () => window.removeEventListener('lipstick-images', onImages);
+  }, [product, url]);
   const [loaded, setLoaded] = useState(false);
   const [failed, setFailed] = useState(false);
   const w = width ?? size,
@@ -2064,7 +2067,8 @@ function loadCorsImage(url) {
 
 // Preload every wishlist product photo. Returns an array aligned with `wishlist`
 // (null where there's no image or the host blocked cross-origin use).
-function loadWishlistImages(wishlist) {
+async function loadWishlistImages(wishlist) {
+  await window.requestLipstickImages?.(wishlist);
   return Promise.all(wishlist.map(p => loadCorsImage(getProductImage(p))));
 }
 
