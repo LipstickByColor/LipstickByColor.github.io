@@ -121,7 +121,12 @@ function ProductThumb({
       position: 'relative'
     }
   }, showImg && /*#__PURE__*/React.createElement("img", {
-    key: src,
+    key: src
+    // A photo already in the cache (the color chart loads some ahead) can finish before onLoad is attached
+    ,
+    ref: img => {
+      if (img?.complete && img.naturalWidth && !loaded) setLoaded(true);
+    },
     src: src,
     alt: `${product.brand} ${product.shade}`,
     loading: "lazy",
@@ -757,6 +762,18 @@ function matchBand(candidates, maxDeltaE, chartLab) {
   const bestDist = candidates[0]?.distance ?? 0;
   const inBand = candidates.filter(p => p.distance <= bandCut(bestDist, maxDeltaE, chartLab));
   return inBand.length >= 5 ? inBand : candidates.slice(0, 5);
+}
+// Every black lipstick, closest first: what a black pick on the chart or the wheel (Onyx) shows
+function blackMatches(lab) {
+  return REAL_PRODUCTS.filter(p => isBlackLab(p.lab)).map(p => ({
+    ...p,
+    distance: deltaE(lab, p.lab)
+  })).sort((a, b) => a.distance - b.distance);
+}
+// The color chart's results for a pick
+function chartMatches(hex, maxDeltaE) {
+  const lab = hexToLab(hex);
+  return isBlackLab(lab) ? blackMatches(lab) : matchBand(getClosestColors(hex, 500), maxDeltaE, lab);
 }
 function nearestProductDistance(hex) {
   const lab = hexToLab(hex);
@@ -4475,6 +4492,11 @@ const EXPLORER_CTA = {
   cursor: 'pointer'
 };
 
+// How many of the opening red's photos the color chart loads before its results are asked for
+// (about what shows without scrolling); once per page load
+const PREFETCH_PHOTOS = 12;
+let chartPrefetched = false;
+
 // Custom color map use, so visitors who explore without asking for results still show up in analytics.
 // Moving the dot or the depth bar sends one event per visit, not one per drag step.
 const exploreSent = new Set();
@@ -7505,6 +7527,29 @@ function App() {
     const t = setTimeout(() => setShadeInfo(shadeMatchInfo(draftCol.hex, tweaks.maxDeltaE)), 60);
     return () => clearTimeout(t);
   }, [draftCol.hex, mode, dataReady, tweaks.maxDeltaE]);
+  // The chart opens on red, and most visitors ask for its results first. Their photos come from
+  // two dozen retailer hosts and only start after a lookup of their URLs, so while the pick is
+  // still the opening red, look those up and load the first few photos ahead of the click.
+  useEffect(() => {
+    if (mode !== 'hex' || !dataReady || hexHex || chartPrefetched) return;
+    if (draftCol.hex !== draftColor(draftFromLab(hexToLab(EXPLORER_STARTS[0][1]))).hex) return;
+    const run = async () => {
+      chartPrefetched = true;
+      const list = chartMatches(draftCol.hex, tweaks.maxDeltaE).filter(p => !p.discontinued);
+      await window.requestLipstickImages?.(list);
+      list.map(getProductImage).filter(Boolean).slice(0, PREFETCH_PHOTOS).forEach(url => {
+        new Image().src = sizedImageUrl(url, 400);
+      }); // ProductThumb's photoPx
+    };
+    if (window.requestIdleCallback) {
+      const id = requestIdleCallback(run, {
+        timeout: 1500
+      });
+      return () => cancelIdleCallback(id);
+    }
+    const t = setTimeout(run, 300);
+    return () => clearTimeout(t);
+  }, [draftCol.hex, mode, dataReady, hexHex, tweaks.maxDeltaE]);
   // The pick goes in the URL as ?color= once the visitor has made one (or opened a link to one), so it
   // can be shared before results are asked for; written once the dot stops, as browsers limit how often it can change
   const [chartPicked, setChartPicked] = useState(!!hexHex);
@@ -7665,15 +7710,11 @@ function App() {
     if (!selectedColor || !dataReady) return [];
     const hex = toneRamp && toneIdx != null && !onAnchor ? toneRamp.ramp[toneIdx].hex : selectedColor.hex;
     // Custom color and the wheel (Onyx): every black lipstick answers a black pick, closest first
+    if (mode === 'hex') return chartMatches(hex, tweaks.maxDeltaE);
     const target = hexToLab(hex);
-    if ((mode === 'hex' || mode === 'wheel') && isBlackLab(target)) {
-      return REAL_PRODUCTS.filter(p => isBlackLab(p.lab)).map(p => ({
-        ...p,
-        distance: deltaE(target, p.lab)
-      })).sort((a, b) => a.distance - b.distance);
-    }
+    if (mode === 'wheel' && isBlackLab(target)) return blackMatches(target);
     const candidates = getClosestColors(hex, 500).filter(p => !selectedColor.sourceKey || `${p.brand}|${p.shade}` !== selectedColor.sourceKey);
-    return matchBand(candidates, tweaks.maxDeltaE, mode === 'hex' ? target : null);
+    return matchBand(candidates, tweaks.maxDeltaE, null);
   }, [selectedColor, toneRamp, toneIdx, tweaks.maxDeltaE, dataReady, mode]);
   // matches: array of real products with .hex .brand .product .shade .finish .retailer .distance
   function togglePin(product) {
