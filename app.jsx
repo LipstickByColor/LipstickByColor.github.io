@@ -4500,6 +4500,15 @@ function App() {
         }}>
           Pinterest
         </a>
+        <a href="https://www.instagram.com/lipstick.color.finder/" target="_blank" rel="noopener noreferrer"
+          onClick={() => window.gtag?.('event', 'nav_link_click', { target: 'instagram', location: 'footer' })}
+          style={{
+          fontSize:11, color:'var(--blush-deep)', letterSpacing:'0.05em',
+          textDecoration:'none', borderBottom:'1px solid currentColor', paddingBottom:1,
+          transition:'opacity 0.15s',
+        }}>
+          Instagram
+        </a>
         {selectedColor && matches.length > 0 && (
           <span style={{ fontSize:11, color:'var(--text-muted)' }}>
             · {matches.length} closest match{matches.length !== 1 ? 'es' : ''} from {REAL_PRODUCTS.length} products

@@ -245,7 +245,7 @@ ${list('Mid-priced alternatives', 'The closest matches one tier up ($$).', mid)}
       <a href="/dupe-finder/">Find dupes for any lipstick</a>
     </p>
   </section>
-  <p class="foot"><a href="/privacy/">Privacy</a> · <a href="https://www.pinterest.com/lipstickbycolor/" target="_blank" rel="noopener noreferrer">Pinterest</a></p>
+  <p class="foot"><a href="/privacy/">Privacy</a> · <a href="https://www.pinterest.com/lipstickbycolor/" target="_blank" rel="noopener noreferrer">Pinterest</a> · <a href="https://www.instagram.com/lipstick.color.finder/" target="_blank" rel="noopener noreferrer">Instagram</a></p>
 </div>
 </body>
 </html>

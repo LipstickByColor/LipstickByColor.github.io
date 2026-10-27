@@ -23,6 +23,9 @@ guides/assets/wet-n-wild-bad-girls-club-lips-3.webp
 # Analytics event reference (local only)
 analytics-events.csv
 
+# Instagram cards (local only)
+social/
+
 # Catalogue file for Supabase Storage (build-catalogue.js); never committed
 data-build/
 
