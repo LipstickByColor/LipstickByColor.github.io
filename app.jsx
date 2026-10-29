@@ -451,6 +451,7 @@ function getHsl(hex) {
 // ── Segmented Color Wheel ──────────────────────────────────────────────────────
 // Each of the 40 colors gets its own arc segment — clear boundaries, labeled,
 // clickable. Colors sorted by hue; arranged in 2 rings (light outer, dark inner).
+const WHEEL_TYPE = { micro:11, name:15 };
 function ColorWheel({ colors, selectedId, onSelect, hoveredId, onHover }) {
   const SIZE = 440;
   const CX = SIZE / 2, CY = SIZE / 2;
@@ -506,6 +507,10 @@ function ColorWheel({ colors, selectedId, onSelect, hoveredId, onHover }) {
 
   // Keyboard: the wheel is one Tab stop. Arrow keys move the focus (left/right around the ring,
   // up/down between the outer and inner ring), Enter or Space picks the color.
+  // With a mouse, the center names the color under the pointer. Touch screens have no hover
+  // (a tap picks the color), so there the center keeps showing the picked color.
+  const [canHover] = useState(() => window.matchMedia('(hover: hover) and (pointer: fine)').matches);
+  const hovered = canHover ? colors.find(c => c.id === hoveredId) : null;
   const [rovingId, setRovingId] = useState(null); // the segment Tab lands on
   const [ringId, setRingId] = useState(null);     // the segment showing a keyboard focus ring
   const cellEls = React.useRef({});
@@ -530,8 +535,8 @@ function ColorWheel({ colors, selectedId, onSelect, hoveredId, onHover }) {
     role: 'button', tabIndex: c.id === tabId ? 0 : -1,
     'aria-label': c.name, 'aria-pressed': c.id === selectedId,
     onKeyDown: e => onCellKey(e, c),
-    onFocus: e => { setRovingId(c.id); if (e.target.matches(':focus-visible')) setRingId(c.id); },
-    onBlur: () => setRingId(null),
+    onFocus: e => { setRovingId(c.id); onHover(c.id); if (e.target.matches(':focus-visible')) setRingId(c.id); },
+    onBlur: () => { setRingId(null); onHover(null); },
   });
 
   function polarToXY(angleDeg, r) {
@@ -666,24 +671,40 @@ function ColorWheel({ colors, selectedId, onSelect, hoveredId, onHover }) {
           );
         })()}
 
-        {/* Center circle — shows selected color */}
-        <circle cx={CX} cy={CY} r={(SINGLE_RING ? R_SINGLE_IN : R_INNER_IN) - 1}
-          fill={selectedId ? (colors.find(c=>c.id===selectedId)?.hex || '#FAF6F1') : '#FAF6F1'}
-          stroke="#E0D0C0" strokeWidth="1.5"
-          style={{ transition:'fill 0.3s ease' }}
-        />
-        {selectedId && (() => {
-          const c = colors.find(c=>c.id===selectedId);
-          if (!c) return null;
-          const lum = luminance(c.hex);
+        {/* Center circle: the color under the pointer, its name and kind ("Cherry", "Blue-red",
+            in the color chart's words); otherwise the picked color and its hex */}
+        {(() => {
+          const r = (SINGLE_RING ? R_SINGLE_IN : R_INNER_IN) - 1;
+          const picked = colors.find(c => c.id === selectedId);
+          const shown = hovered || picked;
           return (
-            <text x={CX} y={CY} textAnchor="middle" dominantBaseline="middle"
-              fontSize="11" fontFamily="DM Sans, sans-serif" fontWeight="500"
-              fill={lum > 0.32 ? 'rgba(42,26,20,0.7)' : 'rgba(255,255,255,0.85)'}
-              style={{ pointerEvents:'none', userSelect:'none' }}
-            >
-              {c.hex.toUpperCase()}
-            </text>
+            <>
+              <circle cx={CX} cy={CY} r={r}
+                fill={shown ? shown.hex : '#FAF6F1'}
+                stroke="#E0D0C0" strokeWidth="1.5"
+                style={{ transition: hovered ? 'none' : 'fill 0.3s ease' }}
+              />
+              {hovered ? (
+                <foreignObject x={CX - r} y={CY - r} width={r * 2} height={r * 2} style={{ pointerEvents:'none' }}>
+                  <div style={{
+                    width:'100%', height:'100%', padding:'0 8px', boxSizing:'border-box',
+                    display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:3,
+                    textAlign:'center', color:bandInk(hovered.hex), userSelect:'none',
+                  }}>
+                    <div style={{ fontFamily:'Cormorant Garamond', fontSize:WHEEL_TYPE.name, fontWeight:600, lineHeight:1.05 }}>{hovered.name}</div>
+                    <div style={{ fontFamily:'DM Sans', fontSize:WHEEL_TYPE.micro, fontWeight:500, lineHeight:1.2 }}>{chartColorName(hovered.hex)}</div>
+                  </div>
+                </foreignObject>
+              ) : picked && (
+                <text x={CX} y={CY} textAnchor="middle" dominantBaseline="middle"
+                  fontSize="11" fontFamily="DM Sans, sans-serif" fontWeight="500"
+                  fill={luminance(picked.hex) > 0.32 ? 'rgba(42,26,20,0.7)' : 'rgba(255,255,255,0.85)'}
+                  style={{ pointerEvents:'none', userSelect:'none' }}
+                >
+                  {picked.hex.toUpperCase()}
+                </text>
+              )}
+            </>
           );
         })()}
 
