@@ -2931,7 +2931,7 @@ function ShadeExplorer({ draft, color, origin, zoom, onZoom, info, committed, pi
           startChip(name, labToHex(...startLab(sel.fam, sel.ti, di)), onStart && sel.di === di, () => pickStart(sel.fam, sel.ti, di, 'depth_chip'))), true)}
       </div>
 
-      {stacked && depthBar}
+      {depthBar}
 
       {/* The map: a* across (greener → redder), b* up (bluer → yellower) */}
       <div style={{ display:'flex', gap:4, alignItems:'stretch', width:'100%' }}>
@@ -2991,8 +2991,6 @@ function ShadeExplorer({ draft, color, origin, zoom, onZoom, info, committed, pi
         </div>
         <span aria-hidden="true" style={{ ...axisWord, writingMode:'vertical-rl', alignSelf:'center', flex:'none' }}>redder</span>
       </div>
-
-      {!stacked && depthBar}
 
       <p id="shade-map-help" style={{ fontSize:TYPE.body, lineHeight:1.6, color:'var(--espresso-mid)', textAlign:'center' }}>
         {zoom ? `Close-up of the shades around your pick. ${stacked ? 'Tap a spot to choose, or drag the dot.' : 'Select or drag to choose one.'}`

@@ -4879,7 +4879,7 @@ function ShadeExplorer({
       name
     });
     onDraft(draftFromLab(hexToLab(hex)));
-  }))), sel && startRow('Tone', START_TONES.map((name, ti) => startChip(name, labToHex(...startLab(sel.fam, ti, sel.di)), onStart && sel.ti === ti, () => pickStart(sel.fam, ti, sel.di, 'tone'))), true), sel && (START_FAMILIES[sel.fam].depths || START_DEPTHS).length > 1 && startRow('Depth', (START_FAMILIES[sel.fam].depths || START_DEPTHS).map(([name], di) => startChip(name, labToHex(...startLab(sel.fam, sel.ti, di)), onStart && sel.di === di, () => pickStart(sel.fam, sel.ti, di, 'depth_chip'))), true)), stacked && depthBar, /*#__PURE__*/React.createElement("div", {
+  }))), sel && startRow('Tone', START_TONES.map((name, ti) => startChip(name, labToHex(...startLab(sel.fam, ti, sel.di)), onStart && sel.ti === ti, () => pickStart(sel.fam, ti, sel.di, 'tone'))), true), sel && (START_FAMILIES[sel.fam].depths || START_DEPTHS).length > 1 && startRow('Depth', (START_FAMILIES[sel.fam].depths || START_DEPTHS).map(([name], di) => startChip(name, labToHex(...startLab(sel.fam, sel.ti, di)), onStart && sel.di === di, () => pickStart(sel.fam, sel.ti, di, 'depth_chip'))), true)), depthBar, /*#__PURE__*/React.createElement("div", {
     style: {
       display: 'flex',
       gap: 4,
@@ -5051,7 +5051,7 @@ function ShadeExplorer({
       alignSelf: 'center',
       flex: 'none'
     }
-  }, "redder")), !stacked && depthBar, /*#__PURE__*/React.createElement("p", {
+  }, "redder")), /*#__PURE__*/React.createElement("p", {
     id: "shade-map-help",
     style: {
       fontSize: TYPE.body,
