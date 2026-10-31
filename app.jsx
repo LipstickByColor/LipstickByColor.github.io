@@ -126,12 +126,14 @@ const srOnly = { position:'absolute', width:1, height:1, overflow:'hidden', clip
 // How many shades the comparison tray holds
 const MAX_COMPARE = 6;
 
-// Single result card — image, save/compare overlay, ΔE + % match
+const MATCH_CARD_TYPE = { brand:11, meta:12, body:13 };
+
+// Single result card — image, save/compare overlay, finish · price and match tier
 function MatchCard({ p, wishlist, toggleWishlist, pinnedItems, togglePin, onOpen }) {
+  const TYPE = MATCH_CARD_TYPE;
   const isLiked = wishlist.some(x => x.brand === p.brand && x.shade === p.shade);
   const isPinned = pinnedItems.some(x => x.brand === p.brand && x.shade === p.shade);
   const isFull = pinnedItems.length >= MAX_COMPARE && !isPinned;
-  const pct = Math.max(0, Math.round(100 - p.distance));
 
   return (
     <div className="match-card" style={{
@@ -183,23 +185,21 @@ function MatchCard({ p, wishlist, toggleWishlist, pinnedItems, togglePin, onOpen
         </div>
       </div>
       <div style={{ padding:'8px 9px 9px', display:'flex', flexDirection:'column', gap:3, flex:1 }}>
-        <div style={{ fontSize:11, letterSpacing:'0.08em', textTransform:'uppercase', color:'var(--text-muted)', fontFamily:'DM Sans', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
+        <div style={{ fontSize:TYPE.brand, letterSpacing:'0.08em', textTransform:'uppercase', color:'var(--text-muted)', fontFamily:'DM Sans', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
           <span style={srOnly}>Brand: </span>{p.brand}
         </div>
-        <div title={p.product} style={{ fontSize:13, color:'var(--espresso)', fontFamily:'DM Sans', lineHeight:1.3, display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical', overflow:'hidden' }}>
+        <div title={p.product} style={{ fontSize:TYPE.body, color:'var(--espresso)', fontFamily:'DM Sans', lineHeight:1.3, display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical', overflow:'hidden' }}>
           {p.product}
         </div>
-        <div style={{ fontSize:12, fontFamily:'DM Sans', color:'var(--text-muted)', lineHeight:1.35 }}>
+        <div style={{ fontSize:TYPE.meta, fontFamily:'DM Sans', color:'var(--text-muted)', lineHeight:1.35 }}>
           <span style={srOnly}>Shade: </span>{p.shade}
         </div>
-        <div style={{ display:'flex', alignItems:'center', gap:7, marginTop:4 }} title={`Color distance ΔE ${p.distance.toFixed(1)} — lower is closer`}>
-          <span style={{ fontFamily:'ui-monospace, Menlo, monospace', fontSize:10.5, color:'var(--text-muted)' }}>
-            ΔE {p.distance.toFixed(1)}
+        <div style={{ display:'flex', alignItems:'center', gap:7, marginTop:'auto', paddingTop:4, fontSize:TYPE.meta }} title={`Color distance ΔE ${p.distance.toFixed(1)}, lower is closer`}>
+          <span style={{ color:'var(--espresso-mid)', minWidth:0, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
+            {[(p.finish || '').trim(), p.price_tier || '$$'].filter(Boolean).join(' · ')}
           </span>
-          <span style={{ marginLeft:'auto', display:'flex', alignItems:'baseline', gap:3, color:'var(--blush-deep)' }}>
-            <span style={srOnly}>Match: </span>
-            <span style={{ fontSize:12.5, fontWeight:500 }}>{pct}%</span>
-            <span style={{ fontSize:10.5 }}>match</span>
+          <span style={{ marginLeft:'auto', fontWeight:600, color:'var(--blush-deep)', whiteSpace:'nowrap' }}>
+            <span style={srOnly}>Match: </span>{matchTier(p.distance)}
           </span>
         </div>
       </div>
@@ -228,7 +228,6 @@ function MatchDetail({ p, source, onClose, wishlist, toggleWishlist, pinnedItems
   const isLiked = wishlist.some(x => x.brand === p.brand && x.shade === p.shade);
   const isPinned = pinnedItems.some(x => x.brand === p.brand && x.shade === p.shade);
   const isFull = pinnedItems.length >= MAX_COMPARE && !isPinned;
-  const pct = Math.max(0, Math.round(100 - p.distance));
   const ink = bandInk(p.hex);
   const redName = redLabel(p.hex);
   const dialogRef = useDialog(onClose);
@@ -294,9 +293,9 @@ function MatchDetail({ p, source, onClose, wishlist, toggleWishlist, pinnedItems
               <div role={source ? undefined : 'img'} aria-label={source ? undefined : `Swatch ${p.hex}`} style={{ ...stripHalf, justifyContent:'flex-end', background:p.hex, color:ink }}>{source && 'This lipstick'}</div>
             </div>
             <div style={{ display:'flex', alignItems:'baseline', justifyContent:'space-between', gap:12 }}>
-              <span style={{ fontSize:TYPE.match, fontWeight:600, color:'var(--blush-deep)' }}>{pct}% match</span>
+              <span style={{ fontSize:TYPE.match, fontWeight:600, color:'var(--blush-deep)' }}>{matchTier(p.distance)}</span>
               <span style={{ fontFamily:'ui-monospace, Menlo, monospace', fontSize:TYPE.body, color:'var(--espresso-mid)' }}>
-                {p.hex.toUpperCase()}
+                {p.hex.toUpperCase()} · ΔE {p.distance.toFixed(1)}
               </span>
             </div>
           </div>
@@ -379,6 +378,12 @@ function generateToneSteps(anchorHex, perSide = 2, stepL = 13, baseName = 'This 
 // ordinary shades. (Well beyond "just noticeable"; equivalent to the old ΔE76
 // cutoff of 10, which reads as a clearly different color, not a slightly-off match.)
 const NO_MATCH_DELTA_E = 6.5;
+
+// How close a result is, in words, by CIEDE2000 distance (1 is about the smallest
+// difference the eye can see). Replaces a "100 − ΔE" percentage, which read 90–100%
+// for nearly every result and promised more than a color measured from photos can.
+const MATCH_TIERS = [[1, 'Very close'], [2, 'Close'], [3.5, 'Similar'], [Infinity, 'Same family']];
+function matchTier(distance) { return MATCH_TIERS.find(([max]) => distance <= max)[1]; }
 
 // How far from the color a result may be. Normally maxDeltaE past the closest match. The color
 // chart instead uses a fixed distance from the pick, so two picks the eye can't tell apart search
@@ -2296,7 +2301,7 @@ function ComparisonTray({ pinnedItems, onRemove, onClear }) {
                   whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis',
                 }}>{p.brand}</span>
                 {expanded && (
-                  <span style={{ fontSize:TYPE.micro, color:'var(--text-muted)' }}>ΔE {p.distance.toFixed(1)}</span>
+                  <span style={{ fontSize:TYPE.micro, color:'var(--blush-deep)', fontWeight:600 }}>{matchTier(p.distance)}</span>
                 )}
               </span>
             </button>

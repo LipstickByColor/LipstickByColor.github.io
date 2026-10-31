@@ -179,8 +179,13 @@ const srOnly = {
 
 // How many shades the comparison tray holds
 const MAX_COMPARE = 6;
+const MATCH_CARD_TYPE = {
+  brand: 11,
+  meta: 12,
+  body: 13
+};
 
-// Single result card — image, save/compare overlay, ΔE + % match
+// Single result card — image, save/compare overlay, finish · price and match tier
 function MatchCard({
   p,
   wishlist,
@@ -189,10 +194,10 @@ function MatchCard({
   togglePin,
   onOpen
 }) {
+  const TYPE = MATCH_CARD_TYPE;
   const isLiked = wishlist.some(x => x.brand === p.brand && x.shade === p.shade);
   const isPinned = pinnedItems.some(x => x.brand === p.brand && x.shade === p.shade);
   const isFull = pinnedItems.length >= MAX_COMPARE && !isPinned;
-  const pct = Math.max(0, Math.round(100 - p.distance));
   return /*#__PURE__*/React.createElement("div", {
     className: "match-card",
     style: {
@@ -320,7 +325,7 @@ function MatchCard({
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
-      fontSize: 11,
+      fontSize: TYPE.brand,
       letterSpacing: '0.08em',
       textTransform: 'uppercase',
       color: 'var(--text-muted)',
@@ -334,7 +339,7 @@ function MatchCard({
   }, "Brand: "), p.brand), /*#__PURE__*/React.createElement("div", {
     title: p.product,
     style: {
-      fontSize: 13,
+      fontSize: TYPE.body,
       color: 'var(--espresso)',
       fontFamily: 'DM Sans',
       lineHeight: 1.3,
@@ -345,7 +350,7 @@ function MatchCard({
     }
   }, p.product), /*#__PURE__*/React.createElement("div", {
     style: {
-      fontSize: 12,
+      fontSize: TYPE.meta,
       fontFamily: 'DM Sans',
       color: 'var(--text-muted)',
       lineHeight: 1.35
@@ -357,35 +362,29 @@ function MatchCard({
       display: 'flex',
       alignItems: 'center',
       gap: 7,
-      marginTop: 4
+      marginTop: 'auto',
+      paddingTop: 4,
+      fontSize: TYPE.meta
     },
-    title: `Color distance ΔE ${p.distance.toFixed(1)} — lower is closer`
+    title: `Color distance ΔE ${p.distance.toFixed(1)}, lower is closer`
   }, /*#__PURE__*/React.createElement("span", {
     style: {
-      fontFamily: 'ui-monospace, Menlo, monospace',
-      fontSize: 10.5,
-      color: 'var(--text-muted)'
+      color: 'var(--espresso-mid)',
+      minWidth: 0,
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      whiteSpace: 'nowrap'
     }
-  }, "\u0394E ", p.distance.toFixed(1)), /*#__PURE__*/React.createElement("span", {
+  }, [(p.finish || '').trim(), p.price_tier || '$$'].filter(Boolean).join(' · ')), /*#__PURE__*/React.createElement("span", {
     style: {
       marginLeft: 'auto',
-      display: 'flex',
-      alignItems: 'baseline',
-      gap: 3,
-      color: 'var(--blush-deep)'
+      fontWeight: 600,
+      color: 'var(--blush-deep)',
+      whiteSpace: 'nowrap'
     }
   }, /*#__PURE__*/React.createElement("span", {
     style: srOnly
-  }, "Match: "), /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 12.5,
-      fontWeight: 500
-    }
-  }, pct, "%"), /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 10.5
-    }
-  }, "match")))));
+  }, "Match: "), matchTier(p.distance)))));
 }
 
 // What a result was matched against, for the detail view's side-by-side strip.
@@ -428,7 +427,6 @@ function MatchDetail({
   const isLiked = wishlist.some(x => x.brand === p.brand && x.shade === p.shade);
   const isPinned = pinnedItems.some(x => x.brand === p.brand && x.shade === p.shade);
   const isFull = pinnedItems.length >= MAX_COMPARE && !isPinned;
-  const pct = Math.max(0, Math.round(100 - p.distance));
   const ink = bandInk(p.hex);
   const redName = redLabel(p.hex);
   const dialogRef = useDialog(onClose);
@@ -626,13 +624,13 @@ function MatchDetail({
       fontWeight: 600,
       color: 'var(--blush-deep)'
     }
-  }, pct, "% match"), /*#__PURE__*/React.createElement("span", {
+  }, matchTier(p.distance)), /*#__PURE__*/React.createElement("span", {
     style: {
       fontFamily: 'ui-monospace, Menlo, monospace',
       fontSize: TYPE.body,
       color: 'var(--espresso-mid)'
     }
-  }, p.hex.toUpperCase()))), /*#__PURE__*/React.createElement("dl", {
+  }, p.hex.toUpperCase(), " \xB7 \u0394E ", p.distance.toFixed(1)))), /*#__PURE__*/React.createElement("dl", {
     style: {
       display: 'grid',
       gridTemplateColumns: 'repeat(auto-fit, minmax(96px, 1fr))',
@@ -741,6 +739,14 @@ function generateToneSteps(anchorHex, perSide = 2, stepL = 13, baseName = 'This 
 // ordinary shades. (Well beyond "just noticeable"; equivalent to the old ΔE76
 // cutoff of 10, which reads as a clearly different color, not a slightly-off match.)
 const NO_MATCH_DELTA_E = 6.5;
+
+// How close a result is, in words, by CIEDE2000 distance (1 is about the smallest
+// difference the eye can see). Replaces a "100 − ΔE" percentage, which read 90–100%
+// for nearly every result and promised more than a color measured from photos can.
+const MATCH_TIERS = [[1, 'Very close'], [2, 'Close'], [3.5, 'Similar'], [Infinity, 'Same family']];
+function matchTier(distance) {
+  return MATCH_TIERS.find(([max]) => distance <= max)[1];
+}
 
 // How far from the color a result may be. Normally maxDeltaE past the closest match. The color
 // chart instead uses a fixed distance from the pick, so two picks the eye can't tell apart search
@@ -3734,9 +3740,10 @@ function ComparisonTray({
     }, p.brand), expanded && /*#__PURE__*/React.createElement("span", {
       style: {
         fontSize: TYPE.micro,
-        color: 'var(--text-muted)'
+        color: 'var(--blush-deep)',
+        fontWeight: 600
       }
-    }, "\u0394E ", p.distance.toFixed(1))))), Array.from({
+    }, matchTier(p.distance))))), Array.from({
       length: Math.max(0, MAX_COMPARE - pinnedItems.length)
     }).map((_, i) => /*#__PURE__*/React.createElement("div", {
       key: `empty-${i}`,
