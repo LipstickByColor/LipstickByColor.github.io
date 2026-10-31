@@ -398,11 +398,15 @@ function bandCut(best, maxDeltaE, chartLab) {
   return Math.max(radius, best + CHART_SPARSE);
 }
 // What the results show: everything within the cut-off, and never fewer than five
-function matchBand(candidates, maxDeltaE, chartLab) {
-  const bestDist = candidates[0]?.distance ?? 0;
-  const inBand = candidates.filter(p => p.distance <= bandCut(bestDist, maxDeltaE, chartLab));
+function withinCut(candidates, cut) {
+  const inBand = candidates.filter(p => p.distance <= cut);
   return inBand.length >= 5 ? inBand : candidates.slice(0, 5);
 }
+function matchBand(candidates, maxDeltaE, chartLab) {
+  return withinCut(candidates, bandCut(candidates[0]?.distance ?? 0, maxDeltaE, chartLab));
+}
+// The color wheel browses a color, so it shows a fixed distance around it, not a margin past the closest lipstick
+const WHEEL_RADIUS = 3.5;
 // Every black lipstick, closest first: what a black pick on the chart or the wheel (Onyx) shows
 function blackMatches(lab) {
   return REAL_PRODUCTS.filter(p => isBlackLab(p.lab)).map(p => ({ ...p, distance: deltaE(lab, p.lab) }))
@@ -4232,6 +4236,7 @@ function App() {
     if (mode === 'wheel' && isBlackLab(target)) return blackMatches(target);
     const candidates = getClosestColors(hex, 500)
       .filter(p => !selectedColor.sourceKey || `${p.brand}|${p.shade}` !== selectedColor.sourceKey);
+    if (mode === 'wheel') return withinCut(candidates, WHEEL_RADIUS);
     return matchBand(candidates, tweaks.maxDeltaE, null);
   }, [selectedColor, toneRamp, toneIdx, tweaks.maxDeltaE, dataReady, mode]);
   // matches: array of real products with .hex .brand .product .shade .finish .retailer .distance
