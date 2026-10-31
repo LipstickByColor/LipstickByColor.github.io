@@ -407,6 +407,8 @@ function matchBand(candidates, maxDeltaE, chartLab) {
 }
 // The color wheel browses a color, so it shows a fixed distance around it, not a margin past the closest lipstick
 const WHEEL_RADIUS = 3.5;
+// The dupe finder's margin past the closest lipstick
+const DUPE_DELTA_E = 2;
 // Every black lipstick, closest first: what a black pick on the chart or the wheel (Onyx) shows
 function blackMatches(lab) {
   return REAL_PRODUCTS.filter(p => isBlackLab(p.lab)).map(p => ({ ...p, distance: deltaE(lab, p.lab) }))
@@ -4237,6 +4239,7 @@ function App() {
     const candidates = getClosestColors(hex, 500)
       .filter(p => !selectedColor.sourceKey || `${p.brand}|${p.shade}` !== selectedColor.sourceKey);
     if (mode === 'wheel') return withinCut(candidates, WHEEL_RADIUS);
+    if (mode === 'dupe') return matchBand(candidates, DUPE_DELTA_E, null);
     return matchBand(candidates, tweaks.maxDeltaE, null);
   }, [selectedColor, toneRamp, toneIdx, tweaks.maxDeltaE, dataReady, mode]);
   // matches: array of real products with .hex .brand .product .shade .finish .retailer .distance
