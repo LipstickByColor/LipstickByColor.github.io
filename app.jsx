@@ -128,8 +128,8 @@ const MAX_COMPARE = 6;
 
 const MATCH_CARD_TYPE = { brand:11, meta:12, body:13 };
 
-// Single result card — image, save/compare overlay, finish · price and match tier
-function MatchCard({ p, wishlist, toggleWishlist, pinnedItems, togglePin, onOpen }) {
+// Single result card — image, save/compare overlay, finish · price and match tier (hideMatch: no tier)
+function MatchCard({ p, wishlist, toggleWishlist, pinnedItems, togglePin, onOpen, hideMatch }) {
   const TYPE = MATCH_CARD_TYPE;
   const isLiked = wishlist.some(x => x.brand === p.brand && x.shade === p.shade);
   const isPinned = pinnedItems.some(x => x.brand === p.brand && x.shade === p.shade);
@@ -194,13 +194,13 @@ function MatchCard({ p, wishlist, toggleWishlist, pinnedItems, togglePin, onOpen
         <div style={{ fontSize:TYPE.meta, fontFamily:'DM Sans', color:'var(--text-muted)', lineHeight:1.35 }}>
           <span style={srOnly}>Shade: </span>{p.shade}
         </div>
-        <div style={{ display:'flex', alignItems:'center', gap:7, marginTop:'auto', paddingTop:4, fontSize:TYPE.meta }} title={`Color distance ΔE ${p.distance.toFixed(1)}, lower is closer`}>
+        <div style={{ display:'flex', alignItems:'center', gap:7, marginTop:'auto', paddingTop:4, fontSize:TYPE.meta }} title={hideMatch ? undefined : `Color distance ΔE ${p.distance.toFixed(1)}, lower is closer`}>
           <span style={{ color:'var(--espresso-mid)', minWidth:0, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
             {[(p.finish || '').trim(), p.price_tier || '$$'].filter(Boolean).join(' · ')}
           </span>
-          <span style={{ marginLeft:'auto', fontWeight:600, color:'var(--blush-deep)', whiteSpace:'nowrap' }}>
+          {!hideMatch && <span style={{ marginLeft:'auto', fontWeight:600, color:'var(--blush-deep)', whiteSpace:'nowrap' }}>
             <span style={srOnly}>Match: </span>{matchTier(p.distance)}
-          </span>
+          </span>}
         </div>
       </div>
     </div>
@@ -223,7 +223,7 @@ const MATCH_DETAIL_TYPE = { eyebrow:11, brand:12, body:13, value:15, match:17, s
 // A result card opened up: bottom sheet on phones, centered dialog on desktop
 // (.match-detail in index.html). `source` is the color it was matched against,
 // or null when the swatch shows the lipstick alone.
-function MatchDetail({ p, source, onClose, wishlist, toggleWishlist, pinnedItems, togglePin }) {
+function MatchDetail({ p, source, onClose, wishlist, toggleWishlist, pinnedItems, togglePin, hideMatch }) {
   const TYPE = MATCH_DETAIL_TYPE;
   const isLiked = wishlist.some(x => x.brand === p.brand && x.shade === p.shade);
   const isPinned = pinnedItems.some(x => x.brand === p.brand && x.shade === p.shade);
@@ -293,9 +293,9 @@ function MatchDetail({ p, source, onClose, wishlist, toggleWishlist, pinnedItems
               <div role={source ? undefined : 'img'} aria-label={source ? undefined : `Swatch ${p.hex}`} style={{ ...stripHalf, justifyContent:'flex-end', background:p.hex, color:ink }}>{source && 'This lipstick'}</div>
             </div>
             <div style={{ display:'flex', alignItems:'baseline', justifyContent:'space-between', gap:12 }}>
-              <span style={{ fontSize:TYPE.match, fontWeight:600, color:'var(--blush-deep)' }}>{matchTier(p.distance)}</span>
+              {!hideMatch && <span style={{ fontSize:TYPE.match, fontWeight:600, color:'var(--blush-deep)' }}>{matchTier(p.distance)}</span>}
               <span style={{ fontFamily:'ui-monospace, Menlo, monospace', fontSize:TYPE.body, color:'var(--espresso-mid)' }}>
-                {p.hex.toUpperCase()} · ΔE {p.distance.toFixed(1)}
+                {p.hex.toUpperCase()}{!hideMatch && ` · ΔE ${p.distance.toFixed(1)}`}
               </span>
             </div>
           </div>
@@ -795,7 +795,7 @@ function filterParamsFrom(search) {
   return [...new URLSearchParams(search)].filter(([k]) => FILTER_PARAMS.includes(k));
 }
 
-function ResultsTable({ selectedColor, matches, totalProducts, pinnedItems, togglePin, wishlist, toggleWishlist, toneRamp, toneIdx, setToneIdx, initialFilterParams, onFiltersChange, hideHeader, collapsibleFilters }) {
+function ResultsTable({ selectedColor, matches, totalProducts, pinnedItems, togglePin, wishlist, toggleWishlist, toneRamp, toneIdx, setToneIdx, initialFilterParams, onFiltersChange, hideHeader, collapsibleFilters, hideMatch }) {
   const [activeBrands, setActiveBrands] = React.useState([]);
   const [filtersShown, setFiltersShown] = React.useState(false);
   const [activeTones, setActiveTones] = React.useState([]);
@@ -1249,7 +1249,7 @@ function ResultsTable({ selectedColor, matches, totalProducts, pinnedItems, togg
           }}>
             {filtered.map((p, i) => (
               <li key={i}>
-                <MatchCard p={p} wishlist={wishlist} toggleWishlist={toggleWishlist} pinnedItems={pinnedItems} togglePin={togglePin} onOpen={() => openDetail(p)} />
+                <MatchCard p={p} wishlist={wishlist} toggleWishlist={toggleWishlist} pinnedItems={pinnedItems} togglePin={togglePin} onOpen={() => openDetail(p)} hideMatch={hideMatch} />
               </li>
             ))}
           </ul>
@@ -1260,7 +1260,7 @@ function ResultsTable({ selectedColor, matches, totalProducts, pinnedItems, togg
           p={openProduct}
           source={DETAIL_SOURCES[selectedColor?.id] ? selectedColor : null}
           onClose={() => setOpenProduct(null)}
-          wishlist={wishlist} toggleWishlist={toggleWishlist} pinnedItems={pinnedItems} togglePin={togglePin}
+          wishlist={wishlist} toggleWishlist={toggleWishlist} pinnedItems={pinnedItems} togglePin={togglePin} hideMatch={hideMatch}
         />
       )}
     </div>
@@ -4251,7 +4251,7 @@ function App() {
   if (dataStatus === 'error') return <DataLoadError />;
 
   // Custom color shows its pick on the card above the results, so they skip their own color header
-  const resultsEl = selectedColor && !dataReady ? <CatalogueLoading /> : <ResultsTable selectedColor={effectiveColor} matches={matches} totalProducts={REAL_PRODUCTS.length} pinnedItems={pinnedItems} togglePin={togglePin} wishlist={wishlist} toggleWishlist={toggleWishlist} toneRamp={toneRamp} toneIdx={toneIdx} setToneIdx={handleToneIdxChange} initialFilterParams={filterParams} onFiltersChange={setFilterParams} hideHeader={mode === 'hex'} collapsibleFilters={mode === 'hex'} />;
+  const resultsEl = selectedColor && !dataReady ? <CatalogueLoading /> : <ResultsTable selectedColor={effectiveColor} matches={matches} totalProducts={REAL_PRODUCTS.length} pinnedItems={pinnedItems} togglePin={togglePin} wishlist={wishlist} toggleWishlist={toggleWishlist} toneRamp={toneRamp} toneIdx={toneIdx} setToneIdx={handleToneIdxChange} initialFilterParams={filterParams} onFiltersChange={setFilterParams} hideHeader={mode === 'hex'} collapsibleFilters={mode === 'hex'} hideMatch={mode === 'wheel'} />;
 
   return (
     <div style={{ minHeight:'100vh', display:'flex', flexDirection:'column', position:'relative', zIndex:1 }}>

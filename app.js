@@ -185,14 +185,15 @@ const MATCH_CARD_TYPE = {
   body: 13
 };
 
-// Single result card — image, save/compare overlay, finish · price and match tier
+// Single result card — image, save/compare overlay, finish · price and match tier (hideMatch: no tier)
 function MatchCard({
   p,
   wishlist,
   toggleWishlist,
   pinnedItems,
   togglePin,
-  onOpen
+  onOpen,
+  hideMatch
 }) {
   const TYPE = MATCH_CARD_TYPE;
   const isLiked = wishlist.some(x => x.brand === p.brand && x.shade === p.shade);
@@ -366,7 +367,7 @@ function MatchCard({
       paddingTop: 4,
       fontSize: TYPE.meta
     },
-    title: `Color distance ΔE ${p.distance.toFixed(1)}, lower is closer`
+    title: hideMatch ? undefined : `Color distance ΔE ${p.distance.toFixed(1)}, lower is closer`
   }, /*#__PURE__*/React.createElement("span", {
     style: {
       color: 'var(--espresso-mid)',
@@ -375,7 +376,7 @@ function MatchCard({
       textOverflow: 'ellipsis',
       whiteSpace: 'nowrap'
     }
-  }, [(p.finish || '').trim(), p.price_tier || '$$'].filter(Boolean).join(' · ')), /*#__PURE__*/React.createElement("span", {
+  }, [(p.finish || '').trim(), p.price_tier || '$$'].filter(Boolean).join(' · ')), !hideMatch && /*#__PURE__*/React.createElement("span", {
     style: {
       marginLeft: 'auto',
       fontWeight: 600,
@@ -421,7 +422,8 @@ function MatchDetail({
   wishlist,
   toggleWishlist,
   pinnedItems,
-  togglePin
+  togglePin,
+  hideMatch
 }) {
   const TYPE = MATCH_DETAIL_TYPE;
   const isLiked = wishlist.some(x => x.brand === p.brand && x.shade === p.shade);
@@ -618,7 +620,7 @@ function MatchDetail({
       justifyContent: 'space-between',
       gap: 12
     }
-  }, /*#__PURE__*/React.createElement("span", {
+  }, !hideMatch && /*#__PURE__*/React.createElement("span", {
     style: {
       fontSize: TYPE.match,
       fontWeight: 600,
@@ -630,7 +632,7 @@ function MatchDetail({
       fontSize: TYPE.body,
       color: 'var(--espresso-mid)'
     }
-  }, p.hex.toUpperCase(), " \xB7 \u0394E ", p.distance.toFixed(1)))), /*#__PURE__*/React.createElement("dl", {
+  }, p.hex.toUpperCase(), !hideMatch && ` · ΔE ${p.distance.toFixed(1)}`))), /*#__PURE__*/React.createElement("dl", {
     style: {
       display: 'grid',
       gridTemplateColumns: 'repeat(auto-fit, minmax(96px, 1fr))',
@@ -1353,7 +1355,8 @@ function ResultsTable({
   initialFilterParams,
   onFiltersChange,
   hideHeader,
-  collapsibleFilters
+  collapsibleFilters,
+  hideMatch
 }) {
   const [activeBrands, setActiveBrands] = React.useState([]);
   const [filtersShown, setFiltersShown] = React.useState(false);
@@ -2046,7 +2049,8 @@ function ResultsTable({
     toggleWishlist: toggleWishlist,
     pinnedItems: pinnedItems,
     togglePin: togglePin,
-    onOpen: () => openDetail(p)
+    onOpen: () => openDetail(p),
+    hideMatch: hideMatch
   }))))), openProduct && /*#__PURE__*/React.createElement(MatchDetail, {
     p: openProduct,
     source: DETAIL_SOURCES[selectedColor?.id] ? selectedColor : null,
@@ -2054,7 +2058,8 @@ function ResultsTable({
     wishlist: wishlist,
     toggleWishlist: toggleWishlist,
     pinnedItems: pinnedItems,
-    togglePin: togglePin
+    togglePin: togglePin,
+    hideMatch: hideMatch
   }));
 }
 
@@ -7806,7 +7811,8 @@ function App() {
     initialFilterParams: filterParams,
     onFiltersChange: setFilterParams,
     hideHeader: mode === 'hex',
-    collapsibleFilters: mode === 'hex'
+    collapsibleFilters: mode === 'hex',
+    hideMatch: mode === 'wheel'
   });
   return /*#__PURE__*/React.createElement("div", {
     style: {
