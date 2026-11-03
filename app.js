@@ -4403,8 +4403,10 @@ function colorFamily(L, a, b) {
   if (h < 0) h += 360;
   if (C < 12) return L < 22 ? 'black' : L > 88 ? 'white' : 'gray';
   if (redKind(labToHex(L, a, b))) return 'red';
-  if (C < 24 && h < 90 || C < 30 && h >= 20 && h < 90) return 'brown';
-  if (C < 30 && (h >= 330 || h < 20)) return 'mauve';
+  // Muted pink hues are mauve, or pink / rose when light: pale pinks are low in chroma by nature
+  if (C < 30 && (h >= 330 || h < 20)) return L >= 75 ? 'pink' : 'mauve';
+  if (C < 30 && h < 30 && L >= 75) return 'rose';
+  if (C < 30 && h >= 20 && h < 90) return 'brown';
   if (h >= 305 && h < 335) return L < 40 ? 'plum' : 'purple';
   if (h >= 335 || h < 14) return L < 40 ? 'berry' : 'pink';
   if (h < 30) return L < 40 ? 'berry' : 'rose';
