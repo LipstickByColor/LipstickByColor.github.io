@@ -3236,6 +3236,19 @@ const wordTails = s => {
   const words = s.split(/\s+/);
   return words.map((_, i) => normSearch(words.slice(i).join(' '))).filter(Boolean);
 };
+// Words people add around a shade name ("armani lip power in shade 104")
+const SHADE_FILLER = new Set(['lipstick', 'lip', 'in', 'shade', 'the', 'dupe']);
+// Every word of `rest` appears in `full` (product line and shade, normShade'd)
+// in any order, so "naughty plum 045" finds "045 naughty plum" and "rouge coco"
+// finds the Rouge Coco line. The last word only has to start a word, for
+// searches still being typed ("dior addi").
+const wordsHit = (rest, full) => {
+  const all = rest.split(' ').filter(Boolean);
+  const words = all.some(w => !SHADE_FILLER.has(w)) ? all.filter(w => !SHADE_FILLER.has(w)) : all;
+  if (!words.length) return false;
+  const have = full.split(' ');
+  return words.every((w, i) => i === words.length - 1 ? have.some(h => h.startsWith(w)) : have.includes(w));
+};
 
 // Quick-start options shown under the dupe search for anyone who
 // doesn't have a specific lipstick in mind yet.
@@ -3272,12 +3285,15 @@ function DupeFinder({ product, onSelect, onUsePhoto }) {
 
   // Brand search ignores case, accents, spaces and punctuation, so "smash box",
   // "loreal" and "elf" still find their brands; other names ("ysl") count too.
+  // `heads` are the ways a brand can start a brand + shade search: its first
+  // word (3+ letters), first two words and so on ("pat mcgrath"), or an alias.
   const brandKeys = React.useMemo(() => brands.map(b => {
-    const first = normSearch(b.split(' ')[0]), aliases = brandAliases(b);
-    return { b, key: normSearch(b), first: first.length >= 3 ? first : null, aliases, tails: [...wordTails(b), ...aliases] };
+    const words = b.split(' '), aliases = brandAliases(b);
+    const heads = [...words.map((_, i) => normSearch(words.slice(0, i + 1).join(' '))).filter((h, i) => h && (i > 0 || h.length >= 3)), ...aliases];
+    return { b, key: normSearch(b), aliases, heads, tails: [...wordTails(b), ...aliases] };
   }), [brands]);
   const shadeIndex = React.useMemo(
-    () => REAL_PRODUCTS.map(p => ({ p, key: normShade(p.shade), tails: wordTails(normShade(p.shade)) })),
+    () => REAL_PRODUCTS.map(p => ({ p, key: normShade(p.shade), full: normShade(`${p.product || ''} ${p.shade}`), tails: wordTails(normShade(p.shade)) })),
     []
   );
   // Shades `q` is a typo or two away from, closest first
@@ -3316,9 +3332,16 @@ function DupeFinder({ product, onSelect, onUsePhoto }) {
   // ("pillow talk") lists that shade across brands. Either skips step 2. The
   // brand can also come last ("rebel mac") when the whole search isn't a shade.
   // When neither matches as typed and no brand does either, typos are allowed
-  // in both parts ("nars gols", "rimmel's 136 balistic").
+  // in both parts ("nars gols", "rimmel's 136 balistic"). The shade part can
+  // also name the product line ("dior addict") or put the words in another
+  // order ("revlon naughty plum 045"). A brand found with no shade to match
+  // gives { route: 'brand_only' } and an empty list, so the visitor is told
+  // the brand is there and can browse it.
   const quickShades = React.useMemo(() => {
     const words = brandQuery.trim().toLowerCase().split(/\s+/).filter(Boolean);
+    // Brand found with no shade to match: as typed, and with typos allowed
+    const missed = { exact: null, typos: null };
+    const byShade = (a, b) => a.shade.localeCompare(b.shade) || a.brand.localeCompare(b.brand);
     const brandShade = (typos, brandLast) => {
       for (let k = words.length - 1; k >= 1; k--) {
         const brandWords = brandLast ? words.slice(words.length - k) : words.slice(0, k);
@@ -3326,18 +3349,25 @@ function DupeFinder({ product, onSelect, onUsePhoto }) {
         const head = normSearch(brandWords.join(' '));
         const rest = normShade(shadeWords.join(' '));
         if (!rest) continue;
-        const hit = new Set(brandKeys.filter(x => x.key === head || x.first === head || x.aliases.includes(head)).map(x => x.b));
+        const hit = new Set(brandKeys.filter(x => x.heads.includes(head)).map(x => x.b));
         if (typos && !hit.size) {
           const max = typoLimit(head);
           for (const x of brandKeys) {
-            if ([x.key, x.first, ...x.aliases].some(n => n && typoDistance(head, n, true, max) <= max)) hit.add(x.b);
+            if (x.heads.some(n => typoDistance(head, n, true, max) <= max)) hit.add(x.b);
           }
         }
         if (!hit.size) continue;
         const items = shadeIndex.filter(x => hit.has(x.p.brand));
-        let list = items.filter(x => x.key.includes(rest)).map(x => x.p).sort((a, b) => a.shade.localeCompare(b.shade)).slice(0, 40);
+        const inShade = items.filter(x => x.key.includes(rest));
+        const inWords = items.filter(x => !x.key.includes(rest) && wordsHit(rest, x.full));
+        let list = [...inShade.map(x => x.p).sort(byShade), ...inWords.map(x => x.p).sort(byShade)].slice(0, 40);
         if (typos && !list.length) list = nearShades(normSearch(rest), items);
         if (list.length) return { route: 'brand_shade', list };
+        const tier = typos ? 'typos' : 'exact';
+        if (!missed[tier] && !brandLast) {
+          const brand = [...hit].sort((a, b) => brandCounts[b] - brandCounts[a])[0];
+          missed[tier] = { route: 'brand_only', brand, rest: shadeWords.join(' '), list: [] };
+        }
       }
       return null;
     };
@@ -3350,7 +3380,6 @@ function DupeFinder({ product, onSelect, onUsePhoto }) {
       if (key.startsWith(q)) starts.push(p);
       else if (key.includes(q)) incl.push(p);
     }
-    const byShade = (a, b) => a.shade.localeCompare(b.shade) || a.brand.localeCompare(b.brand);
     const list = [...starts.sort(byShade), ...incl.sort(byShade)].slice(0, 40);
     if (list.length) return { route: 'shade', list };
     const last = brandShade(false, true);
@@ -3358,19 +3387,30 @@ function DupeFinder({ product, onSelect, onUsePhoto }) {
     if (brandMatches.length) return null;
     const near = brandShade(true, false) || brandShade(true, true);
     if (near) return near;
+    // A brand typed as such but none of its shades: say so rather than guess
+    // shades of other brands from the whole search. A brand only found with
+    // typos ("pillow" for Mellow) comes after that guess.
+    if (missed.exact) return missed.exact;
     const nearList = nearShades(normSearch(brandQuery), shadeIndex);
-    return nearList.length ? { route: 'shade', list: nearList } : null;
-  }, [brandQuery, brandKeys, shadeIndex, brandMatches]);
+    return nearList.length ? { route: 'shade', list: nearList } : missed.typos;
+  }, [brandQuery, brandKeys, brandCounts, shadeIndex, brandMatches]);
+  // Shades to list under the brand box, and a brand found with no shade to match
+  const shadeHits = quickShades?.list.length ? quickShades : null;
+  const missedShade = quickShades?.route === 'brand_only' ? quickShades : null;
 
   const shadeMatches = React.useMemo(() => {
     if (!brand) return [];
     // An empty box lists every shade of the brand, so it can be browsed
     const q = shadeQuery.trim().toLowerCase();
-    const list = REAL_PRODUCTS.filter(p => p.brand === brand && (!q ||
-      p.shade.toLowerCase().includes(q) || (p.product || '').toLowerCase().includes(q)));
+    const items = shadeIndex.filter(x => x.p.brand === brand);
+    const list = items.filter(({ p }) => !q ||
+      p.shade.toLowerCase().includes(q) || (p.product || '').toLowerCase().includes(q)).map(x => x.p);
     if (list.length || !q) return list.sort((a, b) => a.shade.localeCompare(b.shade));
+    // Words in another order ("naughty plum 045"), product line included
+    const words = items.filter(x => wordsHit(normShade(q), x.full)).map(x => x.p);
+    if (words.length) return words.sort((a, b) => a.shade.localeCompare(b.shade));
     // Nothing matches as typed: shades of the brand a typo or two away
-    return nearShades(normSearch(q), shadeIndex.filter(x => x.p.brand === brand));
+    return nearShades(normSearch(q), items);
   }, [brand, shadeQuery, shadeIndex]);
 
   function pickBrand(b) {
@@ -3405,13 +3445,14 @@ function DupeFinder({ product, onSelect, onUsePhoto }) {
   // don't inflate the metric with repeats of the same dead-end search.
   React.useEffect(() => {
     const q = brandQuery.trim().toLowerCase();
-    if (q.length < 3 || brandMatches.length > 0 || quickShades || brandNoResultFired.current) return;
+    if (q.length < 3 || brandMatches.length > 0 || shadeHits || brandNoResultFired.current) return;
     const t = setTimeout(() => {
       brandNoResultFired.current = true;
-      window.gtag?.('event', 'dupe_brand_no_results', { query: q });
+      // `brand` is set when the brand was found but none of its shades matched
+      window.gtag?.('event', 'dupe_brand_no_results', { query: q, ...(missedShade ? { brand: missedShade.brand } : {}) });
     }, 600);
     return () => clearTimeout(t);
-  }, [brandQuery, brandMatches.length, quickShades]);
+  }, [brandQuery, brandMatches.length, shadeHits, missedShade]);
 
   React.useEffect(() => {
     const q = shadeQuery.trim().toLowerCase();
@@ -3472,22 +3513,30 @@ function DupeFinder({ product, onSelect, onUsePhoto }) {
               onKeyDown={e => {
                 if (e.key !== 'Enter') return;
                 if (brandMatches[0]) pickBrand(brandMatches[0]);
-                else if (quickShades) pickQuickShade(quickShades.list[0]);
+                else if (shadeHits) pickQuickShade(shadeHits.list[0]);
+                else if (missedShade) pickBrand(missedShade.brand);
               }}
               placeholder="MAC, Charlotte Tilbury…" aria-label="Brand" style={inputStyle} />
             {brandQuery && <button onClick={() => setBrandQuery('')} aria-label="Clear search" style={clearBtn}>×</button>}
           </div>
-          {brandQuery.trim() && brandMatches.length === 0 && !quickShades && normSearch(brandQuery).length >= 3 && (
+          {brandQuery.trim() && brandMatches.length === 0 && !shadeHits && normSearch(brandQuery).length >= 3 && (
             <div style={{ textAlign:'center', padding:'8px 0' }}>
-              <p style={emptyNote}>No brand or shade matches "{brandQuery.trim()}". It may not be in the catalogue.</p>
+              {missedShade ? (<>
+                <p style={emptyNote}>No <span style={{ textTransform:'capitalize' }}>{missedShade.brand}</span> shade matches "{missedShade.rest}". It may not be in the catalogue.</p>
+                <button onClick={() => pickBrand(missedShade.brand)} style={{ ...photoFallbackBtn, display:'block', margin:'6px auto 0' }}>
+                  See all {missedShade.brand} shades
+                </button>
+              </>) : (
+                <p style={emptyNote}>No brand or shade matches "{brandQuery.trim()}". It may not be in the catalogue.</p>
+              )}
               <button onClick={() => { window.gtag?.('event', 'dupe_photo_fallback', { step: 'brand_no_results', query: brandQuery.trim().toLowerCase() }); onUsePhoto(); }} style={photoFallbackBtn}>
                 Match it from a photo →
               </button>
             </div>
           )}
-          {(brandMatches.length > 0 || quickShades) && (
+          {(brandMatches.length > 0 || shadeHits) && (
             <div style={{ ...suggestBox, maxHeight:308 }}>
-              {brandMatches.length > 0 && quickShades && <span style={{ ...stepLabel, padding:'6px 12px 2px' }}>Brands</span>}
+              {brandMatches.length > 0 && shadeHits && <span style={{ ...stepLabel, padding:'6px 12px 2px' }}>Brands</span>}
               {brandMatches.map(b => (
                 <button key={b} onClick={() => pickBrand(b)} {...hov()} style={{
                   display:'flex', alignItems:'center', gap:8, width:'100%',
@@ -3501,8 +3550,8 @@ function DupeFinder({ product, onSelect, onUsePhoto }) {
                   </span>
                 </button>
               ))}
-              {brandMatches.length > 0 && quickShades && <span style={{ ...stepLabel, padding:'10px 12px 2px' }}>Shades</span>}
-              {quickShades?.list.map((p, i) => (
+              {brandMatches.length > 0 && shadeHits && <span style={{ ...stepLabel, padding:'10px 12px 2px' }}>Shades</span>}
+              {shadeHits?.list.map((p, i) => (
                 <button key={i}
                   onTouchStart={e => { touchStartY.current = e.touches[0].clientY; }}
                   onTouchEnd={e => { if (Math.abs(e.changedTouches[0].clientY - touchStartY.current) < 10) { e.preventDefault(); pickQuickShade(p); } }}
