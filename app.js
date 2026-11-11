@@ -433,7 +433,7 @@ function MatchDetail({
   const redName = shadeLabel(p.hex);
   const dialogRef = useDialog(onClose);
   useBackToClose(onClose);
-  const facts = [['Finish', (p.finish || '').trim() || 'Unlisted'], ['Type', FORMAT_LABELS[p.format] || p.format], ['Price', p.price_tier || '$$'], p.discontinued && ['Status', 'Discontinued']].filter(f => f && f[1]);
+  const facts = [['Finish', (p.finish || '').trim() || 'Unlisted'], ['Type', p.format], ['Price', p.price_tier || '$$'], p.discontinued && ['Status', 'Discontinued']].filter(f => f && f[1]);
   const stripHalf = {
     flex: 1,
     minWidth: 0,
@@ -1337,13 +1337,17 @@ function FilterDropdown({
 // ── Filters in the link ───────────────────────────────────────────────────────
 // Result filters ride along in the URL so a filtered view can be shared:
 //   &price=1&price=2 ($ and $$)  &fbrand=dior  &finish=Matte  &format=Lip+Gloss
-//   &tone=cool  &discontinued=show
+//   &tone=cool  &lasting=1  &discontinued=show
 // (fbrand, not brand: ?brand= already names the lipstick in a dupe link)
-const FILTER_PARAMS = ['price', 'fbrand', 'finish', 'format', 'tone', 'discontinued'];
+const FILTER_PARAMS = ['price', 'fbrand', 'finish', 'format', 'tone', 'lasting', 'discontinued'];
 const PRICE_TIERS = ['$', '$$', '$$$', '$$$$'];
-const FORMAT_LABELS = {
-  'Lip Liner & Pencil': 'Lip Crayon, Liner, & Pencil'
+// Lip crayons are filtered with bullets, under one "Bullet & Crayon" option
+const formatGroup = f => f === 'Lip Crayon' ? 'Bullet Lipstick' : f;
+// The Format menu drops the leading "Lip" ("Gloss", "Oil"); the product card shows the product's own type
+const FORMAT_MENU_LABELS = {
+  'Bullet Lipstick': 'Bullet & Crayon'
 };
+const formatMenuLabel = f => FORMAT_MENU_LABELS[f] || f.replace(/^Lip /, '');
 function filterParamsFrom(search) {
   return [...new URLSearchParams(search)].filter(([k]) => FILTER_PARAMS.includes(k));
 }
@@ -1362,7 +1366,8 @@ function ResultsTable({
   onFiltersChange,
   hideHeader,
   collapsibleFilters,
-  hideMatch
+  hideMatch,
+  keepFilters
 }) {
   const [activeBrands, setActiveBrands] = React.useState([]);
   const [filtersShown, setFiltersShown] = React.useState(false);
@@ -1371,6 +1376,7 @@ function ResultsTable({
   const [activeFinishes, setActiveFinishes] = React.useState([]);
   const [activeFormats, setActiveFormats] = React.useState([]);
   const [hideDiscontinued, setHideDiscontinued] = React.useState(true);
+  const [longLasting, setLongLasting] = React.useState(false);
   const [openFilter, setOpenFilter] = React.useState(null);
   // The result whose detail view is open, if any
   const [openProduct, setOpenProduct] = React.useState(null);
@@ -1389,25 +1395,34 @@ function ResultsTable({
   // Filters the page was opened with (a shared link), waiting for the first results to apply to
   const linkFilters = React.useRef(initialFilterParams || []);
   // Reset filters when selection changes (hideDiscontinued persists as a standing preference).
-  // The first selection takes the link's filters instead.
+  // The first selection takes the link's filters instead. With keepFilters (the color wheel)
+  // they stay on from one color to the next, but still reset on arriving from another tab.
+  const keptBefore = React.useRef(false);
   React.useEffect(() => {
     const fromLink = selectedColor ? linkFilters.current : null;
     if (selectedColor) linkFilters.current = null;
+    const keep = keepFilters && keptBefore.current && !fromLink;
+    keptBefore.current = keepFilters;
+    if (keep) {
+      setOpenFilter(null);
+      return;
+    }
     const got = key => (fromLink || []).filter(([k]) => k === key).map(([, v]) => v);
     setActiveBrands(got('fbrand'));
     setActiveTones(got('tone'));
     setActiveFinishes(got('finish'));
     setActiveFormats(got('format'));
     setActiveTiers(got('price').map(n => PRICE_TIERS[n - 1]).filter(Boolean));
+    setLongLasting(got('lasting').includes('1'));
     if (got('discontinued').includes('show')) setHideDiscontinued(false);
     setOpenFilter(null);
-  }, [selectedColor?.id]);
+  }, [selectedColor?.id, keepFilters]);
 
   // Tell the app which filters are on, for the URL
   React.useEffect(() => {
     if (linkFilters.current || !onFiltersChange) return;
-    onFiltersChange([...activeTiers.map(t => ['price', String(PRICE_TIERS.indexOf(t) + 1)]), ...activeBrands.map(b => ['fbrand', b]), ...activeFinishes.map(f => ['finish', f]), ...activeFormats.map(f => ['format', f]), ...activeTones.map(t => ['tone', t]), ...(hideDiscontinued ? [] : [['discontinued', 'show']])]);
-  }, [selectedColor?.id, activeTiers, activeBrands, activeFinishes, activeFormats, activeTones, hideDiscontinued]);
+    onFiltersChange([...activeTiers.map(t => ['price', String(PRICE_TIERS.indexOf(t) + 1)]), ...activeBrands.map(b => ['fbrand', b]), ...activeFinishes.map(f => ['finish', f]), ...activeFormats.map(f => ['format', f]), ...activeTones.map(t => ['tone', t]), ...(longLasting ? [['lasting', '1']] : []), ...(hideDiscontinued ? [] : [['discontinued', 'show']])]);
+  }, [selectedColor?.id, activeTiers, activeBrands, activeFinishes, activeFormats, activeTones, longLasting, hideDiscontinued]);
 
   // Classify undertone from LAB hue angle
   function toneOf(p) {
@@ -1428,19 +1443,22 @@ function ResultsTable({
     return (p.finish || '').trim() || 'Unlisted';
   }
 
-  // Derive available options from matches
-  const allBrands = [...new Set(matches.map(p => p.brand))].sort();
-  const allTones = [...new Set(matches.map(toneOf))];
+  // Derive available options from matches. A filter that's on stays listed even when these
+  // matches have none of it (kept from the previous color on the wheel), so it can be switched off.
+  const allBrands = [...new Set([...matches.map(p => p.brand), ...activeBrands])].sort();
+  const allTones = [...new Set([...matches.map(toneOf), ...activeTones])];
   const TONE_ORDER = ['cool', 'neutral', 'warm'];
   const orderedTones = TONE_ORDER.filter(t => allTones.includes(t));
   const TIER_ORDER = PRICE_TIERS;
-  const allTiers = TIER_ORDER.filter(t => matches.some(p => tierOf(p) === t));
+  const allTiers = TIER_ORDER.filter(t => activeTiers.includes(t) || matches.some(p => tierOf(p) === t));
   const FINISH_ORDER = ['Cream', 'Glossy', 'Matte', 'Satin', 'Semi-Matte', 'Sheer', 'Shimmer', 'Unlisted'];
-  const allFinishes = FINISH_ORDER.filter(f => matches.some(p => finishOf(p) === f));
+  const allFinishes = FINISH_ORDER.filter(f => activeFinishes.includes(f) || matches.some(p => finishOf(p) === f));
   const FORMAT_ORDER = ['Bullet Lipstick', 'Liquid Lipstick', 'Lip Gloss', 'Lip Stain & Tint', 'Lip Liner & Pencil', 'Lip Oil', 'Lip Balm & Care'];
-  const allFormats = FORMAT_ORDER.filter(f => matches.some(p => p.format === f));
+  const allFormats = FORMAT_ORDER.filter(f => activeFormats.includes(f) || matches.some(p => formatGroup(p.format) === f));
   const hasDiscontinued = matches.some(p => p.discontinued);
-  const filtered = matches.filter(p => (activeBrands.length === 0 || activeBrands.includes(p.brand)) && (activeTones.length === 0 || activeTones.includes(toneOf(p))) && (activeTiers.length === 0 || activeTiers.includes(tierOf(p))) && (activeFinishes.length === 0 || activeFinishes.includes(finishOf(p))) && (activeFormats.length === 0 || activeFormats.includes(p.format)) && (!hideDiscontinued || !p.discontinued));
+  // Only worth offering when it would narrow the list (or it's on)
+  const offerLongLasting = longLasting || matches.some(p => p.long_lasting) && matches.some(p => !p.long_lasting);
+  const filtered = matches.filter(p => (activeBrands.length === 0 || activeBrands.includes(p.brand)) && (activeTones.length === 0 || activeTones.includes(toneOf(p))) && (activeTiers.length === 0 || activeTiers.includes(tierOf(p))) && (activeFinishes.length === 0 || activeFinishes.includes(finishOf(p))) && (activeFormats.length === 0 || activeFormats.includes(formatGroup(p.format))) && (!longLasting || p.long_lasting) && (!hideDiscontinued || !p.discontinued));
 
   // Fire once each time a filter combination empties the results
   const filtersEmptied = matches.length > 0 && filtered.length === 0;
@@ -1452,6 +1470,7 @@ function ResultsTable({
       price_tier: activeTiers.join(','),
       finish: activeFinishes.join(','),
       format: activeFormats.join(','),
+      long_lasting: longLasting,
       still_made: hideDiscontinued
     });
   }, [filtersEmptied]);
@@ -1513,7 +1532,14 @@ function ResultsTable({
     });
     setHideDiscontinued(v => !v);
   }
-  const otherFilters = activeBrands.length + activeTones.length + activeTiers.length + activeFinishes.length + activeFormats.length;
+  function toggleLongLasting() {
+    window.gtag?.('event', 'apply_filter', {
+      filter_type: 'long_lasting',
+      filter_value: longLasting ? 'off' : 'on'
+    });
+    setLongLasting(v => !v);
+  }
+  const otherFilters = activeBrands.length + activeTones.length + activeTiers.length + activeFinishes.length + activeFormats.length + (longLasting ? 1 : 0);
   function clearFilters() {
     window.gtag?.('event', 'clear_filters', {
       filter_count: otherFilters
@@ -1523,9 +1549,10 @@ function ResultsTable({
     setActiveTiers([]);
     setActiveFinishes([]);
     setActiveFormats([]);
+    setLongLasting(false);
   }
   // Matches the other filters keep that are only missing because discontinued shades are hidden
-  const hiddenDiscontinued = hideDiscontinued ? matches.filter(p => p.discontinued && (activeBrands.length === 0 || activeBrands.includes(p.brand)) && (activeTones.length === 0 || activeTones.includes(toneOf(p))) && (activeTiers.length === 0 || activeTiers.includes(tierOf(p))) && (activeFinishes.length === 0 || activeFinishes.includes(finishOf(p))) && (activeFormats.length === 0 || activeFormats.includes(p.format))).length : 0;
+  const hiddenDiscontinued = hideDiscontinued ? matches.filter(p => p.discontinued && (activeBrands.length === 0 || activeBrands.includes(p.brand)) && (activeTones.length === 0 || activeTones.includes(toneOf(p))) && (activeTiers.length === 0 || activeTiers.includes(tierOf(p))) && (activeFinishes.length === 0 || activeFinishes.includes(finishOf(p))) && (activeFormats.length === 0 || activeFormats.includes(formatGroup(p.format))) && (!longLasting || p.long_lasting)).length : 0;
   const emptyBtn = {
     fontFamily: 'DM Sans',
     fontSize: 12,
@@ -1861,7 +1888,7 @@ function ResultsTable({
         transition: 'all 0.15s',
         whiteSpace: 'nowrap'
       }
-    }, FORMAT_LABELS[f] || f, active && /*#__PURE__*/React.createElement("span", {
+    }, formatMenuLabel(f), active && /*#__PURE__*/React.createElement("span", {
       style: {
         marginLeft: 5,
         opacity: 0.6,
@@ -1937,7 +1964,44 @@ function ResultsTable({
         whiteSpace: 'nowrap'
       }
     }, t);
-  })), hasDiscontinued && /*#__PURE__*/React.createElement("button", {
+  })), offerLongLasting && /*#__PURE__*/React.createElement("button", {
+    "aria-pressed": longLasting,
+    onClick: toggleLongLasting,
+    style: {
+      display: 'inline-flex',
+      alignItems: 'center',
+      gap: 7,
+      fontSize: 11,
+      padding: '5px 12px 5px 9px',
+      borderRadius: 20,
+      border: `1.5px solid ${longLasting ? 'var(--espresso-mid)' : 'var(--border)'}`,
+      background: longLasting ? 'rgba(92,61,48,0.08)' : 'transparent',
+      color: longLasting ? 'var(--espresso-mid)' : 'var(--text-muted)',
+      cursor: 'pointer',
+      fontFamily: 'DM Sans',
+      fontWeight: longLasting ? 500 : 400,
+      letterSpacing: '0.06em',
+      textTransform: 'uppercase',
+      transition: 'all 0.15s',
+      whiteSpace: 'nowrap'
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    "aria-hidden": "true",
+    style: {
+      width: 14,
+      height: 14,
+      borderRadius: 4,
+      flex: 'none',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      border: `1.5px solid ${longLasting ? 'var(--espresso-mid)' : 'var(--text-muted)'}`,
+      background: longLasting ? 'var(--espresso-mid)' : '#fff',
+      color: '#fff',
+      fontSize: 10,
+      lineHeight: 1
+    }
+  }, longLasting ? '✓' : ''), "Long-lasting"), hasDiscontinued && /*#__PURE__*/React.createElement("button", {
     "aria-pressed": hideDiscontinued,
     onClick: toggleDiscontinued,
     style: {
@@ -1974,7 +2038,7 @@ function ResultsTable({
       fontSize: 10,
       lineHeight: 1
     }
-  }, hideDiscontinued ? '✓' : ''), "Hide discontinued"), (activeBrands.length > 0 || activeTones.length > 0 || activeTiers.length > 0 || activeFinishes.length > 0 || activeFormats.length > 0) && /*#__PURE__*/React.createElement("div", {
+  }, hideDiscontinued ? '✓' : ''), "Hide discontinued"), otherFilters > 0 && /*#__PURE__*/React.createElement("div", {
     className: "filter-summary",
     style: {
       display: 'flex',
@@ -2791,7 +2855,7 @@ const MODE_PAGES = {
   },
   hex: {
     path: '/lipstick-color-chart/',
-    title: 'Lipstick Color Chart: Nearly 17,000 Lipsticks by Color'
+    title: 'Lipstick Color Chart: Over 24,000 Lipsticks by Color'
   }
 };
 const HOME_TITLE = 'Lipstick Color Finder: Any Lipstick or Dupe by Color';
@@ -7289,7 +7353,7 @@ function Landing({
       lineHeight: 1.5,
       color: 'var(--espresso-mid)'
     }
-  }, "Nearly 17,000 lip products at every price, matched by how they actually look.")), /*#__PURE__*/React.createElement("div", {
+  }, "Over 24,000 lip products at every price, matched by how they actually look.")), /*#__PURE__*/React.createElement("div", {
     className: "landing-grid"
   }, cards.map(c => /*#__PURE__*/React.createElement(LandingCard, {
     key: c.id,
@@ -7324,7 +7388,7 @@ function CatalogueLoading() {
       fontSize: 18,
       color: 'var(--text-muted)'
     }
-  }, "Loading nearly 17,000 shades\u2026"));
+  }, "Loading over 24,000 shades\u2026"));
 }
 
 // Replaces the whole app when the catalogue can't be loaded, so visitors don't
@@ -7910,7 +7974,8 @@ function App() {
     onFiltersChange: setFilterParams,
     hideHeader: mode === 'hex',
     collapsibleFilters: mode === 'hex',
-    hideMatch: mode === 'wheel'
+    hideMatch: mode === 'wheel',
+    keepFilters: mode === 'wheel'
   });
   return /*#__PURE__*/React.createElement("div", {
     style: {
@@ -7972,7 +8037,7 @@ function App() {
       color: 'var(--text-muted)',
       letterSpacing: '0.02em'
     }
-  }, "\xB7 Nearly 17,000 lip products"), /*#__PURE__*/React.createElement("div", {
+  }, "\xB7 Over 24,000 lip products"), /*#__PURE__*/React.createElement("div", {
     className: "header-actions",
     style: {
       marginLeft: 'auto',

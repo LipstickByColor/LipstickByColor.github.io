@@ -235,7 +235,7 @@ function MatchDetail({ p, source, onClose, wishlist, toggleWishlist, pinnedItems
 
   const facts = [
     ['Finish', (p.finish || '').trim() || 'Unlisted'],
-    ['Type', FORMAT_LABELS[p.format] || p.format],
+    ['Type', p.format],
     ['Price', p.price_tier || '$$'],
     p.discontinued && ['Status', 'Discontinued'],
   ].filter(f => f && f[1]);
@@ -792,16 +792,20 @@ function FilterDropdown({ label, count, onClear, isOpen, onOpen, children }) {
 // ── Filters in the link ───────────────────────────────────────────────────────
 // Result filters ride along in the URL so a filtered view can be shared:
 //   &price=1&price=2 ($ and $$)  &fbrand=dior  &finish=Matte  &format=Lip+Gloss
-//   &tone=cool  &discontinued=show
+//   &tone=cool  &lasting=1  &discontinued=show
 // (fbrand, not brand: ?brand= already names the lipstick in a dupe link)
-const FILTER_PARAMS = ['price', 'fbrand', 'finish', 'format', 'tone', 'discontinued'];
+const FILTER_PARAMS = ['price', 'fbrand', 'finish', 'format', 'tone', 'lasting', 'discontinued'];
 const PRICE_TIERS = ['$', '$$', '$$$', '$$$$'];
-const FORMAT_LABELS = { 'Lip Liner & Pencil': 'Lip Crayon, Liner, & Pencil' };
+// Lip crayons are filtered with bullets, under one "Bullet & Crayon" option
+const formatGroup = f => f === 'Lip Crayon' ? 'Bullet Lipstick' : f;
+// The Format menu drops the leading "Lip" ("Gloss", "Oil"); the product card shows the product's own type
+const FORMAT_MENU_LABELS = { 'Bullet Lipstick': 'Bullet & Crayon' };
+const formatMenuLabel = f => FORMAT_MENU_LABELS[f] || f.replace(/^Lip /, '');
 function filterParamsFrom(search) {
   return [...new URLSearchParams(search)].filter(([k]) => FILTER_PARAMS.includes(k));
 }
 
-function ResultsTable({ selectedColor, matches, totalProducts, pinnedItems, togglePin, wishlist, toggleWishlist, toneRamp, toneIdx, setToneIdx, initialFilterParams, onFiltersChange, hideHeader, collapsibleFilters, hideMatch }) {
+function ResultsTable({ selectedColor, matches, totalProducts, pinnedItems, togglePin, wishlist, toggleWishlist, toneRamp, toneIdx, setToneIdx, initialFilterParams, onFiltersChange, hideHeader, collapsibleFilters, hideMatch, keepFilters }) {
   const [activeBrands, setActiveBrands] = React.useState([]);
   const [filtersShown, setFiltersShown] = React.useState(false);
   const [activeTones, setActiveTones] = React.useState([]);
@@ -809,6 +813,7 @@ function ResultsTable({ selectedColor, matches, totalProducts, pinnedItems, togg
   const [activeFinishes, setActiveFinishes] = React.useState([]);
   const [activeFormats, setActiveFormats] = React.useState([]);
   const [hideDiscontinued, setHideDiscontinued] = React.useState(true);
+  const [longLasting, setLongLasting] = React.useState(false);
   const [openFilter, setOpenFilter] = React.useState(null);
   // The result whose detail view is open, if any
   const [openProduct, setOpenProduct] = React.useState(null);
@@ -821,16 +826,22 @@ function ResultsTable({ selectedColor, matches, totalProducts, pinnedItems, togg
   // Filters the page was opened with (a shared link), waiting for the first results to apply to
   const linkFilters = React.useRef(initialFilterParams || []);
   // Reset filters when selection changes (hideDiscontinued persists as a standing preference).
-  // The first selection takes the link's filters instead.
+  // The first selection takes the link's filters instead. With keepFilters (the color wheel)
+  // they stay on from one color to the next, but still reset on arriving from another tab.
+  const keptBefore = React.useRef(false);
   React.useEffect(() => {
     const fromLink = selectedColor ? linkFilters.current : null;
     if (selectedColor) linkFilters.current = null;
+    const keep = keepFilters && keptBefore.current && !fromLink;
+    keptBefore.current = keepFilters;
+    if (keep) { setOpenFilter(null); return; }
     const got = key => (fromLink || []).filter(([k]) => k === key).map(([, v]) => v);
     setActiveBrands(got('fbrand')); setActiveTones(got('tone')); setActiveFinishes(got('finish')); setActiveFormats(got('format'));
     setActiveTiers(got('price').map(n => PRICE_TIERS[n - 1]).filter(Boolean));
+    setLongLasting(got('lasting').includes('1'));
     if (got('discontinued').includes('show')) setHideDiscontinued(false);
     setOpenFilter(null);
-  }, [selectedColor?.id]);
+  }, [selectedColor?.id, keepFilters]);
 
   // Tell the app which filters are on, for the URL
   React.useEffect(() => {
@@ -841,9 +852,10 @@ function ResultsTable({ selectedColor, matches, totalProducts, pinnedItems, togg
       ...activeFinishes.map(f => ['finish', f]),
       ...activeFormats.map(f => ['format', f]),
       ...activeTones.map(t => ['tone', t]),
+      ...(longLasting ? [['lasting', '1']] : []),
       ...(hideDiscontinued ? [] : [['discontinued', 'show']]),
     ]);
-  }, [selectedColor?.id, activeTiers, activeBrands, activeFinishes, activeFormats, activeTones, hideDiscontinued]);
+  }, [selectedColor?.id, activeTiers, activeBrands, activeFinishes, activeFormats, activeTones, longLasting, hideDiscontinued]);
 
   // Classify undertone from LAB hue angle
   function toneOf(p) {
@@ -862,25 +874,29 @@ function ResultsTable({ selectedColor, matches, totalProducts, pinnedItems, togg
   function tierOf(p) { return p.price_tier || '$$'; }
   function finishOf(p) { return (p.finish || '').trim() || 'Unlisted'; }
 
-  // Derive available options from matches
-  const allBrands   = [...new Set(matches.map(p => p.brand))].sort();
-  const allTones    = [...new Set(matches.map(toneOf))];
+  // Derive available options from matches. A filter that's on stays listed even when these
+  // matches have none of it (kept from the previous color on the wheel), so it can be switched off.
+  const allBrands   = [...new Set([...matches.map(p => p.brand), ...activeBrands])].sort();
+  const allTones    = [...new Set([...matches.map(toneOf), ...activeTones])];
   const TONE_ORDER  = ['cool','neutral','warm'];
   const orderedTones = TONE_ORDER.filter(t => allTones.includes(t));
   const TIER_ORDER  = PRICE_TIERS;
-  const allTiers    = TIER_ORDER.filter(t => matches.some(p => tierOf(p) === t));
+  const allTiers    = TIER_ORDER.filter(t => activeTiers.includes(t) || matches.some(p => tierOf(p) === t));
   const FINISH_ORDER = ['Cream','Glossy','Matte','Satin','Semi-Matte','Sheer','Shimmer','Unlisted'];
-  const allFinishes = FINISH_ORDER.filter(f => matches.some(p => finishOf(p) === f));
+  const allFinishes = FINISH_ORDER.filter(f => activeFinishes.includes(f) || matches.some(p => finishOf(p) === f));
   const FORMAT_ORDER = ['Bullet Lipstick','Liquid Lipstick','Lip Gloss','Lip Stain & Tint','Lip Liner & Pencil','Lip Oil','Lip Balm & Care'];
-  const allFormats  = FORMAT_ORDER.filter(f => matches.some(p => p.format === f));
+  const allFormats  = FORMAT_ORDER.filter(f => activeFormats.includes(f) || matches.some(p => formatGroup(p.format) === f));
   const hasDiscontinued = matches.some(p => p.discontinued);
+  // Only worth offering when it would narrow the list (or it's on)
+  const offerLongLasting = longLasting || (matches.some(p => p.long_lasting) && matches.some(p => !p.long_lasting));
 
   const filtered = matches.filter(p =>
     (activeBrands.length === 0   || activeBrands.includes(p.brand))   &&
     (activeTones.length === 0    || activeTones.includes(toneOf(p)))   &&
     (activeTiers.length === 0    || activeTiers.includes(tierOf(p)))   &&
     (activeFinishes.length === 0 || activeFinishes.includes(finishOf(p))) &&
-    (activeFormats.length === 0  || activeFormats.includes(p.format))  &&
+    (activeFormats.length === 0  || activeFormats.includes(formatGroup(p.format)))  &&
+    (!longLasting || p.long_lasting) &&
     (!hideDiscontinued || !p.discontinued)
   );
 
@@ -890,7 +906,7 @@ function ResultsTable({ selectedColor, matches, totalProducts, pinnedItems, togg
     if (!filtersEmptied) return;
     window.gtag?.('event', 'filter_no_results', {
       brand: activeBrands.join(','), undertone: activeTones.join(','), price_tier: activeTiers.join(','),
-      finish: activeFinishes.join(','), format: activeFormats.join(','), still_made: hideDiscontinued,
+      finish: activeFinishes.join(','), format: activeFormats.join(','), long_lasting: longLasting, still_made: hideDiscontinued,
     });
   }, [filtersEmptied]);
 
@@ -940,10 +956,14 @@ function ResultsTable({ selectedColor, matches, totalProducts, pinnedItems, togg
     window.gtag?.('event', 'apply_filter', { filter_type: 'still_made', filter_value: hideDiscontinued ? 'include_discontinued' : 'still_made_only' });
     setHideDiscontinued(v => !v);
   }
-  const otherFilters = activeBrands.length + activeTones.length + activeTiers.length + activeFinishes.length + activeFormats.length;
+  function toggleLongLasting() {
+    window.gtag?.('event', 'apply_filter', { filter_type: 'long_lasting', filter_value: longLasting ? 'off' : 'on' });
+    setLongLasting(v => !v);
+  }
+  const otherFilters = activeBrands.length + activeTones.length + activeTiers.length + activeFinishes.length + activeFormats.length + (longLasting ? 1 : 0);
   function clearFilters() {
     window.gtag?.('event', 'clear_filters', { filter_count: otherFilters });
-    setActiveBrands([]); setActiveTones([]); setActiveTiers([]); setActiveFinishes([]); setActiveFormats([]);
+    setActiveBrands([]); setActiveTones([]); setActiveTiers([]); setActiveFinishes([]); setActiveFormats([]); setLongLasting(false);
   }
   // Matches the other filters keep that are only missing because discontinued shades are hidden
   const hiddenDiscontinued = hideDiscontinued ? matches.filter(p => p.discontinued &&
@@ -951,7 +971,8 @@ function ResultsTable({ selectedColor, matches, totalProducts, pinnedItems, togg
     (activeTones.length === 0    || activeTones.includes(toneOf(p)))   &&
     (activeTiers.length === 0    || activeTiers.includes(tierOf(p)))   &&
     (activeFinishes.length === 0 || activeFinishes.includes(finishOf(p))) &&
-    (activeFormats.length === 0  || activeFormats.includes(p.format))).length : 0;
+    (activeFormats.length === 0  || activeFormats.includes(formatGroup(p.format))) &&
+    (!longLasting || p.long_lasting)).length : 0;
   const emptyBtn = {
     fontFamily:'DM Sans', fontSize:12, fontWeight:500, letterSpacing:'0.06em', textTransform:'uppercase',
     padding:'10px 18px', borderRadius:24, border:'1.5px solid var(--espresso)', background:'#fff', color:'var(--espresso)', cursor:'pointer',
@@ -1142,7 +1163,7 @@ function ResultsTable({ selectedColor, matches, totalProducts, pinnedItems, togg
                     color: active ? 'var(--espresso-mid)' : 'var(--text-muted)',
                     cursor:'pointer', fontFamily:'DM Sans', fontWeight: active ? 500 : 400,
                     letterSpacing:'0.04em', transition:'all 0.15s', whiteSpace:'nowrap',
-                  }}>{FORMAT_LABELS[f] || f}{active && <span style={{ marginLeft:5, opacity:0.6, fontSize:10 }}>✕</span>}</button>
+                  }}>{formatMenuLabel(f)}{active && <span style={{ marginLeft:5, opacity:0.6, fontSize:10 }}>✕</span>}</button>
                 );
               })}
             </FilterDropdown>
@@ -1197,6 +1218,28 @@ function ResultsTable({ selectedColor, matches, totalProducts, pinnedItems, togg
             </FilterDropdown>
           )}
 
+          {/* Off by default; the same box-and-tick chip as Hide discontinued */}
+          {offerLongLasting && (
+            <button aria-pressed={longLasting} onClick={toggleLongLasting} style={{
+              display:'inline-flex', alignItems:'center', gap:7,
+              fontSize:11, padding:'5px 12px 5px 9px', borderRadius:20,
+              border:`1.5px solid ${longLasting ? 'var(--espresso-mid)' : 'var(--border)'}`,
+              background: longLasting ? 'rgba(92,61,48,0.08)' : 'transparent',
+              color: longLasting ? 'var(--espresso-mid)' : 'var(--text-muted)',
+              cursor:'pointer', fontFamily:'DM Sans', fontWeight: longLasting ? 500 : 400,
+              letterSpacing:'0.06em', textTransform:'uppercase', transition:'all 0.15s', whiteSpace:'nowrap',
+            }}>
+              <span aria-hidden="true" style={{
+                width:14, height:14, borderRadius:4, flex:'none',
+                display:'flex', alignItems:'center', justifyContent:'center',
+                border:`1.5px solid ${longLasting ? 'var(--espresso-mid)' : 'var(--text-muted)'}`,
+                background: longLasting ? 'var(--espresso-mid)' : '#fff',
+                color:'#fff', fontSize:10, lineHeight:1,
+              }}>{longLasting ? '✓' : ''}</span>
+              Long-lasting
+            </button>
+          )}
+
           {/* On by default. The box and its tick are what say this chip can be switched off. */}
           {hasDiscontinued && (
             <button aria-pressed={hideDiscontinued} onClick={toggleDiscontinued} style={{
@@ -1219,7 +1262,7 @@ function ResultsTable({ selectedColor, matches, totalProducts, pinnedItems, togg
             </button>
           )}
 
-          {(activeBrands.length > 0 || activeTones.length > 0 || activeTiers.length > 0 || activeFinishes.length > 0 || activeFormats.length > 0) && (
+          {otherFilters > 0 && (
             <div className="filter-summary" style={{ display:'flex', alignItems:'center', gap:10, marginLeft:'auto' }}>
               <span style={{ fontSize:11, color:'var(--text-muted)', fontFamily:'DM Sans' }}>
                 {filtered.length} of {matches.length} shown
@@ -1765,7 +1808,7 @@ const MODE_PAGES = {
   wheel: { path:'/color-wheel/', title:'Lipstick Color Wheel: Browse Shades by Color' },
   photo: { path:'/photo-match/', title:'Find a Lipstick from a Photo: Match Any Lip Color' },
   dupe:  { path:'/dupe-finder/', title:'Lipstick Dupe Finder: Same Color, Any Price' },
-  hex:   { path:'/lipstick-color-chart/', title:'Lipstick Color Chart: Nearly 17,000 Lipsticks by Color' },
+  hex:   { path:'/lipstick-color-chart/', title:'Lipstick Color Chart: Over 24,000 Lipsticks by Color' },
 };
 const HOME_TITLE = 'Lipstick Color Finder: Any Lipstick or Dupe by Color';
 const PAGE_MODE = Object.keys(MODE_PAGES).find(m => window.location.pathname.startsWith(MODE_PAGES[m].path)) || null;
@@ -3895,7 +3938,7 @@ function Landing({ onPick }) {
           How do you want <em style={{ fontStyle:'italic', fontWeight:400, color:'var(--espresso-mid)' }}>to search?</em>
         </h2>
         <p style={{ fontSize:15, lineHeight:1.5, color:'var(--espresso-mid)' }}>
-          Nearly 17,000 lip products at every price, matched by how they actually look.
+          Over 24,000 lip products at every price, matched by how they actually look.
         </p>
       </div>
       <div className="landing-grid">
@@ -3915,7 +3958,7 @@ function CatalogueLoading() {
     <div role="status" style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:14, padding:'48px 16px', textAlign:'center' }}>
       <div className="preload-spinner" />
       <p style={{ fontFamily:'Cormorant Garamond, serif', fontStyle:'italic', fontSize:18, color:'var(--text-muted)' }}>
-        Loading nearly 17,000 shades…
+        Loading over 24,000 shades…
       </p>
     </div>
   );
@@ -4320,7 +4363,7 @@ function App() {
   if (dataStatus === 'error') return <DataLoadError />;
 
   // Custom color shows its pick on the card above the results, so they skip their own color header
-  const resultsEl = selectedColor && !dataReady ? <CatalogueLoading /> : <ResultsTable selectedColor={effectiveColor} matches={matches} totalProducts={REAL_PRODUCTS.length} pinnedItems={pinnedItems} togglePin={togglePin} wishlist={wishlist} toggleWishlist={toggleWishlist} toneRamp={toneRamp} toneIdx={toneIdx} setToneIdx={handleToneIdxChange} initialFilterParams={filterParams} onFiltersChange={setFilterParams} hideHeader={mode === 'hex'} collapsibleFilters={mode === 'hex'} hideMatch={mode === 'wheel'} />;
+  const resultsEl = selectedColor && !dataReady ? <CatalogueLoading /> : <ResultsTable selectedColor={effectiveColor} matches={matches} totalProducts={REAL_PRODUCTS.length} pinnedItems={pinnedItems} togglePin={togglePin} wishlist={wishlist} toggleWishlist={toggleWishlist} toneRamp={toneRamp} toneIdx={toneIdx} setToneIdx={handleToneIdxChange} initialFilterParams={filterParams} onFiltersChange={setFilterParams} hideHeader={mode === 'hex'} collapsibleFilters={mode === 'hex'} hideMatch={mode === 'wheel'} keepFilters={mode === 'wheel'} />;
 
   return (
     <div style={{ minHeight:'100vh', display:'flex', flexDirection:'column', position:'relative', zIndex:1 }}>
@@ -4351,7 +4394,7 @@ function App() {
         <span className="header-product-count" style={{
           fontFamily:'DM Sans', fontSize:11, color:'var(--text-muted)', letterSpacing:'0.02em',
         }}>
-          · Nearly 17,000 lip products
+          · Over 24,000 lip products
         </span>
         <div className="header-actions" style={{ marginLeft:'auto', display:'flex', alignItems:'center', gap:16 }}>
           <a href="/guides/" className="header-how-it-works"
