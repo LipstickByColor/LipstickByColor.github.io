@@ -21,8 +21,9 @@ const LOCK = path.join(ROOT, 'site-numbers.lock.json');
 const BRANDS = path.join(ROOT, 'brands.json');
 
 // Hand-written sources plus the generated pages (so they stay right between rebuilds)
-// Not here: guides/red-lipstick/index.html. Its figures (17,141 lipsticks, 2,668 reds) are the
-// catalogue as it was when the guide was written, and stay fixed. guides/index.html quotes those
+// Not here: guides/red-lipstick/index.html and guides/pink-lipstick/index.html. Their figures
+// (17,141 lipsticks, 2,668 reds; 24,097 lipsticks, 5,235 pinks) are the catalogue as it was when
+// each guide was written, and stay fixed. guides/index.html quotes those
 // same two figures for the guides; they no longer match a current wording, so they are left alone.
 const FILES = [
   'index.html', 'about/index.html', 'color-science/index.html', 'privacy/index.html', '404.html',
