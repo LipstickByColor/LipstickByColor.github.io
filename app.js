@@ -4401,6 +4401,7 @@ const EXPLORER_STARTS = [['Red', '#b5252c'], ['Pink', '#d66796'], ['Berry', '#7d
 // Start-from families that open a Tone and a Depth row: hue (degrees) for [warm, neutral, cool], chroma,
 // and which depth a tap on the family opens on. The numbers are chosen so the card names each pick the
 // way its chips do (describeColor); Red has its own depths, the red guide's bright / classic / deep.
+// Pink's hues sit in the pink guide's tones (warm from 15°, true 0–15°, cool below 0°, pinkKind).
 // No chip may land on another family: a pink below lightness 40 is named berry, so Pink's Deep stops
 // at 43, and Berry has only its deep depth (lighter ones are pinks) and so no Depth row.
 // Blue and Black have no rows: they jump to their EXPLORER_STARTS color.
@@ -4414,9 +4415,9 @@ const START_FAMILIES = {
     open: 1
   },
   Pink: {
-    hues: [5.5, 354.5, 343.5],
+    hues: [16.5, 6, 346],
     C: 45,
-    depths: [['Light', 68], ['Medium', 52], ['Deep', 43]],
+    depths: [['Light', 68], ['Medium', 56], ['Deep', 43]],
     open: 1
   },
   Berry: {
@@ -4510,8 +4511,9 @@ function isBlackLab(lab) {
 // Per family: [neutral center, "clearly leaning" threshold, band start, band end], in hue degrees.
 // A family only gets "warm"/"cool" when the hue is clearly off-center and at least 3° inside
 // its band, so a name never points back at the neighboring family.
+// Pink follows the pink guide (pinkKind): cool below 0°, warm from 15°, which the pink family never reaches.
 const FAMILY_TONE = {
-  pink: [354.5, 8, 335, 14],
+  pink: [7.5, 7.5, 335, 14],
   berry: [358, 9, 335, 30],
   coral: [51, 3, 30, 60],
   brick: [51, 4, 30, 60],
@@ -4533,13 +4535,16 @@ function familyTone(fam, h) {
   return off > c[1] ? 'warm' : off < -c[1] ? 'cool' : '';
 }
 // "Deep cool berry", "Light coral", "Black"; a red is worded as the red guide does, minus
-// its middle depth word: "classic" read as a tone here, so that depth is just "True red", "Blue-red"
+// its middle depth word: "classic" read as a tone here, so that depth is just "True red", "Blue-red".
+// A pink the pink guide counts (pinkKind) is worded as that guide does: "Pale true pink", "Vivid pink".
 function describeColor(L, a, b) {
   const fam = colorFamily(L, a, b);
   if (fam === 'red') {
     const red = redLabel(labToHex(L, a, b)).replace(/^classic /, '');
     return red[0].toUpperCase() + red.slice(1);
   }
+  const pink = pinkLabel(labToHex(L, a, b));
+  if (pink) return pink[0].toUpperCase() + pink.slice(1);
   let h = Math.atan2(b, a) * 180 / Math.PI;
   if (h < 0) h += 360;
   const tone = familyTone(fam, h);

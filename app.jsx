@@ -2680,6 +2680,7 @@ const EXPLORER_STARTS = [['Red', '#b5252c'], ['Pink', '#d66796'], ['Berry', '#7d
 // Start-from families that open a Tone and a Depth row: hue (degrees) for [warm, neutral, cool], chroma,
 // and which depth a tap on the family opens on. The numbers are chosen so the card names each pick the
 // way its chips do (describeColor); Red has its own depths, the red guide's bright / classic / deep.
+// Pink's hues sit in the pink guide's tones (warm from 15°, true 0–15°, cool below 0°, pinkKind).
 // No chip may land on another family: a pink below lightness 40 is named berry, so Pink's Deep stops
 // at 43, and Berry has only its deep depth (lighter ones are pinks) and so no Depth row.
 // Blue and Black have no rows: they jump to their EXPLORER_STARTS color.
@@ -2687,7 +2688,7 @@ const START_TONES = ['Warm', 'Neutral', 'Cool'];
 const START_DEPTHS = [['Light', 68], ['Medium', 52], ['Deep', 34]];
 const START_FAMILIES = {
   Red:   { hues: [37, 30, 23], C: 64, depths: [['Bright', 50], ['Medium', 42], ['Deep', 32]], open: 1 },
-  Pink:  { hues: [5.5, 354.5, 343.5], C: 45, depths: [['Light', 68], ['Medium', 52], ['Deep', 43]], open: 1 },
+  Pink:  { hues: [16.5, 6, 346], C: 45, depths: [['Light', 68], ['Medium', 56], ['Deep', 43]], open: 1 },
   Berry: { hues: [10, 358, 346], C: 40, depths: [['Deep', 34]], open: 0 },
   Coral: { hues: [56, 51, 46], C: 50, open: 1 },
   Brown: { hues: [70, 55, 40], C: 20, open: 1 },
@@ -2749,7 +2750,8 @@ function isBlackLab(lab) {
 // Per family: [neutral center, "clearly leaning" threshold, band start, band end], in hue degrees.
 // A family only gets "warm"/"cool" when the hue is clearly off-center and at least 3° inside
 // its band, so a name never points back at the neighboring family.
-const FAMILY_TONE = { pink: [354.5, 8, 335, 14], berry: [358, 9, 335, 30], coral: [51, 3, 30, 60], brick: [51, 4, 30, 60], rust: [72.5, 6, 60, 85], orange: [72.5, 6, 60, 85], brown: [55, 12, 20, 90], mauve: [355, 10, 330, 20], plum: [320, 6, 305, 335], purple: [320, 6, 305, 335], blue: [285, 10, 230, 305] };
+// Pink follows the pink guide (pinkKind): cool below 0°, warm from 15°, which the pink family never reaches.
+const FAMILY_TONE = { pink: [7.5, 7.5, 335, 14], berry: [358, 9, 335, 30], coral: [51, 3, 30, 60], brick: [51, 4, 30, 60], rust: [72.5, 6, 60, 85], orange: [72.5, 6, 60, 85], brown: [55, 12, 20, 90], mauve: [355, 10, 330, 20], plum: [320, 6, 305, 335], purple: [320, 6, 305, 335], blue: [285, 10, 230, 305] };
 function familyTone(fam, h) {
   const c = FAMILY_TONE[fam]; if (!c) return '';
   const w = (c[3] - c[2] + 360) % 360, d = (h - c[2] + 360) % 360;
@@ -2758,10 +2760,13 @@ function familyTone(fam, h) {
   return off > c[1] ? 'warm' : off < -c[1] ? 'cool' : '';
 }
 // "Deep cool berry", "Light coral", "Black"; a red is worded as the red guide does, minus
-// its middle depth word: "classic" read as a tone here, so that depth is just "True red", "Blue-red"
+// its middle depth word: "classic" read as a tone here, so that depth is just "True red", "Blue-red".
+// A pink the pink guide counts (pinkKind) is worded as that guide does: "Pale true pink", "Vivid pink".
 function describeColor(L, a, b) {
   const fam = colorFamily(L, a, b);
   if (fam === 'red') { const red = redLabel(labToHex(L, a, b)).replace(/^classic /, ''); return red[0].toUpperCase() + red.slice(1); }
+  const pink = pinkLabel(labToHex(L, a, b));
+  if (pink) return pink[0].toUpperCase() + pink.slice(1);
   let h = Math.atan2(b, a) * 180 / Math.PI; if (h < 0) h += 360;
   const tone = familyTone(fam, h);
   const name = ['black', 'white', 'gray'].includes(fam) ? fam
