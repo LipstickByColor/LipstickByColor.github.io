@@ -229,7 +229,7 @@ function MatchDetail({ p, source, onClose, wishlist, toggleWishlist, pinnedItems
   const isPinned = pinnedItems.some(x => x.brand === p.brand && x.shade === p.shade);
   const isFull = pinnedItems.length >= MAX_COMPARE && !isPinned;
   const ink = bandInk(p.hex);
-  const redName = redLabel(p.hex);
+  const redName = shadeLabel(p.hex);
   const dialogRef = useDialog(onClose);
   useBackToClose(onClose);
 
@@ -857,7 +857,7 @@ function ResultsTable({ selectedColor, matches, totalProducts, pinnedItems, togg
     return 'neutral';
   }
 
-  const redName = selectedColor ? redLabel(selectedColor.hex) : null;
+  const redName = selectedColor ? shadeLabel(selectedColor.hex) : null;
 
   function tierOf(p) { return p.price_tier || '$$'; }
   function finishOf(p) { return (p.finish || '').trim() || 'Unlisted'; }
@@ -986,7 +986,7 @@ function ResultsTable({ selectedColor, matches, totalProducts, pinnedItems, togg
           <p style={{ fontSize:11, color:'var(--text-muted)', marginTop:2, fontFamily:'DM Sans', letterSpacing:'0.05em' }}>
             {selectedColor.hex.toUpperCase()} · Closest lip matches by ΔE
           </p>
-          {/* Reds only: tone and depth, by the red guide's rules */}
+          {/* Reds and pinks: tone and depth, by the red and pink guides' rules */}
           {redName && <p style={{ ...RED_LABEL_STYLE, marginTop:6 }}>{redName}</p>}
         </div>
       </div>}
@@ -1819,6 +1819,13 @@ function redLabel(hex) {
   const red = hex ? redKind(hex) : null;
   return red ? `${red.depth} ${RED_TONES[red.tone]}` : null;
 }
+// "medium warm pink", "vivid pink"… for any color the pink guide counts as a pink
+function pinkLabel(hex) {
+  const pink = hex && !redKind(hex) ? pinkKind(hex) : null;
+  return pink ? (pink.depth === 'vivid' ? 'vivid pink' : `${pink.depth} ${pink.tone} pink`) : null;
+}
+// The red or pink guide's name for a color, shown in small capitals under it
+function shadeLabel(hex) { return redLabel(hex) || pinkLabel(hex); }
 const RED_LABEL_STYLE = {
   fontFamily:'DM Sans', fontSize:11, fontWeight:500,
   letterSpacing:'0.12em', textTransform:'uppercase', color:'var(--blush-deep)',
@@ -1845,7 +1852,7 @@ function bandInk(hex) {
 const SHADE_ITEM_TYPE = { micro:11, body:13, shade:15, title:18 };
 function ShadeListItem({ p, action, glow }) {
   const TYPE = SHADE_ITEM_TYPE;
-  const redName = redLabel(p.hex);
+  const redName = shadeLabel(p.hex);
   const facts = [(p.finish || '').trim(), p.price_tier, p.hex.toUpperCase(), p.discontinued && 'Discontinued'].filter(Boolean);
   const ink = bandInk(p.hex);
   return (

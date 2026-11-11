@@ -149,6 +149,28 @@ function redKind(hex) {
   };
 }
 
+// ── Is this color a pink, and which kind? ────────────────────────────────────
+// The pink guide's kinds (guides/pink-lipstick/). Pink is hue −30° to 30° with enough
+// chroma (a little less for pale pinks); depth comes from lightness (pale / light /
+// medium / deep), tone from hue (cool below 0°, true below 15°, warm above), and pinks
+// too saturated for the depth scale are vivid. The guide's export doesn't spell out its
+// limits for depth and warmth; these are fitted so the guide's 14 kind colors and its
+// "not pink" examples come out right, and the catalogue splits into kinds in the guide's
+// shares (about 22% of lipsticks pink, rose the biggest kind at about a quarter).
+// Check redKind first: the two slices overlap, and a red is a red.
+// Returns null for anything that isn't a pink.
+function pinkKind(hex) {
+  const [L, a, b] = hexToLab(hex);
+  const C = Math.hypot(a, b), h = Math.atan2(b, a) * 180 / Math.PI;
+  if (h < -30 || h > 30 || L < 40) return null;                 // outside the slice; deeper is berry
+  if (C < (L >= 72 ? 22 : 25)) return null;                      // near gray: mauve or greige
+  if (h > 15 + (L - 40) * 0.8) return null;                      // too warm for its depth: rose-brown, nude, coral
+  if ((L < 52 || (h >= 15 && L < 55)) && C < 40) return null;    // deep, or medium and warm, without enough color: nude
+  const tone = h < 0 ? 'cool' : h < 15 ? 'true' : 'warm';
+  if (C >= 59 && L >= 48) return { depth: 'vivid', tone };
+  return { depth: L >= 72 ? 'pale' : L >= 62 ? 'light' : L >= 52 ? 'medium' : 'deep', tone };
+}
+
 // ── Find closest real products to a wheel color by ΔE ────────────────────────
 function getClosestColors(wheelHex, count = 5) {
   const targetLab = hexToLab(wheelHex);

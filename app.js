@@ -430,7 +430,7 @@ function MatchDetail({
   const isPinned = pinnedItems.some(x => x.brand === p.brand && x.shade === p.shade);
   const isFull = pinnedItems.length >= MAX_COMPARE && !isPinned;
   const ink = bandInk(p.hex);
-  const redName = redLabel(p.hex);
+  const redName = shadeLabel(p.hex);
   const dialogRef = useDialog(onClose);
   useBackToClose(onClose);
   const facts = [['Finish', (p.finish || '').trim() || 'Unlisted'], ['Type', FORMAT_LABELS[p.format] || p.format], ['Price', p.price_tier || '$$'], p.discontinued && ['Status', 'Discontinued']].filter(f => f && f[1]);
@@ -1420,7 +1420,7 @@ function ResultsTable({
     if (h > 28) return 'warm';
     return 'neutral';
   }
-  const redName = selectedColor ? redLabel(selectedColor.hex) : null;
+  const redName = selectedColor ? shadeLabel(selectedColor.hex) : null;
   function tierOf(p) {
     return p.price_tier || '$$';
   }
@@ -2883,6 +2883,15 @@ function redLabel(hex) {
   const red = hex ? redKind(hex) : null;
   return red ? `${red.depth} ${RED_TONES[red.tone]}` : null;
 }
+// "medium warm pink", "vivid pink"… for any color the pink guide counts as a pink
+function pinkLabel(hex) {
+  const pink = hex && !redKind(hex) ? pinkKind(hex) : null;
+  return pink ? pink.depth === 'vivid' ? 'vivid pink' : `${pink.depth} ${pink.tone} pink` : null;
+}
+// The red or pink guide's name for a color, shown in small capitals under it
+function shadeLabel(hex) {
+  return redLabel(hex) || pinkLabel(hex);
+}
 const RED_LABEL_STYLE = {
   fontFamily: 'DM Sans',
   fontSize: 11,
@@ -2922,7 +2931,7 @@ function ShadeListItem({
   glow
 }) {
   const TYPE = SHADE_ITEM_TYPE;
-  const redName = redLabel(p.hex);
+  const redName = shadeLabel(p.hex);
   const facts = [(p.finish || '').trim(), p.price_tier, p.hex.toUpperCase(), p.discontinued && 'Discontinued'].filter(Boolean);
   const ink = bandInk(p.hex);
   return /*#__PURE__*/React.createElement("li", {
