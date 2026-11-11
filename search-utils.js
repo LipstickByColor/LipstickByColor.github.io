@@ -49,5 +49,8 @@ const BRAND_ALIASES = {
   'maybelline': ['maybelline new york'],
   'nyx professional makeup': ['nyx cosmetics'],
   'l oreal': ['loreal paris'],
+  'rare beauty': ['selena gomez'],
+  'haus labs': ['lady gaga'],
+  'prada': ['prada beauty'],
 };
 const brandAliases = b => [...(BRAND_ALIASES[b] || []), ...(b.includes('&') ? [b.replace(/&/g, ' and ')] : [])].map(normSearch);
