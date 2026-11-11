@@ -1348,6 +1348,8 @@ const FORMAT_MENU_LABELS = {
   'Bullet Lipstick': 'Bullet & Crayon'
 };
 const formatMenuLabel = f => FORMAT_MENU_LABELS[f] || f.replace(/^Lip /, '');
+// The catalogue files metallic finishes under Shimmer
+const finishMenuLabel = f => f === 'Shimmer' ? 'Shimmer & Metallic' : f;
 function filterParamsFrom(search) {
   return [...new URLSearchParams(search)].filter(([k]) => FILTER_PARAMS.includes(k));
 }
@@ -1931,7 +1933,7 @@ function ResultsTable({
         transition: 'all 0.15s',
         whiteSpace: 'nowrap'
       }
-    }, f, active && /*#__PURE__*/React.createElement("span", {
+    }, finishMenuLabel(f), active && /*#__PURE__*/React.createElement("span", {
       style: {
         marginLeft: 5,
         opacity: 0.6,

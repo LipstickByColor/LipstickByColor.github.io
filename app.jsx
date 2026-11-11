@@ -801,6 +801,8 @@ const formatGroup = f => f === 'Lip Crayon' ? 'Bullet Lipstick' : f;
 // The Format menu drops the leading "Lip" ("Gloss", "Oil"); the product card shows the product's own type
 const FORMAT_MENU_LABELS = { 'Bullet Lipstick': 'Bullet & Crayon' };
 const formatMenuLabel = f => FORMAT_MENU_LABELS[f] || f.replace(/^Lip /, '');
+// The catalogue files metallic finishes under Shimmer
+const finishMenuLabel = f => f === 'Shimmer' ? 'Shimmer & Metallic' : f;
 function filterParamsFrom(search) {
   return [...new URLSearchParams(search)].filter(([k]) => FILTER_PARAMS.includes(k));
 }
@@ -1192,7 +1194,7 @@ function ResultsTable({ selectedColor, matches, totalProducts, pinnedItems, togg
                     color: active ? 'var(--espresso-mid)' : 'var(--text-muted)',
                     cursor:'pointer', fontFamily:'DM Sans', fontWeight: active ? 500 : 400,
                     letterSpacing:'0.04em', transition:'all 0.15s', whiteSpace:'nowrap',
-                  }}>{f}{active && <span style={{ marginLeft:5, opacity:0.6, fontSize:10 }}>✕</span>}</button>
+                  }}>{finishMenuLabel(f)}{active && <span style={{ marginLeft:5, opacity:0.6, fontSize:10 }}>✕</span>}</button>
                 );
               })}
             </FilterDropdown>

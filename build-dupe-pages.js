@@ -257,7 +257,7 @@ function page(s, src, srcImg, top, budget, listed, band, colors, shareImg) {
   const formats = LISTED_FORMATS.filter(f => f !== 'Lip Crayon' && band.some(p => formatGroup(p.format) === f));
   const filterRows = [
     ['Brand', brands.map(b => [brandName(b), ['fbrand', b]])],
-    ['Finish', finishes.map(f => [f, ['finish', f]])],
+    ['Finish', finishes.map(f => [f === 'Shimmer' ? 'Shimmer & Metallic' : f, ['finish', f]])],
     ['Format', formats.map(f => [FORMAT_PILLS[f] || FORMATS[f], ['format', f]])],
   ].filter(([, pills]) => pills.length);
 
