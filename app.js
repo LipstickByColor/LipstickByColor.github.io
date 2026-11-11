@@ -185,6 +185,10 @@ const MATCH_CARD_TYPE = {
   body: 13
 };
 
+// Result cards name the format only for these, which aren't lipsticks in the
+// usual sense; the product line is in the detail view
+const CARD_FORMATS = new Set(['Lip Gloss', 'Lip Oil', 'Lip Balm & Care']);
+
 // Single result card — image, save/compare overlay, finish · price and match tier (hideMatch: no tier)
 function MatchCard({
   p,
@@ -329,8 +333,9 @@ function MatchCard({
       fontSize: TYPE.brand,
       letterSpacing: '0.08em',
       textTransform: 'uppercase',
-      color: 'var(--text-muted)',
+      color: 'var(--espresso-mid)',
       fontFamily: 'DM Sans',
+      fontWeight: 500,
       overflow: 'hidden',
       textOverflow: 'ellipsis',
       whiteSpace: 'nowrap'
@@ -338,27 +343,24 @@ function MatchCard({
   }, /*#__PURE__*/React.createElement("span", {
     style: srOnly
   }, "Brand: "), p.brand), /*#__PURE__*/React.createElement("div", {
-    title: p.product,
-    style: {
-      fontSize: TYPE.body,
-      color: 'var(--espresso)',
-      fontFamily: 'DM Sans',
-      lineHeight: 1.3,
-      display: '-webkit-box',
-      WebkitLineClamp: 2,
-      WebkitBoxOrient: 'vertical',
-      overflow: 'hidden'
-    }
-  }, p.product), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: TYPE.meta,
       fontFamily: 'DM Sans',
-      color: 'var(--text-muted)',
+      color: 'var(--espresso-mid)',
       lineHeight: 1.35
     }
   }, /*#__PURE__*/React.createElement("span", {
     style: srOnly
-  }, "Shade: "), p.shade), /*#__PURE__*/React.createElement("div", {
+  }, "Shade: "), p.shade), CARD_FORMATS.has(p.format) && /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: TYPE.meta,
+      fontFamily: 'DM Sans',
+      color: 'var(--espresso-mid)',
+      lineHeight: 1.35
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: srOnly
+  }, "Type: "), formatMenuLabel(p.format)), /*#__PURE__*/React.createElement("div", {
     style: {
       display: 'flex',
       alignItems: 'center',

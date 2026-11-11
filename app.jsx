@@ -128,6 +128,10 @@ const MAX_COMPARE = 6;
 
 const MATCH_CARD_TYPE = { brand:11, meta:12, body:13 };
 
+// Result cards name the format only for these, which aren't lipsticks in the
+// usual sense; the product line is in the detail view
+const CARD_FORMATS = new Set(['Lip Gloss', 'Lip Oil', 'Lip Balm & Care']);
+
 // Single result card — image, save/compare overlay, finish · price and match tier (hideMatch: no tier)
 function MatchCard({ p, wishlist, toggleWishlist, pinnedItems, togglePin, onOpen, hideMatch }) {
   const TYPE = MATCH_CARD_TYPE;
@@ -185,15 +189,17 @@ function MatchCard({ p, wishlist, toggleWishlist, pinnedItems, togglePin, onOpen
         </div>
       </div>
       <div style={{ padding:'8px 9px 9px', display:'flex', flexDirection:'column', gap:3, flex:1 }}>
-        <div style={{ fontSize:TYPE.brand, letterSpacing:'0.08em', textTransform:'uppercase', color:'var(--text-muted)', fontFamily:'DM Sans', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
+        <div style={{ fontSize:TYPE.brand, letterSpacing:'0.08em', textTransform:'uppercase', color:'var(--espresso-mid)', fontFamily:'DM Sans', fontWeight:500, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
           <span style={srOnly}>Brand: </span>{p.brand}
         </div>
-        <div title={p.product} style={{ fontSize:TYPE.body, color:'var(--espresso)', fontFamily:'DM Sans', lineHeight:1.3, display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical', overflow:'hidden' }}>
-          {p.product}
-        </div>
-        <div style={{ fontSize:TYPE.meta, fontFamily:'DM Sans', color:'var(--text-muted)', lineHeight:1.35 }}>
+        <div style={{ fontSize:TYPE.meta, fontFamily:'DM Sans', color:'var(--espresso-mid)', lineHeight:1.35 }}>
           <span style={srOnly}>Shade: </span>{p.shade}
         </div>
+        {CARD_FORMATS.has(p.format) && (
+          <div style={{ fontSize:TYPE.meta, fontFamily:'DM Sans', color:'var(--espresso-mid)', lineHeight:1.35 }}>
+            <span style={srOnly}>Type: </span>{formatMenuLabel(p.format)}
+          </div>
+        )}
         <div style={{ display:'flex', alignItems:'center', gap:7, marginTop:'auto', paddingTop:4, fontSize:TYPE.meta }} title={hideMatch ? undefined : `Color distance ΔE ${p.distance.toFixed(1)}, lower is closer`}>
           <span style={{ color:'var(--espresso-mid)', minWidth:0, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
             {[(p.finish || '').trim(), p.price_tier || '$$'].filter(Boolean).join(' · ')}
