@@ -14,11 +14,11 @@ const esc = s => s.replace(/&/g, '&amp;').replace(/"/g, '&quot;');
 // come from wheel-counts.json, which `npm run build:counts` writes from the live catalogue.
 const WHEEL_FAMILIES = [
   ['Red', ['Poppy','Vermilion','Signal Red','Raspberry Red','Classic Red','Tomato','Cherry','Ruby','Scarlet','Black Cherry','Oxblood','Brick']],
-  ['Pink', ['Ballet','Flamingo','Bubblegum','Rosy Pink','Tea Rose','Cerise','Azalea','Raspberry Sorbet','Magenta','Hot Magenta','Faded Rose','Dusty Cedar']],
+  ['Pink', ['Ballet','Lilac Pink','Ballet Pink','Bright Pink','Peachy Pink','Rosy Pink','Hot Pink','Classic Pink','Rose','Faded Rose','Dusty Cedar','Deep Rose','Magenta']],
   ['Coral and peach', ['Apricot','Burnt Coral','Coral','Carnelian']],
-  ['Nude and brown', ['Rose Dawn','Canyon Clay','Terracotta','Nude Rose','Sable','Espresso','Old Rose','Rosewood']],
-  ['Berry and wine', ['Mauve','Deep Raspberry','Dark Rose','Burgundy','Syrah','Dark Wine','Holly Berry','Rose Wine']],
-  ['Black and grey', ['Charcoal','Onyx']],
+  ['Nude and brown', ['Rose Dawn','Canyon Clay','Terracotta','Nude Rose','Chestnut','Sable','Espresso','Old Rose','Rosewood']],
+  ['Berry and wine', ['Deep Raspberry','Dark Rose','Burgundy','Syrah','Dark Wine','Holly Berry','Rose Wine']],
+  ['Black', ['Onyx']],
 ];
 const wheel = require('vm').runInNewContext(
   fs.readFileSync(path.join(__dirname, 'lipstick-utils.js'), 'utf8') + '\n;({ LIPSTICK_DATA, hexToLab })', {});

@@ -703,7 +703,7 @@ function ColorWheel({ colors, selectedId, onSelect, hoveredId, onHover }) {
                     textAlign:'center', color:bandInk(hovered.hex), userSelect:'none',
                   }}>
                     <div style={{ fontFamily:'Cormorant Garamond', fontSize:WHEEL_TYPE.name, fontWeight:600, lineHeight:1.05 }}>{hovered.name}</div>
-                    <div style={{ fontFamily:'DM Sans', fontSize:WHEEL_TYPE.micro, fontWeight:500, lineHeight:1.2 }}>{chartColorName(hovered.hex)}</div>
+                    <div style={{ fontFamily:'DM Sans', fontSize:WHEEL_TYPE.micro, fontWeight:500, lineHeight:1.2 }}>{hovered.tag || chartColorName(hovered.hex)}</div>
                   </div>
                 </foreignObject>
               ) : picked && (
@@ -1781,7 +1781,10 @@ function parseSharedLink(search) {
   if (color && /^[0-9a-f]{6}$/i.test(color)) return { type:'color', hex:'#' + color.toLowerCase() };
   const wheel = q.get('wheel');
   if (wheel) {
-    const c = LIPSTICK_DATA.find(c => c.name.toLowerCase().replace(/[^a-z0-9]+/g, '-') === wheel.toLowerCase());
+    // Wheel colors that were replaced keep working in old links
+    const RENAMED = { 'raspberry-sorbet':'lilac-pink', 'azalea':'peachy-pink', 'hot-magenta':'hot-pink', 'bubblegum':'classic-pink', 'tea-rose':'rose', 'flamingo':'bright-pink', 'cerise':'deep-rose' };
+    const slug = RENAMED[wheel.toLowerCase()] || wheel.toLowerCase();
+    const c = LIPSTICK_DATA.find(c => c.name.toLowerCase().replace(/[^a-z0-9]+/g, '-') === slug);
     if (c) return { type:'color', hex:c.hex.toLowerCase() };
   }
   if (brand && dupe) return { type:'dupe', brand, shade:dupe };
@@ -3753,8 +3756,8 @@ const MODE_ICONS = {
 // Landing card pictures: each mode drawn as its own small object (Claude Design "Search landing" 3a)
 // Three depth rings of twelve wheel colors, light outside to deep inside
 const LANDING_WHEEL_RINGS = [
-  { inner:70, outer:100, colors:['#E3454D','#DE2A21','#EA8E83','#D9A083','#C48C7F','#C26F67','#AF5F64','#B24F5C','#A3487A','#F89FB5','#EFBFBB','#CA7780'] },
-  { inner:47, outer:68, colors:['#B5252C','#B12D1E','#D85D5B','#C47159','#B07774','#AA6155','#92515A','#883042','#A22956','#DC5391','#ED7491','#CC4C63'] },
+  { inner:70, outer:100, colors:['#E3454D','#DE2A21','#EA8E83','#D9A083','#C48C7F','#C26F67','#AF5F64','#B24F5C','#F1ABB7','#E58297','#EFBFBB','#CA7780'] },
+  { inner:47, outer:68, colors:['#B5252C','#B12D1E','#D85D5B','#C47159','#B07774','#AA6155','#92515A','#883042','#A22956','#B73E78','#CB6C7E','#C14D5D'] },
   { inner:22.5, outer:44, colors:['#9C0822','#7E1C11','#BA5250','#945C55','#76433D','#50332C','#6B272B','#6C3348','#801628','#DC3092','#D23658','#A4333E'] },
 ];
 const ringGradient = colors => `conic-gradient(from -15deg, ${colors.map((c, i) =>

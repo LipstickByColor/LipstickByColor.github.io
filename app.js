@@ -1183,7 +1183,7 @@ function ColorWheel({
         fontWeight: 500,
         lineHeight: 1.2
       }
-    }, chartColorName(hovered.hex)))) : picked && /*#__PURE__*/React.createElement("text", {
+    }, hovered.tag || chartColorName(hovered.hex)))) : picked && /*#__PURE__*/React.createElement("text", {
       x: CX,
       y: CY,
       textAnchor: "middle",
@@ -2819,7 +2819,18 @@ function parseSharedLink(search) {
   };
   const wheel = q.get('wheel');
   if (wheel) {
-    const c = LIPSTICK_DATA.find(c => c.name.toLowerCase().replace(/[^a-z0-9]+/g, '-') === wheel.toLowerCase());
+    // Wheel colors that were replaced keep working in old links
+    const RENAMED = {
+      'raspberry-sorbet': 'lilac-pink',
+      'azalea': 'peachy-pink',
+      'hot-magenta': 'hot-pink',
+      'bubblegum': 'classic-pink',
+      'tea-rose': 'rose',
+      'flamingo': 'bright-pink',
+      'cerise': 'deep-rose'
+    };
+    const slug = RENAMED[wheel.toLowerCase()] || wheel.toLowerCase();
+    const c = LIPSTICK_DATA.find(c => c.name.toLowerCase().replace(/[^a-z0-9]+/g, '-') === slug);
     if (c) return {
       type: 'color',
       hex: c.hex.toLowerCase()
@@ -6880,11 +6891,11 @@ const MODE_ICONS = {
 const LANDING_WHEEL_RINGS = [{
   inner: 70,
   outer: 100,
-  colors: ['#E3454D', '#DE2A21', '#EA8E83', '#D9A083', '#C48C7F', '#C26F67', '#AF5F64', '#B24F5C', '#A3487A', '#F89FB5', '#EFBFBB', '#CA7780']
+  colors: ['#E3454D', '#DE2A21', '#EA8E83', '#D9A083', '#C48C7F', '#C26F67', '#AF5F64', '#B24F5C', '#F1ABB7', '#E58297', '#EFBFBB', '#CA7780']
 }, {
   inner: 47,
   outer: 68,
-  colors: ['#B5252C', '#B12D1E', '#D85D5B', '#C47159', '#B07774', '#AA6155', '#92515A', '#883042', '#A22956', '#DC5391', '#ED7491', '#CC4C63']
+  colors: ['#B5252C', '#B12D1E', '#D85D5B', '#C47159', '#B07774', '#AA6155', '#92515A', '#883042', '#A22956', '#B73E78', '#CB6C7E', '#C14D5D']
 }, {
   inner: 22.5,
   outer: 44,

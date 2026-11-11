@@ -64,56 +64,58 @@ function deltaE(lab1, lab2) {
   return Math.sqrt((dL / SL) ** 2 + (dC / SC) ** 2 + (dH / SH) ** 2 + RT * (dC / SC) * (dH / SH));
 }
 
-// ── Wheel palette: 44 GMM cluster centers + 2 novelty entry points ────────────
+// ── Wheel palette: GMM cluster centers, pink guide kinds, Chestnut + the two darkest (Onyx, Espresso) at the bottom ──
+// tag: the line under the name in the middle of the wheel. Pinks use the pink guide's words
+// (depth pale / light / medium / deep, undertone cool / true / warm, vivid); reds the red guide's.
 const LIPSTICK_DATA = [
   // ── GMM clusters (data-driven from 8684 real products, hue-ordered) ─────────
-  {id:1,  hex:"#a22956", name:"Deep Raspberry"},
-  {id:2,  hex:"#db2a6a", name:"Raspberry Sorbet"},
-  {id:3,  hex:"#ed7491", name:"Bubblegum"},
-  {id:4,  hex:"#883042", name:"Dark Rose"},
-  {id:5,  hex:"#92515a", name:"Rose Wine"},
-  {id:6,  hex:"#d23658", name:"Azalea"},
-  {id:51, hex:"#cc4c63", name:"Cerise"},
-  {id:7,  hex:"#ca7780", name:"Rosy Pink"},
-  {id:8,  hex:"#b24f5c", name:"Holly Berry"},
-  {id:9,  hex:"#af5f64", name:"Dusty Cedar"},
-  {id:10, hex:"#d56369", name:"Tea Rose"},
-  {id:11, hex:"#a4333e", name:"Cherry"},
-  {id:12, hex:"#6b272b", name:"Syrah"},
-  {id:13, hex:"#4b2323", name:"Dark Wine"},
-  {id:14, hex:"#b07774", name:"Old Rose"},
-  {id:15, hex:"#e3454d", name:"Signal Red"},
-  {id:16, hex:"#d85d5b", name:"Coral"},
-  {id:17, hex:"#ba5250", name:"Rosewood"},
-  {id:18, hex:"#b5252c", name:"Classic Red"},
-  {id:19, hex:"#7e1c11", name:"Brick"},
-  {id:20, hex:"#efbfbb", name:"Ballet"},
-  {id:21, hex:"#842525", name:"Oxblood"},
-  {id:22, hex:"#c26f67", name:"Faded Rose"},
-  {id:23, hex:"#ea8e83", name:"Burnt Coral"},
-  {id:34, hex:"#c47159", name:"Carnelian"},
-  {id:25, hex:"#945c55", name:"Nude Rose"},
-  {id:26, hex:"#76433d", name:"Sable"},
-  {id:54, hex:"#50332c", name:"Espresso"},
-  {id:27, hex:"#9c0822", name:"Scarlet"},
-  {id:52, hex:"#da0f18", name:"Vermilion"},
-  {id:28, hex:"#a02523", name:"Ruby"},
-  {id:29, hex:"#cb8579", name:"Canyon Clay"},
-  {id:53, hex:"#d9a083", name:"Apricot"},
-  {id:30, hex:"#aa6155", name:"Terracotta"},
-  {id:31, hex:"#de2a21", name:"Poppy"},
-  {id:50, hex:"#e02040", name:"Raspberry Red"},
-  {id:32, hex:"#b12d1e", name:"Tomato"},
-  {id:33, hex:"#c48c7f", name:"Rose Dawn"},
-  {id:39, hex:"#dc5391", name:"Magenta"},
-  {id:40, hex:"#a3487a", name:"Mauve"},
-  {id:49, hex:"#F89FB5", name:"Flamingo"},
-  {id:42, hex:"#6c3348", name:"Burgundy"},
-  {id:43, hex:"#DC3092", name:"Hot Magenta"},
-  {id:44, hex:"#801628", name:"Black Cherry"},
+  {id:1,  hex:"#a22956", name:"Deep Raspberry", tag:"Deep berry"},
+  {id:2,  hex:"#efb5cd", name:"Lilac Pink", tag:"Pale cool pink"},     // pink guide kind (replaced Raspberry Sorbet)
+  {id:3,  hex:"#cb6c7e", name:"Classic Pink", tag:"Medium true pink"},   // pink guide kind (replaced Bubblegum)
+  {id:4,  hex:"#883042", name:"Dark Rose", tag:"Deep warm berry"},
+  {id:5,  hex:"#92515a", name:"Rose Wine", tag:"Warm wine"},
+  {id:6,  hex:"#e48385", name:"Peachy Pink", tag:"Light warm pink"},    // pink guide kind (replaced Azalea)
+  {id:51, hex:"#c14d5d", name:"Deep Rose", tag:"Deep warm pink"},    // pink guide kind (replaced Cerise)
+  {id:7,  hex:"#ca7780", name:"Rosy Pink", tag:"Medium warm pink"},
+  {id:8,  hex:"#b24f5c", name:"Holly Berry", tag:"Deep warm pink"},
+  {id:9,  hex:"#af5f64", name:"Dusty Cedar", tag:"Pink-nude"},
+  {id:10, hex:"#d3676d", name:"Rose", tag:"Medium warm pink"},           // pink guide kind (replaced Tea Rose)
+  {id:11, hex:"#a4333e", name:"Cherry", tag:"Blue-red"},
+  {id:12, hex:"#6b272b", name:"Syrah", tag:"Deep warm berry"},
+  {id:13, hex:"#4b2323", name:"Dark Wine", tag:"Deep cool brown"},
+  {id:14, hex:"#b07774", name:"Old Rose", tag:"Medium cool brown"},
+  {id:15, hex:"#e3454d", name:"Signal Red", tag:"Bright true red"},
+  {id:16, hex:"#d85d5b", name:"Coral", tag:"Medium coral"},
+  {id:17, hex:"#ba5250", name:"Rosewood", tag:"Medium rose-brown"},
+  {id:18, hex:"#b5252c", name:"Classic Red", tag:"True red"},
+  {id:19, hex:"#7e1c11", name:"Brick", tag:"Deep orange-red"},
+  {id:20, hex:"#efbfbb", name:"Ballet", tag:"Pale nude"},
+  {id:21, hex:"#842525", name:"Oxblood", tag:"Deep true red"},
+  {id:22, hex:"#c26f67", name:"Faded Rose", tag:"Medium nude"},
+  {id:23, hex:"#ea8e83", name:"Burnt Coral", tag:"Light coral"},
+  {id:34, hex:"#c47159", name:"Carnelian", tag:"Medium cool coral"},
+  {id:25, hex:"#945c55", name:"Nude Rose", tag:"Medium rose-brown"},
+  {id:26, hex:"#76433d", name:"Sable", tag:"Deep cool brown"},
+  {id:47, hex:"#994d36", name:"Chestnut", tag:"Deep warm brown"},  // fills the biggest uncovered group (replaced Charcoal)
+  {id:27, hex:"#9c0822", name:"Scarlet", tag:"Deep true red"},
+  {id:52, hex:"#da0f18", name:"Vermilion", tag:"Bright orange-red"},
+  {id:28, hex:"#a02523", name:"Ruby", tag:"True red"},
+  {id:29, hex:"#cb8579", name:"Canyon Clay", tag:"Light cool coral"},
+  {id:53, hex:"#d9a083", name:"Apricot", tag:"Light brown"},
+  {id:30, hex:"#aa6155", name:"Terracotta", tag:"Medium warm brown"},
+  {id:31, hex:"#de2a21", name:"Poppy", tag:"Bright orange-red"},
+  {id:50, hex:"#e02040", name:"Raspberry Red", tag:"Bright blue-red"},
+  {id:32, hex:"#b12d1e", name:"Tomato", tag:"Orange-red"},
+  {id:33, hex:"#c48c7f", name:"Rose Dawn", tag:"Light cool brown"},
+  {id:39, hex:"#b73e78", name:"Magenta", tag:"Deep cool pink"},        // pink guide kind
+  {id:40, hex:"#f1abb7", name:"Ballet Pink", tag:"Pale true pink"},  // pink guide kind (replaced Mauve)
+  {id:49, hex:"#e58297", name:"Bright Pink", tag:"Bright light pink"},    // pink guide kind (replaced Flamingo)
+  {id:42, hex:"#6c3348", name:"Burgundy", tag:"Deep mauve"},
+  {id:43, hex:"#e6567e", name:"Hot Pink", tag:"Vivid pink"},       // pink guide kind (replaced Hot Magenta)
+  {id:44, hex:"#801628", name:"Black Cherry", tag:"Deep blue-red"},
   // ── Novelty entry points (hand-curated for outlier zones) ─────────────────
-  {id:41, hex:"#170e12", name:"Onyx",     novelty:true}, // GMM cluster — moved here; near-neutral hue sorts poorly
-  {id:47, hex:"#454048", name:"Charcoal", novelty:true},
+  {id:41, hex:"#170e12", name:"Onyx", tag:"Black",     novelty:true}, // GMM cluster — moved here; near-neutral hue sorts poorly
+  {id:54, hex:"#50332c", name:"Espresso", tag:"Deep cool brown", novelty:true}, // sits with Onyx so the two rings stay even
 ];
 
 // ── Convert wheel hex to CIELAB for matching ─────────────────────────────────
