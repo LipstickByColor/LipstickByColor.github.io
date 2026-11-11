@@ -2695,6 +2695,20 @@ function ShareImageModal({
 // position:relative). Switches itself off after GUIDES_NEW_UNTIL so it can't
 // go stale.
 const GUIDES_NEW_UNTIL = new Date('2026-11-16');
+// The pill's look, shared with the Discontinued tag on the dupe finder card
+const PILL_TAG = {
+  fontFamily: "'DM Sans', sans-serif",
+  fontWeight: 500,
+  fontSize: 9,
+  lineHeight: 1,
+  letterSpacing: '0.12em',
+  textTransform: 'uppercase',
+  whiteSpace: 'nowrap',
+  color: '#fff',
+  background: 'var(--blush-deep)',
+  padding: '3px 6px 2px',
+  borderRadius: 10
+};
 function GuidesNewTag({
   top = -8,
   right = -10
@@ -2703,24 +2717,26 @@ function GuidesNewTag({
   return /*#__PURE__*/React.createElement("span", {
     "aria-label": "New",
     style: {
+      ...PILL_TAG,
       position: 'absolute',
       top,
       right,
       pointerEvents: 'none',
-      fontFamily: "'DM Sans', sans-serif",
-      fontWeight: 500,
-      fontSize: 9,
-      lineHeight: 1,
-      letterSpacing: '0.12em',
-      textTransform: 'uppercase',
-      whiteSpace: 'nowrap',
-      color: '#fff',
-      background: 'var(--blush-deep)',
-      padding: '3px 6px 2px',
-      borderRadius: 10,
       boxShadow: '0 0 0 2px var(--cream)'
     }
   }, "new");
+}
+
+// "Discontinued" pill after the hex code on the dupe finder's chosen-shade card
+function DiscontinuedTag() {
+  return /*#__PURE__*/React.createElement("span", {
+    style: {
+      ...PILL_TAG,
+      display: 'inline-block',
+      marginLeft: 8,
+      verticalAlign: '1px'
+    }
+  }, "Discontinued");
 }
 
 // ── Dialogs ───────────────────────────────────────────────────────────────────
@@ -6675,7 +6691,6 @@ function DupeFinder({
   }, product.brand), /*#__PURE__*/React.createElement("div", {
     style: {
       fontFamily: 'Cormorant Garamond',
-      fontStyle: 'italic',
       fontSize: TYPE.lede,
       color: 'var(--espresso-mid)',
       lineHeight: 1.2,
@@ -6696,7 +6711,7 @@ function DupeFinder({
       marginTop: 6,
       letterSpacing: '0.04em'
     }
-  }, product.hex.toUpperCase()))), /*#__PURE__*/React.createElement("div", {
+  }, product.hex.toUpperCase(), product.discontinued && /*#__PURE__*/React.createElement(DiscontinuedTag, null)))), /*#__PURE__*/React.createElement("div", {
     className: "dupe-card-mobile",
     style: {
       alignItems: 'center',
@@ -6729,7 +6744,6 @@ function DupeFinder({
   }, product.brand), /*#__PURE__*/React.createElement("div", {
     style: {
       fontFamily: 'Cormorant Garamond',
-      fontStyle: 'italic',
       fontSize: 18,
       color: 'var(--espresso-mid)',
       lineHeight: 1.2
@@ -6742,7 +6756,7 @@ function DupeFinder({
       marginTop: 2,
       letterSpacing: '0.04em'
     }
-  }, product.hex.toUpperCase()))), /*#__PURE__*/React.createElement("button", {
+  }, product.hex.toUpperCase(), product.discontinued && /*#__PURE__*/React.createElement(DiscontinuedTag, null)))), /*#__PURE__*/React.createElement("button", {
     onClick: () => onSelect(null),
     style: {
       alignSelf: 'flex-start',

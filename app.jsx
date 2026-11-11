@@ -1702,18 +1702,26 @@ function ShareImageModal({ wishlist, onClose }) {
 // position:relative). Switches itself off after GUIDES_NEW_UNTIL so it can't
 // go stale.
 const GUIDES_NEW_UNTIL = new Date('2026-11-16');
+// The pill's look, shared with the Discontinued tag on the dupe finder card
+const PILL_TAG = {
+  fontFamily:"'DM Sans', sans-serif", fontWeight:500,
+  fontSize:9, lineHeight:1, letterSpacing:'0.12em', textTransform:'uppercase', whiteSpace:'nowrap',
+  color:'#fff', background:'var(--blush-deep)',
+  padding:'3px 6px 2px', borderRadius:10,
+};
 function GuidesNewTag({ top = -8, right = -10 }) {
   if (new Date() > GUIDES_NEW_UNTIL) return null;
   return (
     <span aria-label="New" style={{
-      position:'absolute', top, right, pointerEvents:'none',
-      fontFamily:"'DM Sans', sans-serif", fontWeight:500,
-      fontSize:9, lineHeight:1, letterSpacing:'0.12em', textTransform:'uppercase', whiteSpace:'nowrap',
-      color:'#fff', background:'var(--blush-deep)',
-      padding:'3px 6px 2px', borderRadius:10,
+      ...PILL_TAG, position:'absolute', top, right, pointerEvents:'none',
       boxShadow:'0 0 0 2px var(--cream)',
     }}>new</span>
   );
+}
+
+// "Discontinued" pill after the hex code on the dupe finder's chosen-shade card
+function DiscontinuedTag() {
+  return <span style={{ ...PILL_TAG, display:'inline-block', marginLeft:8, verticalAlign:'1px' }}>Discontinued</span>;
 }
 
 // ── Dialogs ───────────────────────────────────────────────────────────────────
@@ -3705,11 +3713,11 @@ function DupeFinder({ product, onSelect, onUsePhoto }) {
                 </div>
                 <div style={{ padding:'16px 20px 18px', borderTop:'1px solid var(--border)' }}>
                   <div style={{ fontFamily:'DM Sans', fontSize:TYPE.body, fontWeight:500, color:'var(--espresso)' }}>{product.brand}</div>
-                  <div style={{ fontFamily:'Cormorant Garamond', fontStyle:'italic', fontSize:TYPE.lede, color:'var(--espresso-mid)', lineHeight:1.2, marginTop:2 }}>{product.shade}</div>
+                  <div style={{ fontFamily:'Cormorant Garamond', fontSize:TYPE.lede, color:'var(--espresso-mid)', lineHeight:1.2, marginTop:2 }}>{product.shade}</div>
                   {product.product && (
                     <div style={{ fontFamily:'DM Sans', fontSize:TYPE.body, color:'var(--text-muted)', marginTop:4 }}>{product.product}</div>
                   )}
-                  <div style={{ fontFamily:'DM Sans', fontSize:TYPE.micro, color:'var(--text-muted)', marginTop:6, letterSpacing:'0.04em' }}>{product.hex.toUpperCase()}</div>
+                  <div style={{ fontFamily:'DM Sans', fontSize:TYPE.micro, color:'var(--text-muted)', marginTop:6, letterSpacing:'0.04em' }}>{product.hex.toUpperCase()}{product.discontinued && <DiscontinuedTag />}</div>
                 </div>
               </div>
               <div className="dupe-card-mobile" style={{ alignItems:'center', gap:14, padding:'14px 16px', background:'#fff', borderRadius:16, border:'1px solid var(--border)', boxShadow:'0 2px 12px var(--shadow)' }}>
@@ -3717,8 +3725,8 @@ function DupeFinder({ product, onSelect, onUsePhoto }) {
                 <ShadeChip hex={product.hex} height={56} width={9} />
                 <div style={{ flex:1, minWidth:0 }}>
                   <div style={{ fontFamily:'DM Sans', fontSize:12, fontWeight:500, color:'var(--espresso)' }}>{product.brand}</div>
-                  <div style={{ fontFamily:'Cormorant Garamond', fontStyle:'italic', fontSize:18, color:'var(--espresso-mid)', lineHeight:1.2 }}>{product.shade}</div>
-                  <div style={{ fontFamily:'DM Sans', fontSize:10, color:'var(--text-muted)', marginTop:2, letterSpacing:'0.04em' }}>{product.hex.toUpperCase()}</div>
+                  <div style={{ fontFamily:'Cormorant Garamond', fontSize:18, color:'var(--espresso-mid)', lineHeight:1.2 }}>{product.shade}</div>
+                  <div style={{ fontFamily:'DM Sans', fontSize:10, color:'var(--text-muted)', marginTop:2, letterSpacing:'0.04em' }}>{product.hex.toUpperCase()}{product.discontinued && <DiscontinuedTag />}</div>
                 </div>
               </div>
               <button onClick={() => onSelect(null)} style={{
