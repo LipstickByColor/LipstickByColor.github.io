@@ -200,13 +200,14 @@ function MatchCard({ p, wishlist, toggleWishlist, pinnedItems, togglePin, onOpen
             <span style={srOnly}>Type: </span>{formatMenuLabel(p.format)}
           </div>
         )}
-        <div style={{ display:'flex', alignItems:'center', gap:7, marginTop:'auto', paddingTop:4, fontSize:TYPE.meta }} title={hideMatch ? undefined : `Color distance ΔE ${p.distance.toFixed(1)}, lower is closer`}>
+        {/* How close the color is, on its own line so it doesn't read as part of finish and price */}
+        <div style={{ display:'flex', flexDirection:'column', gap:2, marginTop:'auto', paddingTop:4, fontSize:TYPE.meta, lineHeight:1.35 }}>
+          {!hideMatch && <span title={`Color distance ΔE ${p.distance.toFixed(1)}, lower is closer`} style={{ fontWeight:600, color:'var(--blush-deep)', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>
+            <span style={srOnly}>Match: </span>{matchTier(p.distance)}
+          </span>}
           <span style={{ color:'var(--espresso-mid)', minWidth:0, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
             {[(p.finish || '').trim(), p.price_tier || '$$'].filter(Boolean).join(' · ')}
           </span>
-          {!hideMatch && <span style={{ marginLeft:'auto', fontWeight:600, color:'var(--blush-deep)', whiteSpace:'nowrap' }}>
-            <span style={srOnly}>Match: </span>{matchTier(p.distance)}
-          </span>}
         </div>
       </div>
     </div>
@@ -388,7 +389,7 @@ const NO_MATCH_DELTA_E = 6.5;
 // How close a result is, in words, by CIEDE2000 distance (1 is about the smallest
 // difference the eye can see). Replaces a "100 − ΔE" percentage, which read 90–100%
 // for nearly every result and promised more than a color measured from photos can.
-const MATCH_TIERS = [[1, 'Very close'], [2, 'Close'], [3.5, 'Similar'], [Infinity, 'Same family']];
+const MATCH_TIERS = [[1, 'Very close color'], [2, 'Close color'], [3.5, 'Similar color'], [Infinity, 'Same color family']];
 function matchTier(distance) { return MATCH_TIERS.find(([max]) => distance <= max)[1]; }
 
 // How far from the color a result may be. Normally maxDeltaE past the closest match. The color
