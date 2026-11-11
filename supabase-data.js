@@ -6,7 +6,7 @@ const _SUPABASE_KEY = 'sb_publishable_2RQlqm5VuZaTBZ7qrd5V1A_eSjFIpaB';
 // its own name and is cached by the browser for a year, so tab switches and
 // return visits download nothing; reading the table directly cost ~1 MB of
 // Supabase transfer per page view.
-const CATALOGUE_FILE = 'catalogue-20261027-16794.json';
+const CATALOGUE_FILE = 'catalogue-20261111-24032.json';
 const _CATALOGUE_URL = `${_SUPABASE_URL}/storage/v1/object/public/site-data/${CATALOGUE_FILE}`;
 
 // The app mounts right away (app.js loads in parallel) and listens for the
@@ -33,10 +33,11 @@ const _imageKey = p => `${(p.brand||'').toLowerCase()}|${(p.product||'').toLower
     const { brands, products, rows } = await res.json();
     if (!rows?.length) throw new Error('No products returned');
 
-    REAL_PRODUCTS = rows.map(([id, b, p, shade, finish, type, l, a, bb, hex, price_tier, discontinued]) => ({
+    REAL_PRODUCTS = rows.map(([id, b, p, shade, finish, type, l, a, bb, hex, price_tier, discontinued, long_lasting]) => ({
       id, brand: brands[b], product: products[p], shade, finish, format: type,
       lab: [l, a, bb], hex, price_tier,
       discontinued: discontinued === '1' || discontinued === 1,
+      long_lasting: long_lasting === 1,
     }));
   } catch (err) {
     console.error('Failed to load product data:', err);
@@ -62,7 +63,7 @@ function _flushImages() {
   const chunks = [];
   for (let i = 0; i < ids.length; i += 100) chunks.push(ids.slice(i, i + 100));
   Promise.all(chunks.map(async chunk => {
-    const { data, error } = await _client.from('lipstic-data-update-oct26').select('id, image_url').in('id', chunk);
+    const { data, error } = await _client.from('lipstick-data-nov26-v2').select('id, image_url').in('id', chunk);
     if (error) throw error;
     const byId = new Map(REAL_PRODUCTS.map(p => [p.id, p]));
     data.forEach(r => { const p = byId.get(r.id); if (p && r.image_url) window.LIPSTICK_IMAGES[_imageKey(p)] = r.image_url; });

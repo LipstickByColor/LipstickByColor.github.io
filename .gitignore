@@ -31,3 +31,9 @@ data-build/
 
 # Local secrets (SUPABASE_SERVICE_KEY for build-catalogue.js)
 .env
+
+# Dupe page design handoff (local only)
+new_dupe_page_design/
+
+# Supabase table SQL and steps (local only)
+SUPABASE_TABLE.md

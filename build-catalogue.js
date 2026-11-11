@@ -11,7 +11,7 @@ const path = require('path');
 
 const DATA_JS = path.join(__dirname, 'supabase-data.js');
 const BUCKET = 'site-data';
-const COLS = ['id', 'brand', 'product', 'shade', 'finish', 'type', 'lab_l', 'lab_a', 'lab_b', 'hex', 'price_tier', 'discontinued'];
+const COLS = ['id', 'brand', 'product', 'shade', 'finish', 'type', 'lab_l', 'lab_a', 'lab_b', 'hex', 'price_tier', 'discontinued', 'long_lasting'];
 
 const src = fs.readFileSync(DATA_JS, 'utf8');
 const url = src.match(/_SUPABASE_URL = '([^']+)'/)[1], key = src.match(/_SUPABASE_KEY = '([^']+)'/)[1];
@@ -38,7 +38,7 @@ function pack(rows) {
     fields: COLS,
     brands, products,
     rows: rows.map(r => [r.id, idx(brands, bi, r.brand), idx(products, pi, r.product), r.shade, r.finish, r.type,
-      r.lab_l, r.lab_a, r.lab_b, r.hex, r.price_tier, r.discontinued]),
+      r.lab_l, r.lab_a, r.lab_b, r.hex, r.price_tier, r.discontinued, r.long_lasting]),
   };
 }
 
