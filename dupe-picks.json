@@ -1,0 +1,130 @@
+{
+  "mac/ruby-woo": {
+    "top": [
+      "maybelline|691 rich ruby",
+      "valentino|220a - take the lipstick and run",
+      "the creme shop|lucy i'm home",
+      "mac cosmetics|werk werk werk",
+      "holika holika|new woman"
+    ],
+    "budget": [
+      "maybelline|691 rich ruby",
+      "the creme shop|lucy i'm home",
+      "holika holika|new woman",
+      "l oreal|203 le rouge avant-garde",
+      "essence|happy"
+    ]
+  },
+  "charlotte-tilbury/pillow-talk": {
+    "top": [
+      "iconic london|undressed",
+      "revolution pro|tease",
+      "queen musia|madame bovary ~the gauguin pink~",
+      "girlactik|innocence",
+      "covergirl|very sancerre 105"
+    ],
+    "budget": [
+      "revolution pro|tease",
+      "covergirl|very sancerre 105",
+      "mua makeup academy|love letter",
+      "milani|39 pretty",
+      "wet n wild|pink peach stole my look"
+    ]
+  },
+  "pat-mcgrath/elson-4": {
+    "top": [
+      "gerard cosmetics|cherry bomb - metalmatte liquid lipstick",
+      "anastasia beverly hills|american doll",
+      "sephora collection|95 electric ruby",
+      "yves saint laurent|28 true chili",
+      "labomme|flame thrower"
+    ],
+    "budget": [
+      "holika holika|bite me",
+      "holika holika|spicy",
+      "nyx professional makeup|alabama",
+      "maybelline|more ruby 199",
+      "maybelline|exhilarator"
+    ]
+  },
+  "chanel/99-pirate": {
+    "top": [
+      "house of sillage|king - classic red",
+      "yves saint laurent|147 brooklyn baby",
+      "valentino|220a - take the lipstick and run",
+      "bodyography|raw seduction",
+      "bobbi brown|parisian red"
+    ],
+    "budget": [
+      "maybelline|crimson race",
+      "l.a. colors|clipc30 wild fire",
+      "l.a. girl|gossip",
+      "holika holika|new woman",
+      "revlon|525 wine with everything"
+    ]
+  },
+  "chanel/49-ever-red": {
+    "top": [
+      "la bouche rouge, paris|le rouge anja",
+      "nars|867 desirous",
+      "christian louboutin|rouge louboutin",
+      "too faced|chocolate lava",
+      "valentino|213r sensuous red"
+    ],
+    "budget": [
+      "max factor|35 love",
+      "e l f|own it",
+      "covergirl|burnt red pepper",
+      "holika holika|cream mocha",
+      "juvia's place|red-y or not"
+    ]
+  },
+  "dior/100-forever-nude-look": {
+    "top": [
+      "house of sillage|count - rich nude with gold luminosity",
+      "yves saint laurent|10 beige tribute",
+      "marie hunter|oak street",
+      "pat mcgrath labs|skinsane 2 (warm rose nude)",
+      "jane iredale|bellini"
+    ],
+    "budget": [
+      "morphe|honey",
+      "nyx professional makeup|athens",
+      "e.l.f. cosmetics|dirty talk",
+      "oulac|sg03 be seductive (creamy pinky nude)",
+      "nyx professional makeup|san francisco"
+    ]
+  },
+  "dior/422-rose-des-vents": {
+    "top": [
+      "covergirl|621 natural blush",
+      "nyx professional makeup|11 cash flow",
+      "kylie cosmetics|rosy ray",
+      "maybelline|115 peppy",
+      "nyx professional makeup|bella"
+    ],
+    "budget": [
+      "covergirl|621 natural blush",
+      "nyx professional makeup|11 cash flow",
+      "maybelline|115 peppy",
+      "nyx professional makeup|bella",
+      "sacheu|02 bunny tongue - sheer pink"
+    ]
+  },
+  "dior/670-rose-blues": {
+    "top": [
+      "l.a. colors|clipc858 attention",
+      "covergirl|370 precious mauve",
+      "fwee|cr03 bff (pink coral)",
+      "estee lauder|220 Powerful",
+      "l.a. colors|clipc9 pink wink"
+    ],
+    "budget": [
+      "l.a. colors|clipc858 attention",
+      "covergirl|370 precious mauve",
+      "l.a. colors|clipc9 pink wink",
+      "covergirl|sunny days",
+      "revlon|silver rose"
+    ]
+  }
+}

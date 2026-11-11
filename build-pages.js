@@ -4,6 +4,7 @@
 // Edit the copy here, then `npm run build`. Don't edit the generated pages.
 const fs = require('fs');
 const path = require('path');
+const { SHADES: DUPE_SHADES, pageUrl: dupePageUrl } = require('./dupe-shades');
 
 const SITE = 'https://lipstickbycolor.github.io';
 const HOME_TITLE = 'Lipstick Color Finder: Any Lipstick or Dupe by Color';
@@ -70,9 +71,9 @@ const PAGES = [
     imageAlt: 'The dupe finder: two lipsticks side by side, yours and its twin',
     name: 'Lipstick Dupe Finder',
     title: 'Lipstick Dupe Finder: Same Color, Any Price',
-    description: 'Find lipstick dupes across nearly 17,000 lip products and 430+ brands. Compare shades from drugstore to luxury, including alternatives to discontinued lipsticks.',
+    description: 'Find lipstick dupes across over 24,000 lip products and 520+ brands. Compare shades from drugstore to luxury, including alternatives to discontinued lipsticks.',
     h1: 'Lipstick dupe finder',
-    intro: 'Name a lipstick you love and see the shades that look most like it, from drugstore to luxury, across nearly 450 brands.',
+    intro: 'Name a lipstick you love and see the shades that look most like it, from drugstore to luxury, across over 500 brands.',
     copy: `
     <h2>How the lipstick dupe finder works</h2>
     <p>Search the brand, then the shade. The finder takes that lipstick's measured color and ranks every other product in the catalogue by how close its color is, closest first. Narrow the list by price, brand, format, finish, or undertone to find a cheaper alternative, the same color in a different finish, or a stand-in for a shade you can no longer buy.</p>
@@ -87,15 +88,8 @@ const PAGES = [
     <h3>What if my lipstick isn't listed?</h3>
     <p>Use <a href="/photo-match/">photo match</a>: upload a picture of it, tap the color, and search from there. Or find the closest color on the <a href="/color-wheel/">color wheel</a> or the <a href="/lipstick-color-chart/">lipstick color chart</a>.</p>
     <h3>Popular shades to start from</h3>
-    <p class="page-copy-links">
-      <a href="/dupe-finder/mac/ruby-woo/">MAC Ruby Woo dupes</a>
-      <a href="/dupe-finder/charlotte-tilbury/pillow-talk/">Charlotte Tilbury Pillow Talk dupes</a>
-      <a href="/dupe-finder/pat-mcgrath/elson-4/">Pat McGrath Labs Elson 4 dupes</a>
-      <a href="/dupe-finder/chanel/99-pirate/">Chanel 99 Pirate dupes</a>
-      <a href="/dupe-finder/chanel/49-ever-red/">Chanel 49 Ever Red dupes</a>
-      <a href="/dupe-finder/dior/100-forever-nude-look/">Dior 100 Forever Nude Look dupes</a>
-      <a href="/dupe-finder/dior/422-rose-des-vents/">Dior 422 Rose des Vents dupes</a>
-      <a href="/dupe-finder/dior/670-rose-blues/">Dior 670 Rose Blues dupes</a>
+    <p class="page-copy-links">${DUPE_SHADES.map(s => `
+      <a href="${dupePageUrl(s)}">${esc(s.name)} dupes</a>`).join('')}
     </p>`,
   },
   {
@@ -104,7 +98,7 @@ const PAGES = [
     imageAlt: 'Photo match: red lips in a camera frame, with a picker on the color',
     name: 'Lipstick Photo Match',
     title: 'Find a Lipstick from a Photo: Match Any Lip Color',
-    description: 'Saw the perfect lip color on Instagram? Upload the photo, tap the lips, and find it among nearly 17,000 lipsticks. Your photo never leaves your phone.',
+    description: 'Saw the perfect lip color on Instagram? Upload the photo, tap the lips, and find it among over 24,000 lipsticks. Your photo never leaves your phone.',
     h1: 'Find a lipstick color from a photo',
     intro: 'That lip color you screenshotted? Upload it, tap the lips, and see which lipsticks come closest. Your photo stays on your device.',
     copy: `
@@ -124,10 +118,10 @@ const PAGES = [
     image: 'share-card-color-chart.png',
     imageAlt: 'The color chart: hundreds of shades on one chart, with one picked',
     name: 'Lipstick Color Chart',
-    title: 'Lipstick Color Chart: Nearly 17,000 Lipsticks by Color',
-    description: 'Explore hundreds of lipstick shades on an interactive chart. Tap a shade or enter a hex code to find matching lipsticks from nearly 17,000 products across 430+ brands.',
+    title: 'Lipstick Color Chart: Over 24,000 Lipsticks by Color',
+    description: 'Explore hundreds of lipstick shades on an interactive chart. Tap a shade or enter a hex code to find matching lipsticks from over 24,000 products across 520+ brands.',
     h1: 'Lipstick color chart: find any shade',
-    intro: 'Hundreds of shades on one map, from soft nudes to deep blue-reds, matched against nearly 17,000 lipsticks from 430+ brands. Tap a color to see the closest matches, then go lighter or deeper.',
+    intro: 'Hundreds of shades on one map, from soft nudes to deep blue-reds, matched against over 24,000 lipsticks from 520+ brands. Tap a color to see the closest matches, then go lighter or deeper.',
     copy: `
     <h2>How to find the right lipstick color</h2>
     <p>The best way to find a lipstick shade depends on how much you already know about the color you want. A lipstick color chart lets you explore shades visually instead of relying only on brand names, which can describe similar colors differently.</p>

@@ -6,6 +6,7 @@
     "numbers:fetch": "node build-numbers.js --fetch",
     "build:counts": "node build-wheel-counts.js",
     "build:dupes": "node build-dupe-pages.js",
+    "dupes:pick": "node build-dupe-pages.js --pick",
     "build:catalogue": "node build-catalogue.js"
   },
   "devDependencies": {
