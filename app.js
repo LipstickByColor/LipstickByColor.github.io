@@ -8551,36 +8551,6 @@ function App() {
       transition: 'opacity 0.15s'
     }
   }, "What is \u0394E?")), /*#__PURE__*/React.createElement("a", {
-    href: "/about/",
-    onClick: () => window.gtag?.('event', 'nav_link_click', {
-      target: 'about',
-      location: 'footer'
-    }),
-    style: {
-      fontSize: 11,
-      color: 'var(--blush-deep)',
-      letterSpacing: '0.05em',
-      textDecoration: 'none',
-      borderBottom: '1px solid currentColor',
-      paddingBottom: 1,
-      transition: 'opacity 0.15s'
-    }
-  }, "How I Built It"), /*#__PURE__*/React.createElement("a", {
-    href: "/guides/",
-    onClick: () => window.gtag?.('event', 'nav_link_click', {
-      target: 'guides',
-      location: 'footer'
-    }),
-    style: {
-      fontSize: 11,
-      color: 'var(--blush-deep)',
-      letterSpacing: '0.05em',
-      textDecoration: 'none',
-      borderBottom: '1px solid currentColor',
-      paddingBottom: 1,
-      transition: 'opacity 0.15s'
-    }
-  }, "Guides"), /*#__PURE__*/React.createElement("a", {
     href: "/privacy/",
     style: {
       fontSize: 11,
@@ -8625,7 +8595,24 @@ function App() {
       paddingBottom: 1,
       transition: 'opacity 0.15s'
     }
-  }, "Instagram"), selectedColor && matches.length > 0 && /*#__PURE__*/React.createElement("span", {
+  }, "Instagram"), /*#__PURE__*/React.createElement("a", {
+    href: "https://forms.gle/EeCaetrPGkz3TTxU8",
+    target: "_blank",
+    rel: "noopener noreferrer",
+    onClick: () => window.gtag?.('event', 'nav_link_click', {
+      target: 'feedback',
+      location: 'footer'
+    }),
+    style: {
+      fontSize: 11,
+      color: 'var(--blush-deep)',
+      letterSpacing: '0.05em',
+      textDecoration: 'none',
+      borderBottom: '1px solid currentColor',
+      paddingBottom: 1,
+      transition: 'opacity 0.15s'
+    }
+  }, "Leave Feedback"), selectedColor && matches.length > 0 && /*#__PURE__*/React.createElement("span", {
     style: {
       fontSize: 11,
       color: 'var(--text-muted)'

@@ -4690,24 +4690,6 @@ function App() {
             What is ΔE?
           </a>
         </>}
-        <a href="/about/"
-          onClick={() => window.gtag?.('event', 'nav_link_click', { target: 'about', location: 'footer' })}
-          style={{
-          fontSize:11, color:'var(--blush-deep)', letterSpacing:'0.05em',
-          textDecoration:'none', borderBottom:'1px solid currentColor', paddingBottom:1,
-          transition:'opacity 0.15s',
-        }}>
-          How I Built It
-        </a>
-        <a href="/guides/"
-          onClick={() => window.gtag?.('event', 'nav_link_click', { target: 'guides', location: 'footer' })}
-          style={{
-          fontSize:11, color:'var(--blush-deep)', letterSpacing:'0.05em',
-          textDecoration:'none', borderBottom:'1px solid currentColor', paddingBottom:1,
-          transition:'opacity 0.15s',
-        }}>
-          Guides
-        </a>
         <a href="/privacy/" style={{
           fontSize:11, color:'var(--blush-deep)', letterSpacing:'0.05em',
           textDecoration:'none', borderBottom:'1px solid currentColor', paddingBottom:1,
@@ -4732,6 +4714,15 @@ function App() {
           transition:'opacity 0.15s',
         }}>
           Instagram
+        </a>
+        <a href="https://forms.gle/EeCaetrPGkz3TTxU8" target="_blank" rel="noopener noreferrer"
+          onClick={() => window.gtag?.('event', 'nav_link_click', { target: 'feedback', location: 'footer' })}
+          style={{
+          fontSize:11, color:'var(--blush-deep)', letterSpacing:'0.05em',
+          textDecoration:'none', borderBottom:'1px solid currentColor', paddingBottom:1,
+          transition:'opacity 0.15s',
+        }}>
+          Leave Feedback
         </a>
         {selectedColor && matches.length > 0 && (
           <span style={{ fontSize:11, color:'var(--text-muted)' }}>
