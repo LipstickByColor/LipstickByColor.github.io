@@ -6,7 +6,7 @@ const fs = require('fs');
 const path = require('path');
 const { SHADES: DUPE_SHADES, pageUrl: dupePageUrl } = require('./dupe-shades');
 
-const SITE = 'https://lipstickbycolor.github.io';
+const SITE = 'https://lipstickcolorfinder.com';
 const HOME_TITLE = 'Lipstick Color Finder: Any Lipstick or Dupe by Color';
 const esc = s => s.replace(/&/g, '&amp;').replace(/"/g, '&quot;');
 

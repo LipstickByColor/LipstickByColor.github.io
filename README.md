@@ -2,17 +2,17 @@
 
 A tool for discovering, searching, and comparing lipstick shades across 24,000+ products and 520+ brands by color, finish, and vibe.
 
-**[lipstickbycolor.github.io](https://lipstickbycolor.github.io)**
+**[lipstickcolorfinder.com](https://lipstickcolorfinder.com)**
 
 ---
 
 ## How it works
 
-The color wheel is built from the actual product data: 48 cluster centers were derived using a Gaussian Mixture Model trained on the catalog's lipstick shades in CIELAB color space. When you pick a color, the app computes [ΔE (perceptual color distance)](https://lipstickbycolor.github.io/color-science/) between your selection and every product in the database to surface the closest matches.
+The color wheel is built from the actual product data: 48 cluster centers were derived using a Gaussian Mixture Model trained on the catalog's lipstick shades in CIELAB color space. When you pick a color, the app computes [ΔE (perceptual color distance)](https://lipstickcolorfinder.com/color-science/) between your selection and every product in the database to surface the closest matches.
 
 All product data is stored in [Supabase](https://supabase.com) and fetched on load. Color matching runs entirely in the browser using the CIELAB → sRGB math.
 
-The ML pipeline behind the color clustering and product data is described in the [About](https://lipstickbycolor.github.io/about/) section and documented in detail on [GitHub](https://github.com/ConstanzaSchibber/lipstick_color_extraction).
+The ML pipeline behind the color clustering and product data is described in the [About](https://lipstickcolorfinder.com/about/) section and documented in detail on [GitHub](https://github.com/ConstanzaSchibber/lipstick_color_extraction).
 
 ---
 

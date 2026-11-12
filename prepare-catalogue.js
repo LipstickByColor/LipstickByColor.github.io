@@ -12,7 +12,7 @@ const COLS = ['id', 'brand', 'product', 'shade', 'finish', 'type', 'lab_l', 'lab
 // to the source CSV) are copied to product-images/ and served by the site;
 // the row's image_url points there. Commit that folder with the change.
 const IMAGE_DIR = path.join(__dirname, 'product-images');
-const IMAGE_BASE = 'https://lipstickbycolor.github.io/product-images/';
+const IMAGE_BASE = 'https://lipstickcolorfinder.com/product-images/';
 
 const BRAND_RENAMES = { 'prada beauty': 'prada' };
 

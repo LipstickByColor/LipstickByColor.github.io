@@ -13,7 +13,7 @@ const vm = require('vm');
 const sharp = require('sharp');
 const { SHADES, slug, pageUrl } = require('./dupe-shades');
 
-const SITE = 'https://lipstickbycolor.github.io';
+const SITE = 'https://lipstickcolorfinder.com';
 const IMG_DIR = path.join(__dirname, 'dupe-finder', 'assets');
 // Saved at about twice the size they are shown at, for sharp screens
 const THUMB = 144, SOURCE_IMG = 240;

@@ -6,7 +6,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const HOST = 'lipstickbycolor.github.io';
+const HOST = 'lipstickcolorfinder.com';
 const KEY = 'cdf01ce9fadf4ed7902161c57beab7a5';
 
 const arg = process.argv[2];

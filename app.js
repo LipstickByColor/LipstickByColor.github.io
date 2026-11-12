@@ -2247,7 +2247,7 @@ function TweaksPanel({
 
 // ── Shareable Image (Instagram-friendly) ──────────────────────────────────────
 // Site URL printed on the shared card so it can be scanned / typed back in.
-const SITE_URL = 'lipstickbycolor.github.io';
+const SITE_URL = 'lipstickcolorfinder.com';
 
 // Route a URL through a CORS-friendly image proxy. Many retailer CDNs (Sephora,
 // ilmakiage, …) serve product photos without an Access-Control-Allow-Origin
