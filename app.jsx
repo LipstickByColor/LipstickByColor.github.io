@@ -4107,6 +4107,8 @@ function App() {
 
   function switchMode(id, ui_source = 'tabs') {
     setMode(id);
+    // Filters belong to the tab they were set on (the wheel keeps its own between colors)
+    setFilterParams([]);
     localStorage.setItem('lipstick-visited', '1');
     window.gtag?.('event', 'select_mode', { mode: id, ui_source });
     if (id === 'wheel') { setSelectedColor(null); setPhotoHex(null); setHexHex(null); setDupeProduct(null); }
