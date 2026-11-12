@@ -118,6 +118,18 @@ const LIPSTICK_DATA = [
   {id:54, hex:"#50332c", name:"Espresso", tag:"Deep cool brown", novelty:true}, // sits with Onyx so the two rings stay even
 ];
 
+// The wheel colors by family. The color wheel page groups its shade cards this way, and
+// the color wheel orders its colors by family (see ColorWheel in app.jsx). Every wheel
+// color must be in exactly one family.
+const WHEEL_FAMILIES = [
+  ['Red', ['Poppy','Vermilion','Signal Red','Raspberry Red','Classic Red','Tomato','Cherry','Ruby','Scarlet','Black Cherry','Oxblood','Brick']],
+  ['Pink', ['Ballet','Lilac Pink','Ballet Pink','Bright Pink','Peachy Pink','Rosy Pink','Hot Pink','Classic Pink','Rose','Faded Rose','Dusty Cedar','Deep Rose','Magenta']],
+  ['Coral and peach', ['Apricot','Burnt Coral','Coral','Carnelian']],
+  ['Nude and brown', ['Rose Dawn','Canyon Clay','Terracotta','Nude Rose','Chestnut','Sable','Espresso','Old Rose','Rosewood']],
+  ['Berry and wine', ['Deep Raspberry','Dark Rose','Burgundy','Syrah','Dark Wine','Holly Berry','Rose Wine']],
+  ['Black', ['Onyx']],
+];
+
 // ── Convert wheel hex to CIELAB for matching ─────────────────────────────────
 function hexToLab(hex) {
   const r = parseInt(hex.slice(1,3),16)/255;

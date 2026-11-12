@@ -11,22 +11,14 @@ const HOME_TITLE = 'Lipstick Color Finder: Any Lipstick or Dupe by Color';
 const esc = s => s.replace(/&/g, '&amp;').replace(/"/g, '&quot;');
 
 // The wheel's colors as small cards (swatch, name, lipstick count, hex), grouped by family
-// and ordered light to deep. Every wheel color must be in exactly one family. The counts
-// come from wheel-counts.json, which `npm run build:counts` writes from the live catalogue.
-const WHEEL_FAMILIES = [
-  ['Red', ['Poppy','Vermilion','Signal Red','Raspberry Red','Classic Red','Tomato','Cherry','Ruby','Scarlet','Black Cherry','Oxblood','Brick']],
-  ['Pink', ['Ballet','Lilac Pink','Ballet Pink','Bright Pink','Peachy Pink','Rosy Pink','Hot Pink','Classic Pink','Rose','Faded Rose','Dusty Cedar','Deep Rose','Magenta']],
-  ['Coral and peach', ['Apricot','Burnt Coral','Coral','Carnelian']],
-  ['Nude and brown', ['Rose Dawn','Canyon Clay','Terracotta','Nude Rose','Chestnut','Sable','Espresso','Old Rose','Rosewood']],
-  ['Berry and wine', ['Deep Raspberry','Dark Rose','Burgundy','Syrah','Dark Wine','Holly Berry','Rose Wine']],
-  ['Black', ['Onyx']],
-];
+// (WHEEL_FAMILIES in lipstick-utils.js) and ordered light to deep. The counts come from
+// wheel-counts.json, which `npm run build:counts` writes from the live catalogue.
 const wheel = require('vm').runInNewContext(
-  fs.readFileSync(path.join(__dirname, 'lipstick-utils.js'), 'utf8') + '\n;({ LIPSTICK_DATA, hexToLab })', {});
+  fs.readFileSync(path.join(__dirname, 'lipstick-utils.js'), 'utf8') + '\n;({ LIPSTICK_DATA, WHEEL_FAMILIES, hexToLab })', {});
 const wheelCounts = JSON.parse(fs.readFileSync(path.join(__dirname, 'wheel-counts.json'), 'utf8'));
 function wheelCards() {
   const left = new Map(wheel.LIPSTICK_DATA.map(c => [c.name, c]));
-  const html = WHEEL_FAMILIES.map(([family, names]) => {
+  const html = wheel.WHEEL_FAMILIES.map(([family, names]) => {
     const colors = names.map(n => {
       if (!left.has(n)) throw new Error(`build-pages: "${n}" is not a wheel color, or is listed twice`);
       if (!Number.isInteger(wheelCounts[n])) throw new Error(`build-pages: no count for "${n}" in wheel-counts.json. Run npm run build:counts.`);

@@ -853,11 +853,32 @@ function getHsl(hex) {
 
 // ── Segmented Color Wheel ──────────────────────────────────────────────────────
 // Each of the 40 colors gets its own arc segment — clear boundaries, labeled,
-// clickable. Colors sorted by hue; arranged in 2 rings (light outer, dark inner).
+// clickable. Colors ordered by family, then hue (wheelFamilyOrder); arranged in 2 rings
+// (lighter of each pair outer).
 const WHEEL_TYPE = {
   micro: 11,
   name: 15
 };
+// The order of the wheel's colors, clockwise from the novelty block at the bottom: reds
+// (orange-red to blue-red), pinks and berries (cool to warm), then nudes, corals and browns
+// (WHEEL_FAMILIES; "Nude and brown" splits into its lighter half, nudes, and deeper half,
+// browns). Each group is sorted by hue; there's no gap between groups.
+function wheelFamilyOrder(list) {
+  const hue = c => {
+    const h = getHsl(c.hex).h;
+    return h > 300 ? h - 360 : h;
+  }; // pinks just below 0°, next to the reds
+  const byHue = (arr, dir = 1) => [...arr].sort((a, b) => dir * (hue(a) - hue(b)));
+  const fam = name => {
+    const names = new Set((WHEEL_FAMILIES.find(f => f[0] === name) || [, []])[1]);
+    return list.filter(c => names.has(c.name));
+  };
+  const nudeBrown = fam('Nude and brown').sort((a, b) => hexToLab(b.hex)[0] - hexToLab(a.hex)[0]);
+  const half = Math.ceil(nudeBrown.length / 2);
+  const order = [...byHue(fam('Red'), -1), ...byHue([...fam('Pink'), ...fam('Berry and wine')]), ...byHue(nudeBrown.slice(0, half)), ...byHue(fam('Coral and peach')), ...byHue(nudeBrown.slice(half))];
+  const placed = new Set(order);
+  return [...order, ...list.filter(c => !placed.has(c))]; // a color missing from WHEEL_FAMILIES still shows
+}
 function ColorWheel({
   colors,
   selectedId,
@@ -892,7 +913,7 @@ function ColorWheel({
   const segments = [];
   {
     const sortByHue = arr => [...arr].sort((a, b) => getHsl(a.hex).h - getHsl(b.hex).h);
-    const gmmColors = sortByHue(colors.filter(c => !c.novelty));
+    const gmmColors = wheelFamilyOrder(colors.filter(c => !c.novelty));
     const novColors = sortByHue(colors.filter(c => c.novelty));
     const sliceDeg = (360 - DIVIDER_GAP) / HALF;
     const novHalf = SINGLE_RING ? novColors.length : novColors.length / 2;
