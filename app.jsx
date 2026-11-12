@@ -2692,11 +2692,11 @@ function PhotoPicker({ sampledHex, onColor }) {
           style={{
             flex:1, padding:'8px 12px', fontFamily:'DM Sans', fontSize:11,
             letterSpacing:'0.08em', textTransform:'uppercase', fontWeight:500,
-            background:'transparent', color:'var(--text-muted)',
-            border:'1px solid var(--border)', borderRadius:20, cursor:'pointer',
+            background:'var(--blush-deep)', color:'#fff',
+            border:'none', borderRadius:20, cursor:'pointer',
           }}
         >
-          ← New photo
+          Upload new photo
         </button>
       </div>
     </div>
@@ -4617,8 +4617,8 @@ function App() {
             />
           )}
 
-          {/* Selected color pill (Custom color shows its pick on the card instead) */}
-          {selectedColor && mode !== 'hex' && mode !== 'list' && (
+          {/* Selected color pill (Custom color shows its pick on the card instead; From photo has its own Upload new photo button) */}
+          {selectedColor && mode !== 'hex' && mode !== 'list' && mode !== 'photo' && (
             <div style={{
               marginTop:28, display:'flex', alignItems:'center', gap:10,
               padding:'8px 16px 8px 10px',

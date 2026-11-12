@@ -4402,13 +4402,13 @@ function PhotoPicker({
       letterSpacing: '0.08em',
       textTransform: 'uppercase',
       fontWeight: 500,
-      background: 'transparent',
-      color: 'var(--text-muted)',
-      border: '1px solid var(--border)',
+      background: 'var(--blush-deep)',
+      color: '#fff',
+      border: 'none',
       borderRadius: 20,
       cursor: 'pointer'
     }
-  }, "\u2190 New photo")));
+  }, "Upload new photo")));
 }
 
 // ── Hex Picker ──────────────────────────────────────────────────────────
@@ -8391,7 +8391,7 @@ function App() {
         name: p.shade
       });
     }
-  }), selectedColor && mode !== 'hex' && mode !== 'list' && /*#__PURE__*/React.createElement("div", {
+  }), selectedColor && mode !== 'hex' && mode !== 'list' && mode !== 'photo' && /*#__PURE__*/React.createElement("div", {
     style: {
       marginTop: 28,
       display: 'flex',
