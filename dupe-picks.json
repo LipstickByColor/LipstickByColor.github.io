@@ -130,17 +130,17 @@
   "bobbi-brown/blue-raspberry": {
     "top": [
       "rimmel|heather",
-      "mua makeup academy|rouge noir",
       "decorté|06 urban wear",
       "l oreal|mica 620",
-      "decorté|11"
+      "w3ll people|let it go",
+      "covergirl|natural blush"
     ],
     "budget": [
       "rimmel|heather",
       "l oreal|mica 620",
       "covergirl|natural blush",
-      "essence|baby got blush 104",
-      "revlon|laidback lilac"
+      "revlon|laidback lilac",
+      "maybelline|373 mauve for me"
     ]
   },
   "mac/velvet-teddy": {
@@ -158,5 +158,9 @@
       "oden's eye|cream petal",
       "revlon|want it all"
     ]
+  },
+  "photos": {
+    "maybelline|crimson race": "dupe-photos/maybelline-color-sensational-the-creams-lip-color-crimson-race-5343a4aa.webp",
+    "rimmel|heather": "dupe-photos/rimmel-lip-stick-heather-829f6c9f.webp"
   }
 }
