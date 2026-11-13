@@ -58,7 +58,10 @@ warns and fills the gap with the closest unpicked match; rerun the picker to che
   color the way the color chart does, and its "Filter all" links open the color chart. Remove it once the
   dataset is fixed (Pillow Talk has one now).
 - `swatch: '/dupe-finder/assets/<name>.webp'` — a swatch photo shown beside the product in the hero. Save
-  the user's image as WebP in `dupe-finder/assets/` with sharp; the cleanup step keeps it.
+  the user's image as WebP in `dupe-finder/assets/` with sharp; the cleanup step keeps it. Name it
+  `<page-slug>-swatch.webp` (e.g. `mac-ruby-woo-swatch.webp`), resize to fit 480px and trim white borders. Then rebuild
+  only that page: `npm run build:dupes -- --only mac/ruby-woo` (page keys as in `dupe-picks.json`, comma-separated).
+  A page with a swatch has no lip drawing; `swatchLip: true` puts it over the swatch's bottom-right corner.
 - `skip: ['brand|shade']` — never offer this match on that page (e.g. a duplicate listing of the same
   lipstick, a product whose photo can't be downloaded). Prefer the picker; use skip when it would keep
   coming back.

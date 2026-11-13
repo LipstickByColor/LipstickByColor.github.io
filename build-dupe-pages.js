@@ -3,6 +3,7 @@
 // catalogue. Needs the network, so it is run on its own:
 //   npm run dupes:pick    pick each page's matches out of its 10 closest, save, and rebuild
 //   npm run build:dupes   rebuild the pages with the saved picks (dupe-picks.json)
+//                         (-- --only mac/ruby-woo,dior/670-rose-blues for just those pages)
 // Product photos (or ones chosen in the picker, see PHOTO_DIR) are saved as small WebP thumbnails in /dupe-finder/assets/, so the pages
 // don't depend on retailer image links. Ones already saved are reused; unused ones are removed.
 // Each page also gets a share image (<page>-share.png) for Pinterest and link previews.
@@ -372,6 +373,8 @@ h1 em{font-weight:400;color:var(--accent)}
 .has-swatch{justify-content:space-evenly;gap:8px;padding:0 12px}
 .has-swatch img{height:170px;min-width:0}
 .has-swatch .swatch{height:auto;width:52%;max-width:220px}
+.swatch-box{position:relative;width:52%;max-width:220px}.swatch-box .swatch{display:block;width:100%;max-width:none}
+.original-img .swatch-box [data-lip]{right:6%;bottom:5%;width:36%}
 .original-text{display:flex;flex-direction:column;gap:6px}
 .original-label{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#8C6858}
 .original-name{font-family:'Cormorant Garamond',serif;font-size:28px;line-height:1.1}
@@ -529,8 +532,9 @@ body:has(.detail[open]){overflow:hidden}
       </div>
       <div class="original">
         <div class="original-img${s.swatch ? ' has-swatch' : ''}">${srcImg ? `
-          <img src="${srcImg}" alt="${esc(fullName(src))}" width="190" height="190" fetchpriority="high">` : ''}${s.swatch ? `
-          <img class="swatch" src="${s.swatch}" alt="${esc(`${s.name} swatch`)}" width="315" height="273">` : `
+          <img src="${srcImg}" alt="${esc(fullName(src))}" width="190" height="190" fetchpriority="high">` : ''}${s.swatch ? (img => s.swatchLip ? `
+          <div class="swatch-box">${img}<div data-lip aria-hidden="true" style="background:${src.hex}"></div></div>` : `
+          ${img}`)(`<img class="swatch" src="${s.swatch}" alt="${esc(`${s.name} swatch`)}" width="${s.swatchSize.width}" height="${s.swatchSize.height}">`) : `
           <div data-lip aria-hidden="true" style="background:${src.hex}"></div>`}
         </div>
         <div class="original-text">
@@ -544,9 +548,9 @@ body:has(.detail[open]){overflow:hidden}
 
   <section class="in method" aria-label="How we find dupes">
     <div><span class="eyebrow">How we find dupes</span><a class="u" href="/color-science/">Read the color science →</a></div>
-    <div><span class="num" aria-hidden="true">01</span><span class="step">Measure</span><p>We isolate the lipstick in each product photo and read its true color, ignoring the packaging and the shade name.</p></div>
+    <div><span class="num" aria-hidden="true">01</span><span class="step">Measure</span><p>We isolate the lipstick in each product photo and measure its visible color. Lighting and your natural lip color can affect how a shade appears in real life.</p></div>
     <div><span class="num" aria-hidden="true">02</span><span class="step">Compare</span><p>Every shade is scored against ${esc(s.short)} by how different the two colors look to the eye.</p></div>
-    <div><span class="num" aria-hidden="true">03</span><span class="step">Rank</span><p>Closest first. Nothing is hand-picked or paid for.</p></div>
+    <div><span class="num" aria-hidden="true">03</span><span class="step">Rank</span><p>Closest color matches first. Filter by finish, brand, or other preferences to narrow the results.</p></div>
   </section>
 
   <div class="in">
@@ -743,6 +747,8 @@ async function writePages(shades, picks) {
     const top = choose(listed, pick.top, `${s.name}, closest`), budget = choose(budgetAll, pick.budget, `${s.name}, under $15`);
     // The cards' photos, and larger ones for the detail view (a photo chosen in the picker first)
     await Promise.all([...top, ...budget].map(async p => { p.photo = (picks.photos || {})[productKey(p)]; p.img = await image(p, THUMB); p.big = await image(p, SOURCE_IMG); }));
+    // The swatch photo's own size, so the hero keeps its shape while it loads
+    if (s.swatch) s.swatchSize = await sharp(path.join(__dirname, s.swatch)).metadata();
     const colors = pageColors(src.hex);
     const shareImg = await shareImage(s, src, top, colors);
     const html = page(s, src, await image(src, SOURCE_IMG), top, budget, listed, band, colors, shareImg);
@@ -1048,5 +1054,10 @@ async function pickServer(shades) {
 (async () => {
   const shades = await prepare();
   if (process.argv.includes('--pick')) await pickServer(shades);
-  else await writePages(shades, readPicks());
+  else {
+    // --only mac/ruby-woo,dior/670-rose-blues rebuilds just those pages
+    const i = process.argv.indexOf('--only'), only = i > 0 && process.argv[i + 1].split(',');
+    if (only) { const missing = only.filter(k => !shades.some(({ s }) => pageKey(s) === k)); if (missing.length) throw new Error(`no page ${missing.join(', ')}`); }
+    await writePages(only ? shades.filter(({ s }) => only.includes(pageKey(s))) : shades, readPicks());
+  }
 })().catch(err => { console.error(err); process.exit(1); });
