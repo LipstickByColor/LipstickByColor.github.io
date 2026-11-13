@@ -10,7 +10,9 @@
     "budget": [
       "ulta|lava",
       "maybelline|691 rich ruby",
-      "essence|happy"
+      "essence|happy",
+      "oulac|y13 taste of love",
+      "peripera|19 love sniper red"
     ]
   },
   "charlotte-tilbury/pillow-talk": {
@@ -19,7 +21,7 @@
       "iconic london|undressed",
       "dinto|107",
       "natasha moor cosmetics|self made",
-      "queen musia|madame bovary ~the gauguin pink~"
+      "w7|silk slip"
     ],
     "budget": [
       "w7|silk slip",
@@ -35,7 +37,7 @@
       "sephora collection|95 electric ruby",
       "stila|beso (true red)",
       "labomme|flame thrower",
-      "clinique|chili pop"
+      "the lip bar|infamous red"
     ],
     "budget": [
       "the lip bar|infamous red",
@@ -123,6 +125,38 @@
       "l oreal|pink flamingo 180",
       "oulac|sg17 bella",
       "almay|dance now"
+    ]
+  },
+  "bobbi-brown/blue-raspberry": {
+    "top": [
+      "rimmel|heather",
+      "mua makeup academy|rouge noir",
+      "decorté|06 urban wear",
+      "l oreal|mica 620",
+      "decorté|11"
+    ],
+    "budget": [
+      "rimmel|heather",
+      "l oreal|mica 620",
+      "covergirl|natural blush",
+      "essence|baby got blush 104",
+      "revlon|laidback lilac"
+    ]
+  },
+  "mac/velvet-teddy": {
+    "top": [
+      "dear dahlia|17 cosy",
+      "tom ford|110 blush absolute",
+      "l oreal|150 lazy sunday",
+      "3ce|hazy rose",
+      "guerlain|360 le beige nu"
+    ],
+    "budget": [
+      "l oreal|150 lazy sunday",
+      "revlon|130 rose velvet",
+      "nyx professional makeup|04 teddy fluff",
+      "oden's eye|cream petal",
+      "revlon|want it all"
     ]
   }
 }

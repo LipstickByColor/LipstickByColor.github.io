@@ -22,6 +22,8 @@ const SHADES = [
   { brand:'dior', shade:'100 forever nude look', name:'Dior 100 Forever Nude Look', short:'100 Forever Nude Look' },
   { brand:'dior', shade:'422 rose des vents', name:'Dior 422 Rose des Vents', short:'422 Rose des Vents' },
   { brand:'dior', shade:'670 rose blues', name:'Dior 670 Rose Blues', short:'670 Rose Blues' },
+  { brand:'bobbi brown', shade:'blue raspberry', product:'crushed lip color', name:'Bobbi Brown Blue Raspberry', short:'Blue Raspberry' },
+  { brand:'mac cosmetics', shade:'velvet teddy', product:'m·a·cximal silky matte lipstick', name:'MAC Velvet Teddy', short:'Velvet Teddy', brandSlug:'mac' },
 ];
 
 const slug = s => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
