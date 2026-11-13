@@ -3,7 +3,7 @@
 // catalogue. Needs the network, so it is run on its own:
 //   npm run dupes:pick    pick each page's matches out of its 10 closest, save, and rebuild
 //   npm run build:dupes   rebuild the pages with the saved picks (dupe-picks.json)
-// Product photos are saved as small WebP thumbnails in /dupe-finder/assets/, so the pages
+// Product photos (or ones chosen in the picker, see PHOTO_DIR) are saved as small WebP thumbnails in /dupe-finder/assets/, so the pages
 // don't depend on retailer image links. Ones already saved are reused; unused ones are removed.
 // Each page also gets a share image (<page>-share.png) for Pinterest and link previews.
 // The shades are listed in dupe-shades.js. Don't edit the generated pages.
@@ -143,22 +143,32 @@ async function fetchCatalogue() {
 // none. One already saved in either folder is reused (copied over when it is in the other one).
 // The picker's candidates go in CANDIDATE_DIR, outside the site, so they aren't committed.
 const CANDIDATE_DIR = path.join(__dirname, 'data-build', 'dupe-candidates');
+// A photo chosen in the picker replaces the catalogue's (p.photo): an image link, or a file
+// uploaded there and kept in PHOTO_DIR. Its saved photos carry a short hash of it in their name.
+const PHOTO_DIR = path.join(__dirname, 'dupe-photos');
+const hash = s => require('crypto').createHash('sha1').update(s).digest('hex').slice(0, 8);
+async function photoBytes(source) {
+  if (source.startsWith('dupe-photos/')) return fs.readFileSync(path.join(PHOTO_DIR, path.basename(source)));
+  const res = await fetch(source.replace(/^\/\//, 'https://'), { headers: { 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36', Accept: 'image/avif,image/webp,image/*,*/*;q=0.8' }, signal: AbortSignal.timeout(20000) });
+  if (!res.ok) throw new Error(`status ${res.status}`);
+  return Buffer.from(await res.arrayBuffer());
+}
 const saving = new Map();
-function savePhoto(p, px, dir) {
-  if (!p.imageUrl) return null;
-  const name = `${slug(`${p.brand} ${p.product} ${p.shade}`)}-${px}.webp`;
+function savePhoto(p, px, dir, quiet) {
+  const source = p.photo || p.imageUrl;
+  if (!source) return null;
+  const name = `${slug(`${p.brand} ${p.product} ${p.shade}`)}${p.photo ? `-${hash(p.photo)}` : ''}-${px}.webp`;
   const file = path.join(dir, name);
   if (!saving.has(file)) saving.set(file, (async () => {
     if (fs.existsSync(file)) return name;
     const other = path.join(dir === IMG_DIR ? CANDIDATE_DIR : IMG_DIR, name);
     if (fs.existsSync(other)) { fs.copyFileSync(other, file); return name; }
     try {
-      const res = await fetch(p.imageUrl.replace(/^\/\//, 'https://'), { headers: { 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36', Accept: 'image/avif,image/webp,image/*,*/*;q=0.8' }, signal: AbortSignal.timeout(20000) });
-      if (!res.ok) throw new Error(`status ${res.status}`);
-      await sharp(Buffer.from(await res.arrayBuffer())).flatten({ background: '#fff' })
+      await sharp(await photoBytes(source)).flatten({ background: '#fff' })
         .resize(px, px, { fit: 'contain', background: '#fff' }).webp({ quality: 80 }).toFile(file);
       return name;
     } catch (err) {
+      if (quiet) { saving.delete(file); throw err; }
       console.warn(`no image for ${p.brand} / ${p.shade}: ${err.message}`);
       return null;
     }
@@ -731,8 +741,8 @@ async function writePages(shades, picks) {
   for (const { s, src, listed, budgetAll, band } of shades) {
     const pick = picks[pageKey(s)] || {};
     const top = choose(listed, pick.top, `${s.name}, closest`), budget = choose(budgetAll, pick.budget, `${s.name}, under $15`);
-    // The cards' photos, and larger ones for the detail view
-    await Promise.all([...top, ...budget].map(async p => { p.img = await image(p, THUMB); p.big = await image(p, SOURCE_IMG); }));
+    // The cards' photos, and larger ones for the detail view (a photo chosen in the picker first)
+    await Promise.all([...top, ...budget].map(async p => { p.photo = (picks.photos || {})[productKey(p)]; p.img = await image(p, THUMB); p.big = await image(p, SOURCE_IMG); }));
     const colors = pageColors(src.hex);
     const shareImg = await shareImage(s, src, top, colors);
     const html = page(s, src, await image(src, SOURCE_IMG), top, budget, listed, band, colors, shareImg);
@@ -743,13 +753,20 @@ async function writePages(shades, picks) {
     console.log(`wrote ${pageUrl(s).slice(1)}index.html (${src.finish || 'no finish'}, closest ΔE ${top[0] ? top[0].d.toFixed(1) : '–'}, ${budget.length} under $15)`);
   }
 
-  // Drop thumbnails and share images no page shows any more (only when every page was rewritten)
-  if (written.length === SHADES.length) {
-    const shares = new Set(SHADES.map(shareName));
-    SHADES.forEach(s => s.swatch && used.add(path.basename(s.swatch)));
-    for (const f of fs.readdirSync(IMG_DIR)) {
-      if ((f.endsWith('.webp') && !used.has(f)) || (f.endsWith('-share.png') && !shares.has(f))) fs.unlinkSync(path.join(IMG_DIR, f));
+  // Drop thumbnails and share images no page shows any more. When only some pages were rewritten,
+  // the others' photos are found in their HTML.
+  if (written.length < SHADES.length) {
+    for (const s of SHADES) {
+      if (written.includes(s)) continue;
+      const file = path.join(__dirname, pageUrl(s), 'index.html');
+      if (!fs.existsSync(file)) continue;
+      for (const m of fs.readFileSync(file, 'utf8').matchAll(/\/dupe-finder\/assets\/([^"'\s)?#]+\.webp)/g)) used.add(m[1]);
     }
+  }
+  const shares = new Set(SHADES.map(shareName));
+  SHADES.forEach(s => s.swatch && used.add(path.basename(s.swatch)));
+  for (const f of fs.readdirSync(IMG_DIR)) {
+    if ((f.endsWith('.webp') && !used.has(f)) || (f.endsWith('-share.png') && !shares.has(f))) fs.unlinkSync(path.join(IMG_DIR, f));
   }
 
   // List the pages in the sitemap, with today as the date they last changed
@@ -769,16 +786,27 @@ async function writePages(shades, picks) {
 
 // ── Picker ────────────────────────────────────────────────────────────────────
 // npm run dupes:pick serves a page at localhost:8081 with each shade's 10 closest candidates for
-// both lists. Pick up to 5 in each and save: the picks go in dupe-picks.json and the pages are rebuilt.
+// both lists. Pick up to 5 in each and save: the picks go in dupe-picks.json and the pages whose picks changed are rebuilt.
 function pickerPage(cands, picks) {
+  const photos = picks.photos || {};
   const cardHtml = (src, list, keys) => (p, i) => `
+        <div class="cw" data-key="${esc(productKey(p))}" data-orig="${p.origThumb || ''}">
         <button type="button" class="c" data-list="${list}" data-key="${esc(productKey(p))}" aria-pressed="${keys.includes(productKey(p))}">
           <span class="ci">${p.thumb ? `<img src="/img/${p.thumb}" alt="" width="96" height="96">` : '<span class="none">No photo</span>'}<span class="r">${String(i + 1).padStart(2, '0')}</span><span class="tick" aria-hidden="true">✓</span></span>
           <span class="pr"><span style="background:${src.hex}"></span><span style="background:${p.hex}"></span></span>
           <span class="cb"><span class="b">${esc(brandName(p.brand))}</span><span class="s">${esc(titleCase(p.shade))}</span>
           <span class="m">${esc([titleCase(p.product), p.finish, FORMATS[p.format] || p.format, p.tier].filter(Boolean).join(' · '))}</span>
           <span class="d">ΔE ${p.d.toFixed(1)}</span></span>
-        </button>`;
+        </button>
+        <div class="ph">
+          <button type="button" class="phl" data-act="open">Change photo</button>${photos[productKey(p)] ? '<button type="button" class="phl" data-act="reset">Reset photo</button>' : ''}
+          <div class="pp" hidden>
+            <input type="url" placeholder="Paste an image link" aria-label="Image link">
+            <div class="pa"><button type="button" class="pb" data-act="use">Use link</button><label class="pb">Choose file<input type="file" accept="image/*" hidden></label><button type="button" class="phl" data-act="close">Cancel</button></div>
+            <p class="pe" role="status"></p>
+          </div>
+        </div>
+        </div>`;
   const block = (src, list, title, items, keys) => `
       <div class="list" data-list="${list}">
         <h3>${title} <span class="count"></span></h3>
@@ -811,6 +839,14 @@ h3{margin:24px 0 10px;font-size:15px;font-weight:600}.count{font-weight:400;colo
 .cb{display:flex;flex-direction:column;gap:3px;padding:8px 10px 10px}
 .b{font-size:12px;color:#5C3D30}.s{font-family:'Cormorant Garamond',serif;font-size:19px;line-height:1.1}.m{font-size:12px;line-height:1.4;color:#5C3D30}.d{font-size:12px;font-weight:600;margin-top:2px}
 .empty{font-size:14px;color:#5C3D30}
+.cw{display:flex;flex-direction:column;min-width:0}.cw .c{flex:1}
+.ph{padding:6px 2px 0;display:flex;flex-wrap:wrap;gap:4px 12px}
+.phl{padding:0;border:0;background:none;font:500 12px 'DM Sans',sans-serif;color:#96455C;text-decoration:underline;cursor:pointer}
+.pp{flex-basis:100%;display:flex;flex-direction:column;gap:6px;margin-top:4px}.pp[hidden]{display:none}
+.pp input[type=url]{width:100%;font:13px 'DM Sans',sans-serif;padding:6px 8px;border:1px solid #E0D0C4;border-radius:6px}
+.pa{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px}
+.pb{font:500 12px 'DM Sans',sans-serif;padding:5px 10px;border:1px solid #2A1A14;border-radius:30px;background:#fff;color:#2A1A14;cursor:pointer}
+.pe{margin:0;font-size:12px;line-height:1.4;color:#5C3D30}.pe:empty{display:none}
 .bar{position:fixed;left:0;right:0;bottom:0;background:#2A1A14;color:#FAF6F1}
 .bar .in{display:flex;align-items:center;gap:16px;padding-top:14px;padding-bottom:14px}
 #status{font-size:14px;margin-right:auto}
@@ -821,7 +857,7 @@ h3{margin:24px 0 10px;font-size:15px;font-weight:600}.count{font-weight:400;colo
 <div class="in">
   <header>
     <h1>Dupe picks</h1>
-    <p>Each shade's 10 closest matches, for each list on its page. Pick up to ${LISTED} in each list, then save: the picks go in dupe-picks.json and every page is rebuilt. Look at them on <a href="http://localhost:8080/dupe-finder/" target="_blank">localhost:8080</a>. Lists without picks show the ${LISTED} closest.</p>
+    <p>Each shade's 10 closest matches, for each list on its page. Pick up to ${LISTED} in each list (use "Change photo" to swap a photo for a pasted image link or a file), then save: the picks go in dupe-picks.json and the pages whose picks changed are rebuilt. Look at them on <a href="http://localhost:8080/dupe-finder/" target="_blank">localhost:8080</a>. Lists without picks show the ${LISTED} closest.</p>
     <nav class="jump">${cands.map(({ s }) => `<a href="#${pageKey(s).replace('/', '-')}">${esc(s.name)}</a>`).join('')}</nav>
   </header>
 ${cands.map(({ s, src, top, budget }) => {
@@ -835,6 +871,51 @@ ${cands.map(({ s, src, top, budget }) => {
 <div class="bar"><div class="in"><span id="status">Pick up to ${LISTED} in each list.</span><button type="button" id="save">Save picks and rebuild</button></div></div>
 <script>
 const MAX = ${LISTED};
+const photos = ${JSON.stringify(photos).replace(/</g, '\\u003c')};
+// Shows a product's photo on every card of it (it can be on several pages and in both lists)
+function showPhoto(key, thumb) {
+  document.querySelectorAll('.cw').forEach(w => {
+    if (w.dataset.key !== key) return;
+    const ci = w.querySelector('.ci'), old = ci.querySelector('img, .none');
+    const el = thumb ? Object.assign(document.createElement('img'), { src: '/img/' + thumb, alt: '', width: 96, height: 96 }) : Object.assign(document.createElement('span'), { className: 'none', textContent: 'No photo' });
+    old.replaceWith(el);
+    let reset = w.querySelector('[data-act=reset]');
+    if (photos[key] && !reset) { reset = Object.assign(document.createElement('button'), { type: 'button', className: 'phl', textContent: 'Reset photo' }); reset.dataset.act = 'reset'; w.querySelector('[data-act=open]').after(reset); }
+    if (!photos[key] && reset) reset.remove();
+  });
+}
+async function sendPhoto(w, body) {
+  const msg = w.querySelector('.pe');
+  msg.textContent = 'Loading the photo…';
+  try {
+    const res = await fetch('/photo', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key: w.dataset.key, ...body }) });
+    const out = await res.json();
+    if (!res.ok) { msg.textContent = 'Not used: ' + out.error; return; }
+    photos[w.dataset.key] = out.source;
+    showPhoto(w.dataset.key, out.thumb);
+    msg.textContent = '';
+    w.querySelector('.pp').hidden = true;
+    document.getElementById('status').textContent = 'Not saved yet.';
+  } catch (e) { msg.textContent = 'Not used: ' + e.message; }
+}
+document.addEventListener('click', e => {
+  const b = e.target.closest('.ph [data-act]'); if (!b) return;
+  const w = b.closest('.cw'), pp = w.querySelector('.pp');
+  if (b.dataset.act === 'open') { pp.hidden = !pp.hidden; if (!pp.hidden) pp.querySelector('input[type=url]').focus(); }
+  if (b.dataset.act === 'close') { pp.hidden = true; pp.querySelector('.pe').textContent = ''; }
+  if (b.dataset.act === 'use') sendPhoto(w, { url: pp.querySelector('input[type=url]').value });
+  if (b.dataset.act === 'reset') { delete photos[w.dataset.key]; showPhoto(w.dataset.key, w.dataset.orig); document.getElementById('status').textContent = 'Not saved yet.'; }
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && e.target.matches('.pp input[type=url]')) sendPhoto(e.target.closest('.cw'), { url: e.target.value });
+});
+document.addEventListener('change', e => {
+  if (!e.target.matches('.pp input[type=file]') || !e.target.files[0]) return;
+  const w = e.target.closest('.cw'), r = new FileReader();
+  r.onload = () => sendPhoto(w, { file: r.result });
+  r.readAsDataURL(e.target.files[0]);
+  e.target.value = '';
+});
 function update(list) {
   const on = list.querySelectorAll('.c[aria-pressed=true]').length, total = list.querySelectorAll('.c').length;
   const count = list.querySelector('.count');
@@ -859,9 +940,9 @@ document.getElementById('save').addEventListener('click', async () => {
   const btn = document.getElementById('save'), status = document.getElementById('status');
   btn.disabled = true; status.textContent = 'Saving and rebuilding the pages…';
   try {
-    const res = await fetch('/save', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(picks) });
+    const res = await fetch('/save', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ picks, photos }) });
     const out = await res.json();
-    status.textContent = res.ok ? 'Saved. ' + out.pages + ' pages rebuilt.' : 'Not saved: ' + out.error;
+    status.textContent = res.ok ? 'Saved. ' + out.pages + (out.pages === 1 ? ' page' : ' pages') + ' rebuilt.' : 'Not saved: ' + out.error;
   } catch (e) { status.textContent = 'Not saved: ' + e.message; }
   btn.disabled = false;
 });
@@ -872,10 +953,21 @@ document.getElementById('save').addEventListener('click', async () => {
 async function pickServer(shades) {
   fs.mkdirSync(CANDIDATE_DIR, { recursive: true });
   const cands = shades.map(sh => ({ ...sh, top: sh.listed.slice(0, CANDIDATES), budget: sh.budgetAll.slice(0, CANDIDATES) }));
+  const photos = readPicks().photos || {};
   console.log('saving candidate photos…');
-  await Promise.all(cands.flatMap(c => [...c.top, ...c.budget]).map(async p => { p.thumb = await savePhoto(p, THUMB, CANDIDATE_DIR); }));
+  // Each card keeps the catalogue's photo too (origThumb), for "Reset photo"
+  await Promise.all(cands.flatMap(c => [...c.top, ...c.budget]).map(async p => {
+    p.origThumb = await savePhoto(p, THUMB, CANDIDATE_DIR);
+    p.thumb = photos[productKey(p)] ? await savePhoto({ ...p, photo: photos[productKey(p)] }, THUMB, CANDIDATE_DIR) : p.origThumb;
+  }));
+  const products = new Map(cands.flatMap(c => [...c.top, ...c.budget]).map(p => [productKey(p), p]));
   const http = require('http');
   let busy = false;
+  const readBody = async (req, max) => {
+    let body = '';
+    for await (const chunk of req) { body += chunk; if (body.length > max) throw new Error('too large'); }
+    return JSON.parse(body);
+  };
   http.createServer(async (req, res) => {
     const json = (code, body) => { res.writeHead(code, { 'Content-Type': 'application/json' }); res.end(JSON.stringify(body)); };
     if (req.method === 'GET' && (req.url === '/' || req.url.startsWith('/?'))) {
@@ -889,22 +981,60 @@ async function pickServer(shades) {
       res.writeHead(200, { 'Content-Type': 'image/webp' });
       return fs.createReadStream(file).pipe(res);
     }
+    // A new photo for a product: { key, url } or { key, file: data URL }. Returns the source to
+    // save with the picks, and its thumbnail.
+    if (req.method === 'POST' && req.url === '/photo') {
+      try {
+        const { key, url, file } = await readBody(req, 40e6);
+        const p = products.get(key);
+        if (!p) return json(400, { error: 'unknown lipstick' });
+        let source;
+        if (typeof file === 'string' && file.startsWith('data:image/')) {
+          const bytes = Buffer.from(file.slice(file.indexOf(',') + 1), 'base64');
+          const name = `${slug(`${p.brand} ${p.product} ${p.shade}`)}-${hash(file)}.webp`;
+          fs.mkdirSync(PHOTO_DIR, { recursive: true });
+          await sharp(bytes).rotate().resize(600, 600, { fit: 'inside', withoutEnlargement: true }).webp({ quality: 85 }).toFile(path.join(PHOTO_DIR, name));
+          source = `dupe-photos/${name}`;
+        } else if (typeof url === 'string' && /^https?:\/\//.test(url.trim())) source = url.trim();
+        else return json(400, { error: 'paste an image link starting with http' });
+        const thumb = await savePhoto({ ...p, photo: source }, THUMB, CANDIDATE_DIR, true);
+        return json(200, { source, thumb });
+      } catch (err) {
+        return json(400, { error: `couldn't use that image (${err.message})` });
+      }
+    }
     if (req.method === 'POST' && req.url === '/save') {
       if (busy) return json(409, { error: 'still saving the last picks' });
-      let body = '';
-      for await (const chunk of req) body += chunk;
       busy = true;
       try {
-        const sent = JSON.parse(body), picks = {};
+        const sent = await readBody(req, 1e6), picks = {};
         for (const { s } of cands) {
-          const p = sent[pageKey(s)];
+          const p = (sent.picks || {})[pageKey(s)];
           if (!p) continue;
           const keys = v => (Array.isArray(v) ? v : []).filter(k => typeof k === 'string').slice(0, LISTED);
           picks[pageKey(s)] = { top: keys(p.top), budget: keys(p.budget) };
         }
+        const old = readPicks(), oldPhotos = old.photos || {}, newPhotos = {};
+        for (const [k, v] of Object.entries(sent.photos || {})) if (typeof v === 'string' && v) newPhotos[k] = v;
+        if (Object.keys(newPhotos).length) picks.photos = newPhotos;
+        // Only rebuild the pages whose picks changed, or that list a product whose photo changed
+        const photoChanged = new Set([...Object.keys(oldPhotos), ...Object.keys(newPhotos)].filter(k => oldPhotos[k] !== newPhotos[k]));
+        const listedKeys = ({ s, listed, budgetAll }) => {
+          const pick = picks[pageKey(s)] || {};
+          const pickedOr5 = (list, keys) => keys ? keys : list.slice(0, LISTED).map(productKey);
+          return [...pickedOr5(listed, pick.top), ...pickedOr5(budgetAll, pick.budget)];
+        };
+        const changed = shades.filter(sh => JSON.stringify(old[pageKey(sh.s)] || null) !== JSON.stringify(picks[pageKey(sh.s)] || null)
+          || listedKeys(sh).some(k => photoChanged.has(k)));
         fs.writeFileSync(PICKS_FILE, JSON.stringify(picks, null, 2) + '\n');
-        await writePages(shades, picks);
-        json(200, { pages: shades.length });
+        // Uploaded photos no product uses any more
+        if (fs.existsSync(PHOTO_DIR)) {
+          const kept = new Set(Object.values(newPhotos).filter(v => v.startsWith('dupe-photos/')).map(v => path.basename(v)));
+          for (const f of fs.readdirSync(PHOTO_DIR)) if (!kept.has(f)) fs.unlinkSync(path.join(PHOTO_DIR, f));
+        }
+        if (changed.length) await writePages(changed, picks);
+        console.log(changed.length ? `rebuilt ${changed.map(({ s }) => s.name).join(', ')}` : 'nothing changed');
+        json(200, { pages: changed.length });
       } catch (err) {
         console.error(err);
         json(500, { error: err.message });

@@ -27,7 +27,12 @@ limited to bullets, liquid lipsticks and stains in the same or a similar finish 
 1. Make sure the site is served on 8080 (`npm exec serve /Users/connie/dev/lipstick_website -- --listen 8080`).
 2. Run `npm run dupes:pick` in the background. When it prints `Pick the matches at http://localhost:8081`,
    give the user that link. It shows each shade's 10 closest candidates per list; they click up to 5 in each
-   and press **Save picks and rebuild**. That writes `dupe-picks.json` and rebuilds every page.
+   and press **Save picks and rebuild**. That writes `dupe-picks.json` and rebuilds only the pages whose picks
+   (or a listed product's photo) changed.
+   "Change photo" under a card swaps that product's photo for a pasted image link or an uploaded file. It
+   applies on every page that lists the product. Chosen photos are kept in `dupe-picks.json` under `photos`
+   (`brand|shade` → link, or `dupe-photos/<file>.webp` for an upload, kept in `dupe-photos/`; commit that
+   folder). "Reset photo" goes back to the catalogue's.
 3. They can look at the result on localhost:8080 (each section has an "Open page →" link) and keep
    adjusting. Stop the server when they're done.
 
@@ -72,5 +77,5 @@ If the filter links changed, open a few and make sure each shows results.
 
 ## Shipping
 
-Commit the pages, `dupe-finder/assets/` (new and deleted photos), `dupe-picks.json`, `dupe-shades.js`,
+Commit the pages, `dupe-finder/assets/` (new and deleted photos), `dupe-photos/` (uploaded photos), `dupe-picks.json`, `dupe-shades.js`,
 `sitemap.xml` (the build updates the pages' lastmod) and any script changes. Then follow the `ship` skill.
