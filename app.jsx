@@ -758,7 +758,22 @@ function ColorWheel({ colors, selectedId, onSelect, hoveredId, onHover }) {
 }
 
 // ── Filter Dropdown ───────────────────────────────────────────────────────────
-function FilterDropdown({ label, count, onClear, isOpen, onOpen, children }) {
+// A filter menu's "Clear ✕"
+function FilterClear({ onClick }) {
+  return (
+    <button onClick={onClick}
+      onMouseEnter={e => { e.currentTarget.style.textDecoration = 'underline'; }}
+      onMouseLeave={e => { e.currentTarget.style.textDecoration = 'none'; }}
+      style={{
+        fontSize:12, padding:0, border:'none', background:'transparent', flex:'none',
+        color:'var(--blush-deep)', cursor:'pointer', fontFamily:'DM Sans', fontWeight:500,
+        letterSpacing:'0.04em', textUnderlineOffset:3,
+      }}>Clear ✕</button>
+  );
+}
+// `header` sits above the chips (the Brand menu's search box). With clearOnTop the header
+// has its own Clear, so a long list doesn't have to be scrolled to reach one at the bottom.
+function FilterDropdown({ label, count, onClear, isOpen, onOpen, header, clearOnTop, children }) {
   const ref = React.useRef(null);
   React.useEffect(() => {
     if (!isOpen) return;
@@ -792,10 +807,11 @@ function FilterDropdown({ label, count, onClear, isOpen, onOpen, children }) {
           minWidth:200, maxWidth:300,
           animation:'fadeUp 0.15s ease',
         }}>
+          {header}
           <div style={{ display:'flex', flexWrap:'wrap', gap:6 }}>
             {children}
           </div>
-          {count > 0 && (
+          {count > 0 && !clearOnTop && (
             <div style={{
               display:'flex', alignItems:'center', justifyContent:'space-between',
               marginTop:12, paddingTop:10, borderTop:'1px solid var(--border)',
@@ -803,20 +819,33 @@ function FilterDropdown({ label, count, onClear, isOpen, onOpen, children }) {
               <span style={{ fontSize:11, color:'var(--text-muted)', fontFamily:'DM Sans', letterSpacing:'0.04em' }}>
                 {count} selected
               </span>
-              <button onClick={onClear}
-                onMouseEnter={e => { e.currentTarget.style.textDecoration = 'underline'; }}
-                onMouseLeave={e => { e.currentTarget.style.textDecoration = 'none'; }}
-                style={{
-                  fontSize:12, padding:0, border:'none', background:'transparent',
-                  color:'var(--blush-deep)', cursor:'pointer', fontFamily:'DM Sans', fontWeight:500,
-                  letterSpacing:'0.04em', textUnderlineOffset:3,
-                }}>Clear ✕</button>
+              <FilterClear onClick={onClear} />
             </div>
           )}
         </div>
       )}
     </div>
   );
+}
+
+// The Brand filter gets a search box once it lists more brands than this
+const BRAND_SEARCH_MIN = 10;
+// Brands in `brands` that `query` finds, the same way the dupe finder's brand box does:
+// ignoring case, spaces and punctuation ("elf"), other names ("ysl"), and typos when nothing matches as typed
+function searchBrands(query, brands) {
+  const q = normSearch(query);
+  if (!q) return brands;
+  const starts = [], incl = [];
+  for (const b of brands) {
+    const key = normSearch(b), aliases = brandAliases(b);
+    if (key.startsWith(q) || aliases.some(a => a.startsWith(q)) || wordTails(b).some(t => t.startsWith(q))) starts.push(b);
+    else if (key.includes(q)) incl.push(b);
+  }
+  if (starts.length || incl.length) return [...starts, ...incl];
+  const max = typoLimit(q);
+  if (max < 0) return [];
+  return brands.map(b => ({ b, d: typoScore(q, [...wordTails(b), ...brandAliases(b)], max) }))
+    .filter(x => x.d <= max).sort((x, y) => x.d - y.d).map(x => x.b);
 }
 
 // ── Results Table ─────────────────────────────────────────────────────────────
@@ -848,6 +877,9 @@ function ResultsTable({ selectedColor, matches, totalProducts, pinnedItems, togg
   const [hideDiscontinued, setHideDiscontinued] = React.useState(true);
   const [longLasting, setLongLasting] = React.useState(false);
   const [openFilter, setOpenFilter] = React.useState(null);
+  // The Brand menu's search; cleared whenever the menu closes
+  const [brandSearch, setBrandSearch] = React.useState('');
+  React.useEffect(() => { if (openFilter !== 'Brand') setBrandSearch(''); }, [openFilter]);
   // The result whose detail view is open, if any
   const [openProduct, setOpenProduct] = React.useState(null);
   React.useEffect(() => { setOpenProduct(null); }, [selectedColor?.id, selectedColor?.hex]);
@@ -1165,8 +1197,31 @@ function ResultsTable({ selectedColor, matches, totalProducts, pinnedItems, togg
           {allBrands.length > 1 && (
             <FilterDropdown label="Brand" count={activeBrands.length}
               isOpen={openFilter==='Brand'} onOpen={setOpenFilter}
-              onClear={() => setActiveBrands([])}>
-              {allBrands.map(b => {
+              onClear={() => setActiveBrands([])} clearOnTop={allBrands.length > BRAND_SEARCH_MIN}
+              header={allBrands.length > BRAND_SEARCH_MIN && (
+                <div style={{ marginBottom:10 }}>
+                  <div style={{ display:'flex', alignItems:'center', gap:12 }}>
+                    <input type="search" value={brandSearch} onChange={e => setBrandSearch(e.target.value)}
+                      // Focus the box for a mouse, but don't pop up a phone's keyboard on open
+                      autoFocus={window.matchMedia?.('(hover: hover)').matches}
+                      placeholder="Search brands" aria-label="Search brands"
+                      style={{
+                        flex:1, minWidth:0, boxSizing:'border-box', fontFamily:'DM Sans', fontSize:13,
+                        padding:'7px 12px', borderRadius:20, border:'1.5px solid var(--border)',
+                        background:'var(--cream)', color:'var(--espresso)', outline:'none',
+                      }} />
+                    {activeBrands.length > 0 && <FilterClear onClick={() => setActiveBrands([])} />}
+                  </div>
+                  {brandSearch.trim() && !searchBrands(brandSearch, allBrands).length && (
+                    <div style={{ marginTop:8, fontSize:13, color:'var(--text-muted)', fontFamily:'DM Sans' }}>No brands match.</div>
+                  )}
+                </div>
+              )}>
+              {(brandSearch.trim()
+                // Selected brands stay listed so they can be turned off
+                ? [...activeBrands.filter(b => !searchBrands(brandSearch, allBrands).includes(b)), ...searchBrands(brandSearch, allBrands)]
+                : allBrands
+              ).map(b => {
                 const active = activeBrands.includes(b);
                 return (
                   <button key={b} onClick={() => toggleBrand(b)} style={{
