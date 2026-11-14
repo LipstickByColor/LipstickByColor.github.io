@@ -20,7 +20,7 @@ const IMG_DIR = path.join(__dirname, 'dupe-finder', 'assets');
 const THUMB = 144, SOURCE_IMG = 240;
 // The dupe finder lists matches up to this far past the closest one (DUPE_DELTA_E in app.jsx);
 // the page only offers filters that leave something in that range
-const FINDER_MARGIN = 2;
+const FINDER_MARGIN = 4;
 // The color chart's reach for a pick (CHART_RADIUS and CHART_SPARSE in app.jsx)
 const CHART_RADIUS = 2.25, CHART_SPARSE = 1;
 

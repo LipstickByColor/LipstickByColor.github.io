@@ -780,7 +780,7 @@ function matchBand(candidates, maxDeltaE, chartLab) {
 // The color wheel browses a color, so it shows a fixed distance around it, not a margin past the closest lipstick
 const WHEEL_RADIUS = 3.5;
 // The dupe finder's margin past the closest lipstick
-const DUPE_DELTA_E = 2;
+const DUPE_DELTA_E = 4;
 // Every black lipstick, closest first: what a black pick on the chart or the wheel (Onyx) shows
 function blackMatches(lab) {
   return REAL_PRODUCTS.filter(p => isBlackLab(p.lab)).map(p => ({
