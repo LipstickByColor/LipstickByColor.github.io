@@ -62,6 +62,13 @@ const SIMILAR_FINISHES = {
   'Sheer': ['Sheer', 'Glossy'],
   'Shimmer': ['Shimmer', 'Glossy'],
 };
+// " in a similar finish (matte or semi-matte)", from the finishes the lists allow
+const finishNote = src => {
+  const f = SIMILAR_FINISHES[src.finish];
+  if (!f) return '';
+  const names = f.map(x => x.toLowerCase());
+  return ` in a similar finish (${names.length > 1 ? names.slice(0, -1).join(', ') + ' or ' + names[names.length - 1] : names[0]})`;
+};
 // ΔE bands, as the finder names them (MATCH_TIERS in app.jsx), on a scale that runs 0 to 4
 const SCALE_MAX = 4;
 const BANDS = [[0, 1, 'Very close'], [1, 2, 'Close'], [2, 3.5, 'Similar'], [3.5, SCALE_MAX, 'Same family']];
@@ -276,7 +283,7 @@ function page(s, src, srcImg, top, budget, listed, band, colors, shareImg) {
   const cheaper = first && first.tier.length < src.tier.length;
   const faq = [
     ['Will a dupe look the same on me?', 'Color is only part of it. Finish and formula change how a shade reads on your lips, so a matte and a gloss in the same color can look different. Every match lists its finish and format so you can compare like with like.'],
-    cheaper && [`Why is a ${first.tier === '$' ? 'drugstore' : 'cheaper'} ${FORMAT_NOUNS[first.format] || 'lipstick'} the top match?`,
+    cheaper && [`Why is ${first.tier === '$' ? 'an under $15' : 'a cheaper'} ${FORMAT_NOUNS[first.format] || 'lipstick'} the top match?`,
       `Ranking uses measured color only, never price or brand. A ${first.tier} product can be the closest match to a ${src.tier} one.`],
     ['Is anything sponsored?', 'No. Nothing here is sponsored or hand-picked, and discontinued shades are left out.'],
   ].filter(Boolean);
@@ -554,8 +561,8 @@ body:has(.detail[open]){overflow:hidden}
   </section>
 
   <div class="in">
-${grid(`Closest color matches to ${esc(s.short)}`, 'The 5 closest shades, any brand, any price.', top)}
-${grid(`Closest ${esc(s.short)} dupes under $15`, 'The 5 closest matches in the drugstore price tier ($).', budget)}
+${grid(`Closest color matches to ${esc(s.short)}`, `The 5 closest shades${finishNote(src)}, any brand, any price.`, top)}
+${grid(`Closest ${esc(s.short)} dupes under $15`, 'The 5 closest matches under $15.', budget)}
 
     <div class="cta-wrap"><section class="cta">
       <div class="cta-text">
