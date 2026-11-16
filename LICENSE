@@ -1,17 +1,18 @@
-Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
+Copyright (c) 2025-2026 Constanza Schibber. All rights reserved.
 
-Copyright (c) 2025 Constanza Schibber
+This repository and the website it publishes, including the source code, the
+lipstick dataset, color extraction data, data files (such as lipstick-data.js
+and lipstick-images.js), images and written content, are proprietary.
 
-The dataset, color extraction data, and associated data files in this project
-(including lipstick-data.js and lipstick-images.js) are licensed under the
-Creative Commons Attribution-NonCommercial 4.0 International License.
+No license is granted. You may not copy, redistribute, modify, publish, scrape,
+or use any part of this project, in whole or in part, for any purpose, without
+prior written permission from the copyright holder.
 
-You are free to:
-  Share — copy and redistribute the material in any medium or format
-  Adapt — remix, transform, and build upon the material
+The code is publicly visible only because the website is hosted on GitHub
+Pages. Viewing it does not grant any right to use it.
 
-Under the following terms:
-  Attribution — You must give appropriate credit and indicate if changes were made.
-  NonCommercial — You may not use the material for commercial purposes.
+Material previously obtained under the Creative Commons Attribution-NonCommercial
+4.0 license remains under that license's terms for that earlier copy only. All
+versions from this change onward are covered by this notice.
 
-Full license text: https://creativecommons.org/licenses/by-nc/4.0/legalcode
+For permission requests, contact the copyright holder through the website.

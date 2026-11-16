@@ -1,4 +1,4 @@
-// Copyright (c) 2025 Constanza Schibber. Licensed under CC BY-NC 4.0 — non-commercial use only. https://creativecommons.org/licenses/by-nc/4.0/
+// Copyright (c) 2025-2026 Constanza Schibber. All rights reserved. See LICENSE.
 // ── CIELAB → sRGB hex conversion (D65 illuminant) ────────────────────────────
 function labToXyz(L, a, b) {
   const fy = (L + 16) / 116;

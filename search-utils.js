@@ -1,4 +1,4 @@
-// Copyright (c) 2025 Constanza Schibber. Licensed under CC BY-NC 4.0 — non-commercial use only. https://creativecommons.org/licenses/by-nc/4.0/
+// Copyright (c) 2025-2026 Constanza Schibber. All rights reserved. See LICENSE.
 // ── Forgiving brand search, shared by the dupe finder (app.jsx) and the red guide ──
 
 // Lowercase with accents, spaces and punctuation removed, for forgiving search.
