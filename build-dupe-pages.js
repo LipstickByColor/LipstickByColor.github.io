@@ -263,7 +263,7 @@ function scaleDots(matches) {
 function page(s, src, srcImg, top, budget, listed, band, colors, shareImg) {
   const url = `${SITE}${pageUrl(s)}`;
   const title = `${s.name} Dupes & Closest Color Matches`;
-  const description = `The lipsticks closest in color to ${s.name}, out of nearly 17,000, from drugstore to luxury. Closest first.`;
+  const description = `The lipsticks closest in color to ${s.name}, out of over 24,000, and the closest affordable matches under $15.`;
   const now = new Date(), today = now.toISOString().slice(0, 10);
   const updated = now.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
   const productLine = titleCase(src.product).replace(/\s+Lipstick$/, '');
