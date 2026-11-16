@@ -1,0 +1,39 @@
+# Lipstick Color Finder
+
+> Lipstick Color Finder is a free website for finding lipsticks by how they actually look, not by shade name. It covers over 24,000 lipsticks from 520+ brands, from drugstore to luxury. Each lipstick's color is measured from its product photos, and matches are ranked by color alone. Nothing is sponsored, there are no accounts and no ads.
+
+Use it to find a dupe of a specific lipstick, a cheaper alternative, a replacement for a discontinued shade, or a lipstick that matches a color seen in a photo.
+
+## Tools
+
+- [Dupe finder](https://lipstickcolorfinder.com/dupe-finder/): search for a lipstick by brand and shade name and see the closest color matches from any brand, with filters for price, brand, format, finish and undertone. Includes alternatives to discontinued lipsticks.
+- [Photo match](https://lipstickcolorfinder.com/photo-match/): upload a photo, tap the lips, and see the lipsticks closest to that color. The photo is processed on the device and never uploaded.
+- [Color wheel](https://lipstickcolorfinder.com/color-wheel/): pick one of 46 lipstick colors on a wheel, then browse lighter, deeper, warmer or cooler shades and filter by price, finish and type.
+- [Color chart](https://lipstickcolorfinder.com/lipstick-color-chart/): pick any color on an interactive chart or enter a hex code to find matching lipsticks.
+
+## Lipstick dupe pages
+
+Each page lists the 5 closest color matches overall and the 5 closest under $15.
+
+- [MAC Ruby Woo dupes](https://lipstickcolorfinder.com/dupe-finder/mac/ruby-woo/)
+- [MAC Velvet Teddy dupes](https://lipstickcolorfinder.com/dupe-finder/mac/velvet-teddy/)
+- [Charlotte Tilbury Pillow Talk dupes](https://lipstickcolorfinder.com/dupe-finder/charlotte-tilbury/pillow-talk/)
+- [Chanel 99 Pirate dupes](https://lipstickcolorfinder.com/dupe-finder/chanel/99-pirate/)
+- [Chanel 49 Ever Red dupes](https://lipstickcolorfinder.com/dupe-finder/chanel/49-ever-red/)
+- [Dior 100 Forever Nude Look dupes](https://lipstickcolorfinder.com/dupe-finder/dior/100-forever-nude-look/)
+- [Dior 422 Rose des Vents dupes](https://lipstickcolorfinder.com/dupe-finder/dior/422-rose-des-vents/)
+- [Dior 670 Rose Blues dupes](https://lipstickcolorfinder.com/dupe-finder/dior/670-rose-blues/)
+- [Pat McGrath Labs Elson 4 dupes](https://lipstickcolorfinder.com/dupe-finder/pat-mcgrath/elson-4/)
+- [Bobbi Brown Blue Raspberry dupes](https://lipstickcolorfinder.com/dupe-finder/bobbi-brown/blue-raspberry/)
+
+## Guides
+
+- [Red lipstick guide](https://lipstickcolorfinder.com/guides/red-lipstick/): how orange-reds, blue-reds and deep reds differ, where famous reds sit, and cheaper twins.
+- [Pink lipstick guide](https://lipstickcolorfinder.com/guides/pink-lipstick/): fourteen kinds of pink, where pink turns nude, and drugstore twins of well-known pinks.
+- [All guides](https://lipstickcolorfinder.com/guides/)
+
+## How matching works
+
+- [How lipstick color is measured](https://lipstickcolorfinder.com/color-science/): colors are measured in CIELAB and compared with Delta E (CIEDE2000), which scores how different two colors look to the eye. Undertone and depth are explained there too.
+- [How it was built](https://lipstickcolorfinder.com/about/): product photos, computer vision and color science.
+- [Privacy](https://lipstickcolorfinder.com/privacy/): what is collected and what stays on the device.
