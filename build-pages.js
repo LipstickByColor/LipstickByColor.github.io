@@ -40,8 +40,8 @@ const PAGES = [
     image: 'share-card-color-wheel.png',
     imageAlt: 'The color wheel: tap a shade on the wheel and see the lipsticks that look like it',
     name: 'Lipstick Color Wheel',
-    title: 'Lipstick Color Wheel: Browse Shades by Color',
-    description: 'Explore lipstick shades by color. Tap the color wheel to find matching lipsticks, then browse lighter, deeper, warmer or cooler shades and filter by price, finish and undertone.',
+    title: 'Lipstick Color Wheel: Browse over 24,000 Lipsticks by Shade',
+    description: 'Find lipsticks by color using the interactive color wheel. Browse lighter, deeper, warmer, or cooler shades, and filter by price, finish, type.',
     h1: 'Lipstick color wheel',
     intro: 'Not sure what you want yet? Start with a color and see real lipsticks in it, then go lighter, deeper, warmer or cooler until it feels right.',
     copy: `
@@ -90,7 +90,7 @@ const PAGES = [
     imageAlt: 'Photo match: red lips in a camera frame, with a picker on the color',
     name: 'Lipstick Photo Match',
     title: 'Find a Lipstick from a Photo: Match Any Lip Color',
-    description: 'Saw the perfect lip color on Instagram? Upload the photo, tap the lips, and find it among over 24,000 lipsticks. Your photo never leaves your phone.',
+    description: 'See a lip color you love on Instagram? Upload the photo, tap the lips, and find matching shades among 24,000+ lipsticks. Your photo never leaves your phone.',
     h1: 'Find a lipstick color from a photo',
     intro: 'That lip color you screenshotted? Upload it, tap the lips, and see which lipsticks come closest. Your photo stays on your device.',
     copy: `
@@ -110,8 +110,8 @@ const PAGES = [
     image: 'share-card-color-chart.png',
     imageAlt: 'The color chart: hundreds of shades on one chart, with one picked',
     name: 'Lipstick Color Chart',
-    title: 'Lipstick Color Chart: Over 24,000 Lipsticks by Color',
-    description: 'Explore hundreds of lipstick shades on an interactive chart. Tap a shade or enter a hex code to find matching lipsticks from over 24,000 products across 520+ brands.',
+    title: 'Lipstick Color Chart: Find 24,000+ Lipsticks by Color',
+    description: 'Explore lipsticks by color on an interactive chart. Tap a color or enter a hex code to find matching shades from 24,000+ lipsticks across 520+ brands.',
     h1: 'Lipstick color chart: find any shade',
     intro: 'Hundreds of shades on one map, from soft nudes to deep blue-reds, matched against over 24,000 lipsticks from 520+ brands. Tap a color to see the closest matches, then go lighter or deeper.',
     copy: `

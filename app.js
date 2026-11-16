@@ -2972,7 +2972,7 @@ function useBackToClose(onClose, enabled = true) {
 const MODE_PAGES = {
   wheel: {
     path: '/color-wheel/',
-    title: 'Lipstick Color Wheel: Browse Shades by Color'
+    title: 'Lipstick Color Wheel: Browse over 24,000 Lipsticks by Shade'
   },
   photo: {
     path: '/photo-match/',
@@ -2984,7 +2984,7 @@ const MODE_PAGES = {
   },
   hex: {
     path: '/lipstick-color-chart/',
-    title: 'Lipstick Color Chart: Over 24,000 Lipsticks by Color'
+    title: 'Lipstick Color Chart: Find 24,000+ Lipsticks by Color'
   }
 };
 const HOME_TITLE = 'Lipstick Color Finder: Any Lipstick or Dupe by Color';

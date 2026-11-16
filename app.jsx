@@ -1901,10 +1901,10 @@ function useBackToClose(onClose, enabled = true) {
 // Tools with a page of their own: the same app, opened in that mode. The path
 // follows the mode as tabs change. Titles match the pages build-pages.js writes.
 const MODE_PAGES = {
-  wheel: { path:'/color-wheel/', title:'Lipstick Color Wheel: Browse Shades by Color' },
+  wheel: { path:'/color-wheel/', title:'Lipstick Color Wheel: Browse over 24,000 Lipsticks by Shade' },
   photo: { path:'/photo-match/', title:'Find a Lipstick from a Photo: Match Any Lip Color' },
   dupe:  { path:'/dupe-finder/', title:'Lipstick Dupe Finder: Same Color, Any Price' },
-  hex:   { path:'/lipstick-color-chart/', title:'Lipstick Color Chart: Over 24,000 Lipsticks by Color' },
+  hex:   { path:'/lipstick-color-chart/', title:'Lipstick Color Chart: Find 24,000+ Lipsticks by Color' },
 };
 const HOME_TITLE = 'Lipstick Color Finder: Any Lipstick or Dupe by Color';
 const PAGE_MODE = Object.keys(MODE_PAGES).find(m => window.location.pathname.startsWith(MODE_PAGES[m].path)) || null;
