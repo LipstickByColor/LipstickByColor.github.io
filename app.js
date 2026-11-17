@@ -763,10 +763,14 @@ const CHART_RADIUS = 2.25,
   CHART_SPARSE = 1,
   CHART_RARE_RADIUS = 9,
   CHART_RARE = ['blue', 'green'];
+// A link with range=wide (e.g. one shared on Pinterest) searches a wider area, for every pick
+// made on that visit; the chart's own links keep it.
+const CHART_WIDE_RADIUS = 3.5;
+const CHART_WIDE = new URLSearchParams(window.location.search).get('range') === 'wide';
 // chartLab is the chart's pick (null elsewhere)
 function bandCut(best, maxDeltaE, chartLab) {
   if (!chartLab) return best + maxDeltaE;
-  const radius = CHART_RARE.includes(colorFamily(...chartLab)) ? CHART_RARE_RADIUS : CHART_RADIUS;
+  const radius = CHART_RARE.includes(colorFamily(...chartLab)) ? CHART_RARE_RADIUS : CHART_WIDE ? CHART_WIDE_RADIUS : CHART_RADIUS;
   return Math.max(radius, best + CHART_SPARSE);
 }
 // What the results show: everything within the cut-off, and never fewer than five
@@ -8022,6 +8026,7 @@ function App() {
       if (selectedColor?.item) q.set('pick', selectedColor.sourceKey);
     } else if (mode !== 'dupe' && effectiveColor) q.set('color', effectiveColor.hex.slice(1).toLowerCase());else if (mode === 'hex' && chartPicked && chartLinkHex) q.set('color', chartLinkHex.slice(1).toLowerCase());
     if (q.has('color') || q.has('dupe') || q.has('pick')) filterParams.forEach(([k, v]) => q.append(k, v));
+    if (mode === 'hex' && CHART_WIDE && q.has('color')) q.set('range', 'wide');
     const search = q.toString() ? `?${q}` : '';
     const path = MODE_PAGES[mode]?.path || '/';
     const url = path + search + window.location.hash;
