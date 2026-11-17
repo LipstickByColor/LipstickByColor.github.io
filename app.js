@@ -6125,12 +6125,35 @@ function DupeFinder({
       p
     }) => !q || p.shade.toLowerCase().includes(q) || (p.product || '').toLowerCase().includes(q)).map(x => x.p);
     if (list.length || !q) return list.sort((a, b) => a.shade.localeCompare(b.shade));
+    // The brand typed again in this box ("mac whirl", "bobbi brown blue"):
+    // search what's left once the brand's words are dropped from the start or end
+    const all = normShade(q).split(' ');
+    const bk = brandKeys.find(x => x.b === brand);
+    const isBrand = w => {
+      const h = normSearch(w.join(' '));
+      return !!bk && (h === bk.key || bk.heads.includes(h));
+    };
+    let rest = normShade(q);
+    for (let k = all.length - 1; k >= 1; k--) {
+      if (isBrand(all.slice(0, k))) {
+        rest = all.slice(k).join(' ');
+        break;
+      }
+      if (isBrand(all.slice(all.length - k))) {
+        rest = all.slice(0, all.length - k).join(' ');
+        break;
+      }
+    }
+    if (rest !== normShade(q)) {
+      const r = items.filter(x => x.key.includes(rest) || normShade(x.p.product).includes(rest)).map(x => x.p);
+      if (r.length) return r.sort((a, b) => a.shade.localeCompare(b.shade));
+    }
     // Words in another order ("naughty plum 045"), product line included
-    const words = items.filter(x => wordsHit(normShade(q), x.full)).map(x => x.p);
+    const words = items.filter(x => wordsHit(rest, x.full)).map(x => x.p);
     if (words.length) return words.sort((a, b) => a.shade.localeCompare(b.shade));
     // Nothing matches as typed: shades of the brand a typo or two away
-    return nearShades(normSearch(q), items);
-  }, [brand, shadeQuery, shadeIndex]);
+    return nearShades(normSearch(rest), items);
+  }, [brand, shadeQuery, shadeIndex, brandKeys]);
   function pickBrand(b) {
     window.gtag?.('event', 'dupe_brand_select', {
       brand: b
