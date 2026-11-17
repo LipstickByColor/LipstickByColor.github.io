@@ -3,6 +3,8 @@
 (function () {
   const SUPABASE_URL = 'https://xhmxvocjqcccrriovyfj.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_2RQlqm5VuZaTBZ7qrd5V1A_eSjFIpaB';
+  // The catalogue table; `npm run build` copies the name from supabase-data.js
+  const TABLE = 'lipstick-data-nov26-v2';
   const ASSETS = '/guides/assets/';
 
   const $ = id => document.getElementById(id);
@@ -325,7 +327,7 @@
     if (toks.length) params.set('and', '(' + toks.map(pattern).map(t => `or(brand.imatch."${t}",product.imatch."${t}",shade.imatch."${t}")`).join(',') + ')');
     if (brands) params.set('brand', 'in.(' + brands.map(b => `"${b.replace(/["\\]/g, '\\$&')}"`).join(',') + ')');
     if (redBox) { params.append('lab_l', 'gte.20'); params.append('lab_l', 'lte.55'); params.append('lab_a', 'gte.33'); params.append('lab_b', 'gte.13'); }
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/lipstic-data-update-oct26?${params}`, {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}?${params}`, {
       headers: { apikey: SUPABASE_KEY, Authorization: 'Bearer ' + SUPABASE_KEY },
     });
     if (!res.ok) throw new Error(res.status);
