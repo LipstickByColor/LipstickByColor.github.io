@@ -5,11 +5,13 @@
 //   npm run build:catalogue   (secret key in .env as SUPABASE_SERVICE_KEY)
 // Without the key it only writes data-build/<file> for a manual upload.
 // Each run gets a new file name (CATALOGUE_FILE in supabase-data.js), so
-// browsers can keep a file forever; commit and push supabase-data.js after.
+// browsers can keep a file forever; commit and push supabase-data.js and
+// guides/red-lipstick/red-lipstick.js after.
 const fs = require('fs');
 const path = require('path');
 
 const DATA_JS = path.join(__dirname, 'supabase-data.js');
+const GUIDE_JS = path.join(__dirname, 'guides/red-lipstick/red-lipstick.js'); // its search loads the same file
 const BUCKET = 'site-data';
 const COLS = ['id', 'brand', 'product', 'shade', 'finish', 'type', 'lab_l', 'lab_a', 'lab_b', 'hex', 'price_tier', 'discontinued', 'long_lasting'];
 
@@ -79,5 +81,7 @@ async function upload(name, body, serviceKey) {
   }
 
   fs.writeFileSync(DATA_JS, src.replace(/const CATALOGUE_FILE = '[^']*';/, `const CATALOGUE_FILE = '${name}';`));
-  console.log('updated CATALOGUE_FILE in supabase-data.js');
+  const guide = fs.readFileSync(GUIDE_JS, 'utf8');
+  fs.writeFileSync(GUIDE_JS, guide.replace(/const CATALOGUE_FILE = '[^']*';/, `const CATALOGUE_FILE = '${name}';`));
+  console.log('updated CATALOGUE_FILE in supabase-data.js and the red guide');
 })().catch(err => { console.error(err); process.exit(1); });

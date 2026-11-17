@@ -229,13 +229,13 @@ for (const page of PAGES) {
   console.log(`wrote ${page.dir}/index.html`);
 }
 
-// The red guide's search queries the catalogue table itself, so keep its table
-// name the one supabase-data.js reads (it was left on an old table once).
+// The red guide's search loads the catalogue file itself, so keep its file name
+// the one supabase-data.js loads (build-catalogue.js sets both; this catches a hand edit).
 {
-  const table = fs.readFileSync(path.join(__dirname, 'supabase-data.js'), 'utf8').match(/_client\.from\('([^']+)'\)/)[1];
+  const name = fs.readFileSync(path.join(__dirname, 'supabase-data.js'), 'utf8').match(/const CATALOGUE_FILE = '([^']+)';/)[1];
   const file = path.join(__dirname, 'guides/red-lipstick/red-lipstick.js');
   const src = fs.readFileSync(file, 'utf8');
-  if (!/const TABLE = '[^']*';/.test(src)) throw new Error('build-pages: no TABLE in red-lipstick.js');
-  const out = src.replace(/const TABLE = '[^']*';/, `const TABLE = '${table}';`);
-  if (out !== src) { fs.writeFileSync(file, out); console.log(`red guide search now reads ${table}`); }
+  if (!/const CATALOGUE_FILE = '[^']*';/.test(src)) throw new Error('build-pages: no CATALOGUE_FILE in red-lipstick.js');
+  const out = src.replace(/const CATALOGUE_FILE = '[^']*';/, `const CATALOGUE_FILE = '${name}';`);
+  if (out !== src) { fs.writeFileSync(file, out); console.log(`red guide search now loads ${name}`); }
 }

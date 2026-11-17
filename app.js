@@ -5884,30 +5884,8 @@ function ShadeSheet({
 }
 
 // ── Dupe Finder ──────────────────────────────────────────────────────────────
-// normSearch, typoDistance, typoLimit and brandAliases come from search-utils.js.
-// Shade names keep their word gaps, so a search can't join two words ("colorbar"
-// shouldn't match "lip color | bare it all").
-const normShade = s => (s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
-// How close `q` comes to a name, given the name from each word on ("tilbury"
-// for "charlotte tilbury"); a match from a later word ranks after the start.
-const typoScore = (q, tails, max) => Math.min(...tails.map((t, i) => typoDistance(q, t, false, max) + (i ? 0.5 : 0)));
-const wordTails = s => {
-  const words = s.split(/\s+/);
-  return words.map((_, i) => normSearch(words.slice(i).join(' '))).filter(Boolean);
-};
-// Words people add around a shade name ("armani lip power in shade 104")
-const SHADE_FILLER = new Set(['lipstick', 'lip', 'in', 'shade', 'the', 'dupe']);
-// Every word of `rest` appears in `full` (product line and shade, normShade'd)
-// in any order, so "naughty plum 045" finds "045 naughty plum" and "rouge coco"
-// finds the Rouge Coco line. The last word only has to start a word, for
-// searches still being typed ("dior addi").
-const wordsHit = (rest, full) => {
-  const all = rest.split(' ').filter(Boolean);
-  const words = all.some(w => !SHADE_FILLER.has(w)) ? all.filter(w => !SHADE_FILLER.has(w)) : all;
-  if (!words.length) return false;
-  const have = full.split(' ');
-  return words.every((w, i) => i === words.length - 1 ? have.some(h => h.startsWith(w)) : have.includes(w));
-};
+// The search itself (shadeSearchIndex, matchBrands, findShades, nearShades,
+// normShade, wordsHit) is in search-utils.js, shared with the red guide.
 
 // Quick-start options shown under the dupe search for anyone who
 // doesn't have a specific lipstick in mind yet.
@@ -5951,168 +5929,19 @@ function DupeFinder({
   const touchStartY = React.useRef(0);
   const brandNoResultFired = React.useRef(false);
   const shadeNoResultFired = React.useRef(new Set());
-  const brands = React.useMemo(() => [...new Set(REAL_PRODUCTS.map(p => p.brand))].sort((a, b) => a.localeCompare(b)), []);
-  const brandCounts = React.useMemo(() => {
-    const m = {};
-    for (const p of REAL_PRODUCTS) m[p.brand] = (m[p.brand] || 0) + 1;
-    return m;
-  }, []);
+  const search = React.useMemo(() => shadeSearchIndex(REAL_PRODUCTS), []);
+  const {
+    brandKeys,
+    brandCounts,
+    shadeIndex
+  } = search;
+  const brandMatches = React.useMemo(() => matchBrands(brandQuery, search), [brandQuery, search]);
 
-  // Brand search ignores case, accents, spaces and punctuation, so "smash box",
-  // "loreal" and "elf" still find their brands; other names ("ysl") count too.
-  // `heads` are the ways a brand can start a brand + shade search: its first
-  // word (3+ letters), first two words and so on ("pat mcgrath"), or an alias.
-  const brandKeys = React.useMemo(() => brands.map(b => {
-    const words = b.split(' '),
-      aliases = brandAliases(b);
-    const heads = [...words.map((_, i) => normSearch(words.slice(0, i + 1).join(' '))).filter((h, i) => h && (i > 0 || h.length >= 3)), ...aliases];
-    return {
-      b,
-      key: normSearch(b),
-      aliases,
-      heads,
-      tails: [...wordTails(b), ...aliases]
-    };
-  }), [brands]);
-  const shadeIndex = React.useMemo(() => REAL_PRODUCTS.map(p => ({
-    p,
-    key: normShade(p.shade),
-    full: normShade(`${p.product || ''} ${p.shade}`),
-    tails: wordTails(normShade(p.shade))
-  })), []);
-  // Shades `q` is a typo or two away from, closest first
-  const nearShades = (q, items) => {
-    const max = typoLimit(q),
-      near = [];
-    if (max < 0) return near;
-    for (const {
-      p,
-      tails
-    } of items) {
-      const d = typoScore(q, tails, max);
-      if (d <= max) near.push({
-        p,
-        d
-      });
-    }
-    return near.sort((x, y) => x.d - y.d || x.p.shade.localeCompare(y.p.shade) || x.p.brand.localeCompare(y.p.brand)).slice(0, 40).map(x => x.p);
-  };
-  const brandMatches = React.useMemo(() => {
-    const q = normSearch(brandQuery);
-    if (!q) return [];
-    const starts = [],
-      incl = [];
-    for (const {
-      b,
-      key,
-      aliases
-    } of brandKeys) {
-      if (key.startsWith(q) || aliases.some(a => a.startsWith(q))) starts.push(b);else if (key.includes(q)) incl.push(b);
-    }
-    if (starts.length || incl.length || q.length < 4) return [...starts, ...incl].slice(0, 12);
-    // Nothing matches as typed: list brands a typo or two away, then bigger brands first
-    const max = typoLimit(q);
-    const near = [];
-    for (const {
-      b,
-      tails
-    } of brandKeys) {
-      const d = typoScore(q, tails, max);
-      if (d <= max) near.push({
-        b,
-        d
-      });
-    }
-    return near.sort((x, y) => x.d - y.d || brandCounts[y.b] - brandCounts[x.b]).slice(0, 5).map(x => x.b);
-  }, [brandQuery, brandKeys, brandCounts]);
-
-  // Shades offered from the brand box: "mac ruby woo" (a brand, or its first
-  // word, then a shade) lists that brand's shades; a shade name on its own
-  // ("pillow talk") lists that shade across brands. Either skips step 2. The
-  // brand can also come last ("rebel mac") when the whole search isn't a shade.
-  // When neither matches as typed and no brand does either, typos are allowed
-  // in both parts ("nars gols", "rimmel's 136 balistic"). The shade part can
-  // also name the product line ("dior addict") or put the words in another
-  // order ("revlon naughty plum 045"). A brand found with no shade to match
-  // gives { route: 'brand_only' } and an empty list, so the visitor is told
-  // the brand is there and can browse it.
-  const quickShades = React.useMemo(() => {
-    const words = brandQuery.trim().toLowerCase().split(/\s+/).filter(Boolean);
-    // Brand found with no shade to match: as typed, and with typos allowed
-    const missed = {
-      exact: null,
-      typos: null
-    };
-    const byShade = (a, b) => a.shade.localeCompare(b.shade) || a.brand.localeCompare(b.brand);
-    const brandShade = (typos, brandLast) => {
-      for (let k = words.length - 1; k >= 1; k--) {
-        const brandWords = brandLast ? words.slice(words.length - k) : words.slice(0, k);
-        const shadeWords = brandLast ? words.slice(0, words.length - k) : words.slice(k);
-        const head = normSearch(brandWords.join(' '));
-        const rest = normShade(shadeWords.join(' '));
-        if (!rest) continue;
-        const hit = new Set(brandKeys.filter(x => x.heads.includes(head)).map(x => x.b));
-        if (typos && !hit.size) {
-          const max = typoLimit(head);
-          for (const x of brandKeys) {
-            if (x.heads.some(n => typoDistance(head, n, true, max) <= max)) hit.add(x.b);
-          }
-        }
-        if (!hit.size) continue;
-        const items = shadeIndex.filter(x => hit.has(x.p.brand));
-        const inShade = items.filter(x => x.key.includes(rest));
-        const inWords = items.filter(x => !x.key.includes(rest) && wordsHit(rest, x.full));
-        let list = [...inShade.map(x => x.p).sort(byShade), ...inWords.map(x => x.p).sort(byShade)].slice(0, 40);
-        if (typos && !list.length) list = nearShades(normSearch(rest), items);
-        if (list.length) return {
-          route: 'brand_shade',
-          list
-        };
-        const tier = typos ? 'typos' : 'exact';
-        if (!missed[tier] && !brandLast) {
-          const brand = [...hit].sort((a, b) => brandCounts[b] - brandCounts[a])[0];
-          missed[tier] = {
-            route: 'brand_only',
-            brand,
-            rest: shadeWords.join(' '),
-            list: []
-          };
-        }
-      }
-      return null;
-    };
-    const exact = brandShade(false, false);
-    if (exact) return exact;
-    const q = normShade(brandQuery);
-    if (q.length < 3) return null;
-    const starts = [],
-      incl = [];
-    for (const {
-      p,
-      key
-    } of shadeIndex) {
-      if (key.startsWith(q)) starts.push(p);else if (key.includes(q)) incl.push(p);
-    }
-    const list = [...starts.sort(byShade), ...incl.sort(byShade)].slice(0, 40);
-    if (list.length) return {
-      route: 'shade',
-      list
-    };
-    const last = brandShade(false, true);
-    if (last) return last;
-    if (brandMatches.length) return null;
-    const near = brandShade(true, false) || brandShade(true, true);
-    if (near) return near;
-    // A brand typed as such but none of its shades: say so rather than guess
-    // shades of other brands from the whole search. A brand only found with
-    // typos ("pillow" for Mellow) comes after that guess.
-    if (missed.exact) return missed.exact;
-    const nearList = nearShades(normSearch(brandQuery), shadeIndex);
-    return nearList.length ? {
-      route: 'shade',
-      list: nearList
-    } : missed.typos;
-  }, [brandQuery, brandKeys, brandCounts, shadeIndex, brandMatches]);
+  // Shades offered from the brand box ("mac ruby woo", "pillow talk"); either
+  // skips step 2. A brand found with no shade to match gives
+  // { route: 'brand_only' } and an empty list, so the visitor is told the
+  // brand is there and can browse it.
+  const quickShades = React.useMemo(() => findShades(brandQuery, search, brandMatches), [brandQuery, search, brandMatches]);
   // Shades to list under the brand box, and a brand found with no shade to match
   const shadeHits = quickShades?.list.length ? quickShades : null;
   const missedShade = quickShades?.route === 'brand_only' ? quickShades : null;

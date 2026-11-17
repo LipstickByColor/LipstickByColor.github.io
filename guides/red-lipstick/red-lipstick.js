@@ -1,10 +1,10 @@
 // Interactive parts of guides/red-lipstick/index.html. The page's text, lists and images are
 // all in the HTML; this only flips cards, moves the map popover and runs search.
 (function () {
-  const SUPABASE_URL = 'https://xhmxvocjqcccrriovyfj.supabase.co';
-  const SUPABASE_KEY = 'sb_publishable_2RQlqm5VuZaTBZ7qrd5V1A_eSjFIpaB';
-  // The catalogue table; `npm run build` copies the name from supabase-data.js
-  const TABLE = 'lipstick-data-nov26-v2';
+  // The catalogue file the search reads, the one the tools load (supabase-data.js);
+  // `npm run build` copies the name over from there
+  const CATALOGUE_URL = 'https://xhmxvocjqcccrriovyfj.supabase.co/storage/v1/object/public/site-data/';
+  const CATALOGUE_FILE = 'catalogue-20261111-24032.json';
   const ASSETS = '/guides/assets/';
 
   const $ = id => document.getElementById(id);
@@ -291,85 +291,38 @@
   const SHOWN = 6;
   let searchTimer, searchSeq = 0;
 
-  // Names are stored with accents some of the time ("rosé", but "lancome"), so
-  // both sides are compared accent-free: here in JS, and in the query by letting
-  // each plain letter match its accented forms.
-  const plain = t => String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
-  const ACCENTS = { a: '[aàáâãä]', c: '[cç]', e: '[eèéêë]', i: '[iìíîï]', n: '[nñ]', o: '[oòóôõö]', u: '[uùúûü]' };
-  const tokens = q => plain(q).split(/\s+/).map(t => t.replace(/[^a-z0-9'&-]/g, '')).filter(Boolean);
+  // The search is the dupe finder's (findShades and matchBrands in search-utils.js):
+  // brand and shade in either order, other brand names ("ysl"), and typos in
+  // both ("mac rubi woo"). It runs on the whole catalogue, loaded on first use.
+  let catalogue = null;
+  const loadCatalogue = () => catalogue ||= fetch(CATALOGUE_URL + CATALOGUE_FILE).then(r => {
+    if (!r.ok) throw new Error(r.status);
+    return r.json();
+  }).then(({ brands, products, rows }) => {
+    const list = rows.map(([id, b, p, shade, , , lab_l, lab_a, lab_b, hex, price_tier]) =>
+      ({ id, brand: brands[b], product: products[p], shade, lab_l, lab_a, lab_b, hex, price_tier }));
+    return shadeSearchIndex(list.filter(r => r.hex && r.lab_l != null));
+  }).catch(err => { catalogue = null; throw err; });
+  qInput.addEventListener('focus', () => loadCatalogue().catch(() => {}), { once: true });
 
-  // How well a row answers the query, so "ruby woo" puts Ruby Woo above
-  // Rosewood Ruby while still listing both:
-  //   3  the shade name has the words typed, in order ("ruby woo")
-  //   2  every word typed is a whole word somewhere in brand, product or shade
-  //   1  every word typed starts a word
-  //   0  matched only inside longer words ("woo" in "rosewood")
-  function rank(r, toks) {
-    const words = t => plain(t).split(/[^a-z0-9'&]+/).filter(Boolean);
-    const shade = words(r.shade), all = words(r.brand).concat(words(r.product), shade);
-    if (shade.some((_, i) => toks.every((t, j) => shade[i + j] === t))) return 3;
-    if (toks.every(t => all.includes(t))) return 2;
-    if (toks.every(t => all.some(w => w.startsWith(t)))) return 1;
-    return 0;
+  // Lipsticks for a search: the shades it names, then, when it names a brand
+  // ("nars", "ysl"), that brand's reds
+  function find(q, idx) {
+    const brands = matchBrands(q, idx);
+    const shades = findShades(q, idx, brands)?.list || [];
+    const named = new Set(brands.slice(0, 3));
+    const brandReds = named.size ? idx.shadeIndex.map(x => x.p).filter(p => named.has(p.brand) && redCheck(p.lab_l, p.lab_a, p.lab_b).ok)
+      .sort((x, y) => x.shade.localeCompare(y.shade)) : [];
+    return [...shades, ...brandReds];
   }
 
-  // Two queries per search: one boxed to roughly-red Lab values so reds aren't
-  // crowded out of a big brand's rows, one unboxed so near-misses still show up
-  // (greyed out, with the reason). redCheck() makes the real call on each row.
-  // With `brands`, only those brands' rows, and `toks` are the other words.
-  async function fetchRows(toks, redBox, brands) {
-    const pattern = t => t.replace(/[aceinou]/g, c => ACCENTS[c]);
-    const params = new URLSearchParams({
-      select: 'id,brand,product,shade,lab_l,lab_a,lab_b,hex,price_tier',
-      order: 'brand,shade,id',
-      limit: redBox ? 300 : 60,
-    });
-    if (toks.length) params.set('and', '(' + toks.map(pattern).map(t => `or(brand.imatch."${t}",product.imatch."${t}",shade.imatch."${t}")`).join(',') + ')');
-    if (brands) params.set('brand', 'in.(' + brands.map(b => `"${b.replace(/["\\]/g, '\\$&')}"`).join(',') + ')');
-    if (redBox) { params.append('lab_l', 'gte.20'); params.append('lab_l', 'lte.55'); params.append('lab_a', 'gte.33'); params.append('lab_b', 'gte.13'); }
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}?${params}`, {
-      headers: { apikey: SUPABASE_KEY, Authorization: 'Bearer ' + SUPABASE_KEY },
-    });
-    if (!res.ok) throw new Error(res.status);
-    return res.json();
-  }
-
-  // Brand names (search-utils.js has the other names), fetched on the first search
-  let brandList = null;
-  const loadBrands = () => brandList ||= fetch('/brands.json').then(r => r.json()).then(list => list.map(b => {
-    const first = normSearch(b.split(' ')[0]);
-    return { b, names: [normSearch(b), first.length >= 3 ? first : null, ...brandAliases(b)].filter(Boolean) };
-  })).catch(() => { brandList = null; return []; });
-
-  // For a search that finds nothing as typed: ways to read it as a brand its
-  // first or last words name another way ("ysl", "loreal", "kat von d"), then
-  // with a typo or two ("naybelline"), plus the words left over for the shade.
-  // The whole search can also be the start of a brand's name ("kat von").
-  function* readBrand(toks, brands) {
-    const n = toks.length;
-    for (const typos of [false, true]) {
-      for (let k = n; k >= 1; k--) {
-        for (const brandLast of k < n ? [false, true] : [false]) {
-          const head = normSearch((brandLast ? toks.slice(n - k) : toks.slice(0, k)).join(''));
-          const max = typos ? typoLimit(head) : 0;
-          if (max < 0 || head.length < 2) continue;
-          const whole = !(k === n && head.length >= 3);
-          const hit = brands.filter(x => x.names.some(nm => typoDistance(head, nm, whole, max) <= max)).map(x => x.b);
-          if (hit.length) yield { brands: hit.slice(0, 10), rest: brandLast ? toks.slice(0, n - k) : toks.slice(k) };
-        }
-      }
-    }
-  }
-
-  const search = (toks, brands) => Promise.all([fetchRows(toks, true, brands), fetchRows(toks, false, brands)]).then(r => r.flat());
-
-  // `rankToks` are the words left once a brand was read from the search
-  function showResults(rows, down, toks, rankToks = toks) {
+  // Reds first; otherwise in the order the search found them
+  function showResults(rows, down, q) {
     resultsEl.querySelectorAll('li:not([data-if])').forEach(li => li.remove());
     const seen = new Set();
-    const items = rows.filter(r => r.hex && !seen.has(r.id) && seen.add(r.id))
-      .map(r => ({ r, rc: redCheck(r.lab_l, r.lab_a, r.lab_b), score: rank(r, rankToks) }))
-      .sort((x, y) => y.score - x.score || y.rc.ok - x.rc.ok)
+    const items = rows.filter(r => !seen.has(r.id) && seen.add(r.id))
+      .map(r => ({ r, rc: redCheck(r.lab_l, r.lab_a, r.lab_b) }))
+      .sort((x, y) => y.rc.ok - x.rc.ok)
       .slice(0, SHOWN);
     const first = resultsEl.firstElementChild;
     items.forEach(({ r, rc }) => {
@@ -388,7 +341,7 @@
       resultsEl.insertBefore(li, first);
     });
     if (down) track('guide_search_error');
-    else if (!items.length) track('guide_search_no_results', { query: toks.join(' ') });
+    else if (!items.length) track('guide_search_no_results', { query: q });
     setIf('searchDown', down);
     setIf('noResults', !down && !items.length);
     setIf('showResults', true);
@@ -396,27 +349,16 @@
   }
 
   function onQuery() {
-    const q = qInput.value.trim(), toks = tokens(q), seq = ++searchSeq;
+    const q = qInput.value.trim(), seq = ++searchSeq;
     clearTimeout(searchTimer);
     setIf('hasQ', qInput.value.length > 0);
-    if (q.length < 2 || !toks.length) { setIf('showResults', false); setText('searchStatus', ''); return; }
-    loadBrands();
+    if (normSearch(q).length < 2) { setIf('showResults', false); setText('searchStatus', ''); return; }
     searchTimer = setTimeout(async () => {
-      let rows = [], down = false, rankToks = toks;
-      try {
-        rows = await search(toks);
-        // "kay von" reads first as Kay Beauty, which has no "von", so a few readings are tried
-        if (!rows.length) {
-          let tries = 0;
-          for (const read of readBrand(toks, await loadBrands())) {
-            rows = await search(read.rest, read.brands); rankToks = read.rest;
-            if (rows.length || ++tries === 3) break;
-          }
-        }
-      }
+      let rows = [], down = false;
+      try { rows = find(q, await loadCatalogue()); }
       catch (err) { down = true; }
-      if (seq === searchSeq) showResults(rows, down, toks, rankToks); // drop answers to an older query
-    }, 250);
+      if (seq === searchSeq) showResults(rows, down, q); // drop answers to an older query
+    }, 150);
   }
   qInput.addEventListener('input', onQuery);
   $('red-q-clear').addEventListener('click', () => { qInput.value = ''; onQuery(); focusEl(qInput); });
