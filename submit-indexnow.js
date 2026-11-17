@@ -1,30 +1,30 @@
-// Sends sitemap URLs to IndexNow (Bing, Yandex, Naver, Seznam) so they recrawl them.
-// Run after the change is live on GitHub Pages:
-//   npm run indexnow              URLs whose sitemap lastmod is today
-//   npm run indexnow -- 2026-11-01   URLs with lastmod on or after that date
-//   npm run indexnow -- --all     every URL in the sitemap
+// Sends NEW pages to IndexNow (Bing, Yandex, Naver, Seznam) once they are live on GitHub Pages.
+// Only for pages that didn't exist before; don't resubmit pages that were only edited
+// (Bing recrawls those from the sitemap).
+//   npm run indexnow -- /guides/new-guide/ /dupe-finder/brand/shade/
+// Paths or full URLs; each must already be in sitemap.xml.
 const fs = require('fs');
 const path = require('path');
 
 const HOST = 'lipstickcolorfinder.com';
 const KEY = 'cdf01ce9fadf4ed7902161c57beab7a5';
 
-const arg = process.argv[2];
-const today = new Date().toISOString().slice(0, 10);
-const since = arg === '--all' ? '' : (arg || today);
+const args = process.argv.slice(2);
+if (!args.length || args.some(a => a.startsWith('-'))) {
+  console.log('Usage: npm run indexnow -- <new page path or URL> [...]');
+  console.log('Only submit pages that are new. Edited pages are picked up from the sitemap.');
+  process.exit(1);
+}
 
 const xml = fs.readFileSync(path.join(__dirname, 'sitemap.xml'), 'utf8');
-const urls = [...xml.matchAll(/<url>([\s\S]*?)<\/url>/g)]
-  .map(([, block]) => ({
-    loc: (block.match(/<loc>(.*?)<\/loc>/) || [])[1],
-    lastmod: (block.match(/<lastmod>(.*?)<\/lastmod>/) || [])[1] || '',
-  }))
-  .filter(u => u.loc && u.lastmod.slice(0, 10) >= since)
-  .map(u => u.loc);
+const sitemap = new Set([...xml.matchAll(/<loc>(.*?)<\/loc>/g)].map(m => m[1]));
 
-if (!urls.length) {
-  console.log(`No sitemap URLs with lastmod on or after ${since}.`);
-  process.exit(0);
+const urls = args.map(a => a.startsWith('http') ? a : `https://${HOST}${a.startsWith('/') ? '' : '/'}${a}`);
+const missing = urls.filter(u => !sitemap.has(u));
+if (missing.length) {
+  console.error('Not in sitemap.xml (check the path, trailing slash included):');
+  missing.forEach(u => console.error('  ' + u));
+  process.exit(1);
 }
 
 fetch('https://api.indexnow.org/indexnow', {
