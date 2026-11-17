@@ -1285,6 +1285,18 @@ function FilterDropdown({
     document.addEventListener('mousedown', handle);
     return () => document.removeEventListener('mousedown', handle);
   }, [isOpen, onOpen]);
+  // Shift the menu left when it would run past the right edge of the screen (a button at the end of a row on a phone)
+  const panel = React.useRef(null);
+  const [shift, setShift] = React.useState(0);
+  React.useLayoutEffect(() => {
+    if (!isOpen || !panel.current) {
+      setShift(0);
+      return;
+    }
+    const r = panel.current.getBoundingClientRect();
+    const over = r.right - shift - (document.documentElement.clientWidth - 8);
+    setShift(over > 0 ? Math.min(over, r.left - shift - 8) : 0);
+  }, [isOpen]);
   return /*#__PURE__*/React.createElement("div", {
     ref: ref,
     style: {
@@ -1334,10 +1346,11 @@ function FilterDropdown({
       transition: 'transform 0.15s'
     }
   }, "\u25BC")), isOpen && /*#__PURE__*/React.createElement("div", {
+    ref: panel,
     style: {
       position: 'absolute',
       top: 'calc(100% + 7px)',
-      left: 0,
+      left: -shift,
       zIndex: 60,
       background: '#fff',
       border: '1px solid var(--border)',
@@ -1515,27 +1528,85 @@ function ResultsTable({
     return (p.finish || '').trim() || 'Unlisted';
   }
 
-  // Derive available options from matches. A filter that's on stays listed even when these
-  // matches have none of it (kept from the previous color on the wheel), so it can be switched off.
-  const allBrands = [...new Set([...matches.map(p => p.brand), ...activeBrands])].sort();
-  const allTones = [...new Set([...matches.map(toneOf), ...activeTones])];
+  // The filter groups that are on, each with its test and a way to switch just that group off
+  const onGroups = [{
+    key: 'brand',
+    on: activeBrands.length > 0,
+    pass: p => activeBrands.includes(p.brand),
+    clear: () => setActiveBrands([]),
+    label: 'Show all brands'
+  }, {
+    key: 'undertone',
+    on: activeTones.length > 0,
+    pass: p => activeTones.includes(toneOf(p)),
+    clear: () => setActiveTones([]),
+    label: 'Any undertone'
+  }, {
+    key: 'price_tier',
+    on: activeTiers.length > 0,
+    pass: p => activeTiers.includes(tierOf(p)),
+    clear: () => setActiveTiers([]),
+    label: 'Any price'
+  }, {
+    key: 'finish',
+    on: activeFinishes.length > 0,
+    pass: p => activeFinishes.includes(finishOf(p)),
+    clear: () => setActiveFinishes([]),
+    label: 'Any finish'
+  }, {
+    key: 'format',
+    on: activeFormats.length > 0,
+    pass: p => activeFormats.includes(formatGroup(p.format)),
+    clear: () => setActiveFormats([]),
+    label: 'Any format'
+  }, {
+    key: 'long_lasting',
+    on: longLasting,
+    pass: p => !!p.long_lasting,
+    clear: () => setLongLasting(false),
+    label: 'Not only long-lasting'
+  }].filter(g => g.on);
+  const passesExcept = (p, skip) => onGroups.every(g => g === skip || g.pass(p));
+  const shown = p => !hideDiscontinued || !p.discontinued;
+  const filtered = matches.filter(p => passesExcept(p, null) && shown(p));
+
+  // Each menu lists the options that still have matches once the other filters (and hidden
+  // discontinued shades) are applied, so picking one never empties the list. A filter that's on
+  // stays listed even when nothing has it (kept from the previous color on the wheel), so it can be switched off.
+  const facet = key => matches.filter(p => shown(p) && onGroups.every(g => g.key === key || g.pass(p)));
+  const brandPool = facet('brand'),
+    tonePool = facet('undertone'),
+    tierPool = facet('price_tier');
+  const finishPool = facet('finish'),
+    formatPool = facet('format'),
+    lastingPool = facet('long_lasting');
+  const allBrands = [...new Set([...brandPool.map(p => p.brand), ...activeBrands])].sort();
+  const allTones = [...new Set([...tonePool.map(toneOf), ...activeTones])];
   const TONE_ORDER = ['cool', 'neutral', 'warm'];
   const orderedTones = TONE_ORDER.filter(t => allTones.includes(t));
   const TIER_ORDER = PRICE_TIERS;
-  const allTiers = TIER_ORDER.filter(t => activeTiers.includes(t) || matches.some(p => tierOf(p) === t));
+  const allTiers = TIER_ORDER.filter(t => activeTiers.includes(t) || tierPool.some(p => tierOf(p) === t));
   const FINISH_ORDER = ['Cream', 'Glossy', 'Matte', 'Satin', 'Semi-Matte', 'Sheer', 'Shimmer', 'Unlisted'];
-  const allFinishes = FINISH_ORDER.filter(f => activeFinishes.includes(f) || matches.some(p => finishOf(p) === f));
+  const allFinishes = FINISH_ORDER.filter(f => activeFinishes.includes(f) || finishPool.some(p => finishOf(p) === f));
   const FORMAT_ORDER = ['Bullet Lipstick', 'Liquid Lipstick', 'Lip Gloss', 'Lip Stain & Tint', 'Lip Liner & Pencil', 'Lip Oil', 'Lip Balm & Care'];
-  const allFormats = FORMAT_ORDER.filter(f => activeFormats.includes(f) || matches.some(p => formatGroup(p.format) === f));
+  const allFormats = FORMAT_ORDER.filter(f => activeFormats.includes(f) || formatPool.some(p => formatGroup(p.format) === f));
   const hasDiscontinued = matches.some(p => p.discontinued);
   // Only worth offering when it would narrow the list (or it's on)
-  const offerLongLasting = longLasting || matches.some(p => p.long_lasting) && matches.some(p => !p.long_lasting);
-  const filtered = matches.filter(p => (activeBrands.length === 0 || activeBrands.includes(p.brand)) && (activeTones.length === 0 || activeTones.includes(toneOf(p))) && (activeTiers.length === 0 || activeTiers.includes(tierOf(p))) && (activeFinishes.length === 0 || activeFinishes.includes(finishOf(p))) && (activeFormats.length === 0 || activeFormats.includes(formatGroup(p.format))) && (!longLasting || p.long_lasting) && (!hideDiscontinued || !p.discontinued));
+  const offerLongLasting = longLasting || lastingPool.some(p => p.long_lasting) && lastingPool.some(p => !p.long_lasting);
 
-  // Fire once each time a filter combination empties the results
+  // When the filters leave nothing, the one group whose removal alone brings back the most matches
   const filtersEmptied = matches.length > 0 && filtered.length === 0;
+  const relaxGroup = !filtersEmptied ? null : onGroups.map(g => ({
+    g,
+    n: matches.filter(p => passesExcept(p, g) && shown(p)).length
+  })).filter(x => x.n > 0).sort((a, b) => b.n - a.n)[0]?.g || null;
+
+  // Fire once per filter combination per visit (not once per wheel color it empties)
+  const firedEmpty = React.useRef(new Set());
+  const emptyCombo = [activeBrands, activeTones, activeTiers, activeFinishes, activeFormats].map(a => a.join(',')).join('|') + `|${longLasting}|${hideDiscontinued}`;
   React.useEffect(() => {
-    if (!filtersEmptied) return;
+    if (!filtersEmptied || firedEmpty.current.has(emptyCombo)) return;
+    firedEmpty.current.add(emptyCombo);
     window.gtag?.('event', 'filter_no_results', {
       brand: activeBrands.join(','),
       undertone: activeTones.join(','),
@@ -1543,9 +1614,19 @@ function ResultsTable({
       finish: activeFinishes.join(','),
       format: activeFormats.join(','),
       long_lasting: longLasting,
-      still_made: hideDiscontinued
+      still_made: hideDiscontinued,
+      ui_source: DETAIL_SOURCES[selectedColor?.id] || 'wheel',
+      hex: selectedColor?.hex || '',
+      relax_filter: relaxGroup?.key || ''
     });
-  }, [filtersEmptied]);
+  }, [filtersEmptied, emptyCombo]);
+  function relaxFilter() {
+    window.gtag?.('event', 'relax_filter', {
+      filter_type: relaxGroup.key,
+      ui_source: DETAIL_SOURCES[selectedColor?.id] || 'wheel'
+    });
+    relaxGroup.clear();
+  }
   if (!selectedColor) return /*#__PURE__*/React.createElement("div", {
     className: "results-empty-state",
     style: {
@@ -1624,7 +1705,7 @@ function ResultsTable({
     setLongLasting(false);
   }
   // Matches the other filters keep that are only missing because discontinued shades are hidden
-  const hiddenDiscontinued = hideDiscontinued ? matches.filter(p => p.discontinued && (activeBrands.length === 0 || activeBrands.includes(p.brand)) && (activeTones.length === 0 || activeTones.includes(toneOf(p))) && (activeTiers.length === 0 || activeTiers.includes(tierOf(p))) && (activeFinishes.length === 0 || activeFinishes.includes(finishOf(p))) && (activeFormats.length === 0 || activeFormats.includes(formatGroup(p.format))) && (!longLasting || p.long_lasting)).length : 0;
+  const hiddenDiscontinued = hideDiscontinued ? matches.filter(p => p.discontinued && passesExcept(p, null)).length : 0;
   const emptyBtn = {
     fontFamily: 'DM Sans',
     fontSize: 12,
@@ -1811,7 +1892,7 @@ function ResultsTable({
         letterSpacing: '0.03em'
       }
     }, "No lipsticks that ", noLight && noDeep ? 'light or that deep' : noLight ? 'light' : 'deep');
-  })()), (orderedTones.length >= 1 || allBrands.length > 1 || allTiers.length > 1 || allFormats.length > 1 || hasDiscontinued) && /*#__PURE__*/React.createElement("div", {
+  })()), (orderedTones.length >= 1 || allBrands.length > 1 || allTiers.length > 1 || allFormats.length > 1 || hasDiscontinued || otherFilters > 0) && /*#__PURE__*/React.createElement("div", {
     className: `results-filters${collapsibleFilters && !filtersShown ? ' filters-collapsed' : ''}`,
     style: {
       display: 'flex',
@@ -1871,7 +1952,7 @@ function ResultsTable({
       transform: filtersShown ? 'rotate(180deg)' : 'none',
       transition: 'transform 0.15s'
     }
-  }, "\u25BC")), allTiers.length > 1 && /*#__PURE__*/React.createElement(FilterDropdown, {
+  }, "\u25BC")), (allTiers.length > 1 || activeTiers.length > 0) && /*#__PURE__*/React.createElement(FilterDropdown, {
     label: "Price",
     count: activeTiers.length,
     isOpen: openFilter === 'Price',
@@ -1903,7 +1984,7 @@ function ResultsTable({
         fontSize: 10
       }
     }, "\u2715"));
-  })), allBrands.length > 1 && /*#__PURE__*/React.createElement(FilterDropdown, {
+  })), (allBrands.length > 1 || activeBrands.length > 0) && /*#__PURE__*/React.createElement(FilterDropdown, {
     label: "Brand",
     count: activeBrands.length,
     isOpen: openFilter === 'Brand',
@@ -1980,7 +2061,7 @@ function ResultsTable({
         fontSize: 10
       }
     }, "\u2715"));
-  })), allFormats.length > 1 && /*#__PURE__*/React.createElement(FilterDropdown, {
+  })), (allFormats.length > 1 || activeFormats.length > 0) && /*#__PURE__*/React.createElement(FilterDropdown, {
     label: "Format",
     count: activeFormats.length,
     isOpen: openFilter === 'Format',
@@ -2012,7 +2093,7 @@ function ResultsTable({
         fontSize: 10
       }
     }, "\u2715"));
-  })), allFinishes.length > 1 && /*#__PURE__*/React.createElement(FilterDropdown, {
+  })), (allFinishes.length > 1 || activeFinishes.length > 0) && /*#__PURE__*/React.createElement(FilterDropdown, {
     label: "Finish",
     count: activeFinishes.length,
     isOpen: openFilter === 'Finish',
@@ -2205,7 +2286,11 @@ function ResultsTable({
       lineHeight: 1.5,
       color: 'var(--text-body)'
     }
-  }, !hiddenDiscontinued ? 'No matches for the selected filters.' : hiddenDiscontinued === 1 ? otherFilters ? 'The only match for these filters is discontinued.' : 'The only match here is discontinued.' : otherFilters ? `The ${hiddenDiscontinued} matches for these filters are discontinued.` : `All ${hiddenDiscontinued} matches here are discontinued.`), /*#__PURE__*/React.createElement("div", {
+  }, !hiddenDiscontinued ? relaxGroup?.key === 'brand' && activeBrands.length === 1 ? /*#__PURE__*/React.createElement(React.Fragment, null, "No ", /*#__PURE__*/React.createElement("span", {
+    style: {
+      textTransform: 'capitalize'
+    }
+  }, activeBrands[0]), " matches for this color.") : 'No matches for the selected filters.' : hiddenDiscontinued === 1 ? otherFilters ? 'The only match for these filters is discontinued.' : 'The only match here is discontinued.' : otherFilters ? `The ${hiddenDiscontinued} matches for these filters are discontinued.` : `All ${hiddenDiscontinued} matches here are discontinued.`), /*#__PURE__*/React.createElement("div", {
     style: {
       display: 'flex',
       flexWrap: 'wrap',
@@ -2215,7 +2300,10 @@ function ResultsTable({
   }, hiddenDiscontinued > 0 && /*#__PURE__*/React.createElement("button", {
     onClick: toggleDiscontinued,
     style: emptyBtn
-  }, "Show discontinued"), otherFilters > 0 && /*#__PURE__*/React.createElement("button", {
+  }, "Show discontinued"), relaxGroup && /*#__PURE__*/React.createElement("button", {
+    onClick: relaxFilter,
+    style: emptyBtn
+  }, relaxGroup.label), otherFilters > 0 && !(relaxGroup && onGroups.length === 1) && /*#__PURE__*/React.createElement("button", {
     onClick: clearFilters,
     style: emptyBtn
   }, "Clear filters"))) : /*#__PURE__*/React.createElement("ul", {
