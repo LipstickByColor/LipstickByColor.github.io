@@ -2809,7 +2809,7 @@ function ShareImageModal({
 // A small pill badge that overlaps the link's top-right corner (the link needs
 // position:relative). Switches itself off after GUIDES_NEW_UNTIL so it can't
 // go stale.
-const GUIDES_NEW_UNTIL = new Date('2026-11-16');
+const GUIDES_NEW_UNTIL = new Date('2026-12-15T23:59:59-05:00');
 // The pill's look, shared with the Discontinued tag on the dupe finder card
 const PILL_TAG = {
   fontFamily: "'DM Sans', sans-serif",
