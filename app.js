@@ -1689,7 +1689,7 @@ function ResultsTable({
       fontFamily: 'DM Sans',
       letterSpacing: '0.05em'
     }
-  }, selectedColor.hex.toUpperCase(), " \xB7 ", filtered.length, " match", filtered.length !== 1 ? 'es' : '', " ranked by \u0394E"), redName && /*#__PURE__*/React.createElement("p", {
+  }, selectedColor.hex.toUpperCase(), " \xB7 ", filtered.length, " match", filtered.length !== 1 ? 'es' : '', " ranked by color similarity"), redName && /*#__PURE__*/React.createElement("p", {
     style: {
       ...RED_LABEL_STYLE,
       marginTop: 6

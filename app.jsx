@@ -1074,7 +1074,7 @@ function ResultsTable({ selectedColor, matches, totalProducts, pinnedItems, togg
             {selectedColor.name}
           </p>
           <p style={{ fontSize:11, color:'var(--text-muted)', marginTop:2, fontFamily:'DM Sans', letterSpacing:'0.05em' }}>
-            {selectedColor.hex.toUpperCase()} · {filtered.length} match{filtered.length !== 1 ? 'es' : ''} ranked by ΔE
+            {selectedColor.hex.toUpperCase()} · {filtered.length} match{filtered.length !== 1 ? 'es' : ''} ranked by color similarity
           </p>
           {/* Reds and pinks: tone and depth, by the red and pink guides' rules */}
           {redName && <p style={{ ...RED_LABEL_STYLE, marginTop:6 }}>{redName}</p>}
