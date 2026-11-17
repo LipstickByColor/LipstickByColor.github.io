@@ -6492,21 +6492,10 @@ function DupeFinder({
       fontSize: TYPE.link,
       padding: '7px 14px 6px',
       borderRadius: 20,
-      display: 'inline-flex',
-      alignItems: 'center',
-      gap: 8,
+      display: 'inline-block',
       textDecoration: 'none'
     }
-  }, /*#__PURE__*/React.createElement("span", {
-    style: {
-      width: 14,
-      height: 14,
-      borderRadius: '50%',
-      background: '#' + typedHex,
-      boxShadow: '0 0 0 1.5px #fff',
-      flexShrink: 0
-    }
-  }), "See lipsticks near #", typedHex, " \u2192")), !typedHex && brandQuery.trim() && brandMatches.length === 0 && !shadeHits && normSearch(brandQuery).length >= 3 && /*#__PURE__*/React.createElement("div", {
+  }, "See lipsticks near #", typedHex, " \u2192")), !typedHex && brandQuery.trim() && brandMatches.length === 0 && !shadeHits && normSearch(brandQuery).length >= 3 && /*#__PURE__*/React.createElement("div", {
     style: {
       textAlign: 'center',
       padding: '8px 0'

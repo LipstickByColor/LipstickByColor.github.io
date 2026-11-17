@@ -3707,8 +3707,7 @@ function DupeFinder({ product, onSelect, onUsePhoto }) {
           {typedHex && (
             <div style={{ textAlign:'center', padding:'8px 0' }}>
               <p style={{ fontFamily:'DM Sans', fontSize:TYPE.body, color:'var(--espresso)', margin:'0 0 10px' }}>This box searches brand and shade names, not color codes.</p>
-              <a href={chartHexUrl} onClick={openChartHex} style={{ ...PILL_TAG, fontSize:TYPE.link, padding:'7px 14px 6px', borderRadius:20, display:'inline-flex', alignItems:'center', gap:8, textDecoration:'none' }}>
-                <span style={{ width:14, height:14, borderRadius:'50%', background:'#' + typedHex, boxShadow:'0 0 0 1.5px #fff', flexShrink:0 }} />
+              <a href={chartHexUrl} onClick={openChartHex} style={{ ...PILL_TAG, fontSize:TYPE.link, padding:'7px 14px 6px', borderRadius:20, display:'inline-block', textDecoration:'none' }}>
                 See lipsticks near #{typedHex} →
               </a>
             </div>
