@@ -41,6 +41,10 @@ In 34 failed searches, people left without selecting a brand or shade. That sugg
 
 I updated the search to recognize brand aliases, ignore spacing differences, tolerate small typos, and find brands anywhere in the query. All of these examples now return the correct lipstick results. You can also include a shade name in the brand search bar because some users remember the shade name rather than the brand. The red lipstick guide uses the same search logic.
 
+**Filters could lead to an empty list.** On the color wheel, filters stay on when you pick a new color, so you can compare one brand or finish across colors. But if you filtered to MAC and then moved to a color MAC doesn't make, you saw an empty list. Google Analytics showed that 3 people filtering by MAC hit 24 empty lists between them, and one person filtering by L'Oréal hit 5. Now the empty list says which filter caused it, for example "No MAC Cosmetics matches for this color.", and offers a button that turns off just that filter. Your other filters stay on.
+
+**Filters now narrow each other.** Each filter used to list every option for the color, even ones that didn't fit your other choices. If you picked a brand, the finish filter still offered finishes that brand doesn't make, and picking one gave no results. Now each filter only shows options that still have matches. Pick "$" on Classic Red and the brand list drops from 159 brands to the 39 that have an affordable red. Every option you can pick leads to real lipsticks.
+
 ---
 
 ## Credits
