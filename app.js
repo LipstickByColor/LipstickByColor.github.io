@@ -6116,6 +6116,20 @@ function DupeFinder({
   // Shades to list under the brand box, and a brand found with no shade to match
   const shadeHits = quickShades?.list.length ? quickShades : null;
   const missedShade = quickShades?.route === 'brand_only' ? quickShades : null;
+  // A color code pasted into the brand box ("#4e0707", "4e0707", "#f34"): offer
+  // the color chart for it, since this box only searches names
+  const typedHex = React.useMemo(() => {
+    const m = brandQuery.trim().match(/^(#?)([0-9a-f]{6}|[0-9a-f]{3})$/i);
+    if (!m || !m[1] && m[2].length === 3) return null;
+    const h = m[2].toLowerCase();
+    return h.length === 3 ? h.split('').map(c => c + c).join('') : h;
+  }, [brandQuery]);
+  const chartHexUrl = typedHex ? `${MODE_PAGES.hex.path}?color=${typedHex}` : null;
+  function openChartHex() {
+    window.gtag?.('event', 'dupe_hex_to_chart', {
+      hex: '#' + typedHex
+    });
+  }
   const shadeMatches = React.useMemo(() => {
     if (!brand) return [];
     // An empty box lists every shade of the brand, so it can be browsed
@@ -6212,7 +6226,7 @@ function DupeFinder({
   // don't inflate the metric with repeats of the same dead-end search.
   React.useEffect(() => {
     const q = brandQuery.trim().toLowerCase();
-    if (q.length < 3 || brandMatches.length > 0 || shadeHits || brandNoResultFired.current) return;
+    if (q.length < 3 || brandMatches.length > 0 || shadeHits || typedHex || brandNoResultFired.current) return;
     const t = setTimeout(() => {
       brandNoResultFired.current = true;
       // `brand` is set when the brand was found but none of its shades matched
@@ -6224,7 +6238,7 @@ function DupeFinder({
       });
     }, 600);
     return () => clearTimeout(t);
-  }, [brandQuery, brandMatches.length, shadeHits, missedShade]);
+  }, [brandQuery, brandMatches.length, shadeHits, missedShade, typedHex]);
   React.useEffect(() => {
     const q = shadeQuery.trim().toLowerCase();
     if (q.length < 3 || shadeMatches.length > 0 || !brand || shadeNoResultFired.current.has(brand)) return;
@@ -6446,7 +6460,10 @@ function DupeFinder({
     onChange: e => setBrandQuery(e.target.value),
     onKeyDown: e => {
       if (e.key !== 'Enter') return;
-      if (brandMatches[0]) pickBrand(brandMatches[0]);else if (shadeHits) pickQuickShade(shadeHits.list[0]);else if (missedShade) pickBrand(missedShade.brand);
+      if (typedHex && !brandMatches[0] && !shadeHits) {
+        openChartHex();
+        window.location.href = chartHexUrl;
+      } else if (brandMatches[0]) pickBrand(brandMatches[0]);else if (shadeHits) pickQuickShade(shadeHits.list[0]);else if (missedShade) pickBrand(missedShade.brand);
     },
     placeholder: "MAC, Charlotte Tilbury\u2026",
     "aria-label": "Brand",
@@ -6455,7 +6472,33 @@ function DupeFinder({
     onClick: () => setBrandQuery(''),
     "aria-label": "Clear search",
     style: clearBtn
-  }, "\xD7")), brandQuery.trim() && brandMatches.length === 0 && !shadeHits && normSearch(brandQuery).length >= 3 && /*#__PURE__*/React.createElement("div", {
+  }, "\xD7")), typedHex && /*#__PURE__*/React.createElement("div", {
+    style: {
+      textAlign: 'center',
+      padding: '8px 0'
+    }
+  }, /*#__PURE__*/React.createElement("p", {
+    style: emptyNote
+  }, "This box searches brand and shade names, not color codes."), /*#__PURE__*/React.createElement("a", {
+    href: chartHexUrl,
+    onClick: openChartHex,
+    style: {
+      ...photoFallbackBtn,
+      display: 'inline-flex',
+      alignItems: 'center',
+      gap: 8,
+      textDecoration: 'none'
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      width: 14,
+      height: 14,
+      borderRadius: '50%',
+      background: '#' + typedHex,
+      border: '1px solid rgba(0,0,0,0.12)',
+      flexShrink: 0
+    }
+  }), "Find lipsticks near #", typedHex, " \u2192")), !typedHex && brandQuery.trim() && brandMatches.length === 0 && !shadeHits && normSearch(brandQuery).length >= 3 && /*#__PURE__*/React.createElement("div", {
     style: {
       textAlign: 'center',
       padding: '8px 0'
