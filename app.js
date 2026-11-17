@@ -6478,12 +6478,20 @@ function DupeFinder({
       padding: '8px 0'
     }
   }, /*#__PURE__*/React.createElement("p", {
-    style: emptyNote
+    style: {
+      fontFamily: 'DM Sans',
+      fontSize: TYPE.body,
+      color: 'var(--espresso)',
+      margin: '0 0 10px'
+    }
   }, "This box searches brand and shade names, not color codes."), /*#__PURE__*/React.createElement("a", {
     href: chartHexUrl,
     onClick: openChartHex,
     style: {
-      ...photoFallbackBtn,
+      ...PILL_TAG,
+      fontSize: TYPE.link,
+      padding: '7px 14px 6px',
+      borderRadius: 20,
       display: 'inline-flex',
       alignItems: 'center',
       gap: 8,
@@ -6495,10 +6503,10 @@ function DupeFinder({
       height: 14,
       borderRadius: '50%',
       background: '#' + typedHex,
-      border: '1px solid rgba(0,0,0,0.12)',
+      boxShadow: '0 0 0 1.5px #fff',
       flexShrink: 0
     }
-  }), "Find lipsticks near #", typedHex, " \u2192")), !typedHex && brandQuery.trim() && brandMatches.length === 0 && !shadeHits && normSearch(brandQuery).length >= 3 && /*#__PURE__*/React.createElement("div", {
+  }), "See lipsticks near #", typedHex, " \u2192")), !typedHex && brandQuery.trim() && brandMatches.length === 0 && !shadeHits && normSearch(brandQuery).length >= 3 && /*#__PURE__*/React.createElement("div", {
     style: {
       textAlign: 'center',
       padding: '8px 0'
