@@ -1689,7 +1689,7 @@ function ResultsTable({
       fontFamily: 'DM Sans',
       letterSpacing: '0.05em'
     }
-  }, selectedColor.hex.toUpperCase(), " \xB7 Closest lip matches by \u0394E"), redName && /*#__PURE__*/React.createElement("p", {
+  }, selectedColor.hex.toUpperCase(), " \xB7 ", filtered.length, " match", filtered.length !== 1 ? 'es' : '', " ranked by \u0394E"), redName && /*#__PURE__*/React.createElement("p", {
     style: {
       ...RED_LABEL_STYLE,
       marginTop: 6
@@ -1778,7 +1778,7 @@ function ResultsTable({
       color: 'var(--text-muted)',
       letterSpacing: '0.03em'
     }
-  }, toneIdx === toneRamp.anchorIdx ? 'Showing matches for your exact shade' : /*#__PURE__*/React.createElement("span", null, "Matches for a ", /*#__PURE__*/React.createElement("strong", {
+  }, toneIdx === toneRamp.anchorIdx ? 'Showing close matches for your exact shade' : /*#__PURE__*/React.createElement("span", null, "Matches for a ", /*#__PURE__*/React.createElement("strong", {
     style: {
       color: 'var(--espresso)',
       fontWeight: 600

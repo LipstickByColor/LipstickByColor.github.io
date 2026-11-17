@@ -1074,7 +1074,7 @@ function ResultsTable({ selectedColor, matches, totalProducts, pinnedItems, togg
             {selectedColor.name}
           </p>
           <p style={{ fontSize:11, color:'var(--text-muted)', marginTop:2, fontFamily:'DM Sans', letterSpacing:'0.05em' }}>
-            {selectedColor.hex.toUpperCase()} · Closest lip matches by ΔE
+            {selectedColor.hex.toUpperCase()} · {filtered.length} match{filtered.length !== 1 ? 'es' : ''} ranked by ΔE
           </p>
           {/* Reds and pinks: tone and depth, by the red and pink guides' rules */}
           {redName && <p style={{ ...RED_LABEL_STYLE, marginTop:6 }}>{redName}</p>}
@@ -1127,7 +1127,7 @@ function ResultsTable({ selectedColor, matches, totalProducts, pinnedItems, togg
           <div style={{ marginTop:6, display:'flex', alignItems:'center', justifyContent:'space-between', minHeight:16 }}>
             <span style={{ fontSize:11, fontFamily:'DM Sans', color:'var(--text-muted)', letterSpacing:'0.03em' }}>
               {toneIdx === toneRamp.anchorIdx
-                ? 'Showing matches for your exact shade'
+                ? 'Showing close matches for your exact shade'
                 : <span>Matches for a <strong style={{ color:'var(--espresso)', fontWeight:600 }}>{toneRamp.ramp[toneIdx]?.name.split('· ')[1] || 'variant'}</strong> version · {selectedColor.hex.toUpperCase()}</span>}
             </span>
             {toneIdx !== toneRamp.anchorIdx && (
