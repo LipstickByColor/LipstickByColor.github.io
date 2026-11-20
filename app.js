@@ -5987,7 +5987,8 @@ const POPULAR_DUPE_PICKS = [{
 function DupeFinder({
   product,
   onSelect,
-  onUsePhoto
+  onUsePhoto,
+  onUseWheel
 }) {
   const [brand, setBrand] = useState(product?.brand ?? null);
   const [brandQuery, setBrandQuery] = useState('');
@@ -6067,6 +6068,21 @@ function DupeFinder({
     // Nothing matches as typed: shades of the brand a typo or two away
     return nearShades(normSearch(rest), items);
   }, [brand, shadeQuery, shadeIndex, brandKeys]);
+
+  // Nothing in this brand: the search may name another brand ("mac" after
+  // picking Bobbi Brown) or another brand's shade ("mac ruby woo"), so search
+  // every brand and offer to switch
+  const elsewhere = React.useMemo(() => {
+    const q = shadeQuery.trim();
+    if (!brand || shadeMatches.length || normSearch(q).length < 3) return null;
+    const brands = matchBrands(q, search).filter(b => b !== brand).slice(0, 5);
+    const found = findShades(q, search, brands);
+    const shades = found?.list.length && (found.route === 'brand_shade' || !brands.length) ? found.list.filter(p => p.brand !== brand) : [];
+    return brands.length || shades.length ? {
+      brands,
+      shades
+    } : null;
+  }, [brand, shadeQuery, shadeMatches.length, search]);
   function pickBrand(b) {
     window.gtag?.('event', 'dupe_brand_select', {
       brand: b
@@ -6089,6 +6105,17 @@ function DupeFinder({
       hex: p.hex,
       route: 'brand'
     });
+    onSelect(p);
+  }
+  function pickOtherShade(p) {
+    window.gtag?.('event', 'dupe_shade_select', {
+      brand: p.brand,
+      shade: p.shade,
+      hex: p.hex,
+      route: 'other_brand'
+    });
+    setBrand(p.brand);
+    setShadeQuery('');
     onSelect(p);
   }
   function pickQuickShade(p) {
@@ -6145,11 +6172,12 @@ function DupeFinder({
       shadeNoResultFired.current.add(brand);
       window.gtag?.('event', 'dupe_shade_no_results', {
         brand,
-        query: q
+        query: q,
+        elsewhere: !!elsewhere
       });
     }, 600);
     return () => clearTimeout(t);
-  }, [shadeQuery, shadeMatches.length, brand]);
+  }, [shadeQuery, shadeMatches.length, brand, elsewhere]);
 
   // Type scale for this panel — each size has one job. Don't add a one-off
   // size for a new label; pick the closest existing role instead.
@@ -6309,7 +6337,7 @@ function DupeFinder({
       letterSpacing: '0.02em',
       marginTop: 4
     }
-  }, "Search the brand, then the shade name"), /*#__PURE__*/React.createElement("button", {
+  }, "Search a brand, a shade or both"), /*#__PURE__*/React.createElement("button", {
     onClick: () => {
       window.gtag?.('event', 'dupe_photo_fallback', {
         step: 'header'
@@ -6344,7 +6372,7 @@ function DupeFinder({
     style: stepNum
   }, "1"), /*#__PURE__*/React.createElement("span", {
     style: stepLabel
-  }, "Brand")), /*#__PURE__*/React.createElement("div", {
+  }, "Brand or shade")), /*#__PURE__*/React.createElement("div", {
     className: "dupe-input",
     style: inputWrap
   }, /*#__PURE__*/React.createElement("span", {
@@ -6364,8 +6392,8 @@ function DupeFinder({
         window.location.href = chartHexUrl;
       } else if (brandMatches[0]) pickBrand(brandMatches[0]);else if (shadeHits) pickQuickShade(shadeHits.list[0]);else if (missedShade) pickBrand(missedShade.brand);
     },
-    placeholder: "MAC, Charlotte Tilbury\u2026",
-    "aria-label": "Brand",
+    placeholder: "MAC Ruby Woo, Pillow Talk\u2026",
+    "aria-label": "Brand or shade",
     style: inputStyle
   }), brandQuery && /*#__PURE__*/React.createElement("button", {
     onClick: () => setBrandQuery(''),
@@ -6410,7 +6438,14 @@ function DupeFinder({
     }
   }, "See all ", brandName(missedShade.brand), " shades")) : /*#__PURE__*/React.createElement("p", {
     style: emptyNote
-  }, "No brand or shade matches \"", brandQuery.trim(), "\". It may not be in the catalogue."), /*#__PURE__*/React.createElement("button", {
+  }, "No brand or shade matches \"", brandQuery.trim(), "\". It may not be in the catalogue."), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      flexWrap: 'wrap',
+      justifyContent: 'center',
+      gap: 8
+    }
+  }, /*#__PURE__*/React.createElement("button", {
     onClick: () => {
       window.gtag?.('event', 'dupe_photo_fallback', {
         step: 'brand_no_results',
@@ -6419,7 +6454,16 @@ function DupeFinder({
       onUsePhoto();
     },
     style: photoFallbackBtn
-  }, "Match it from a photo \u2192")), (brandMatches.length > 0 || shadeHits) && /*#__PURE__*/React.createElement("div", {
+  }, "Match it from a photo \u2192"), /*#__PURE__*/React.createElement("button", {
+    onClick: () => {
+      window.gtag?.('event', 'dupe_wheel_fallback', {
+        step: 'brand_no_results',
+        query: brandQuery.trim().toLowerCase()
+      });
+      onUseWheel();
+    },
+    style: photoFallbackBtn
+  }, "Pick the color on the wheel \u2192"))), (brandMatches.length > 0 || shadeHits) && /*#__PURE__*/React.createElement("div", {
     style: {
       ...suggestBox,
       maxHeight: 308
@@ -6538,7 +6582,7 @@ function DupeFinder({
       lineHeight: 1.5,
       marginTop: 2
     }
-  }, "Start typing a brand name \u2014 matches appear as you go.")) : /*#__PURE__*/React.createElement("div", {
+  }, "Start typing a brand or shade \u2014 matches appear as you go.")) : /*#__PURE__*/React.createElement("div", {
     style: {
       display: 'flex',
       flexDirection: 'column',
@@ -6595,7 +6639,8 @@ function DupeFinder({
     value: shadeQuery,
     onChange: e => setShadeQuery(e.target.value),
     onKeyDown: e => {
-      if (e.key === 'Enter' && shadeMatches[0]) pickShade(shadeMatches[0]);
+      if (e.key !== 'Enter') return;
+      if (shadeMatches[0]) pickShade(shadeMatches[0]);else if (elsewhere?.shades[0]) pickOtherShade(elsewhere.shades[0]);else if (elsewhere?.brands[0]) pickBrand(elsewhere.brands[0]);
     },
     placeholder: "Search a shade or product\u2026",
     "aria-label": "Shade or product",
@@ -6606,12 +6651,124 @@ function DupeFinder({
     style: clearBtn
   }, "\xD7")), shadeMatches.length === 0 ? /*#__PURE__*/React.createElement("div", {
     style: {
-      textAlign: 'center',
-      padding: '8px 0'
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 8
     }
   }, /*#__PURE__*/React.createElement("p", {
     style: emptyNote
-  }, "No shades match \"", shadeQuery, "\"."), /*#__PURE__*/React.createElement("button", {
+  }, "No ", brandName(brand), " shades match \"", shadeQuery.trim(), "\"."), elsewhere ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      ...suggestBox,
+      maxHeight: 308
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      ...stepLabel,
+      padding: '6px 12px 2px'
+    }
+  }, "Other brands"), elsewhere.brands.map(b => /*#__PURE__*/React.createElement("button", _extends({
+    key: b,
+    onClick: () => pickBrand(b)
+  }, hov(), {
+    style: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: 8,
+      width: '100%',
+      padding: '9px 12px',
+      borderRadius: 9,
+      border: 'none',
+      background: 'transparent',
+      cursor: 'pointer',
+      textAlign: 'left',
+      transition: 'background 0.12s'
+    }
+  }), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontFamily: 'DM Sans',
+      fontSize: 13,
+      fontWeight: 500,
+      color: 'var(--espresso)'
+    }
+  }, brandName(b)), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontFamily: 'DM Sans',
+      fontSize: 11,
+      color: 'var(--text-muted)',
+      marginLeft: 'auto',
+      flexShrink: 0
+    }
+  }, brandCounts[b], " shade", brandCounts[b] !== 1 ? 's' : ''))), elsewhere.shades.map((p, i) => /*#__PURE__*/React.createElement("button", _extends({
+    key: i,
+    onTouchStart: e => {
+      touchStartY.current = e.touches[0].clientY;
+    },
+    onTouchEnd: e => {
+      if (Math.abs(e.changedTouches[0].clientY - touchStartY.current) < 10) {
+        e.preventDefault();
+        pickOtherShade(p);
+      }
+    },
+    onClick: () => pickOtherShade(p)
+  }, hov(), {
+    style: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: 11,
+      width: '100%',
+      padding: '8px 10px',
+      borderRadius: 9,
+      border: 'none',
+      background: 'transparent',
+      cursor: 'pointer',
+      transition: 'background 0.12s'
+    }
+  }), /*#__PURE__*/React.createElement("span", {
+    style: {
+      width: 24,
+      height: 24,
+      borderRadius: '50%',
+      background: p.hex,
+      flexShrink: 0,
+      boxShadow: `0 1px 4px ${p.hex}66`,
+      border: '1px solid rgba(42,26,20,0.08)'
+    }
+  }), /*#__PURE__*/React.createElement("span", {
+    style: {
+      display: 'flex',
+      flexDirection: 'column',
+      minWidth: 0,
+      textAlign: 'left'
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontFamily: 'Cormorant Garamond',
+      fontStyle: 'italic',
+      fontSize: 15,
+      color: 'var(--espresso)',
+      lineHeight: 1.2,
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      whiteSpace: 'nowrap'
+    }
+  }, titleCase(p.shade)), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontFamily: 'DM Sans',
+      fontSize: TYPE.micro,
+      color: 'var(--text-muted)',
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      whiteSpace: 'nowrap'
+    }
+  }, brandName(p.brand), " \xB7 ", titleCase(p.product)))))) : /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      flexWrap: 'wrap',
+      justifyContent: 'center',
+      gap: 8
+    }
+  }, /*#__PURE__*/React.createElement("button", {
     onClick: () => {
       window.gtag?.('event', 'dupe_photo_fallback', {
         step: 'shade_no_results',
@@ -6621,7 +6778,17 @@ function DupeFinder({
       onUsePhoto();
     },
     style: photoFallbackBtn
-  }, "Can't find it? Match from a photo \u2192")) : /*#__PURE__*/React.createElement("div", {
+  }, "Can't find it? Match from a photo \u2192"), /*#__PURE__*/React.createElement("button", {
+    onClick: () => {
+      window.gtag?.('event', 'dupe_wheel_fallback', {
+        step: 'shade_no_results',
+        brand,
+        query: shadeQuery.trim().toLowerCase()
+      });
+      onUseWheel();
+    },
+    style: photoFallbackBtn
+  }, "Pick the color on the wheel \u2192"))) : /*#__PURE__*/React.createElement("div", {
     style: {
       ...suggestBox,
       maxHeight: 308
@@ -8427,7 +8594,8 @@ function App() {
     onUsePhoto: () => {
       setMode('photo');
       setDupeProduct(null);
-    }
+    },
+    onUseWheel: () => switchMode('wheel', 'dupe_no_results')
   }) : /*#__PURE__*/React.createElement(ListPicker, {
     wishlist: wishlist,
     selectedKey: selectedColor?.sourceKey,

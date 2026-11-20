@@ -215,10 +215,24 @@ function findShades(query, { brandKeys, brandCounts, shadeIndex }, brandMatches)
     if (key.startsWith(q)) starts.push(p);
     else if (key.includes(q)) incl.push(p);
   }
-  const list = [...starts.sort(byShade), ...incl.sort(byShade)].slice(0, 40);
-  if (list.length) return { route: 'shade', list };
+  // A product line without its brand ("kiss kiss", "afterglow lip balm"): every
+  // word in the product line and shade, in any order, listed after shade names
+  const named = new Set([...starts, ...incl]);
+  // (the words as typed, together, first: "kiss kiss" before "shoko kiss")
+  const lineHits = q.includes(' ') || q.length >= 5 ? shadeIndex.filter(x => !named.has(x.p) && wordsHit(q, x.full)) : [];
+  const phrase = lineHits.filter(x => ` ${x.full} `.includes(` ${q}`));
+  const line = [...phrase.map(x => x.p).sort(byShade), ...lineHits.filter(x => !phrase.includes(x)).map(x => x.p).sort(byShade)];
+  const list = [...starts.sort(byShade), ...incl.sort(byShade), ...line].slice(0, 40);
+  if (list.length) return { route: named.size ? 'shade' : 'line', list };
   const last = brandShade(false, true);
   if (last) return last;
+  // Shade numbers differ between markets and retailers ("174 nu insouciant" is
+  // "nu insouciant" here): try again without words that have digits in them
+  const noNumbers = words.filter(w => !/\d/.test(w));
+  if (noNumbers.length && noNumbers.length < words.length && noNumbers.some(w => w.replace(/[^a-z]/g, '').length >= 3)) {
+    const again = findShades(noNumbers.join(' '), { brandKeys, brandCounts, shadeIndex }, brandMatches);
+    if (again?.list.length) return again;
+  }
   if (brandMatches.length) return null;
   const near = brandShade(true, false) || brandShade(true, true);
   if (near) return near;

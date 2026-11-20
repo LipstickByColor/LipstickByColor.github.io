@@ -3426,7 +3426,7 @@ const POPULAR_DUPE_PICKS = [
   { brand: 'dior', shade: '670 rose blues' },
 ];
 
-function DupeFinder({ product, onSelect, onUsePhoto }) {
+function DupeFinder({ product, onSelect, onUsePhoto, onUseWheel }) {
   const [brand, setBrand] = useState(product?.brand ?? null);
   const [brandQuery, setBrandQuery] = useState('');
   // A product set from outside (e.g. a shared dupe link) opens its brand too
@@ -3491,6 +3491,19 @@ function DupeFinder({ product, onSelect, onUsePhoto }) {
     return nearShades(normSearch(rest), items);
   }, [brand, shadeQuery, shadeIndex, brandKeys]);
 
+  // Nothing in this brand: the search may name another brand ("mac" after
+  // picking Bobbi Brown) or another brand's shade ("mac ruby woo"), so search
+  // every brand and offer to switch
+  const elsewhere = React.useMemo(() => {
+    const q = shadeQuery.trim();
+    if (!brand || shadeMatches.length || normSearch(q).length < 3) return null;
+    const brands = matchBrands(q, search).filter(b => b !== brand).slice(0, 5);
+    const found = findShades(q, search, brands);
+    const shades = found?.list.length && (found.route === 'brand_shade' || !brands.length)
+      ? found.list.filter(p => p.brand !== brand) : [];
+    return brands.length || shades.length ? { brands, shades } : null;
+  }, [brand, shadeQuery, shadeMatches.length, search]);
+
   function pickBrand(b) {
     window.gtag?.('event', 'dupe_brand_select', { brand: b });
     setBrand(b); setBrandQuery(''); setShadeQuery(''); onSelect(null);
@@ -3498,6 +3511,11 @@ function DupeFinder({ product, onSelect, onUsePhoto }) {
   function changeBrand() { setBrand(null); setBrandQuery(''); setShadeQuery(''); onSelect(null); }
   function pickShade(p) {
     window.gtag?.('event', 'dupe_shade_select', { brand: p.brand, shade: p.shade, hex: p.hex, route: 'brand' });
+    onSelect(p);
+  }
+  function pickOtherShade(p) {
+    window.gtag?.('event', 'dupe_shade_select', { brand: p.brand, shade: p.shade, hex: p.hex, route: 'other_brand' });
+    setBrand(p.brand); setShadeQuery('');
     onSelect(p);
   }
   function pickQuickShade(p) {
@@ -3537,10 +3555,10 @@ function DupeFinder({ product, onSelect, onUsePhoto }) {
     if (q.length < 3 || shadeMatches.length > 0 || !brand || shadeNoResultFired.current.has(brand)) return;
     const t = setTimeout(() => {
       shadeNoResultFired.current.add(brand);
-      window.gtag?.('event', 'dupe_shade_no_results', { brand, query: q });
+      window.gtag?.('event', 'dupe_shade_no_results', { brand, query: q, elsewhere: !!elsewhere });
     }, 600);
     return () => clearTimeout(t);
-  }, [shadeQuery, shadeMatches.length, brand]);
+  }, [shadeQuery, shadeMatches.length, brand, elsewhere]);
 
   // Type scale for this panel — each size has one job. Don't add a one-off
   // size for a new label; pick the closest existing role instead.
@@ -3571,7 +3589,7 @@ function DupeFinder({ product, onSelect, onUsePhoto }) {
           Find a color match for a lipstick you like
         </p>
         <p style={{ fontFamily:'DM Sans', fontSize:TYPE.body, color:'var(--text-muted)', letterSpacing:'0.02em', marginTop:4 }}>
-          Search the brand, then the shade name
+          Search a brand, a shade or both
         </p>
         <button onClick={() => { window.gtag?.('event', 'dupe_photo_fallback', { step: 'header' }); onUsePhoto(); }} style={{ marginTop:8, fontFamily:'DM Sans', fontSize:TYPE.link, letterSpacing:'0.05em', color:'var(--blush-deep)', background:'transparent', border:'none', borderBottom:'1px solid var(--blush-deep)', paddingBottom:1, cursor:'pointer' }}>
           Can't find your lipstick? Match it from a photo →
@@ -3582,7 +3600,7 @@ function DupeFinder({ product, onSelect, onUsePhoto }) {
         <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
           <div style={{ display:'flex', alignItems:'center', gap:8 }}>
             <span style={stepNum}>1</span>
-            <span style={stepLabel}>Brand</span>
+            <span style={stepLabel}>Brand or shade</span>
           </div>
           <div className="dupe-input" style={inputWrap}>
             <span style={{ color:'var(--text-muted)', fontSize:22, lineHeight:1 }}>⌕</span>
@@ -3595,7 +3613,7 @@ function DupeFinder({ product, onSelect, onUsePhoto }) {
                 else if (shadeHits) pickQuickShade(shadeHits.list[0]);
                 else if (missedShade) pickBrand(missedShade.brand);
               }}
-              placeholder="MAC, Charlotte Tilbury…" aria-label="Brand" style={inputStyle} />
+              placeholder="MAC Ruby Woo, Pillow Talk…" aria-label="Brand or shade" style={inputStyle} />
             {brandQuery && <button onClick={() => setBrandQuery('')} aria-label="Clear search" style={clearBtn}>×</button>}
           </div>
           {typedHex && (
@@ -3616,9 +3634,14 @@ function DupeFinder({ product, onSelect, onUsePhoto }) {
               </>) : (
                 <p style={emptyNote}>No brand or shade matches "{brandQuery.trim()}". It may not be in the catalogue.</p>
               )}
-              <button onClick={() => { window.gtag?.('event', 'dupe_photo_fallback', { step: 'brand_no_results', query: brandQuery.trim().toLowerCase() }); onUsePhoto(); }} style={photoFallbackBtn}>
-                Match it from a photo →
-              </button>
+              <div style={{ display:'flex', flexWrap:'wrap', justifyContent:'center', gap:8 }}>
+                <button onClick={() => { window.gtag?.('event', 'dupe_photo_fallback', { step: 'brand_no_results', query: brandQuery.trim().toLowerCase() }); onUsePhoto(); }} style={photoFallbackBtn}>
+                  Match it from a photo →
+                </button>
+                <button onClick={() => { window.gtag?.('event', 'dupe_wheel_fallback', { step: 'brand_no_results', query: brandQuery.trim().toLowerCase() }); onUseWheel(); }} style={photoFallbackBtn}>
+                  Pick the color on the wheel →
+                </button>
+              </div>
             </div>
           )}
           {(brandMatches.length > 0 || shadeHits) && (
@@ -3659,7 +3682,7 @@ function DupeFinder({ product, onSelect, onUsePhoto }) {
           )}
           {!brandQuery && (
             <p style={{ fontFamily:'Cormorant Garamond', fontStyle:'italic', fontSize:TYPE.caption, color:'var(--text-muted)', textAlign:'center', lineHeight:1.5, marginTop:2 }}>
-              Start typing a brand name — matches appear as you go.
+              Start typing a brand or shade — matches appear as you go.
             </p>
           )}
         </div>
@@ -3683,16 +3706,62 @@ function DupeFinder({ product, onSelect, onUsePhoto }) {
                 <span style={{ color:'var(--text-muted)', fontSize:22, lineHeight:1 }}>⌕</span>
                 <input autoFocus value={shadeQuery}
                   onChange={e => setShadeQuery(e.target.value)}
-                  onKeyDown={e => { if (e.key === 'Enter' && shadeMatches[0]) pickShade(shadeMatches[0]); }}
+                  onKeyDown={e => {
+                    if (e.key !== 'Enter') return;
+                    if (shadeMatches[0]) pickShade(shadeMatches[0]);
+                    else if (elsewhere?.shades[0]) pickOtherShade(elsewhere.shades[0]);
+                    else if (elsewhere?.brands[0]) pickBrand(elsewhere.brands[0]);
+                  }}
                   placeholder="Search a shade or product…" aria-label="Shade or product" style={inputStyle} />
                 {shadeQuery && <button onClick={() => setShadeQuery('')} aria-label="Clear search" style={clearBtn}>×</button>}
               </div>
               {shadeMatches.length === 0 ? (
-                <div style={{ textAlign:'center', padding:'8px 0' }}>
-                  <p style={emptyNote}>No shades match "{shadeQuery}".</p>
-                  <button onClick={() => { window.gtag?.('event', 'dupe_photo_fallback', { step: 'shade_no_results', brand, query: shadeQuery.trim().toLowerCase() }); onUsePhoto(); }} style={photoFallbackBtn}>
-                    Can't find it? Match from a photo →
-                  </button>
+                <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
+                  <p style={emptyNote}>No {brandName(brand)} shades match "{shadeQuery.trim()}".</p>
+                  {elsewhere ? (
+                    <div style={{ ...suggestBox, maxHeight:308 }}>
+                      <span style={{ ...stepLabel, padding:'6px 12px 2px' }}>Other brands</span>
+                      {elsewhere.brands.map(b => (
+                        <button key={b} onClick={() => pickBrand(b)} {...hov()} style={{
+                          display:'flex', alignItems:'center', gap:8, width:'100%',
+                          padding:'9px 12px', borderRadius:9, border:'none',
+                          background:'transparent', cursor:'pointer', textAlign:'left',
+                          transition:'background 0.12s',
+                        }}>
+                          <span style={{ fontFamily:'DM Sans', fontSize:13, fontWeight:500, color:'var(--espresso)' }}>{brandName(b)}</span>
+                          <span style={{ fontFamily:'DM Sans', fontSize:11, color:'var(--text-muted)', marginLeft:'auto', flexShrink:0 }}>
+                            {brandCounts[b]} shade{brandCounts[b] !== 1 ? 's' : ''}
+                          </span>
+                        </button>
+                      ))}
+                      {elsewhere.shades.map((p, i) => (
+                        <button key={i}
+                          onTouchStart={e => { touchStartY.current = e.touches[0].clientY; }}
+                          onTouchEnd={e => { if (Math.abs(e.changedTouches[0].clientY - touchStartY.current) < 10) { e.preventDefault(); pickOtherShade(p); } }}
+                          onClick={() => pickOtherShade(p)}
+                          {...hov()} style={{
+                          display:'flex', alignItems:'center', gap:11, width:'100%',
+                          padding:'8px 10px', borderRadius:9, border:'none',
+                          background:'transparent', cursor:'pointer', transition:'background 0.12s',
+                        }}>
+                          <span style={{ width:24, height:24, borderRadius:'50%', background:p.hex, flexShrink:0, boxShadow:`0 1px 4px ${p.hex}66`, border:'1px solid rgba(42,26,20,0.08)' }} />
+                          <span style={{ display:'flex', flexDirection:'column', minWidth:0, textAlign:'left' }}>
+                            <span style={{ fontFamily:'Cormorant Garamond', fontStyle:'italic', fontSize:15, color:'var(--espresso)', lineHeight:1.2, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{titleCase(p.shade)}</span>
+                            <span style={{ fontFamily:'DM Sans', fontSize:TYPE.micro, color:'var(--text-muted)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{brandName(p.brand)} · {titleCase(p.product)}</span>
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  ) : (
+                    <div style={{ display:'flex', flexWrap:'wrap', justifyContent:'center', gap:8 }}>
+                      <button onClick={() => { window.gtag?.('event', 'dupe_photo_fallback', { step: 'shade_no_results', brand, query: shadeQuery.trim().toLowerCase() }); onUsePhoto(); }} style={photoFallbackBtn}>
+                        Can't find it? Match from a photo →
+                      </button>
+                      <button onClick={() => { window.gtag?.('event', 'dupe_wheel_fallback', { step: 'shade_no_results', brand, query: shadeQuery.trim().toLowerCase() }); onUseWheel(); }} style={photoFallbackBtn}>
+                        Pick the color on the wheel →
+                      </button>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div style={{ ...suggestBox, maxHeight:308 }}>
@@ -4594,6 +4663,7 @@ function App() {
               product={dupeProduct}
               onSelect={setDupeProduct}
               onUsePhoto={() => { setMode('photo'); setDupeProduct(null); }}
+              onUseWheel={() => switchMode('wheel', 'dupe_no_results')}
             />
           ) : (
             <ListPicker
