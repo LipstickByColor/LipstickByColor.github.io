@@ -1,0 +1,4 @@
+{
+  "note": "Sites that refuse automated requests. check-links.js lists their links under 'Check by hand' instead of marking them broken.",
+  "hosts": ["dior.com", "chanel.com", "clothbase.com", "linkedin.com"]
+}
