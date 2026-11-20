@@ -62,13 +62,13 @@ const PAGES = [
     image: 'share-card-dupe-finder.png',
     imageAlt: 'The dupe finder: two lipsticks side by side, yours and its twin',
     name: 'Lipstick Dupe Finder',
-    title: 'Lipstick Dupe Finder: Same Color, Any Price',
+    title: 'Lipstick Dupe Finder: Find Similar Shades at Any Price',
     description: 'Find lipstick dupes across over 24,000 lip products and 520+ brands. Compare shades from drugstore to luxury, including alternatives to discontinued lipsticks.',
     h1: 'Lipstick dupe finder',
-    intro: 'Name a lipstick you love and see the shades that look most like it, from drugstore to luxury, across over 500 brands.',
+    intro: 'Name a lipstick you love and find shades with similar colors, from drugstore to luxury, across over 500 brands.',
     copy: `
     <h2>How the lipstick dupe finder works</h2>
-    <p>Search the brand, then the shade. The finder takes that lipstick's measured color and ranks every other product in the catalogue by how close its color is, closest first. Narrow the list by price, brand, format, finish, or undertone to find a cheaper alternative, the same color in a different finish, or a stand-in for a shade you can no longer buy.</p>
+    <p>Search the brand, then the shade. The finder takes that lipstick's measured color and ranks every other product in the catalogue by how close its color is, closest first. Narrow the list by price, brand, format, finish, or undertone to find a cheaper alternative with a similar color, even in a different finish, or a stand-in for a shade you can no longer buy.</p>
     <h3>What counts as a dupe?</h3>
     <p>Two lipsticks are dupes when their colors are close enough to be hard to tell apart. Closeness is measured as ΔE (Delta E), a standard measure of how different two colors look to the eye: the lower the number, the closer the match. The <a href="/color-science/">color science page</a> explains how ΔE works.</p>
     <p>Color is only part of a dupe. Finish and formula also change how a shade looks on your lips, so use the finish and format filters to keep the comparison fair.</p>

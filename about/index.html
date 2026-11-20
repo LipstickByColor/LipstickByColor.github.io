@@ -4,19 +4,19 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>How I Built a Lipstick Search by Color</title>
-<meta name="description" content="The story behind Lipstick Color Finder: thousands of lipstick photos, computer vision and color science, turned into a search by how shades actually look." />
+<meta name="description" content="The story behind Lipstick Color Finder: how I used thousands of lipstick photos, computer vision and color science to make lipstick searchable by color." />
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="Lipstick Color Finder" />
 <meta property="og:url" content="https://lipstickcolorfinder.com/about/" />
 <meta property="og:title" content="How I Built a Lipstick Search by Color" />
-<meta property="og:description" content="The story behind Lipstick Color Finder: thousands of lipstick photos, computer vision and color science, turned into a search by how shades actually look." />
+<meta property="og:description" content="The story behind Lipstick Color Finder: how I used thousands of lipstick photos, computer vision and color science to make lipstick searchable by color." />
 <meta property="og:image" content="https://lipstickcolorfinder.com/assets/share-card.png" />
 <meta property="og:image:width" content="1200" />
 <meta property="og:image:height" content="630" />
 <meta property="og:image:alt" content="Lipstick Color Finder: find lipstick by color, with rows of lips in every color of the rainbow" />
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content="How I Built a Lipstick Search by Color" />
-<meta name="twitter:description" content="The story behind Lipstick Color Finder: thousands of lipstick photos, computer vision and color science, turned into a search by how shades actually look." />
+<meta name="twitter:description" content="The story behind Lipstick Color Finder: how I used thousands of lipstick photos, computer vision and color science to make lipstick searchable by color." />
 <meta name="twitter:image" content="https://lipstickcolorfinder.com/assets/share-card.png" />
 <link rel="canonical" href="https://lipstickcolorfinder.com/about/" />
 <link rel="icon" href="/favicon.ico" sizes="48x48" />
@@ -601,6 +601,8 @@
   }
   .pinks-reveal.is-summary.outcome-card { margin-bottom: 64px; padding: 30px 28px; }
   .outcome-card .outcome-metrics { margin: 0; }
+  .pinks-reveal.is-summary.outcome-card.has-next { margin-bottom: 20px; }
+  .outcome-note { font-size: 15px; line-height: 1.65; color: var(--espresso-mid); }
   .ometric {
     background: #fff; border: 1px solid var(--border); border-radius: 18px;
     padding: 24px 22px; box-shadow: 0 2px 10px var(--shadow);
@@ -653,7 +655,7 @@
     "@type": "Person",
     "name": "Connie Schibber",
     "jobTitle": "Data Scientist",
-    "description": "Data Scientist who builds the measurement systems, experiments, and ML pipelines behind AI products: what to build, why they fail, how to improve them, and when to launch. Built this app's end-to-end ML pipeline — image classification (CNN, ResNet-18), color-region segmentation (U-Net), and CIELAB perceptual color extraction — to power exact-color search across over 24,000 lip products.",
+    "description": "Data Scientist who builds the measurement systems, experiments, and ML pipelines behind AI products: what to build, why they fail, how to improve them, and when to launch. Built this app's end-to-end ML pipeline — image classification (CNN, ResNet-18), color-region segmentation (U-Net), and CIELAB perceptual color extraction — to power color search across over 24,000 lip products.",
     "sameAs": [
       "https://www.linkedin.com/in/cschibber/",
       "https://github.com/ConstanzaSchibber"
@@ -690,9 +692,9 @@
     <div class="premise-row">
       <div class="premise-tag"><span class="pt-word">What</span></div>
       <p class="body-text">
-        So I built a color search and discovery tool that skips the names entirely, matching lip
-        products by actual color using <a href="/color-science/">CIELAB and Delta E</a>, the same
-        standard cosmetics manufacturers use internally.
+        So I built a color search and discovery tool that skips shade names entirely. Instead, it
+        measures the colors in product images using <a href="/color-science/">CIELAB and Delta E</a>,
+        making it possible to search and compare lip products by color.
       </p>
     </div>
 
@@ -884,9 +886,7 @@
       <p class="section-label"><span class="echo">What</span>The approach</p>
       <h2 class="section-title">Search and discover by <em>color</em></h2>
       <p class="section-lede is-wide">
-        Color search works differently depending on how much is already known about the target
-        shade. The three modes below cover everything from casual exploration to color-perfect
-        precision.
+        There are different ways to search for a lipstick color, depending on how much you know about the shade you're looking for. The three modes below let you explore colors, match a photo, or search for a specific color.
       </p>
       <ul class="mode-list">
         <li>
@@ -898,8 +898,8 @@
         <li>
           <span class="lede-num">2</span>
           <span>When a reference exists — a photo, a screenshot, something spotted on someone, or a
-          product that needs a dupe — the <strong>photo upload</strong> identifies the closest
-          matches within a perceptually imperceptible difference.</span>
+          product that needs a dupe — the <strong>photo upload</strong> finds the closest
+          color matches across the catalog.</span>
         </li>
         <li>
           <span class="lede-num">3</span>
@@ -1031,11 +1031,10 @@
 
   <!-- ── Outcome / results ────────────────────────────────────────────── -->
   <section class="problem is-tight">
-    <div class="pinks-reveal is-summary outcome-card">
+    <div class="pinks-reveal is-summary outcome-card has-next">
       <p class="pinks-summary-eyebrow">Outcome</p>
       <p class="pinks-caption">
-        The web app lets users search products by color. For most products, the top match
-        is as close to the target shade as the human eye can detect.
+        The web app lets users search products by color, ranking results by perceptual color similarity.
       </p>
 
       <div class="outcome-metrics">
@@ -1049,9 +1048,16 @@
         </div>
         <div class="ometric">
           <div class="ov">24,000+</div>
-          <div class="ol">Products searchable by exact color</div>
+          <div class="ol">Products searchable by color</div>
         </div>
       </div>
+    </div>
+
+    <div class="pinks-reveal is-summary outcome-card">
+      <p class="pinks-summary-eyebrow">Technical Limitations</p>
+      <p class="outcome-note">
+        The color measurements are based on product images provided by brands and retailers, not physical samples. Differences in photography, lighting, image processing, and lipstick formula can affect how a shade appears in person. Color matches are therefore a way to discover and compare similar shades, not a guarantee that two lipsticks will look the same when worn.
+      </p>
     </div>
 
     <div class="repo-cta">
