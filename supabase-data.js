@@ -26,28 +26,97 @@ function _setDataStatus(status) {
 
 const _imageKey = p => `${(p.brand||'').toLowerCase()}|${(p.product||'').toLowerCase()}|${(p.shade||'').toLowerCase()}`;
 
-(async function () {
-  try {
-    const res = await fetch(_CATALOGUE_URL);
-    if (!res.ok) throw new Error(`Catalogue request failed: ${res.status}`);
-    const { brands, products, rows } = await res.json();
-    if (!rows?.length) throw new Error('No products returned');
+// A dropped connection (weak signal, switching apps on iOS, a tab left in the
+// background) kills the download with a generic network error. Those are tried
+// again a few times before the refresh prompt; a missing file (4xx) is not.
+// Analytics: data_load_retry for each failed try, data_load_recovered when a
+// retry worked, data_load_error when the visitor gets the refresh prompt.
+const _CATALOGUE_TRIES = 3;
+const _CATALOGUE_WAITS = [1000, 3000];   // before the 2nd and 3rd try
+const _CATALOGUE_TIMEOUT = 30000;        // a stalled download fails instead of loading forever
 
-    REAL_PRODUCTS = rows.map(([id, b, p, shade, finish, type, l, a, bb, hex, price_tier, discontinued, long_lasting]) => ({
+let _catalogueLoading = false, _catalogueRound = 0;
+
+async function _fetchCatalogue() {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), _CATALOGUE_TIMEOUT);
+  try {
+    const res = await fetch(_CATALOGUE_URL, { signal: ctrl.signal });
+    if (!res.ok) {
+      const err = new Error(`Catalogue request failed: ${res.status}`);
+      err.retry = res.status >= 500;
+      throw err;
+    }
+    const { brands, products, rows } = await res.json();
+    if (!rows?.length) throw Object.assign(new Error('No products returned'), { retry: false });
+    return rows.map(([id, b, p, shade, finish, type, l, a, bb, hex, price_tier, discontinued, long_lasting]) => ({
       id, brand: brands[b], product: products[p], shade, finish, format: type,
       lab: [l, a, bb], hex, price_tier,
       discontinued: discontinued === '1' || discontinued === 1,
       long_lasting: long_lasting === 1,
     }));
   } catch (err) {
-    console.error('Failed to load product data:', err);
-    window.gtag?.('event', 'data_load_error', { message: String(err?.message || err).slice(0, 100) });
-    _setDataStatus('error');
-    return;
+    if (err.name === 'AbortError') throw Object.assign(new Error('Timed out'), { retry: true });
+    if (err.retry === undefined) err.retry = true;   // network errors: "Load failed", "Failed to fetch"
+    throw err;
+  } finally {
+    clearTimeout(timer);
   }
+}
 
-  _setDataStatus('ready');
-})();
+// Resolves after ms, or as soon as the tab is visible and online again
+// when it is in the background or offline (the retry would fail there too)
+function _waitToRetry(ms) {
+  return new Promise(resolve => {
+    const ready = () => document.visibilityState === 'visible' && navigator.onLine !== false;
+    const check = () => { if (ready()) done(); };
+    const done = () => {
+      document.removeEventListener('visibilitychange', check);
+      window.removeEventListener('online', check);
+      resolve();
+    };
+    setTimeout(() => (ready() ? done() : null), ms);
+    document.addEventListener('visibilitychange', check);
+    window.addEventListener('online', check);
+  });
+}
+
+async function _loadCatalogue() {
+  if (_catalogueLoading) return;
+  _catalogueLoading = true;
+  const round = ++_catalogueRound, start = Date.now();
+  for (let attempt = 1; ; attempt++) {
+    const tryStart = Date.now();
+    try {
+      REAL_PRODUCTS = await _fetchCatalogue();
+      if (attempt > 1 || round > 1) window.gtag?.('event', 'data_load_recovered', { attempt, round, elapsed_ms: Date.now() - start });
+      _catalogueLoading = false;
+      _setDataStatus('ready');
+      return;
+    } catch (err) {
+      const info = {
+        message: String(err?.message || err).slice(0, 100), attempt, round,
+        elapsed_ms: Date.now() - tryStart, visible: document.visibilityState, online: navigator.onLine,
+      };
+      console.error(`Failed to load product data (try ${attempt}):`, err);
+      if (!err.retry || attempt >= _CATALOGUE_TRIES) {
+        window.gtag?.('event', 'data_load_error', info);
+        _catalogueLoading = false;
+        _setDataStatus('error');
+        return;
+      }
+      window.gtag?.('event', 'data_load_retry', info);
+      await _waitToRetry(_CATALOGUE_WAITS[attempt - 1]);
+    }
+  }
+}
+
+_loadCatalogue();
+// After the refresh prompt, one more round when the connection comes back or the
+// tab returns; the app replaces the prompt when the catalogue arrives
+['online', 'visibilitychange'].forEach(ev => (ev === 'online' ? window : document).addEventListener(ev, () => {
+  if (window.LIPSTICK_DATA_STATUS === 'error' && _catalogueRound < 2 && document.visibilityState === 'visible') _loadCatalogue();
+}));
 
 // Image URLs, fetched for the products on screen. Requests made within a short
 // window go out together, 100 ids per call. Products saved before ids existed
