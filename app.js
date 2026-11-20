@@ -128,7 +128,7 @@ function ProductThumb({
       if (img?.complete && img.naturalWidth && !loaded) setLoaded(true);
     },
     src: src,
-    alt: `${product.brand} ${product.shade}`,
+    alt: `${brandName(product.brand)} ${titleCase(product.shade)}`,
     loading: "lazy",
     decoding: "async",
     onLoad: () => setLoaded(true),
@@ -331,8 +331,6 @@ function MatchCard({
   }, /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: TYPE.brand,
-      letterSpacing: '0.08em',
-      textTransform: 'uppercase',
       color: 'var(--espresso-mid)',
       fontFamily: 'DM Sans',
       fontWeight: 500,
@@ -342,7 +340,7 @@ function MatchCard({
     }
   }, /*#__PURE__*/React.createElement("span", {
     style: srOnly
-  }, "Brand: "), p.brand), /*#__PURE__*/React.createElement("div", {
+  }, "Brand: "), brandName(p.brand)), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: TYPE.meta,
       fontFamily: 'DM Sans',
@@ -351,7 +349,7 @@ function MatchCard({
     }
   }, /*#__PURE__*/React.createElement("span", {
     style: srOnly
-  }, "Shade: "), p.shade), CARD_FORMATS.has(p.format) && /*#__PURE__*/React.createElement("div", {
+  }, "Shade: "), titleCase(p.shade)), CARD_FORMATS.has(p.format) && /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: TYPE.meta,
       fontFamily: 'DM Sans',
@@ -405,7 +403,7 @@ function detailSourceLabel(source) {
   if (source.id === '__photo__') return 'Your photo';
   if (source.id === '__hex__') return 'Your color';
   const key = source.sourceKey || '';
-  return key.slice(key.indexOf('|') + 1) || 'Your shade';
+  return titleCase(key.slice(key.indexOf('|') + 1)) || 'Your shade';
 }
 const MATCH_DETAIL_TYPE = {
   eyebrow: 11,
@@ -548,34 +546,30 @@ function MatchDetail({
     style: {
       fontSize: TYPE.brand,
       fontWeight: 500,
-      letterSpacing: '0.1em',
-      textTransform: 'uppercase',
       color: 'var(--espresso-mid)'
     }
   }, /*#__PURE__*/React.createElement("span", {
     style: srOnly
-  }, "Brand: "), p.brand), /*#__PURE__*/React.createElement("div", {
+  }, "Brand: "), brandName(p.brand)), /*#__PURE__*/React.createElement("div", {
     style: {
       fontFamily: 'Cormorant Garamond',
       fontWeight: 600,
       fontSize: TYPE.shade,
       lineHeight: 1.08,
       color: 'var(--espresso)',
-      textTransform: 'capitalize',
       fontVariantNumeric: 'lining-nums'
     }
   }, /*#__PURE__*/React.createElement("span", {
     style: srOnly
-  }, "Shade: "), p.shade), /*#__PURE__*/React.createElement("div", {
+  }, "Shade: "), titleCase(p.shade)), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: TYPE.value,
       lineHeight: 1.35,
-      color: 'var(--text-body)',
-      textTransform: 'capitalize'
+      color: 'var(--text-body)'
     }
   }, /*#__PURE__*/React.createElement("span", {
     style: srOnly
-  }, "Product: "), p.product), redName && /*#__PURE__*/React.createElement("div", {
+  }, "Product: "), titleCase(p.product)), redName && /*#__PURE__*/React.createElement("div", {
     style: {
       ...RED_LABEL_STYLE,
       fontSize: TYPE.eyebrow
@@ -605,8 +599,7 @@ function MatchDetail({
     style: {
       overflow: 'hidden',
       textOverflow: 'ellipsis',
-      whiteSpace: 'nowrap',
-      textTransform: source.sourceKey ? 'capitalize' : 'none'
+      whiteSpace: 'nowrap'
     }
   }, detailSourceLabel(source))), /*#__PURE__*/React.createElement("div", {
     role: source ? undefined : 'img',
@@ -2054,7 +2047,7 @@ function ResultsTable({
         transition: 'all 0.15s',
         whiteSpace: 'nowrap'
       }
-    }, b, active && /*#__PURE__*/React.createElement("span", {
+    }, brandName(b), active && /*#__PURE__*/React.createElement("span", {
       style: {
         marginLeft: 5,
         opacity: 0.6,
@@ -2286,11 +2279,7 @@ function ResultsTable({
       lineHeight: 1.5,
       color: 'var(--text-body)'
     }
-  }, !hiddenDiscontinued ? relaxGroup?.key === 'brand' && activeBrands.length === 1 ? /*#__PURE__*/React.createElement(React.Fragment, null, "No ", /*#__PURE__*/React.createElement("span", {
-    style: {
-      textTransform: 'capitalize'
-    }
-  }, activeBrands[0]), " matches for this color.") : 'No matches for the selected filters.' : hiddenDiscontinued === 1 ? otherFilters ? 'The only match for these filters is discontinued.' : 'The only match here is discontinued.' : otherFilters ? `The ${hiddenDiscontinued} matches for these filters are discontinued.` : `All ${hiddenDiscontinued} matches here are discontinued.`), /*#__PURE__*/React.createElement("div", {
+  }, !hiddenDiscontinued ? relaxGroup?.key === 'brand' && activeBrands.length === 1 ? /*#__PURE__*/React.createElement(React.Fragment, null, "No ", brandName(activeBrands[0]), " matches for this color.") : 'No matches for the selected filters.' : hiddenDiscontinued === 1 ? otherFilters ? 'The only match for these filters is discontinued.' : 'The only match here is discontinued.' : otherFilters ? `The ${hiddenDiscontinued} matches for these filters are discontinued.` : `All ${hiddenDiscontinued} matches here are discontinued.`), /*#__PURE__*/React.createElement("div", {
     style: {
       display: 'flex',
       flexWrap: 'wrap',
@@ -2626,9 +2615,9 @@ function drawShareImage(canvas, wishlist, images) {
       tw = cw - 36 * sc;
     ctx.textAlign = 'left';
     ctx.fillStyle = fg;
-    ctx.fillText(fit(p.shade, tw, s => `500 ${s}px "Cormorant Garamond", serif`, Math.max(26, Math.round(38 * sc)), 18), tx, y + photoH + band * 0.46);
+    ctx.fillText(fit(titleCase(p.shade), tw, s => `500 ${s}px "Cormorant Garamond", serif`, Math.max(26, Math.round(38 * sc)), 18), tx, y + photoH + band * 0.46);
     ctx.globalAlpha = 0.85;
-    ctx.fillText(fit(p.brand.toUpperCase(), tw, s => `600 ${s}px "DM Sans", sans-serif`, Math.max(15, Math.round(18 * sc)), 12), tx, y + photoH + band * 0.78);
+    ctx.fillText(fit(brandName(p.brand), tw, s => `600 ${s}px "DM Sans", sans-serif`, Math.max(15, Math.round(18 * sc)), 12), tx, y + photoH + band * 0.78);
     ctx.restore();
   }
 
@@ -3072,7 +3061,7 @@ const MODE_PAGES = {
   },
   dupe: {
     path: '/dupe-finder/',
-    title: 'Lipstick Dupe Finder: Same Color, Any Price'
+    title: 'Lipstick Dupe Finder: Find Similar Shades at Any Price'
   },
   hex: {
     path: '/lipstick-color-chart/',
@@ -3265,7 +3254,6 @@ function ShadeListItem({
       fontFamily: 'Cormorant Garamond',
       fontWeight: 500,
       lineHeight: 1.15,
-      textTransform: 'capitalize',
       fontVariantNumeric: 'lining-nums' // shade names are often numbers ("999", "0 Ultra Light")
     }
   }, /*#__PURE__*/React.createElement("span", {
@@ -3274,7 +3262,7 @@ function ShadeListItem({
     style: {
       fontSize: TYPE.title
     }
-  }, p.brand), /*#__PURE__*/React.createElement("span", {
+  }, brandName(p.brand)), /*#__PURE__*/React.createElement("span", {
     "aria-hidden": "true",
     style: {
       margin: '0 7px',
@@ -3286,7 +3274,7 @@ function ShadeListItem({
     style: {
       fontSize: TYPE.shade
     }
-  }, p.shade)), /*#__PURE__*/React.createElement("div", {
+  }, titleCase(p.shade))), /*#__PURE__*/React.createElement("div", {
     style: {
       flex: 1,
       display: 'flex',
@@ -3304,10 +3292,9 @@ function ShadeListItem({
     style: {
       fontSize: TYPE.body,
       lineHeight: 1.35,
-      color: 'var(--text-body)',
-      textTransform: 'capitalize'
+      color: 'var(--text-body)'
     }
-  }, p.product), /*#__PURE__*/React.createElement("div", {
+  }, titleCase(p.product)), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: TYPE.micro,
       color: 'var(--text-muted)',
@@ -3345,9 +3332,9 @@ function WishlistPanel({
     if (wishlist.length === 0) return '';
     const lines = ['My Lipstick Shortlist', '─'.repeat(40), ''];
     wishlist.forEach((p, i) => {
-      lines.push(`${i + 1}. ${p.brand}`);
-      lines.push(`   ${p.product}`);
-      lines.push(`   Shade: ${p.shade}`);
+      lines.push(`${i + 1}. ${brandName(p.brand)}`);
+      lines.push(`   ${titleCase(p.product)}`);
+      lines.push(`   Shade: ${titleCase(p.shade)}`);
       lines.push(`   Finish: ${p.finish}`);
       lines.push(`   Color: ${p.hex.toUpperCase()}`);
       lines.push('');
@@ -4036,24 +4023,21 @@ function ComparisonTray({
         fontSize: TYPE.body,
         color: 'var(--espresso)',
         lineHeight: 1.25,
-        textTransform: 'capitalize',
         display: '-webkit-box',
         WebkitLineClamp: expanded ? 2 : 1,
         WebkitBoxOrient: 'vertical',
         overflow: 'hidden',
         overflowWrap: 'anywhere'
       }
-    }, p.shade), /*#__PURE__*/React.createElement("span", {
+    }, titleCase(p.shade)), /*#__PURE__*/React.createElement("span", {
       style: {
         fontSize: TYPE.micro,
         color: 'var(--text-muted)',
-        letterSpacing: '0.04em',
-        textTransform: 'uppercase',
         whiteSpace: 'nowrap',
         overflow: 'hidden',
         textOverflow: 'ellipsis'
       }
-    }, p.brand), expanded && /*#__PURE__*/React.createElement("span", {
+    }, brandName(p.brand)), expanded && /*#__PURE__*/React.createElement("span", {
       style: {
         fontSize: TYPE.micro,
         color: 'var(--blush-deep)',
@@ -4148,11 +4132,9 @@ function ListPicker({
       style: {
         fontFamily: 'DM Sans',
         fontSize: 11,
-        color: 'var(--text-muted)',
-        letterSpacing: '0.06em',
-        textTransform: 'uppercase'
+        color: 'var(--text-muted)'
       }
-    }, p.brand), /*#__PURE__*/React.createElement("span", {
+    }, brandName(p.brand)), /*#__PURE__*/React.createElement("span", {
       style: {
         fontFamily: 'DM Sans',
         fontSize: 13,
@@ -4160,7 +4142,7 @@ function ListPicker({
         color: 'var(--espresso)',
         lineHeight: 1.25
       }
-    }, p.shade), /*#__PURE__*/React.createElement("span", {
+    }, titleCase(p.shade)), /*#__PURE__*/React.createElement("span", {
       style: {
         fontFamily: 'DM Sans',
         fontSize: 12,
@@ -6419,18 +6401,14 @@ function DupeFinder({
     }
   }, missedShade ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("p", {
     style: emptyNote
-  }, "No ", /*#__PURE__*/React.createElement("span", {
-    style: {
-      textTransform: 'capitalize'
-    }
-  }, missedShade.brand), " shade matches \"", missedShade.rest, "\". It may not be in the catalogue."), /*#__PURE__*/React.createElement("button", {
+  }, "No ", brandName(missedShade.brand), " shade matches \"", missedShade.rest, "\". It may not be in the catalogue."), /*#__PURE__*/React.createElement("button", {
     onClick: () => pickBrand(missedShade.brand),
     style: {
       ...photoFallbackBtn,
       display: 'block',
       margin: '6px auto 0'
     }
-  }, "See all ", missedShade.brand, " shades")) : /*#__PURE__*/React.createElement("p", {
+  }, "See all ", brandName(missedShade.brand), " shades")) : /*#__PURE__*/React.createElement("p", {
     style: emptyNote
   }, "No brand or shade matches \"", brandQuery.trim(), "\". It may not be in the catalogue."), /*#__PURE__*/React.createElement("button", {
     onClick: () => {
@@ -6475,7 +6453,7 @@ function DupeFinder({
       fontWeight: 500,
       color: 'var(--espresso)'
     }
-  }, b), /*#__PURE__*/React.createElement("span", {
+  }, brandName(b)), /*#__PURE__*/React.createElement("span", {
     style: {
       fontFamily: 'DM Sans',
       fontSize: 11,
@@ -6541,7 +6519,7 @@ function DupeFinder({
       textOverflow: 'ellipsis',
       whiteSpace: 'nowrap'
     }
-  }, p.shade), /*#__PURE__*/React.createElement("span", {
+  }, titleCase(p.shade)), /*#__PURE__*/React.createElement("span", {
     style: {
       fontFamily: 'DM Sans',
       fontSize: TYPE.micro,
@@ -6550,7 +6528,7 @@ function DupeFinder({
       textOverflow: 'ellipsis',
       whiteSpace: 'nowrap'
     }
-  }, p.brand, " \xB7 ", p.product))))), !brandQuery && /*#__PURE__*/React.createElement("p", {
+  }, brandName(p.brand), " \xB7 ", titleCase(p.product)))))), !brandQuery && /*#__PURE__*/React.createElement("p", {
     style: {
       fontFamily: 'Cormorant Garamond',
       fontStyle: 'italic',
@@ -6583,7 +6561,7 @@ function DupeFinder({
       fontWeight: 500,
       color: 'var(--espresso)'
     }
-  }, brand), /*#__PURE__*/React.createElement("button", {
+  }, brandName(brand)), /*#__PURE__*/React.createElement("button", {
     onClick: changeBrand,
     title: "Change brand",
     style: chipX
@@ -6701,7 +6679,7 @@ function DupeFinder({
       textOverflow: 'ellipsis',
       whiteSpace: 'nowrap'
     }
-  }, p.shade), /*#__PURE__*/React.createElement("span", {
+  }, titleCase(p.shade)), /*#__PURE__*/React.createElement("span", {
     style: {
       fontFamily: 'DM Sans',
       fontSize: TYPE.micro,
@@ -6710,7 +6688,7 @@ function DupeFinder({
       textOverflow: 'ellipsis',
       whiteSpace: 'nowrap'
     }
-  }, p.product, " \xB7 ", p.finish)))))) : /*#__PURE__*/React.createElement("div", {
+  }, titleCase(p.product), " \xB7 ", p.finish)))))) : /*#__PURE__*/React.createElement("div", {
     style: {
       display: 'flex',
       flexDirection: 'column',
@@ -6783,7 +6761,7 @@ function DupeFinder({
       fontWeight: 500,
       color: 'var(--espresso)'
     }
-  }, product.brand), /*#__PURE__*/React.createElement("div", {
+  }, brandName(product.brand)), /*#__PURE__*/React.createElement("div", {
     style: {
       fontFamily: 'Cormorant Garamond',
       fontSize: TYPE.lede,
@@ -6791,14 +6769,14 @@ function DupeFinder({
       lineHeight: 1.2,
       marginTop: 2
     }
-  }, product.shade), product.product && /*#__PURE__*/React.createElement("div", {
+  }, titleCase(product.shade)), product.product && /*#__PURE__*/React.createElement("div", {
     style: {
       fontFamily: 'DM Sans',
       fontSize: TYPE.body,
       color: 'var(--text-muted)',
       marginTop: 4
     }
-  }, product.product), /*#__PURE__*/React.createElement("div", {
+  }, titleCase(product.product)), /*#__PURE__*/React.createElement("div", {
     style: {
       fontFamily: 'DM Sans',
       fontSize: TYPE.micro,
@@ -6836,14 +6814,14 @@ function DupeFinder({
       fontWeight: 500,
       color: 'var(--espresso)'
     }
-  }, product.brand), /*#__PURE__*/React.createElement("div", {
+  }, brandName(product.brand)), /*#__PURE__*/React.createElement("div", {
     style: {
       fontFamily: 'Cormorant Garamond',
       fontSize: 18,
       color: 'var(--espresso-mid)',
       lineHeight: 1.2
     }
-  }, product.shade), /*#__PURE__*/React.createElement("div", {
+  }, titleCase(product.shade)), /*#__PURE__*/React.createElement("div", {
     style: {
       fontFamily: 'DM Sans',
       fontSize: 10,
@@ -6943,15 +6921,14 @@ function DupeFinder({
       color: 'var(--espresso)',
       lineHeight: 1.15
     }
-  }, p.shade), /*#__PURE__*/React.createElement("span", {
+  }, titleCase(p.shade)), /*#__PURE__*/React.createElement("span", {
     className: "popular-pick-brand",
     style: {
       fontFamily: 'DM Sans',
       fontSize: TYPE.micro,
-      color: 'var(--text-muted)',
-      textTransform: 'capitalize'
+      color: 'var(--text-muted)'
     }
-  }, p.brand)))))));
+  }, brandName(p.brand))))))));
 }
 
 // Mode icons for the in-app mode bar: one-color line versions of the landing card pictures,
@@ -7469,7 +7446,7 @@ function Landing({
       lineHeight: 1.5,
       color: 'var(--espresso-mid)'
     }
-  }, "Over 24,000 lip products at every price, matched by how they actually look.")), /*#__PURE__*/React.createElement("div", {
+  }, "Search over 24,000 lip products by color, not just by shade name.")), /*#__PURE__*/React.createElement("div", {
     className: "landing-grid"
   }, cards.map(c => /*#__PURE__*/React.createElement(LandingCard, {
     key: c.id,
@@ -7683,7 +7660,7 @@ function App() {
   function listSeed(p) {
     return {
       id: '__list__',
-      name: `Similar to ${p.shade}`,
+      name: `Similar to ${titleCase(p.shade)}`,
       hex: p.hex,
       sourceKey: `${p.brand}|${p.shade}`,
       item: p
@@ -7801,7 +7778,7 @@ function App() {
     if (dupeProduct) {
       setSelectedColor({
         id: '__dupe__',
-        name: `Similar to ${dupeProduct.shade}`,
+        name: `Similar to ${titleCase(dupeProduct.shade)}`,
         hex: dupeProduct.hex,
         sourceKey: `${dupeProduct.brand}|${dupeProduct.shade}`
       });
@@ -8552,11 +8529,9 @@ function App() {
       style: {
         fontFamily: 'DM Sans',
         fontSize: 12,
-        color: 'var(--text-muted)',
-        letterSpacing: '0.06em',
-        textTransform: 'uppercase'
+        color: 'var(--text-muted)'
       }
-    }, p.brand), /*#__PURE__*/React.createElement("div", {
+    }, brandName(p.brand)), /*#__PURE__*/React.createElement("div", {
       style: {
         fontFamily: 'DM Sans',
         fontSize: 16,
@@ -8565,7 +8540,7 @@ function App() {
         lineHeight: 1.25,
         marginTop: 2
       }
-    }, p.shade))), /*#__PURE__*/React.createElement("div", {
+    }, titleCase(p.shade)))), /*#__PURE__*/React.createElement("div", {
       style: {
         padding: '14px 16px 16px',
         borderTop: '1px solid var(--border)',
@@ -8599,7 +8574,7 @@ function App() {
         color: 'var(--cream)',
         cursor: 'pointer'
       }
-    }, "Explore shades near ", p.shade, " \u2192")));
+    }, "Explore shades near ", titleCase(p.shade), " \u2192")));
   })(), mode === 'wheel' && /*#__PURE__*/React.createElement("p", {
     style: {
       fontSize: 11,

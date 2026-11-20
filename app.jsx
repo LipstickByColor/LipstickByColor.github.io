@@ -85,7 +85,7 @@ function ProductThumb({ product, size = 56, width, height, zoom = 1.18, fit = 'c
           // A photo already in the cache (the color chart loads some ahead) can finish before onLoad is attached
           ref={img => { if (img?.complete && img.naturalWidth && !loaded) setLoaded(true); }}
           src={src}
-          alt={`${product.brand} ${product.shade}`}
+          alt={`${brandName(product.brand)} ${titleCase(product.shade)}`}
           loading="lazy"
           decoding="async"
           onLoad={() => setLoaded(true)}
@@ -189,11 +189,11 @@ function MatchCard({ p, wishlist, toggleWishlist, pinnedItems, togglePin, onOpen
         </div>
       </div>
       <div style={{ padding:'8px 9px 9px', display:'flex', flexDirection:'column', gap:3, flex:1 }}>
-        <div style={{ fontSize:TYPE.brand, letterSpacing:'0.08em', textTransform:'uppercase', color:'var(--espresso-mid)', fontFamily:'DM Sans', fontWeight:500, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
-          <span style={srOnly}>Brand: </span>{p.brand}
+        <div style={{ fontSize:TYPE.brand, color:'var(--espresso-mid)', fontFamily:'DM Sans', fontWeight:500, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
+          <span style={srOnly}>Brand: </span>{brandName(p.brand)}
         </div>
         <div style={{ fontSize:TYPE.meta, fontFamily:'DM Sans', color:'var(--espresso-mid)', lineHeight:1.35 }}>
-          <span style={srOnly}>Shade: </span>{p.shade}
+          <span style={srOnly}>Shade: </span>{titleCase(p.shade)}
         </div>
         {CARD_FORMATS.has(p.format) && (
           <div style={{ fontSize:TYPE.meta, fontFamily:'DM Sans', color:'var(--espresso-mid)', lineHeight:1.35 }}>
@@ -222,7 +222,7 @@ function detailSourceLabel(source) {
   if (source.id === '__photo__') return 'Your photo';
   if (source.id === '__hex__') return 'Your color';
   const key = source.sourceKey || '';
-  return key.slice(key.indexOf('|') + 1) || 'Your shade';
+  return titleCase(key.slice(key.indexOf('|') + 1)) || 'Your shade';
 }
 
 const MATCH_DETAIL_TYPE = { eyebrow:11, brand:12, body:13, value:15, match:17, shade:26 };
@@ -272,17 +272,17 @@ function MatchDetail({ p, source, onClose, wishlist, toggleWishlist, pinnedItems
             </div>
             {/* Three levels: brand as a small label, the shade as the headline, the product line under it */}
             <div style={{ flex:1, minWidth:0, display:'flex', flexDirection:'column', justifyContent:'center', gap:6, overflowWrap:'anywhere' }}>
-              <div style={{ fontSize:TYPE.brand, fontWeight:500, letterSpacing:'0.1em', textTransform:'uppercase', color:'var(--espresso-mid)' }}>
-                <span style={srOnly}>Brand: </span>{p.brand}
+              <div style={{ fontSize:TYPE.brand, fontWeight:500, color:'var(--espresso-mid)' }}>
+                <span style={srOnly}>Brand: </span>{brandName(p.brand)}
               </div>
               <div style={{
                 fontFamily:'Cormorant Garamond', fontWeight:600, fontSize:TYPE.shade, lineHeight:1.08, color:'var(--espresso)',
-                textTransform:'capitalize', fontVariantNumeric:'lining-nums',
+                fontVariantNumeric:'lining-nums',
               }}>
-                <span style={srOnly}>Shade: </span>{p.shade}
+                <span style={srOnly}>Shade: </span>{titleCase(p.shade)}
               </div>
-              <div style={{ fontSize:TYPE.value, lineHeight:1.35, color:'var(--text-body)', textTransform:'capitalize' }}>
-                <span style={srOnly}>Product: </span>{p.product}
+              <div style={{ fontSize:TYPE.value, lineHeight:1.35, color:'var(--text-body)' }}>
+                <span style={srOnly}>Product: </span>{titleCase(p.product)}
               </div>
               {redName && <div style={{ ...RED_LABEL_STYLE, fontSize:TYPE.eyebrow }}>{redName}</div>}
             </div>
@@ -294,7 +294,7 @@ function MatchDetail({ p, source, onClose, wishlist, toggleWishlist, pinnedItems
             <div style={{ display:'flex', gap:3, height:64, borderRadius:12, overflow:'hidden', background:'#fff' }}>
               {source && (
                 <div style={{ ...stripHalf, background:source.hex, color:bandInk(source.hex) }}>
-                  <span style={{ overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', textTransform: source.sourceKey ? 'capitalize' : 'none' }}>{detailSourceLabel(source)}</span>
+                  <span style={{ overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{detailSourceLabel(source)}</span>
                 </div>
               )}
               <div role={source ? undefined : 'img'} aria-label={source ? undefined : `Swatch ${p.hex}`} style={{ ...stripHalf, justifyContent:'flex-end', background:p.hex, color:ink }}>{source && 'This lipstick'}</div>
@@ -1261,7 +1261,7 @@ function ResultsTable({ selectedColor, matches, totalProducts, pinnedItems, togg
                     color: active ? 'var(--espresso-mid)' : 'var(--text-muted)',
                     cursor:'pointer', fontFamily:'DM Sans', fontWeight: active ? 500 : 400,
                     letterSpacing:'0.04em', transition:'all 0.15s', whiteSpace:'nowrap',
-                  }}>{b}{active && <span style={{ marginLeft:5, opacity:0.6, fontSize:10 }}>✕</span>}</button>
+                  }}>{brandName(b)}{active && <span style={{ marginLeft:5, opacity:0.6, fontSize:10 }}>✕</span>}</button>
                 );
               })}
             </FilterDropdown>
@@ -1400,7 +1400,7 @@ function ResultsTable({ selectedColor, matches, totalProducts, pinnedItems, togg
         {filtered.length === 0 ? (
           <div role="status" style={{ padding:'32px 16px', display:'flex', flexDirection:'column', alignItems:'center', gap:14, textAlign:'center' }}>
             <p style={{ fontFamily:'DM Sans', fontSize:14, lineHeight:1.5, color:'var(--text-body)' }}>
-              {!hiddenDiscontinued ? (relaxGroup?.key === 'brand' && activeBrands.length === 1 ? <>No <span style={{ textTransform:'capitalize' }}>{activeBrands[0]}</span> matches for this color.</> : 'No matches for the selected filters.')
+              {!hiddenDiscontinued ? (relaxGroup?.key === 'brand' && activeBrands.length === 1 ? <>No {brandName(activeBrands[0])} matches for this color.</> : 'No matches for the selected filters.')
                 : hiddenDiscontinued === 1 ? (otherFilters ? 'The only match for these filters is discontinued.' : 'The only match here is discontinued.')
                 : otherFilters ? `The ${hiddenDiscontinued} matches for these filters are discontinued.` : `All ${hiddenDiscontinued} matches here are discontinued.`}
             </p>
@@ -1624,9 +1624,9 @@ function drawShareImage(canvas, wishlist, images) {
     const tx = x + 18 * sc, tw = cw - 36 * sc;
     ctx.textAlign = 'left';
     ctx.fillStyle = fg;
-    ctx.fillText(fit(p.shade, tw, s => `500 ${s}px "Cormorant Garamond", serif`, Math.max(26, Math.round(38 * sc)), 18), tx, y + photoH + band * 0.46);
+    ctx.fillText(fit(titleCase(p.shade), tw, s => `500 ${s}px "Cormorant Garamond", serif`, Math.max(26, Math.round(38 * sc)), 18), tx, y + photoH + band * 0.46);
     ctx.globalAlpha = 0.85;
-    ctx.fillText(fit(p.brand.toUpperCase(), tw, s => `600 ${s}px "DM Sans", sans-serif`, Math.max(15, Math.round(18 * sc)), 12), tx, y + photoH + band * 0.78);
+    ctx.fillText(fit(brandName(p.brand), tw, s => `600 ${s}px "DM Sans", sans-serif`, Math.max(15, Math.round(18 * sc)), 12), tx, y + photoH + band * 0.78);
     ctx.restore();
   }
 
@@ -2038,19 +2038,19 @@ function ShadeListItem({ p, action, glow }) {
       <div style={{ flex:1, minWidth:0, display:'flex', flexDirection:'column' }}>
         <div style={{
           background:p.hex, color:ink, padding:'8px 14px 7px',
-          fontFamily:'Cormorant Garamond', fontWeight:500, lineHeight:1.15, textTransform:'capitalize',
+          fontFamily:'Cormorant Garamond', fontWeight:500, lineHeight:1.15,
           fontVariantNumeric:'lining-nums', // shade names are often numbers ("999", "0 Ultra Light")
         }}>
           <span style={srOnly}>Brand: </span>
-          <span style={{ fontSize:TYPE.title }}>{p.brand}</span>
+          <span style={{ fontSize:TYPE.title }}>{brandName(p.brand)}</span>
           <span aria-hidden="true" style={{ margin:'0 7px', opacity:0.75 }}>·</span>
           <span style={srOnly}>Shade: </span>
-          <span style={{ fontSize:TYPE.shade }}>{p.shade}</span>
+          <span style={{ fontSize:TYPE.shade }}>{titleCase(p.shade)}</span>
         </div>
         <div style={{ flex:1, display:'flex', alignItems:'center', gap:12, padding:'9px 14px 10px' }}>
           <div style={{ flex:1, minWidth:0, fontFamily:'DM Sans' }}>
-            <div style={{ fontSize:TYPE.body, lineHeight:1.35, color:'var(--text-body)', textTransform:'capitalize' }}>
-              {p.product}
+            <div style={{ fontSize:TYPE.body, lineHeight:1.35, color:'var(--text-body)' }}>
+              {titleCase(p.product)}
             </div>
             <div style={{ fontSize:TYPE.micro, color:'var(--text-muted)', letterSpacing:'0.04em', marginTop:5 }}>
               {facts.join(' · ')}
@@ -2079,9 +2079,9 @@ function WishlistPanel({ wishlist, onClose, onRemove, onClear, onFindSimilar, gl
     if (wishlist.length === 0) return '';
     const lines = ['My Lipstick Shortlist', '─'.repeat(40), ''];
     wishlist.forEach((p, i) => {
-      lines.push(`${i + 1}. ${p.brand}`);
-      lines.push(`   ${p.product}`);
-      lines.push(`   Shade: ${p.shade}`);
+      lines.push(`${i + 1}. ${brandName(p.brand)}`);
+      lines.push(`   ${titleCase(p.product)}`);
+      lines.push(`   Shade: ${titleCase(p.shade)}`);
       lines.push(`   Finish: ${p.finish}`);
       lines.push(`   Color: ${p.hex.toUpperCase()}`);
       lines.push('');
@@ -2479,13 +2479,13 @@ function ComparisonTray({ pinnedItems, onRemove, onClear }) {
               )}
               <span style={{ display:'flex', flexDirection:'column', gap:2, width:'100%' }}>
                 <span style={{
-                  fontSize:TYPE.body, color:'var(--espresso)', lineHeight:1.25, textTransform:'capitalize',
+                  fontSize:TYPE.body, color:'var(--espresso)', lineHeight:1.25,
                   display:'-webkit-box', WebkitLineClamp: expanded ? 2 : 1, WebkitBoxOrient:'vertical', overflow:'hidden', overflowWrap:'anywhere',
-                }}>{p.shade}</span>
+                }}>{titleCase(p.shade)}</span>
                 <span style={{
-                  fontSize:TYPE.micro, color:'var(--text-muted)', letterSpacing:'0.04em', textTransform:'uppercase',
+                  fontSize:TYPE.micro, color:'var(--text-muted)',
                   whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis',
-                }}>{p.brand}</span>
+                }}>{brandName(p.brand)}</span>
                 {expanded && (
                   <span style={{ fontSize:TYPE.micro, color:'var(--blush-deep)', fontWeight:600 }}>{matchTier(p.distance)}</span>
                 )}
@@ -2542,8 +2542,8 @@ function ListPicker({ wishlist, selectedKey, onPick }) {
             }}>
               <span style={{ display:'block', width:'100%', height:36, background:p.hex, flexShrink:0 }} />
               <span style={{ display:'flex', flexDirection:'column', gap:2, padding:'8px 10px 10px' }}>
-                <span style={{ fontFamily:'DM Sans', fontSize:11, color:'var(--text-muted)', letterSpacing:'0.06em', textTransform:'uppercase' }}>{p.brand}</span>
-                <span style={{ fontFamily:'DM Sans', fontSize:13, fontWeight:500, color:'var(--espresso)', lineHeight:1.25 }}>{p.shade}</span>
+                <span style={{ fontFamily:'DM Sans', fontSize:11, color:'var(--text-muted)' }}>{brandName(p.brand)}</span>
+                <span style={{ fontFamily:'DM Sans', fontSize:13, fontWeight:500, color:'var(--espresso)', lineHeight:1.25 }}>{titleCase(p.shade)}</span>
                 <span style={{ fontFamily:'DM Sans', fontSize:12, color:'var(--espresso-mid)', lineHeight:1.3 }}>{chartColorName(p.hex)}</span>
               </span>
             </button>
@@ -3609,9 +3609,9 @@ function DupeFinder({ product, onSelect, onUsePhoto }) {
           {!typedHex && brandQuery.trim() && brandMatches.length === 0 && !shadeHits && normSearch(brandQuery).length >= 3 && (
             <div style={{ textAlign:'center', padding:'8px 0' }}>
               {missedShade ? (<>
-                <p style={emptyNote}>No <span style={{ textTransform:'capitalize' }}>{missedShade.brand}</span> shade matches "{missedShade.rest}". It may not be in the catalogue.</p>
+                <p style={emptyNote}>No {brandName(missedShade.brand)} shade matches "{missedShade.rest}". It may not be in the catalogue.</p>
                 <button onClick={() => pickBrand(missedShade.brand)} style={{ ...photoFallbackBtn, display:'block', margin:'6px auto 0' }}>
-                  See all {missedShade.brand} shades
+                  See all {brandName(missedShade.brand)} shades
                 </button>
               </>) : (
                 <p style={emptyNote}>No brand or shade matches "{brandQuery.trim()}". It may not be in the catalogue.</p>
@@ -3631,7 +3631,7 @@ function DupeFinder({ product, onSelect, onUsePhoto }) {
                   background:'transparent', cursor:'pointer', textAlign:'left',
                   transition:'background 0.12s',
                 }}>
-                  <span style={{ fontFamily:'DM Sans', fontSize:13, fontWeight:500, color:'var(--espresso)' }}>{b}</span>
+                  <span style={{ fontFamily:'DM Sans', fontSize:13, fontWeight:500, color:'var(--espresso)' }}>{brandName(b)}</span>
                   <span style={{ fontFamily:'DM Sans', fontSize:11, color:'var(--text-muted)', marginLeft:'auto', flexShrink:0 }}>
                     {brandCounts[b]} shade{brandCounts[b] !== 1 ? 's' : ''}
                   </span>
@@ -3650,8 +3650,8 @@ function DupeFinder({ product, onSelect, onUsePhoto }) {
                 }}>
                   <span style={{ width:24, height:24, borderRadius:'50%', background:p.hex, flexShrink:0, boxShadow:`0 1px 4px ${p.hex}66`, border:'1px solid rgba(42,26,20,0.08)' }} />
                   <span style={{ display:'flex', flexDirection:'column', minWidth:0, textAlign:'left' }}>
-                    <span style={{ fontFamily:'Cormorant Garamond', fontStyle:'italic', fontSize:15, color:'var(--espresso)', lineHeight:1.2, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{p.shade}</span>
-                    <span style={{ fontFamily:'DM Sans', fontSize:TYPE.micro, color:'var(--text-muted)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{p.brand} · {p.product}</span>
+                    <span style={{ fontFamily:'Cormorant Garamond', fontStyle:'italic', fontSize:15, color:'var(--espresso)', lineHeight:1.2, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{titleCase(p.shade)}</span>
+                    <span style={{ fontFamily:'DM Sans', fontSize:TYPE.micro, color:'var(--text-muted)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{brandName(p.brand)} · {titleCase(p.product)}</span>
                   </span>
                 </button>
               ))}
@@ -3668,7 +3668,7 @@ function DupeFinder({ product, onSelect, onUsePhoto }) {
           <div style={{ display:'flex', alignItems:'center', gap:10 }}>
             <span style={stepNum}>1</span>
             <div style={chip}>
-              <span style={{ fontFamily:'DM Sans', fontSize:13, fontWeight:500, color:'var(--espresso)' }}>{brand}</span>
+              <span style={{ fontFamily:'DM Sans', fontSize:13, fontWeight:500, color:'var(--espresso)' }}>{brandName(brand)}</span>
               <button onClick={changeBrand} title="Change brand" style={chipX}>×</button>
             </div>
           </div>
@@ -3708,8 +3708,8 @@ function DupeFinder({ product, onSelect, onUsePhoto }) {
                     }}>
                       <span style={{ width:24, height:24, borderRadius:'50%', background:p.hex, flexShrink:0, boxShadow:`0 1px 4px ${p.hex}66`, border:'1px solid rgba(42,26,20,0.08)' }} />
                       <span style={{ display:'flex', flexDirection:'column', minWidth:0, textAlign:'left' }}>
-                        <span style={{ fontFamily:'Cormorant Garamond', fontStyle:'italic', fontSize:15, color:'var(--espresso)', lineHeight:1.2, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{p.shade}</span>
-                        <span style={{ fontFamily:'DM Sans', fontSize:TYPE.micro, color:'var(--text-muted)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{p.product} · {p.finish}</span>
+                        <span style={{ fontFamily:'Cormorant Garamond', fontStyle:'italic', fontSize:15, color:'var(--espresso)', lineHeight:1.2, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{titleCase(p.shade)}</span>
+                        <span style={{ fontFamily:'DM Sans', fontSize:TYPE.micro, color:'var(--text-muted)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{titleCase(p.product)} · {p.finish}</span>
                       </span>
                     </button>
                   ))}
@@ -3731,10 +3731,10 @@ function DupeFinder({ product, onSelect, onUsePhoto }) {
                   </div>
                 </div>
                 <div style={{ padding:'16px 20px 18px', borderTop:'1px solid var(--border)' }}>
-                  <div style={{ fontFamily:'DM Sans', fontSize:TYPE.body, fontWeight:500, color:'var(--espresso)' }}>{product.brand}</div>
-                  <div style={{ fontFamily:'Cormorant Garamond', fontSize:TYPE.lede, color:'var(--espresso-mid)', lineHeight:1.2, marginTop:2 }}>{product.shade}</div>
+                  <div style={{ fontFamily:'DM Sans', fontSize:TYPE.body, fontWeight:500, color:'var(--espresso)' }}>{brandName(product.brand)}</div>
+                  <div style={{ fontFamily:'Cormorant Garamond', fontSize:TYPE.lede, color:'var(--espresso-mid)', lineHeight:1.2, marginTop:2 }}>{titleCase(product.shade)}</div>
                   {product.product && (
-                    <div style={{ fontFamily:'DM Sans', fontSize:TYPE.body, color:'var(--text-muted)', marginTop:4 }}>{product.product}</div>
+                    <div style={{ fontFamily:'DM Sans', fontSize:TYPE.body, color:'var(--text-muted)', marginTop:4 }}>{titleCase(product.product)}</div>
                   )}
                   <div style={{ fontFamily:'DM Sans', fontSize:TYPE.micro, color:'var(--text-muted)', marginTop:6, letterSpacing:'0.04em' }}>{product.hex.toUpperCase()}{product.discontinued && <DiscontinuedTag />}</div>
                 </div>
@@ -3743,8 +3743,8 @@ function DupeFinder({ product, onSelect, onUsePhoto }) {
                 <ProductThumb product={product} size={56} />
                 <ShadeChip hex={product.hex} height={56} width={9} />
                 <div style={{ flex:1, minWidth:0 }}>
-                  <div style={{ fontFamily:'DM Sans', fontSize:12, fontWeight:500, color:'var(--espresso)' }}>{product.brand}</div>
-                  <div style={{ fontFamily:'Cormorant Garamond', fontSize:18, color:'var(--espresso-mid)', lineHeight:1.2 }}>{product.shade}</div>
+                  <div style={{ fontFamily:'DM Sans', fontSize:12, fontWeight:500, color:'var(--espresso)' }}>{brandName(product.brand)}</div>
+                  <div style={{ fontFamily:'Cormorant Garamond', fontSize:18, color:'var(--espresso-mid)', lineHeight:1.2 }}>{titleCase(product.shade)}</div>
                   <div style={{ fontFamily:'DM Sans', fontSize:10, color:'var(--text-muted)', marginTop:2, letterSpacing:'0.04em' }}>{product.hex.toUpperCase()}{product.discontinued && <DiscontinuedTag />}</div>
                 </div>
               </div>
@@ -3778,8 +3778,8 @@ function DupeFinder({ product, onSelect, onUsePhoto }) {
               }}>
                 <span className="popular-pick-swatch" style={{ width:20, height:20, borderRadius:'50%', background:p.hex, flexShrink:0, boxShadow:`0 1px 4px ${p.hex}66`, border:'1px solid rgba(42,26,20,0.08)' }} />
                 <span style={{ display:'flex', flexDirection:'column', textAlign:'left' }}>
-                  <span className="popular-pick-shade" style={{ fontFamily:'Cormorant Garamond', fontStyle:'italic', fontSize:TYPE.body, color:'var(--espresso)', lineHeight:1.15 }}>{p.shade}</span>
-                  <span className="popular-pick-brand" style={{ fontFamily:'DM Sans', fontSize:TYPE.micro, color:'var(--text-muted)', textTransform:'capitalize' }}>{p.brand}</span>
+                  <span className="popular-pick-shade" style={{ fontFamily:'Cormorant Garamond', fontStyle:'italic', fontSize:TYPE.body, color:'var(--espresso)', lineHeight:1.15 }}>{titleCase(p.shade)}</span>
+                  <span className="popular-pick-brand" style={{ fontFamily:'DM Sans', fontSize:TYPE.micro, color:'var(--text-muted)' }}>{brandName(p.brand)}</span>
                 </span>
               </button>
             ))}
@@ -3972,7 +3972,7 @@ function Landing({ onPick }) {
           How do you want <em style={{ fontStyle:'italic', fontWeight:400, color:'var(--espresso-mid)' }}>to search?</em>
         </h2>
         <p style={{ fontSize:15, lineHeight:1.5, color:'var(--espresso-mid)' }}>
-          Over 24,000 lip products at every price, matched by how they actually look.
+          Search over 24,000 lip products by color, not just by shade name.
         </p>
       </div>
       <div className="landing-grid">
@@ -4112,7 +4112,7 @@ function App() {
   }
 
   function listSeed(p) {
-    return { id:'__list__', name:`Similar to ${p.shade}`, hex: p.hex, sourceKey: `${p.brand}|${p.shade}`, item: p };
+    return { id:'__list__', name:`Similar to ${titleCase(p.shade)}`, hex: p.hex, sourceKey: `${p.brand}|${p.shade}`, item: p };
   }
 
   function toggleWishlist(product) {
@@ -4191,7 +4191,7 @@ function App() {
     if (dupeProduct) {
       setSelectedColor({
         id: '__dupe__',
-        name: `Similar to ${dupeProduct.shade}`,
+        name: `Similar to ${titleCase(dupeProduct.shade)}`,
         hex: dupeProduct.hex,
         sourceKey: `${dupeProduct.brand}|${dupeProduct.shade}`,
       });
@@ -4645,8 +4645,8 @@ function App() {
                   <ShadeChip hex={p.hex} height={72} width={9} />
                   <ProductThumb product={p} size={72} tint={false} />
                   <div style={{ flex:1, minWidth:0 }}>
-                    <div style={{ fontFamily:'DM Sans', fontSize:12, color:'var(--text-muted)', letterSpacing:'0.06em', textTransform:'uppercase' }}>{p.brand}</div>
-                    <div style={{ fontFamily:'DM Sans', fontSize:16, fontWeight:500, color:'var(--espresso)', lineHeight:1.25, marginTop:2 }}>{p.shade}</div>
+                    <div style={{ fontFamily:'DM Sans', fontSize:12, color:'var(--text-muted)' }}>{brandName(p.brand)}</div>
+                    <div style={{ fontFamily:'DM Sans', fontSize:16, fontWeight:500, color:'var(--espresso)', lineHeight:1.25, marginTop:2 }}>{titleCase(p.shade)}</div>
                   </div>
                 </div>
                 <div style={{ padding:'14px 16px 16px', borderTop:'1px solid var(--border)', background:'var(--cream)', display:'flex', flexDirection:'column', alignItems:'flex-start', gap:12 }}>
@@ -4658,7 +4658,7 @@ function App() {
                     minHeight:44, padding:'10px 18px', borderRadius:40, border:'none',
                     background:'var(--espresso)', color:'var(--cream)', cursor:'pointer',
                   }}>
-                    Explore shades near {p.shade} →
+                    Explore shades near {titleCase(p.shade)} →
                   </button>
                 </div>
               </div>

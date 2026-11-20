@@ -55,6 +55,38 @@ const BRAND_ALIASES = {
 };
 const brandAliases = b => [...(BRAND_ALIASES[b] || []), ...(b.includes('&') ? [b.replace(/&/g, ' and ')] : [])].map(normSearch);
 
+// ── Display names, shared by the app, the guides and the dupe pages ──────────
+// The catalogue stores brands, shades and product names in lowercase; these
+// write them the same way everywhere they're shown. Search and saved keys keep
+// the stored name.
+
+// Brands whose names plain title-casing gets wrong, keyed by the catalogue's name
+const BRAND_NAMES = {
+  'mac cosmetics':'MAC', 'l.a. colors':'L.A. Colors', 'l.a. girl':'L.A. Girl', 'nars':'NARS', 'nyx':'NYX', 'nyx professional makeup':'NYX Professional Makeup', 'l oreal':"L'Oréal",
+  'lancome':'Lancôme', 'estee lauder':'Estée Lauder', 'hermes':'Hermès', 'e.l.f. cosmetics':'e.l.f.', 'e l f':'e.l.f.',
+  'fenty beauty by rihanna':'Fenty Beauty', 'covergirl':'CoverGirl', 'colourpop':'ColourPop', 'kvd beauty':'KVD Beauty',
+  'rms beauty':'RMS Beauty', 'bh cosmetics':'BH Cosmetics', 'it cosmetics':'IT Cosmetics', 'pat mcgrath labs':'Pat McGrath Labs',
+  '3ce':'3CE', 'dhc':'DHC', 'mua cosmetics':'MUA Cosmetics', 'mua makeup academy':'MUA Makeup Academy', 'lys beauty':'LYS Beauty', 'pyt beauty':'PYT Beauty',
+  'rom&nd':'rom&nd', 'rom nd':'rom&nd', 'yves saint laurent':'Yves Saint Laurent', 'bareminerals':'bareMinerals',
+  'cle de peau beaute':'Clé de Peau Beauté', 'tonymoly':'TonyMoly', 'olehenriksen':'Olehenriksen',
+  'ctzn cosmetics':'CTZN Cosmetics', 'xx revolution':'XX Revolution', 'cover fx':'Cover FX', 'kkw beauty':'KKW Beauty',
+  'lh cosmetics':'LH Cosmetics', 'perricone md':'Perricone MD', 'skkn by kim':'SKKN by Kim', 'w3ll people':'W3LL People',
+  'w7':'W7', 'hnb cosmetics':'HNB Cosmetics', 'blk cosmetics':'BLK Cosmetics', 'rmk':'RMK', 'j.cat beauty':'J.Cat Beauty',
+  'kjh brand by katie jane hughes':'KJH Brand by Katie Jane Hughes', 'r.e.m. beauty':'r.e.m. beauty', 'make up for ever':'Make Up For Ever',
+};
+// Words in shade and product names with a fixed spelling: "ysl loveshine" → "YSL Loveshine", "ph lip balm" → "pH Lip Balm"
+const NAME_WORDS = {
+  spf:'SPF', hd:'HD', xl:'XL', xxl:'XXL', ysl:'YSL', nyx:'NYX', nars:'NARS', blk:'BLK', pdrn:'PDRN', bh:'BH', cc:'CC', bb:'BB', bbf:'BBF',
+  mvp:'MVP', bff:'BFF', vip:'VIP', xoxo:'XOXO', fx:'FX', uv:'UV', ph:'pH', ii:'II', iii:'III', iv:'IV',
+};
+const NAME_WORD_RE = new RegExp(`(^|[^a-z0-9])(${Object.keys(NAME_WORDS).join('|')})(?=[^a-z0-9]|$)`, 'gi');
+// First letter of each word in capitals: "ruby woo" → "Ruby Woo", "kiss 'n' tell" → "Kiss 'n' Tell"
+const titleCase = s => (s || '')
+  .replace(/(^|[\s\-/(])([a-zà-ÿ])/g, (m, pre, ch) => pre + ch.toUpperCase())
+  .replace(NAME_WORD_RE, (m, pre, w) => pre + NAME_WORDS[w.toLowerCase()]);
+// Small joining words stay lowercase: "Makeup by Mario", "Dose of Colors"
+const brandName = b => BRAND_NAMES[(b || '').toLowerCase()] || titleCase(b).replace(/(?<=\s)(Of|By|De|And|The|For)(?=\s)/g, w => w.toLowerCase());
+
 // ── Shade search, shared by the dupe finder (app.jsx) and the red guide ──────
 // Shade names keep their word gaps, so a search can't join two words ("colorbar"
 // shouldn't match "lip color | bare it all").

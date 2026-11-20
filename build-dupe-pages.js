@@ -31,16 +31,6 @@ const SKIP = [
   'buxom|plump shot™ peptide lip serum|lingerie', // a near-clear balm
 ];
 
-// Brands whose names plain title-casing gets wrong
-const BRAND_NAMES = {
-  'mac cosmetics':'MAC', 'l.a. colors':'L.A. Colors', 'l.a. girl':'L.A. Girl', 'nars':'NARS', 'nyx':'NYX', 'nyx professional makeup':'NYX Professional Makeup', 'l oreal':"L'Oréal",
-  'lancome':'Lancôme', 'estee lauder':'Estée Lauder', 'hermes':'Hermès', 'e.l.f. cosmetics':'e.l.f.', 'e l f':'e.l.f.',
-  'fenty beauty by rihanna':'Fenty Beauty', 'covergirl':'CoverGirl', 'colourpop':'ColourPop', 'kvd beauty':'KVD Beauty',
-  'rms beauty':'RMS Beauty', 'bh cosmetics':'BH Cosmetics', 'it cosmetics':'IT Cosmetics', 'pat mcgrath labs':'Pat McGrath Labs',
-  '3ce':'3CE', 'dhc':'DHC', 'mua cosmetics':'MUA Cosmetics', 'mua makeup academy':'MUA Makeup Academy', 'lys beauty':'LYS Beauty', 'pyt beauty':'PYT Beauty',
-  'rom&nd':'rom&nd', 'rom nd':'rom&nd', 'yves saint laurent':'Yves Saint Laurent', 'bareminerals':'bareMinerals',
-  'cle de peau beaute':'Clé de Peau Beauté', 'tonymoly':'TonyMoly', 'olehenriksen':'Olehenriksen',
-};
 
 // The finder's filter values (FINISH_ORDER and FORMAT_ORDER in app.jsx), with the short names shown here
 const FINISHES = ['Matte', 'Semi-Matte', 'Satin', 'Cream', 'Glossy', 'Sheer', 'Shimmer'];
@@ -74,9 +64,9 @@ const SCALE_MAX = 4;
 const BANDS = [[0, 1, 'Very close'], [1, 2, 'Close'], [2, 3.5, 'Similar'], [3.5, SCALE_MAX, 'Same family']];
 
 const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
-const titleCase = s => s.replace(/(^|[\s\-/(])([a-zà-ÿ])/g, (m, pre, ch) => pre + ch.toUpperCase());
-// Small joining words stay lowercase: "Makeup by Mario", "Dose of Colors"
-const brandName = b => BRAND_NAMES[b] || titleCase(b).replace(/(?<=\s)(Of|By|De|And|The|For)(?=\s)/g, w => w.toLowerCase());
+// Display names, the same rule the app and guides use (search-utils.js)
+const { titleCase, brandName } = vm.runInNewContext(
+  fs.readFileSync(path.join(__dirname, 'search-utils.js'), 'utf8') + '\n;({ titleCase, brandName })', {});
 const finderUrl = (p, filters = []) => `/dupe-finder/?brand=${encodeURIComponent(p.brand)}&amp;dupe=${encodeURIComponent(p.shade)}`
   + filters.map(([k, v]) => `&amp;${k}=${encodeURIComponent(v)}`).join('');
 // Every match for the shade: the dupe finder, or the color chart at the shade's chartHex

@@ -16,8 +16,7 @@
   // Analytics: no-ops until the visitor has allowed it (see /consent.js)
   const track = (name, params) => window.gtag?.('event', name, { guide: 'red-lipstick', ...params });
   const slug = t => String(t || '').toLowerCase().replace(/[^a-z0-9]+/g, '-');
-  // Title-case catalogue names; a letter after an apostrophe or accent stays lower
-  const cap = t => (t || '').replace(/(^|[^\p{L}\p{N}'’])(\p{L})/gu, (m, pre, c) => pre + c.toUpperCase());
+  // Catalogue names are written with brandName and titleCase (search-utils.js)
 
   // ── Color math ──────────────────────────────────────────────────────────────
   function lchRgb(L, C, h) {
@@ -257,7 +256,7 @@
     const best = ICONS.map(i => ({ name: i.name, d: de2000(lab, hex2lab(i.hex)) })).sort((x, y) => x.d - y.d)[0];
     const old = $(dotId('__mine')); if (old) old.remove();
     state.mine = {
-      key: '__mine', isMine: true, name: cap(p.brand), brand: cap(p.brand), shade: cap(p.shade),
+      key: '__mine', isMine: true, name: brandName(p.brand), brand: brandName(p.brand), shade: titleCase(p.shade),
       tier: p.price_tier || '', hex: p.hex, h: rc.h, L: p.lab_l, photos: [],
       closest: best.name, closestDe: best.d.toFixed(1),
     };
@@ -331,7 +330,7 @@
       const span = (cls, text) => { const s = document.createElement('span'); s.className = cls; s.textContent = text; return s; };
       const dot = span('res-dot', ''); dot.style.background = r.hex;
       const text = span('res-text', '');
-      text.append(span('res-name', `${cap(r.brand)} · ${cap(r.shade)}`), span('res-product', cap(r.product)));
+      text.append(span('res-name', `${brandName(r.brand)} · ${titleCase(r.shade)}`), span('res-product', titleCase(r.product)));
       btn.append(dot, text, span('res-tag', rc.ok ? KINDS[depthOf(r.lab_l) + '-' + toneOf(rc.h)] : 'Not a red: ' + rc.why));
       btn.addEventListener('click', () => {
         track('guide_search_add', { brand: r.brand, shade: r.shade, hex: r.hex });
