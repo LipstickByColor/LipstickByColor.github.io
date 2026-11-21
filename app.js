@@ -4121,12 +4121,10 @@ function ListPicker({
       className: "popular-pick-shade",
       style: {
         fontFamily: 'Hanken Grotesk',
-        fontSize: 13,
+        fontSize: 15,
         color: 'var(--espresso)',
         lineHeight: 1.3,
-        whiteSpace: 'nowrap',
-        overflow: 'hidden',
-        textOverflow: 'ellipsis',
+        overflowWrap: 'anywhere',
         ...(isSel ? {
           textDecoration: 'underline',
           textUnderlineOffset: 3
@@ -4135,7 +4133,7 @@ function ListPicker({
     }, titleCase(p.shade)), /*#__PURE__*/React.createElement("span", {
       style: {
         fontFamily: 'Hanken Grotesk',
-        fontSize: 11,
+        fontSize: 12,
         color: 'var(--text-muted)',
         lineHeight: 1.3
       }

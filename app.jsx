@@ -2526,8 +2526,8 @@ function ListPicker({ wishlist, selectedKey, onPick }) {
             }}>
               <span style={{ width:10, height:26, borderRadius:2, background:p.hex, flexShrink:0 }} />
               <span style={{ display:'flex', flexDirection:'column', minWidth:0 }}>
-                <span className="popular-pick-shade" style={{ fontFamily:'Hanken Grotesk', fontSize:13, color:'var(--espresso)', lineHeight:1.3, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis', ...(isSel ? { textDecoration:'underline', textUnderlineOffset:3 } : {}) }}>{titleCase(p.shade)}</span>
-                <span style={{ fontFamily:'Hanken Grotesk', fontSize:11, color:'var(--text-muted)', lineHeight:1.3 }}>{brandName(p.brand)}</span>
+                <span className="popular-pick-shade" style={{ fontFamily:'Hanken Grotesk', fontSize:15, color:'var(--espresso)', lineHeight:1.3, overflowWrap:'anywhere', ...(isSel ? { textDecoration:'underline', textUnderlineOffset:3 } : {}) }}>{titleCase(p.shade)}</span>
+                <span style={{ fontFamily:'Hanken Grotesk', fontSize:12, color:'var(--text-muted)', lineHeight:1.3 }}>{brandName(p.brand)}</span>
               </span>
             </button>
           );
