@@ -333,13 +333,13 @@ function page(s, src, srcImg, top, budget, listed, band, colors, shareImg) {
 <script src="/consent.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Gloock&family=Hanken+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box}
-body{margin:0;background:#FAF6F1;color:#2A1A14;font-family:'DM Sans',system-ui,sans-serif;--tint:${colors.tint};--tint-border:${colors.border};--accent:${colors.accent}}
+body{margin:0;background:#FAF6F1;color:#2A1A14;font-family:'Hanken Grotesk',system-ui,sans-serif;--tint:${colors.tint};--tint-border:${colors.border};--accent:${colors.accent}}
 a{color:#2A1A14;text-decoration:none}a:hover{color:#96455C}
 :focus-visible{outline:2px solid #2A1A14;outline-offset:3px;border-radius:4px}
-h1,h2,h3{margin:0;font-family:'Cormorant Garamond',serif;font-weight:300}
+h1,h2,h3{margin:0;font-family:'Gloock',serif;font-weight:400}
 p{margin:0}
 .u{text-decoration:underline;text-decoration-color:#C87890;text-underline-offset:3px}
 .in{max-width:1200px;margin:0 auto;padding-left:56px;padding-right:56px}
@@ -358,8 +358,7 @@ p{margin:0}
 .hero-text{display:flex;flex-direction:column;gap:22px}
 .crumbs{display:flex;flex-wrap:wrap;gap:8px;font-size:13px;color:#5C3D30}
 .crumbs a{color:#5C3D30}.crumbs [aria-current]{color:#2A1A14}
-h1{font-size:72px;line-height:.98;letter-spacing:-.015em;text-wrap:balance}
-h1 em{font-weight:400;color:var(--accent)}
+h1{font-size:64px;line-height:1;letter-spacing:-.01em;text-wrap:balance}
 .lede{font-size:17px;line-height:1.6;color:#5C3D30;max-width:520px;text-wrap:pretty}
 .trust{display:flex;flex-wrap:wrap;align-items:center;gap:12px;font-size:12px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:#5C3D30}
 .trust i{width:4px;height:4px;border-radius:50%;background:var(--accent)}
@@ -374,7 +373,7 @@ h1 em{font-weight:400;color:var(--accent)}
 .original-img .swatch-box [data-lip]{right:6%;bottom:5%;width:36%}
 .original-text{display:flex;flex-direction:column;gap:6px}
 .original-label{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#8C6858}
-.original-name{font-family:'Cormorant Garamond',serif;font-size:28px;line-height:1.1}
+.original-name{font-family:'Gloock',serif;font-size:25px;line-height:1.1}
 .original-meta{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;font-size:13px;color:#5C3D30}
 .original-meta span{display:flex;align-items:center;gap:6px}
 .chip{width:12px;height:12px;border-radius:3px}
@@ -383,24 +382,24 @@ h1 em{font-weight:400;color:var(--accent)}
 .method>div{display:flex;flex-direction:column;gap:6px}
 .method .eyebrow{color:#96455C}
 .method a{font-size:13px;margin-top:2px}
-.num{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:22px;color:#8C6858}
+.num{font-size:14px;font-weight:600;color:#8C6858}
 .step{font-size:15px;font-weight:500}
 .method p{font-size:14px;line-height:1.55;color:#5C3D30;text-wrap:pretty}
 
 .matches{display:flex;flex-direction:column;gap:20px;padding-top:56px}
 .matches+.matches{padding-top:64px}
-.matches h2{font-size:40px;line-height:1.05}
+.matches h2{font-size:36px;line-height:1.05}
 .sub{font-size:14px;color:#5C3D30;margin-top:-12px}
 .grid{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:16px}
 .card{display:flex;flex-direction:column;height:100%;background:#fff;border:1px solid #E0D0C4;border-radius:14px;overflow:hidden;transition:border-color .15s,box-shadow .15s}
 .card:hover{color:#2A1A14;border-color:#C87890;box-shadow:0 10px 28px rgba(42,26,20,.08)}
 .card-img{position:relative;height:140px;display:flex;align-items:center;justify-content:center}
 .card-img img{height:112px;width:auto;display:block}
-.rank{position:absolute;left:12px;top:10px;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:20px;color:#8C6858}
+.rank{position:absolute;left:12px;top:10px;font-size:13px;font-weight:600;color:#8C6858}
 .pair{display:flex;height:44px}.pair span{flex:1}
 .card-body{display:flex;flex-direction:column;gap:6px;padding:14px 16px 16px;flex:1}
-.card-brand{font-size:13px;color:#5C3D30}
-.card-shade{font-family:'Cormorant Garamond',serif;font-size:22px;line-height:1.1}
+.card-brand{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#2A1A14}
+.card-shade{font-size:16px;line-height:1.3;color:#5C3D30}
 .card-meta{font-size:13px;line-height:1.5;color:#5C3D30}
 .card-de{margin-top:auto;padding-top:6px;font-size:13px;font-weight:600;color:#B54A6A}
 
@@ -408,7 +407,7 @@ h1 em{font-weight:400;color:var(--accent)}
 .cta{background:#2A1A14;color:#FAF6F1;border-radius:20px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:48px;padding:44px 48px;align-items:center}
 .cta-text{display:flex;flex-direction:column;gap:14px}
 .cta .eyebrow{color:#E8B4C0;font-weight:400}
-.cta h2{font-size:40px;line-height:1.05;text-wrap:balance}
+.cta h2{font-size:36px;line-height:1.05;text-wrap:balance}
 .cta p{font-size:15px;line-height:1.6;color:#E6D6CC;text-wrap:pretty}
 .button{align-self:flex-start;margin-top:8px;background:#FAF6F1;color:#2A1A14;font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:15px 26px;border-radius:40px;transition:background .15s}
 .button:hover{background:#E8B4C0;color:#2A1A14}
@@ -420,7 +419,7 @@ h1 em{font-weight:400;color:var(--accent)}
 
 .explain{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:56px;padding-top:64px}
 .scale-col{display:flex;flex-direction:column;gap:18px}
-.explain h2{font-size:34px;line-height:1.05}
+.explain h2{font-size:30px;line-height:1.05}
 .scale-col>p{font-size:14px;line-height:1.6;color:#5C3D30;text-wrap:pretty}
 .scale{position:relative}
 .bar{display:flex;height:14px;border-radius:8px;overflow:hidden}
@@ -429,7 +428,7 @@ h1 em{font-weight:400;color:var(--accent)}
 .bands b{font-weight:600;color:#2A1A14}
 .faq{list-style:none;margin:0;padding:0;border-top:1px solid #2A1A14}
 .faq li{display:flex;flex-direction:column;gap:8px;padding:20px 0;border-bottom:1px solid #E0D0C4}
-.faq h3{font-weight:400;font-size:24px;line-height:1.15}
+.faq h3{font-weight:400;font-size:21px;line-height:1.15}
 .faq p{font-size:14px;line-height:1.6;color:#5C3D30;text-wrap:pretty}
 
 .more{display:flex;flex-direction:column;gap:18px;padding-top:64px;padding-bottom:56px}
@@ -455,14 +454,14 @@ body:has(.detail[open]){overflow:hidden}
 @keyframes detailUp{from{transform:translateY(100%)}to{transform:none}}
 .detail-top{position:relative;display:flex;align-items:center;justify-content:center;height:44px}
 .detail-handle{display:none;width:40px;height:4px;border-radius:2px;background:#E0D0C4}
-.detail-close{position:absolute;right:6px;top:0;width:44px;height:44px;border:0;padding:0;background:none;color:#5C3D30;font:20px/1 'DM Sans',sans-serif;cursor:pointer}
+.detail-close{position:absolute;right:6px;top:0;width:44px;height:44px;border:0;padding:0;background:none;color:#5C3D30;font:20px/1 'Hanken Grotesk',sans-serif;cursor:pointer}
 .detail-body{display:flex;flex-direction:column;gap:16px;padding:2px 18px 22px}
 .detail-head{display:flex;gap:14px;align-items:stretch}
 .detail-photo{flex:none;width:160px;height:170px;border-radius:12px;background:#F0E8DF;display:flex;align-items:center;justify-content:center;overflow:hidden}
 .detail-photo img{width:calc(100% - 16px);height:calc(100% - 16px);object-fit:contain;mix-blend-mode:multiply}
 .detail-names{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;gap:6px;overflow-wrap:anywhere}
 .detail-brand{font-size:12px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:#5C3D30}
-.detail-shade{font-family:'Cormorant Garamond',serif;font-weight:500;font-size:28px;line-height:1.08}
+.detail-shade{font-family:'Gloock',serif;font-weight:400;font-size:25px;line-height:1.08}
 .detail-product{font-size:15px;line-height:1.35;color:#3D2820}
 .detail-strip{display:flex;gap:3px;height:64px;border-radius:12px;overflow:hidden;background:#fff}
 .detail-strip span{flex:1;min-width:0;display:flex;align-items:flex-end;padding:8px 10px;font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -475,7 +474,7 @@ body:has(.detail[open]){overflow:hidden}
 .detail-facts dt{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#5C3D30}
 .detail-facts dd{margin:0;font-size:15px;font-weight:500}
 .detail-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.detail-actions>*{height:48px;border-radius:24px;display:flex;align-items:center;justify-content:center;gap:8px;font:500 15px 'DM Sans',sans-serif;cursor:pointer}
+.detail-actions>*{height:48px;border-radius:24px;display:flex;align-items:center;justify-content:center;gap:8px;font:500 15px 'Hanken Grotesk',sans-serif;cursor:pointer}
 .detail-save{background:#2A1A14;color:#FAF6F1;border:1px solid #2A1A14}
 .detail-save.on{background:#B54A6A;border-color:#B54A6A}
 .detail-dupes{background:#fff;color:#2A1A14;border:1px solid #2A1A14}
@@ -492,7 +491,7 @@ body:has(.detail[open]){overflow:hidden}
 @media (max-width:1100px){.grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media (max-width:900px){
   .hero{grid-template-columns:minmax(0,1fr);gap:36px;padding-top:32px;padding-bottom:48px}
-  h1{font-size:44px}
+  h1{font-size:40px}
   .method{grid-template-columns:minmax(0,1fr);gap:22px}
   .cta{grid-template-columns:minmax(0,1fr);gap:28px;padding:32px 28px}
   .explain{grid-template-columns:minmax(0,1fr);gap:40px}
@@ -503,10 +502,10 @@ body:has(.detail[open]){overflow:hidden}
   .site-head{gap:10px 20px}
   .site-nav{margin-left:0;gap:20px}
   .original{padding:18px}
-  .matches h2,.cta h2{font-size:32px}
+  .matches h2,.cta h2{font-size:29px}
   .card-img{height:120px}.card-img img{height:96px}
   .card-body{padding:12px 12px 14px}
-  .card-shade{font-size:20px}
+  .card-shade{font-size:15px}
   .more-head{flex-wrap:wrap}.more-head hr{display:none}
 }
 </style>
@@ -523,7 +522,7 @@ body:has(.detail[open]){overflow:hidden}
     <div class="in hero">
       <div class="hero-text">
         <nav class="crumbs" aria-label="Breadcrumb"><a class="u" href="/dupe-finder/">Dupe finder</a><span aria-hidden="true">/</span><span>${esc(brandName(src.brand))}</span><span aria-hidden="true">/</span><span aria-current="page">${esc(s.short)}</span></nav>
-        <h1>${esc(s.name)} <em>dupes</em></h1>
+        <h1>${esc(s.name)} dupes</h1>
         <p class="lede">The lipsticks that look most like ${esc(s.short)}, out of over 24,000 we've measured. Ranked by color alone, from drugstore to luxury.</p>
         <p class="trust"><span>Not sponsored</span><i aria-hidden="true"></i><span>Measured from product photos</span><i aria-hidden="true"></i><span>Updated ${updated}</span></p>
       </div>
