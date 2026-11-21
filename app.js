@@ -4068,38 +4068,46 @@ function ListPicker({
       textWrap: 'balance',
       marginBottom: 16
     }
-  }, "Pick a saved shade to find similar ones"), /*#__PURE__*/React.createElement("div", {
+  }, "Pick a saved shade to find similar ones"), /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontFamily: 'Hanken Grotesk',
+      fontSize: 11,
+      color: 'var(--text-muted)',
+      letterSpacing: '0.1em',
+      textTransform: 'uppercase'
+    }
+  }, "Saved shades"), /*#__PURE__*/React.createElement("div", {
     style: {
       display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fill, minmax(124px, 1fr))',
-      gap: 10
+      gridTemplateColumns: '1fr 1fr',
+      columnGap: 22,
+      marginTop: 2
     }
   }, wishlist.map((p, i) => {
     const key = `${p.brand}|${p.shade}`;
     const isSel = key === selectedKey;
     return /*#__PURE__*/React.createElement("button", {
       key: i,
+      className: "popular-pick",
       onClick: () => onPick(p),
       "aria-pressed": isSel,
       style: {
         display: 'flex',
-        flexDirection: 'column',
-        textAlign: 'left',
-        background: isSel ? 'var(--cream-dark)' : '#fff',
+        alignItems: 'center',
+        gap: 10,
+        minWidth: 0,
+        padding: '10px 0',
+        background: 'transparent',
+        border: 'none',
+        borderBottom: `1px solid ${isSel ? 'var(--espresso)' : 'var(--border)'}`,
         cursor: 'pointer',
-        padding: 0,
-        borderRadius: 12,
-        overflow: 'hidden',
-        border: isSel ? '2px solid var(--blush-deep)' : '1px solid var(--border)',
-        margin: isSel ? 0 : 1,
-        // keeps tiles the same size whichever border they have
-        transition: 'background 0.15s'
+        textAlign: 'left'
       }
     }, /*#__PURE__*/React.createElement("span", {
       style: {
-        display: 'block',
-        width: '100%',
-        height: 36,
+        width: 10,
+        height: 26,
+        borderRadius: 2,
         background: p.hex,
         flexShrink: 0
       }
@@ -4107,31 +4115,31 @@ function ListPicker({
       style: {
         display: 'flex',
         flexDirection: 'column',
-        gap: 2,
-        padding: '8px 10px 10px'
+        minWidth: 0
       }
     }, /*#__PURE__*/React.createElement("span", {
-      style: {
-        fontFamily: 'Hanken Grotesk',
-        fontSize: 11,
-        color: 'var(--text-muted)'
-      }
-    }, brandName(p.brand)), /*#__PURE__*/React.createElement("span", {
+      className: "popular-pick-shade",
       style: {
         fontFamily: 'Hanken Grotesk',
         fontSize: 13,
-        fontWeight: 500,
         color: 'var(--espresso)',
-        lineHeight: 1.25
+        lineHeight: 1.3,
+        whiteSpace: 'nowrap',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        ...(isSel ? {
+          textDecoration: 'underline',
+          textUnderlineOffset: 3
+        } : {})
       }
     }, titleCase(p.shade)), /*#__PURE__*/React.createElement("span", {
       style: {
         fontFamily: 'Hanken Grotesk',
-        fontSize: 12,
-        color: 'var(--espresso-mid)',
+        fontSize: 11,
+        color: 'var(--text-muted)',
         lineHeight: 1.3
       }
-    }, chartColorName(p.hex))));
+    }, brandName(p.brand))));
   })));
 }
 
@@ -8668,84 +8676,35 @@ function App() {
       style: {
         width: '100%',
         maxWidth: 440,
-        marginTop: 20,
-        background: '#fff',
-        borderRadius: 16,
-        border: '1px solid var(--border)',
-        boxShadow: '0 2px 12px var(--shadow)',
-        overflow: 'hidden',
+        marginTop: 22,
+        borderLeft: '2px solid var(--blush-deep)',
+        padding: '2px 0 2px 14px',
         animation: 'fadeUp 0.2s ease'
       }
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
-        display: 'flex',
-        alignItems: 'center',
-        gap: 14,
-        padding: '14px 16px'
-      }
-    }, /*#__PURE__*/React.createElement(ShadeChip, {
-      hex: p.hex,
-      height: 72,
-      width: 9
-    }), /*#__PURE__*/React.createElement(ProductThumb, {
-      product: p,
-      size: 72,
-      tint: false
-    }), /*#__PURE__*/React.createElement("div", {
-      style: {
-        flex: 1,
-        minWidth: 0
-      }
-    }, /*#__PURE__*/React.createElement("div", {
+    }, /*#__PURE__*/React.createElement("p", {
       style: {
         fontFamily: 'Hanken Grotesk',
-        fontSize: 12,
-        color: 'var(--text-muted)'
-      }
-    }, brandName(p.brand)), /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontFamily: 'Hanken Grotesk',
-        fontSize: 16,
-        fontWeight: 500,
-        color: 'var(--espresso)',
-        lineHeight: 1.25,
-        marginTop: 2
-      }
-    }, titleCase(p.shade)))), /*#__PURE__*/React.createElement("div", {
-      style: {
-        padding: '14px 16px 16px',
-        borderTop: '1px solid var(--border)',
-        background: 'var(--cream)',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'flex-start',
-        gap: 12
-      }
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontFamily: 'Hanken Grotesk',
-        fontSize: 13,
-        color: 'var(--text-body)',
+        fontSize: 14,
+        color: 'var(--espresso-mid)',
         lineHeight: 1.5
       }
     }, "Want it a little warmer or cooler? See the shades around it on the color chart."), /*#__PURE__*/React.createElement("button", {
       type: "button",
       onClick: () => exploreOnChart(p.hex),
       style: {
+        marginTop: 4,
+        padding: 0,
         fontFamily: 'Hanken Grotesk',
-        fontSize: 12,
-        fontWeight: 500,
-        letterSpacing: '0.06em',
-        textTransform: 'uppercase',
-        minHeight: 44,
-        padding: '10px 18px',
-        borderRadius: 40,
+        fontSize: 14,
+        color: 'var(--espresso)',
+        background: 'transparent',
         border: 'none',
-        background: 'var(--espresso)',
-        color: 'var(--cream)',
-        cursor: 'pointer'
+        textDecoration: 'underline',
+        textUnderlineOffset: 3,
+        cursor: 'pointer',
+        textAlign: 'left'
       }
-    }, "Explore shades near ", titleCase(p.shade), " \u2192")));
+    }, "Explore shades near ", titleCase(p.shade), " \u2192"));
   })(), mode === 'wheel' && /*#__PURE__*/React.createElement("p", {
     style: {
       fontSize: 11,
