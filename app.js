@@ -1432,7 +1432,8 @@ function ResultsTable({
   hideHeader,
   collapsibleFilters,
   hideMatch,
-  keepFilters
+  keepFilters,
+  photoSave
 }) {
   const [activeBrands, setActiveBrands] = React.useState([]);
   const [filtersShown, setFiltersShown] = React.useState(false);
@@ -1723,6 +1724,7 @@ function ResultsTable({
     style: {
       display: 'flex',
       alignItems: 'center',
+      flexWrap: 'wrap',
       gap: 12,
       marginBottom: 18,
       padding: '12px 18px',
@@ -1740,7 +1742,41 @@ function ResultsTable({
       boxShadow: `0 3px 10px ${selectedColor.hex}80, inset 0 -2px 4px rgba(0,0,0,0.15)`,
       flexShrink: 0
     }
-  }), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: '1 1 180px',
+      minWidth: 0
+    }
+  }, photoSave?.saved ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("input", {
+    value: photoSave.name,
+    onChange: e => photoSave.onName(e.target.value),
+    autoFocus: true,
+    onBlur: () => photoSave.name.trim() && window.gtag?.('event', 'photo_color_named'),
+    placeholder: "Name this color",
+    "aria-label": "Name this color",
+    maxLength: 60,
+    className: "photo-name",
+    style: {
+      fontFamily: 'Gloock',
+      fontSize: 16,
+      fontWeight: 400,
+      lineHeight: 1.15,
+      color: 'var(--espresso)',
+      width: '100%',
+      padding: '0 0 2px',
+      background: 'transparent',
+      border: 'none',
+      borderBottom: '1.5px solid var(--espresso)',
+      borderRadius: 0
+    }
+  }), /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontSize: 12,
+      color: 'var(--text-muted)',
+      marginTop: 4,
+      fontFamily: 'Hanken Grotesk'
+    }
+  }, "Type a name so you remember it")) : /*#__PURE__*/React.createElement("p", {
     style: {
       fontFamily: 'Gloock',
       fontSize: 16,
@@ -1760,7 +1796,33 @@ function ResultsTable({
       ...RED_LABEL_STYLE,
       marginTop: 6
     }
-  }, redName))), toneRamp && toneRamp.ramp.length > 1 && /*#__PURE__*/React.createElement("div", {
+  }, redName)), photoSave && /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    onClick: photoSave.onToggle,
+    "aria-pressed": photoSave.saved,
+    style: {
+      marginLeft: 'auto',
+      display: 'flex',
+      alignItems: 'center',
+      gap: 6,
+      minHeight: 40,
+      padding: '6px 14px 6px 12px',
+      fontFamily: 'Hanken Grotesk',
+      fontSize: 13,
+      color: 'var(--espresso)',
+      background: '#fff',
+      cursor: 'pointer',
+      borderRadius: 20,
+      border: `1.5px solid ${photoSave.saved ? 'var(--blush-deep)' : 'var(--border)'}`
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    "aria-hidden": "true",
+    style: {
+      color: 'var(--blush-deep)',
+      fontSize: 16,
+      lineHeight: 1
+    }
+  }, photoSave.saved ? HEART : '♡'), photoSave.saved ? 'Saved' : 'Save color')), toneRamp && toneRamp.ramp.length > 1 && /*#__PURE__*/React.createElement("div", {
     style: {
       marginBottom: 12,
       padding: '9px 12px 10px',
@@ -2605,9 +2667,9 @@ function drawShareImage(canvas, wishlist, images) {
       tw = cw - 36 * sc;
     ctx.textAlign = 'left';
     ctx.fillStyle = fg;
-    ctx.fillText(fit(titleCase(p.shade), tw, s => `400 ${s}px "Gloock", serif`, Math.max(26, Math.round(38 * sc)), 18), tx, y + photoH + band * 0.46);
+    ctx.fillText(fit(favShade(p), tw, s => `400 ${s}px "Gloock", serif`, Math.max(26, Math.round(38 * sc)), 18), tx, y + photoH + band * 0.46);
     ctx.globalAlpha = 0.85;
-    ctx.fillText(fit(brandName(p.brand), tw, s => `600 ${s}px "Hanken Grotesk", sans-serif`, Math.max(15, Math.round(18 * sc)), 12), tx, y + photoH + band * 0.78);
+    ctx.fillText(fit(favBrand(p), tw, s => `600 ${s}px "Hanken Grotesk", sans-serif`, Math.max(15, Math.round(18 * sc)), 12), tx, y + photoH + band * 0.78);
     ctx.restore();
   }
 
@@ -3129,7 +3191,9 @@ function findProduct(brand, shade) {
 }
 function sharedListUrl(wishlist) {
   const q = new URLSearchParams();
-  wishlist.forEach(p => q.append('item', `${p.brand}|${p.shade}`));
+  wishlist.forEach(p => {
+    if (!p.photo) q.append('item', `${p.brand}|${p.shade}`);
+  }); // a photo color can't be looked up
   return `${window.location.origin}${window.location.pathname}?${q}`;
 }
 
@@ -3181,6 +3245,11 @@ function bandInk(hex) {
 // red guide), with everything else below it.
 // Sizes, each with one job: title 18 for the brand, shade 15 for the shade name,
 // body 13 for the product, micro 11 for facts and the red label.
+// A color saved from a photo is kept in My Favorites with the lipsticks: { photo:true, brand:'photo:<id>', shade:<the visitor's name>, hex }.
+// The id in brand keeps "brand|shade" unique (the key every list uses) whatever it is named.
+// These give the lines a saved item shows; the visitor's own name is shown as typed.
+const favBrand = p => p.photo ? 'From a photo' : brandName(p.brand);
+const favShade = p => p.photo ? p.shade : titleCase(p.shade);
 const SHADE_ITEM_TYPE = {
   micro: 11,
   body: 13,
@@ -3219,7 +3288,14 @@ function ShadeListItem({
       position: 'absolute',
       inset: 8
     }
-  }, /*#__PURE__*/React.createElement(ProductThumb, {
+  }, p.photo ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: '100%',
+      height: '100%',
+      borderRadius: 8,
+      background: p.hex
+    }
+  }) : /*#__PURE__*/React.createElement(ProductThumb, {
     product: p,
     width: "100%",
     height: "100%",
@@ -3244,7 +3320,11 @@ function ShadeListItem({
       lineHeight: 1.15,
       fontVariantNumeric: 'lining-nums' // shade names are often numbers ("999", "0 Ultra Light")
     }
-  }, /*#__PURE__*/React.createElement("span", {
+  }, p.photo ? /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: TYPE.title
+    }
+  }, p.shade) : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("span", {
     style: srOnly
   }, "Brand: "), /*#__PURE__*/React.createElement("span", {
     style: {
@@ -3262,7 +3342,7 @@ function ShadeListItem({
     style: {
       fontSize: TYPE.shade
     }
-  }, titleCase(p.shade))), /*#__PURE__*/React.createElement("div", {
+  }, titleCase(p.shade)))), /*#__PURE__*/React.createElement("div", {
     style: {
       flex: 1,
       display: 'flex',
@@ -3282,7 +3362,7 @@ function ShadeListItem({
       lineHeight: 1.35,
       color: 'var(--text-body)'
     }
-  }, titleCase(p.product)), /*#__PURE__*/React.createElement("div", {
+  }, p.photo ? 'From a photo' : titleCase(p.product)), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: TYPE.micro,
       color: 'var(--text-muted)',
@@ -3320,6 +3400,10 @@ function WishlistPanel({
     if (wishlist.length === 0) return '';
     const lines = ['My Lipstick Shortlist', '─'.repeat(40), ''];
     wishlist.forEach((p, i) => {
+      if (p.photo) {
+        lines.push(`${i + 1}. ${p.shade}`, '   From a photo', `   Color: ${p.hex.toUpperCase()}`, '');
+        return;
+      }
       lines.push(`${i + 1}. ${brandName(p.brand)}`);
       lines.push(`   ${titleCase(p.product)}`);
       lines.push(`   Shade: ${titleCase(p.shade)}`);
@@ -3560,7 +3644,7 @@ function WishlistPanel({
     action: /*#__PURE__*/React.createElement("button", {
       onClick: () => onRemove(p),
       title: "Remove from My Favorites",
-      "aria-label": `Remove ${p.brand} ${p.shade} from My Favorites`,
+      "aria-label": `Remove ${p.photo ? p.shade : `${p.brand} ${p.shade}`} from My Favorites`,
       style: heartBtnStyle(true)
     }, HEART)
   })), /*#__PURE__*/React.createElement("li", {
@@ -4130,14 +4214,14 @@ function ListPicker({
           textUnderlineOffset: 3
         } : {})
       }
-    }, titleCase(p.shade)), /*#__PURE__*/React.createElement("span", {
+    }, favShade(p)), /*#__PURE__*/React.createElement("span", {
       style: {
         fontFamily: 'Hanken Grotesk',
         fontSize: 12,
         color: 'var(--text-muted)',
         lineHeight: 1.3
       }
-    }, brandName(p.brand))));
+    }, favBrand(p))));
   })));
 }
 
@@ -7749,6 +7833,14 @@ function App() {
     }
   });
   const [photoHex, setPhotoHex] = useState(null);
+  // Photo match: the color saved from the current pick (its brand, 'photo:<id>') and the name typed for it.
+  // A new pick starts over; the saved one stays in My Favorites.
+  const [photoSaveId, setPhotoSaveId] = useState(null);
+  const [photoName, setPhotoName] = useState('');
+  useEffect(() => {
+    setPhotoSaveId(null);
+    setPhotoName('');
+  }, [photoHex]);
   // Custom color: hexDraft is where the dot sits on the map, hexHex the color whose matches were asked for
   const [hexHex, setHexHex] = useState(initialLink?.type === 'color' && !initialWheelColor ? initialLink.hex : null);
   const [hexDraft, setHexDraft] = useState(() => draftFromLab(hexToLab(hexHex || EXPLORER_STARTS[0][1])));
@@ -7822,10 +7914,44 @@ function App() {
       setDupeProduct(null);
     }
   }
+  function togglePhotoSave() {
+    if (wishlist.some(p => p.brand === photoSaveId)) {
+      setWishlist(prev => prev.filter(p => p.brand !== photoSaveId));
+      setPhotoSaveId(null);
+      setPhotoName('');
+      window.gtag?.('event', 'photo_color_unsave');
+      return;
+    }
+    // Saved straight away with a dated name, so naming it is optional
+    const id = `photo:${Date.now().toString(36)}`;
+    const dated = `Photo color, ${new Date().toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric'
+    })}`;
+    setWishlist(prev => [...prev, {
+      photo: true,
+      brand: id,
+      product: '',
+      shade: photoName.trim() || dated,
+      dated,
+      hex: photoHex
+    }]);
+    setPhotoSaveId(id);
+    window.gtag?.('event', 'photo_color_save', {
+      hex: photoHex
+    });
+  }
+  function namePhotoSave(text) {
+    setPhotoName(text);
+    setWishlist(prev => prev.map(p => p.brand === photoSaveId ? {
+      ...p,
+      shade: text.trim() || p.dated
+    } : p));
+  }
   function listSeed(p) {
     return {
       id: '__list__',
-      name: `Similar to ${titleCase(p.shade)}`,
+      name: `Similar to ${favShade(p)}`,
       hex: p.hex,
       sourceKey: `${p.brand}|${p.shade}`,
       item: p
@@ -8243,7 +8369,13 @@ function App() {
     hideHeader: mode === 'hex',
     collapsibleFilters: mode === 'hex',
     hideMatch: mode === 'wheel',
-    keepFilters: mode === 'wheel'
+    keepFilters: mode === 'wheel',
+    photoSave: mode === 'photo' && photoHex && onAnchor ? {
+      saved: wishlist.some(p => p.brand === photoSaveId),
+      name: photoName,
+      onToggle: togglePhotoSave,
+      onName: namePhotoSave
+    } : null
   });
   return /*#__PURE__*/React.createElement("div", {
     style: {
@@ -8702,7 +8834,7 @@ function App() {
         cursor: 'pointer',
         textAlign: 'left'
       }
-    }, "Explore shades near ", titleCase(p.shade), " \u2192"));
+    }, "Explore shades near ", favShade(p), " \u2192"));
   })(), mode === 'wheel' && /*#__PURE__*/React.createElement("p", {
     style: {
       fontSize: 11,

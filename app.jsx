@@ -872,7 +872,7 @@ function filterParamsFrom(search) {
   return [...new URLSearchParams(search)].filter(([k]) => FILTER_PARAMS.includes(k));
 }
 
-function ResultsTable({ selectedColor, matches, totalProducts, pinnedItems, togglePin, wishlist, toggleWishlist, toneRamp, toneIdx, setToneIdx, initialFilterParams, onFiltersChange, hideHeader, collapsibleFilters, hideMatch, keepFilters }) {
+function ResultsTable({ selectedColor, matches, totalProducts, pinnedItems, togglePin, wishlist, toggleWishlist, toneRamp, toneIdx, setToneIdx, initialFilterParams, onFiltersChange, hideHeader, collapsibleFilters, hideMatch, keepFilters, photoSave }) {
   const [activeBrands, setActiveBrands] = React.useState([]);
   const [filtersShown, setFiltersShown] = React.useState(false);
   const [activeTones, setActiveTones] = React.useState([]);
@@ -1076,7 +1076,7 @@ function ResultsTable({ selectedColor, matches, totalProducts, pinnedItems, togg
     <div className="results-table" style={{ flex:1, display:'flex', flexDirection:'column', minHeight:0 }}>
       {/* Selected color header */}
       {!hideHeader && <div style={{
-        display:'flex', alignItems:'center', gap:12, marginBottom:18,
+        display:'flex', alignItems:'center', flexWrap:'wrap', gap:12, marginBottom:18,
         padding:'12px 18px', background:'#fff',
         borderRadius:14, border:'1px solid var(--border)',
         boxShadow:'0 2px 12px var(--shadow)',
@@ -1087,16 +1087,36 @@ function ResultsTable({ selectedColor, matches, totalProducts, pinnedItems, togg
           boxShadow:`0 3px 10px ${selectedColor.hex}80, inset 0 -2px 4px rgba(0,0,0,0.15)`,
           flexShrink:0,
         }} />
-        <div>
-          <p style={{ fontFamily:'Gloock', fontSize:16, fontWeight:400, lineHeight:1.15 }}>
-            {selectedColor.name}
-          </p>
+        <div style={{ flex:'1 1 180px', minWidth:0 }}>
+          {/* Photo match, once saved: the title is the saved color's name, typed over in place */}
+          {photoSave?.saved ? <>
+            <input value={photoSave.name} onChange={e => photoSave.onName(e.target.value)} autoFocus
+              onBlur={() => photoSave.name.trim() && window.gtag?.('event', 'photo_color_named')}
+              placeholder="Name this color" aria-label="Name this color" maxLength={60}
+              className="photo-name"
+              style={{ fontFamily:'Gloock', fontSize:16, fontWeight:400, lineHeight:1.15, color:'var(--espresso)', width:'100%', padding:'0 0 2px', background:'transparent', border:'none', borderBottom:'1.5px solid var(--espresso)', borderRadius:0 }} />
+            <p style={{ fontSize:12, color:'var(--text-muted)', marginTop:4, fontFamily:'Hanken Grotesk' }}>Type a name so you remember it</p>
+          </> : (
+            <p style={{ fontFamily:'Gloock', fontSize:16, fontWeight:400, lineHeight:1.15 }}>
+              {selectedColor.name}
+            </p>
+          )}
           <p style={{ fontSize:11, color:'var(--text-muted)', marginTop:2, fontFamily:'Hanken Grotesk', letterSpacing:'0.05em' }}>
             {selectedColor.hex.toUpperCase()} · {filtered.length} match{filtered.length !== 1 ? 'es' : ''} ranked by color similarity
           </p>
           {/* Reds and pinks: tone and depth, by the red and pink guides' rules */}
           {redName && <p style={{ ...RED_LABEL_STYLE, marginTop:6 }}>{redName}</p>}
         </div>
+        {photoSave && (
+          <button type="button" onClick={photoSave.onToggle} aria-pressed={photoSave.saved} style={{
+            marginLeft:'auto', display:'flex', alignItems:'center', gap:6, minHeight:40, padding:'6px 14px 6px 12px',
+            fontFamily:'Hanken Grotesk', fontSize:13, color:'var(--espresso)', background:'#fff', cursor:'pointer',
+            borderRadius:20, border:`1.5px solid ${photoSave.saved ? 'var(--blush-deep)' : 'var(--border)'}`,
+          }}>
+            <span aria-hidden="true" style={{ color:'var(--blush-deep)', fontSize:16, lineHeight:1 }}>{photoSave.saved ? HEART : '♡'}</span>
+            {photoSave.saved ? 'Saved' : 'Save color'}
+          </button>
+        )}
       </div>}
 
       {/* Tonal range strip — wheel / photo / hex / dupe / list entry points */}
@@ -1616,9 +1636,9 @@ function drawShareImage(canvas, wishlist, images) {
     const tx = x + 18 * sc, tw = cw - 36 * sc;
     ctx.textAlign = 'left';
     ctx.fillStyle = fg;
-    ctx.fillText(fit(titleCase(p.shade), tw, s => `400 ${s}px "Gloock", serif`, Math.max(26, Math.round(38 * sc)), 18), tx, y + photoH + band * 0.46);
+    ctx.fillText(fit(favShade(p), tw, s => `400 ${s}px "Gloock", serif`, Math.max(26, Math.round(38 * sc)), 18), tx, y + photoH + band * 0.46);
     ctx.globalAlpha = 0.85;
-    ctx.fillText(fit(brandName(p.brand), tw, s => `600 ${s}px "Hanken Grotesk", sans-serif`, Math.max(15, Math.round(18 * sc)), 12), tx, y + photoH + band * 0.78);
+    ctx.fillText(fit(favBrand(p), tw, s => `600 ${s}px "Hanken Grotesk", sans-serif`, Math.max(15, Math.round(18 * sc)), 12), tx, y + photoH + band * 0.78);
     ctx.restore();
   }
 
@@ -1969,7 +1989,7 @@ function findProduct(brand, shade) {
 
 function sharedListUrl(wishlist) {
   const q = new URLSearchParams();
-  wishlist.forEach(p => q.append('item', `${p.brand}|${p.shade}`));
+  wishlist.forEach(p => { if (!p.photo) q.append('item', `${p.brand}|${p.shade}`); }); // a photo color can't be looked up
   return `${window.location.origin}${window.location.pathname}?${q}`;
 }
 
@@ -2011,6 +2031,11 @@ function bandInk(hex) {
 // red guide), with everything else below it.
 // Sizes, each with one job: title 18 for the brand, shade 15 for the shade name,
 // body 13 for the product, micro 11 for facts and the red label.
+// A color saved from a photo is kept in My Favorites with the lipsticks: { photo:true, brand:'photo:<id>', shade:<the visitor's name>, hex }.
+// The id in brand keeps "brand|shade" unique (the key every list uses) whatever it is named.
+// These give the lines a saved item shows; the visitor's own name is shown as typed.
+const favBrand = p => p.photo ? 'From a photo' : brandName(p.brand);
+const favShade = p => p.photo ? p.shade : titleCase(p.shade);
 const SHADE_ITEM_TYPE = { micro:11, body:13, shade:14, title:16 };
 function ShadeListItem({ p, action, glow }) {
   const TYPE = SHADE_ITEM_TYPE;
@@ -2024,7 +2049,9 @@ function ShadeListItem({ p, action, glow }) {
     }}>
       <div style={{ position:'relative', width:112, minHeight:112, flexShrink:0, background:'var(--cream-dark)' }}>
         <div style={{ position:'absolute', inset:8 }}>
-          <ProductThumb product={p} width="100%" height="100%" fit="contain" radius={0} ring={false} tint={false} />
+          {p.photo
+            ? <div style={{ width:'100%', height:'100%', borderRadius:8, background:p.hex }} />
+            : <ProductThumb product={p} width="100%" height="100%" fit="contain" radius={0} ring={false} tint={false} />}
         </div>
       </div>
       <div style={{ flex:1, minWidth:0, display:'flex', flexDirection:'column' }}>
@@ -2033,16 +2060,18 @@ function ShadeListItem({ p, action, glow }) {
           fontFamily:'Gloock', fontWeight:400, lineHeight:1.15,
           fontVariantNumeric:'lining-nums', // shade names are often numbers ("999", "0 Ultra Light")
         }}>
-          <span style={srOnly}>Brand: </span>
-          <span style={{ fontSize:TYPE.title }}>{brandName(p.brand)}</span>
-          <span aria-hidden="true" style={{ margin:'0 7px', opacity:0.75 }}>·</span>
-          <span style={srOnly}>Shade: </span>
-          <span style={{ fontSize:TYPE.shade }}>{titleCase(p.shade)}</span>
+          {p.photo ? <span style={{ fontSize:TYPE.title }}>{p.shade}</span> : <>
+            <span style={srOnly}>Brand: </span>
+            <span style={{ fontSize:TYPE.title }}>{brandName(p.brand)}</span>
+            <span aria-hidden="true" style={{ margin:'0 7px', opacity:0.75 }}>·</span>
+            <span style={srOnly}>Shade: </span>
+            <span style={{ fontSize:TYPE.shade }}>{titleCase(p.shade)}</span>
+          </>}
         </div>
         <div style={{ flex:1, display:'flex', alignItems:'center', gap:12, padding:'9px 14px 10px' }}>
           <div style={{ flex:1, minWidth:0, fontFamily:'Hanken Grotesk' }}>
             <div style={{ fontSize:TYPE.body, lineHeight:1.35, color:'var(--text-body)' }}>
-              {titleCase(p.product)}
+              {p.photo ? 'From a photo' : titleCase(p.product)}
             </div>
             <div style={{ fontSize:TYPE.micro, color:'var(--text-muted)', letterSpacing:'0.04em', marginTop:5 }}>
               {facts.join(' · ')}
@@ -2071,6 +2100,7 @@ function WishlistPanel({ wishlist, onClose, onRemove, onClear, onFindSimilar, gl
     if (wishlist.length === 0) return '';
     const lines = ['My Lipstick Shortlist', '─'.repeat(40), ''];
     wishlist.forEach((p, i) => {
+      if (p.photo) { lines.push(`${i + 1}. ${p.shade}`, '   From a photo', `   Color: ${p.hex.toUpperCase()}`, ''); return; }
       lines.push(`${i + 1}. ${brandName(p.brand)}`);
       lines.push(`   ${titleCase(p.product)}`);
       lines.push(`   Shade: ${titleCase(p.shade)}`);
@@ -2214,7 +2244,7 @@ function WishlistPanel({ wishlist, onClose, onRemove, onClear, onFindSimilar, gl
               )}
               {wishlist.map((p, i) => (
                 <ShadeListItem key={i} p={p} glow={glowKey === `${p.brand}|${p.shade}`} action={
-                  <button onClick={() => onRemove(p)} title="Remove from My Favorites" aria-label={`Remove ${p.brand} ${p.shade} from My Favorites`} style={heartBtnStyle(true)}>{HEART}</button>
+                  <button onClick={() => onRemove(p)} title="Remove from My Favorites" aria-label={`Remove ${p.photo ? p.shade : `${p.brand} ${p.shade}`} from My Favorites`} style={heartBtnStyle(true)}>{HEART}</button>
                 } />
               ))}
               {/* Last in the list: over to the From Favorites tab */}
@@ -2526,8 +2556,8 @@ function ListPicker({ wishlist, selectedKey, onPick }) {
             }}>
               <span style={{ width:10, height:26, borderRadius:2, background:p.hex, flexShrink:0 }} />
               <span style={{ display:'flex', flexDirection:'column', minWidth:0 }}>
-                <span className="popular-pick-shade" style={{ fontFamily:'Hanken Grotesk', fontSize:15, color:'var(--espresso)', lineHeight:1.3, overflowWrap:'anywhere', ...(isSel ? { textDecoration:'underline', textUnderlineOffset:3 } : {}) }}>{titleCase(p.shade)}</span>
-                <span style={{ fontFamily:'Hanken Grotesk', fontSize:12, color:'var(--text-muted)', lineHeight:1.3 }}>{brandName(p.brand)}</span>
+                <span className="popular-pick-shade" style={{ fontFamily:'Hanken Grotesk', fontSize:15, color:'var(--espresso)', lineHeight:1.3, overflowWrap:'anywhere', ...(isSel ? { textDecoration:'underline', textUnderlineOffset:3 } : {}) }}>{favShade(p)}</span>
+                <span style={{ fontFamily:'Hanken Grotesk', fontSize:12, color:'var(--text-muted)', lineHeight:1.3 }}>{favBrand(p)}</span>
               </span>
             </button>
           );
@@ -4137,6 +4167,11 @@ function App() {
     catch { return 'landing'; }
   });
   const [photoHex, setPhotoHex] = useState(null);
+  // Photo match: the color saved from the current pick (its brand, 'photo:<id>') and the name typed for it.
+  // A new pick starts over; the saved one stays in My Favorites.
+  const [photoSaveId, setPhotoSaveId] = useState(null);
+  const [photoName, setPhotoName] = useState('');
+  useEffect(() => { setPhotoSaveId(null); setPhotoName(''); }, [photoHex]);
   // Custom color: hexDraft is where the dot sits on the map, hexHex the color whose matches were asked for
   const [hexHex, setHexHex] = useState(initialLink?.type === 'color' && !initialWheelColor ? initialLink.hex : null);
   const [hexDraft, setHexDraft] = useState(() => draftFromLab(hexToLab(hexHex || EXPLORER_STARTS[0][1])));
@@ -4183,8 +4218,27 @@ function App() {
     }
   }
 
+  function togglePhotoSave() {
+    if (wishlist.some(p => p.brand === photoSaveId)) {
+      setWishlist(prev => prev.filter(p => p.brand !== photoSaveId));
+      setPhotoSaveId(null); setPhotoName('');
+      window.gtag?.('event', 'photo_color_unsave');
+      return;
+    }
+    // Saved straight away with a dated name, so naming it is optional
+    const id = `photo:${Date.now().toString(36)}`;
+    const dated = `Photo color, ${new Date().toLocaleDateString('en-US', { month:'short', day:'numeric' })}`;
+    setWishlist(prev => [...prev, { photo:true, brand:id, product:'', shade: photoName.trim() || dated, dated, hex:photoHex }]);
+    setPhotoSaveId(id);
+    window.gtag?.('event', 'photo_color_save', { hex: photoHex });
+  }
+  function namePhotoSave(text) {
+    setPhotoName(text);
+    setWishlist(prev => prev.map(p => p.brand === photoSaveId ? { ...p, shade: text.trim() || p.dated } : p));
+  }
+
   function listSeed(p) {
-    return { id:'__list__', name:`Similar to ${titleCase(p.shade)}`, hex: p.hex, sourceKey: `${p.brand}|${p.shade}`, item: p };
+    return { id:'__list__', name:`Similar to ${favShade(p)}`, hex: p.hex, sourceKey: `${p.brand}|${p.shade}`, item: p };
   }
 
   function toggleWishlist(product) {
@@ -4477,7 +4531,8 @@ function App() {
   if (dataStatus === 'error') return <DataLoadError />;
 
   // Custom color shows its pick on the card above the results, so they skip their own color header
-  const resultsEl = selectedColor && !dataReady ? <CatalogueLoading /> : <ResultsTable selectedColor={effectiveColor} matches={matches} totalProducts={REAL_PRODUCTS.length} pinnedItems={pinnedItems} togglePin={togglePin} wishlist={wishlist} toggleWishlist={toggleWishlist} toneRamp={toneRamp} toneIdx={toneIdx} setToneIdx={handleToneIdxChange} initialFilterParams={filterParams} onFiltersChange={setFilterParams} hideHeader={mode === 'hex'} collapsibleFilters={mode === 'hex'} hideMatch={mode === 'wheel'} keepFilters={mode === 'wheel'} />;
+  const resultsEl = selectedColor && !dataReady ? <CatalogueLoading /> : <ResultsTable selectedColor={effectiveColor} matches={matches} totalProducts={REAL_PRODUCTS.length} pinnedItems={pinnedItems} togglePin={togglePin} wishlist={wishlist} toggleWishlist={toggleWishlist} toneRamp={toneRamp} toneIdx={toneIdx} setToneIdx={handleToneIdxChange} initialFilterParams={filterParams} onFiltersChange={setFilterParams} hideHeader={mode === 'hex'} collapsibleFilters={mode === 'hex'} hideMatch={mode === 'wheel'} keepFilters={mode === 'wheel'}
+    photoSave={mode === 'photo' && photoHex && onAnchor ? { saved: wishlist.some(p => p.brand === photoSaveId), name: photoName, onToggle: togglePhotoSave, onName: namePhotoSave } : null} />;
 
   return (
     <div style={{ minHeight:'100vh', display:'flex', flexDirection:'column', position:'relative', zIndex:1 }}>
@@ -4727,7 +4782,7 @@ function App() {
                   marginTop:4, padding:0, fontFamily:'Hanken Grotesk', fontSize:14, color:'var(--espresso)',
                   background:'transparent', border:'none', textDecoration:'underline', textUnderlineOffset:3, cursor:'pointer', textAlign:'left',
                 }}>
-                  Explore shades near {titleCase(p.shade)} →
+                  Explore shades near {favShade(p)} →
                 </button>
               </div>
             );

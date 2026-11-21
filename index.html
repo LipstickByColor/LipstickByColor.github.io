@@ -230,6 +230,8 @@
     50%      { box-shadow: 0 0 0 2px var(--blush), 0 0 18px 3px var(--blush); }
   }
   #shade-hex:focus { outline: none; box-shadow: 0 0 0 3px rgba(42,26,20,0.18); }
+    .photo-name:focus { outline: none; border-bottom-color: var(--blush-deep) !important; }
+    .photo-name::placeholder { color: var(--text-muted); }
   .hex-chip-glow { animation: hexChipGlow 1.3s ease-in-out 0.6s 3 both; }
   @media (prefers-reduced-motion: reduce) { .hex-chip-glow { animation: none; } }
   .popular-pick:hover .popular-pick-shade { text-decoration: underline; text-underline-offset: 3px; }
