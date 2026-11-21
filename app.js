@@ -6153,7 +6153,7 @@ function DupeFinder({
   //   link     12px  clickable CTA text ("match from a photo")
   //   body     13px  regular UI text (chips, list primary text)
   //   name     19px  picked shade name (serif)
-  //   lede     19px  panel intro headline (serif)
+  //   lede     24px  panel intro headline (serif)
   const TYPE = {
     eyebrow: 11,
     micro: 11,
@@ -6161,21 +6161,7 @@ function DupeFinder({
     link: 12,
     body: 13,
     name: 19,
-    lede: 19
-  };
-  const stepNum = {
-    width: 22,
-    height: 22,
-    borderRadius: '50%',
-    background: 'var(--espresso)',
-    color: 'var(--cream)',
-    fontFamily: 'Hanken Grotesk',
-    fontSize: TYPE.eyebrow,
-    fontWeight: 500,
-    display: 'inline-flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexShrink: 0
+    lede: 24
   };
   const stepLabel = {
     fontFamily: 'Hanken Grotesk',
@@ -6284,60 +6270,30 @@ function DupeFinder({
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
-      textAlign: 'center',
       marginBottom: 2
     }
   }, /*#__PURE__*/React.createElement("p", {
     style: {
       fontFamily: 'Gloock',
       fontSize: TYPE.lede,
-      color: 'var(--espresso-mid)',
-      lineHeight: 1.4
+      color: 'var(--espresso)',
+      lineHeight: 1.2,
+      textWrap: 'balance'
     }
   }, "Find a color match for a lipstick you like"), /*#__PURE__*/React.createElement("p", {
     style: {
       fontFamily: 'Hanken Grotesk',
-      fontSize: TYPE.body,
-      color: 'var(--text-muted)',
-      letterSpacing: '0.02em',
-      marginTop: 4
+      fontSize: TYPE.caption,
+      color: 'var(--espresso-mid)',
+      marginTop: 6
     }
-  }, "Search a brand, a shade or both"), /*#__PURE__*/React.createElement("button", {
-    onClick: () => {
-      window.gtag?.('event', 'dupe_photo_fallback', {
-        step: 'header'
-      });
-      onUsePhoto();
-    },
-    style: {
-      marginTop: 8,
-      fontFamily: 'Hanken Grotesk',
-      fontSize: TYPE.link,
-      letterSpacing: '0.05em',
-      color: 'var(--blush-deep)',
-      background: 'transparent',
-      border: 'none',
-      borderBottom: '1px solid var(--blush-deep)',
-      paddingBottom: 1,
-      cursor: 'pointer'
-    }
-  }, "Can't find your lipstick? Match it from a photo \u2192")), !brand ? /*#__PURE__*/React.createElement("div", {
+  }, "Search a brand, a shade or both")), !brand ? /*#__PURE__*/React.createElement("div", {
     style: {
       display: 'flex',
       flexDirection: 'column',
       gap: 10
     }
   }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: 'flex',
-      alignItems: 'center',
-      gap: 8
-    }
-  }, /*#__PURE__*/React.createElement("span", {
-    style: stepNum
-  }, "1"), /*#__PURE__*/React.createElement("span", {
-    style: stepLabel
-  }, "Brand or shade")), /*#__PURE__*/React.createElement("div", {
     className: "dupe-input",
     style: inputWrap
   }, /*#__PURE__*/React.createElement("span", {
@@ -6539,15 +6495,7 @@ function DupeFinder({
       textOverflow: 'ellipsis',
       whiteSpace: 'nowrap'
     }
-  }, brandName(p.brand), " \xB7 ", titleCase(p.product)))))), !brandQuery && /*#__PURE__*/React.createElement("p", {
-    style: {
-      fontSize: TYPE.body,
-      color: 'var(--text-muted)',
-      textAlign: 'center',
-      lineHeight: 1.5,
-      marginTop: 2
-    }
-  }, "Start typing a brand or shade \u2014 matches appear as you go.")) : /*#__PURE__*/React.createElement("div", {
+  }, brandName(p.brand), " \xB7 ", titleCase(p.product))))))) : /*#__PURE__*/React.createElement("div", {
     style: {
       display: 'flex',
       flexDirection: 'column',
@@ -6559,9 +6507,7 @@ function DupeFinder({
       alignItems: 'center',
       gap: 10
     }
-  }, /*#__PURE__*/React.createElement("span", {
-    style: stepNum
-  }, "1"), /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("div", {
     style: chip
   }, /*#__PURE__*/React.createElement("span", {
     style: {
@@ -6587,8 +6533,6 @@ function DupeFinder({
       gap: 8
     }
   }, /*#__PURE__*/React.createElement("span", {
-    style: stepNum
-  }, "2"), /*#__PURE__*/React.createElement("span", {
     style: stepLabel
   }, "Shade")), /*#__PURE__*/React.createElement("div", {
     className: "dupe-input",
@@ -6837,8 +6781,6 @@ function DupeFinder({
       gap: 8
     }
   }, /*#__PURE__*/React.createElement("span", {
-    style: stepNum
-  }, "2"), /*#__PURE__*/React.createElement("span", {
     style: stepLabel
   }, "Matching this shade")), /*#__PURE__*/React.createElement("div", {
     className: "dupe-card-desktop",
@@ -6991,28 +6933,53 @@ function DupeFinder({
     className: "only-wide"
   }, "Closest dupes are ranked on the right \u2192"), /*#__PURE__*/React.createElement("span", {
     className: "only-stacked"
-  }, "Closest dupes are ranked below \u2193")))), !product && popularProducts.length > 0 && /*#__PURE__*/React.createElement("div", {
+  }, "Closest dupes are ranked below \u2193")))), !product && !brandQuery.trim() && !shadeQuery.trim() && /*#__PURE__*/React.createElement("div", {
     style: {
-      marginTop: 26,
-      display: 'flex',
-      flexDirection: 'column',
-      gap: 10
+      marginTop: 6,
+      borderLeft: '2px solid var(--blush-deep)',
+      padding: '2px 0 2px 14px'
     }
   }, /*#__PURE__*/React.createElement("p", {
     style: {
       fontFamily: 'Hanken Grotesk',
       fontSize: TYPE.eyebrow,
-      color: 'var(--text-muted)',
-      letterSpacing: '0.1em',
+      fontWeight: 500,
+      letterSpacing: '0.12em',
       textTransform: 'uppercase',
-      textAlign: 'center'
+      color: 'var(--blush-deep)'
     }
-  }, "Or try a popular shade"), /*#__PURE__*/React.createElement("div", {
+  }, "Can't find your lipstick?"), /*#__PURE__*/React.createElement("button", {
+    onClick: () => {
+      window.gtag?.('event', 'dupe_photo_fallback', {
+        step: 'header'
+      });
+      onUsePhoto();
+    },
     style: {
-      display: 'flex',
-      flexWrap: 'wrap',
-      gap: 8,
-      justifyContent: 'center'
+      marginTop: 4,
+      padding: 0,
+      fontFamily: 'Hanken Grotesk',
+      fontSize: TYPE.caption,
+      color: 'var(--espresso-mid)',
+      background: 'transparent',
+      border: 'none',
+      textDecoration: 'underline',
+      textUnderlineOffset: 3,
+      cursor: 'pointer'
+    }
+  }, "Match from a photo")), !product && popularProducts.length > 0 && /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 14
+    }
+  }, /*#__PURE__*/React.createElement("p", {
+    style: stepLabel
+  }, "Popular shades"), /*#__PURE__*/React.createElement("div", {
+    className: "popular-list",
+    style: {
+      display: 'grid',
+      gridTemplateColumns: '1fr 1fr',
+      columnGap: 22,
+      marginTop: 2
     }
   }, popularProducts.map((p, i) => /*#__PURE__*/React.createElement("button", {
     key: i,
@@ -7021,48 +6988,46 @@ function DupeFinder({
     style: {
       display: 'flex',
       alignItems: 'center',
-      gap: 8,
-      padding: '7px 12px 7px 8px',
-      background: '#fff',
-      borderRadius: 40,
-      border: '1px solid var(--border)',
-      boxShadow: '0 2px 8px var(--shadow)',
-      cursor: 'pointer'
+      gap: 10,
+      minWidth: 0,
+      padding: '10px 0',
+      background: 'transparent',
+      border: 'none',
+      borderBottom: '1px solid var(--border)',
+      cursor: 'pointer',
+      textAlign: 'left'
     }
   }, /*#__PURE__*/React.createElement("span", {
-    className: "popular-pick-swatch",
     style: {
-      width: 20,
-      height: 20,
-      borderRadius: '50%',
+      width: 10,
+      height: 26,
+      borderRadius: 2,
       background: p.hex,
-      flexShrink: 0,
-      boxShadow: `0 1px 4px ${p.hex}66`,
-      border: '1px solid rgba(42,26,20,0.08)'
+      flexShrink: 0
     }
   }), /*#__PURE__*/React.createElement("span", {
     style: {
       display: 'flex',
       flexDirection: 'column',
-      textAlign: 'left'
+      minWidth: 0
     }
   }, /*#__PURE__*/React.createElement("span", {
     className: "popular-pick-shade",
     style: {
       fontFamily: 'Hanken Grotesk',
-      fontSize: TYPE.link,
-      fontWeight: 700,
-      letterSpacing: '0.05em',
-      textTransform: 'uppercase',
+      fontSize: TYPE.body,
       color: 'var(--espresso)',
-      lineHeight: 1.15
+      lineHeight: 1.3,
+      whiteSpace: 'nowrap',
+      overflow: 'hidden',
+      textOverflow: 'ellipsis'
     }
   }, titleCase(p.shade)), /*#__PURE__*/React.createElement("span", {
-    className: "popular-pick-brand",
     style: {
       fontFamily: 'Hanken Grotesk',
       fontSize: TYPE.micro,
-      color: 'var(--text-muted)'
+      color: 'var(--text-muted)',
+      lineHeight: 1.3
     }
   }, brandName(p.brand))))))));
 }
@@ -8327,7 +8292,7 @@ function App() {
       e.currentTarget.style.borderColor = 'var(--border)';
       e.currentTarget.style.color = 'var(--espresso)';
     }
-  }, "How I Built It"), /*#__PURE__*/React.createElement("button", {
+  }, "How it works"), /*#__PURE__*/React.createElement("button", {
     className: "header-fav",
     onClick: () => setShowWishlist(true),
     style: {
@@ -8378,7 +8343,7 @@ function App() {
   }, wishlist.length))), /*#__PURE__*/React.createElement("nav", {
     className: "header-mobile-links",
     "aria-label": "Pages"
-  }, [['/guides/', 'Guides', 'guides'], ['/about/', 'How I Built It', 'about']].map(([href, label, target]) => /*#__PURE__*/React.createElement("a", {
+  }, [['/guides/', 'Guides', 'guides'], ['/about/', 'How it works', 'about']].map(([href, label, target]) => /*#__PURE__*/React.createElement("a", {
     key: target,
     href: href,
     onClick: () => window.gtag?.('event', 'nav_link_click', {

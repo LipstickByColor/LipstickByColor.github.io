@@ -3560,10 +3560,9 @@ function DupeFinder({ product, onSelect, onUsePhoto, onUseWheel }) {
   //   link     12px  clickable CTA text ("match from a photo")
   //   body     13px  regular UI text (chips, list primary text)
   //   name     19px  picked shade name (serif)
-  //   lede     19px  panel intro headline (serif)
-  const TYPE = { eyebrow:11, micro:11, caption:14, link:12, body:13, name:19, lede:19 };
+  //   lede     24px  panel intro headline (serif)
+  const TYPE = { eyebrow:11, micro:11, caption:14, link:12, body:13, name:19, lede:24 };
 
-  const stepNum = { width:22, height:22, borderRadius:'50%', background:'var(--espresso)', color:'var(--cream)', fontFamily:'Hanken Grotesk', fontSize:TYPE.eyebrow, fontWeight:500, display:'inline-flex', alignItems:'center', justifyContent:'center', flexShrink:0 };
   const stepLabel = { fontFamily:'Hanken Grotesk', fontSize:TYPE.eyebrow, color:'var(--text-muted)', letterSpacing:'0.1em', textTransform:'uppercase' };
   const inputWrap = { display:'flex', alignItems:'center', gap:10, background:'#fff', borderRadius:14, border:'1.5px solid var(--border)', padding:'11px 14px', boxShadow:'0 2px 8px var(--shadow)' };
   const inputStyle = { flex:1, border:'none', outline:'none', background:'transparent', fontFamily:'Hanken Grotesk', fontSize:15, color:'var(--espresso)', minWidth:0 };
@@ -3577,24 +3576,17 @@ function DupeFinder({ product, onSelect, onUsePhoto, onUseWheel }) {
 
   return (
     <div style={{ width:'100%', maxWidth:440, display:'flex', flexDirection:'column', gap:14, padding:'4px 0' }}>
-      <div style={{ textAlign:'center', marginBottom:2 }}>
-        <p style={{ fontFamily:'Gloock', fontSize:TYPE.lede, color:'var(--espresso-mid)', lineHeight:1.4 }}>
+      <div style={{ marginBottom:2 }}>
+        <p style={{ fontFamily:'Gloock', fontSize:TYPE.lede, color:'var(--espresso)', lineHeight:1.2, textWrap:'balance' }}>
           Find a color match for a lipstick you like
         </p>
-        <p style={{ fontFamily:'Hanken Grotesk', fontSize:TYPE.body, color:'var(--text-muted)', letterSpacing:'0.02em', marginTop:4 }}>
+        <p style={{ fontFamily:'Hanken Grotesk', fontSize:TYPE.caption, color:'var(--espresso-mid)', marginTop:6 }}>
           Search a brand, a shade or both
         </p>
-        <button onClick={() => { window.gtag?.('event', 'dupe_photo_fallback', { step: 'header' }); onUsePhoto(); }} style={{ marginTop:8, fontFamily:'Hanken Grotesk', fontSize:TYPE.link, letterSpacing:'0.05em', color:'var(--blush-deep)', background:'transparent', border:'none', borderBottom:'1px solid var(--blush-deep)', paddingBottom:1, cursor:'pointer' }}>
-          Can't find your lipstick? Match it from a photo →
-        </button>
       </div>
 
       {!brand ? (
         <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
-          <div style={{ display:'flex', alignItems:'center', gap:8 }}>
-            <span style={stepNum}>1</span>
-            <span style={stepLabel}>Brand or shade</span>
-          </div>
           <div className="dupe-input" style={inputWrap}>
             <span style={{ color:'var(--text-muted)', fontSize:22, lineHeight:1 }}>⌕</span>
             <input autoFocus value={brandQuery}
@@ -3673,16 +3665,10 @@ function DupeFinder({ product, onSelect, onUsePhoto, onUseWheel }) {
               ))}
             </div>
           )}
-          {!brandQuery && (
-            <p style={{ fontSize:TYPE.body, color:'var(--text-muted)', textAlign:'center', lineHeight:1.5, marginTop:2 }}>
-              Start typing a brand or shade — matches appear as you go.
-            </p>
-          )}
         </div>
       ) : (
         <div style={{ display:'flex', flexDirection:'column', gap:14 }}>
           <div style={{ display:'flex', alignItems:'center', gap:10 }}>
-            <span style={stepNum}>1</span>
             <div style={chip}>
               <span style={{ fontFamily:'Hanken Grotesk', fontSize:13, fontWeight:500, color:'var(--espresso)' }}>{brandName(brand)}</span>
               <button onClick={changeBrand} title="Change brand" style={chipX}>×</button>
@@ -3692,7 +3678,6 @@ function DupeFinder({ product, onSelect, onUsePhoto, onUseWheel }) {
           {!product ? (
             <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
               <div style={{ display:'flex', alignItems:'center', gap:8 }}>
-                <span style={stepNum}>2</span>
                 <span style={stepLabel}>Shade</span>
               </div>
               <div className="dupe-input" style={inputWrap}>
@@ -3781,7 +3766,6 @@ function DupeFinder({ product, onSelect, onUsePhoto, onUseWheel }) {
           ) : (
             <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
               <div style={{ display:'flex', alignItems:'center', gap:8 }}>
-                <span style={stepNum}>2</span>
                 <span style={stepLabel}>Matching this shade</span>
               </div>
               {/* Desktop: tall card with the full, uncropped product image */}
@@ -3825,23 +3809,31 @@ function DupeFinder({ product, onSelect, onUsePhoto, onUseWheel }) {
         </div>
       )}
 
-      {!product && popularProducts.length > 0 && (
-        <div style={{ marginTop:26, display:'flex', flexDirection:'column', gap:10 }}>
-          <p style={{ fontFamily:'Hanken Grotesk', fontSize:TYPE.eyebrow, color:'var(--text-muted)', letterSpacing:'0.1em', textTransform:'uppercase', textAlign:'center' }}>
-            Or try a popular shade
+      {!product && !brandQuery.trim() && !shadeQuery.trim() && (
+        <div style={{ marginTop:6, borderLeft:'2px solid var(--blush-deep)', padding:'2px 0 2px 14px' }}>
+          <p style={{ fontFamily:'Hanken Grotesk', fontSize:TYPE.eyebrow, fontWeight:500, letterSpacing:'0.12em', textTransform:'uppercase', color:'var(--blush-deep)' }}>
+            Can't find your lipstick?
           </p>
-          <div style={{ display:'flex', flexWrap:'wrap', gap:8, justifyContent:'center' }}>
+          <button onClick={() => { window.gtag?.('event', 'dupe_photo_fallback', { step: 'header' }); onUsePhoto(); }} style={{ marginTop:4, padding:0, fontFamily:'Hanken Grotesk', fontSize:TYPE.caption, color:'var(--espresso-mid)', background:'transparent', border:'none', textDecoration:'underline', textUnderlineOffset:3, cursor:'pointer' }}>
+            Match from a photo
+          </button>
+        </div>
+      )}
+
+      {!product && popularProducts.length > 0 && (
+        <div style={{ marginTop:14 }}>
+          <p style={stepLabel}>Popular shades</p>
+          <div className="popular-list" style={{ display:'grid', gridTemplateColumns:'1fr 1fr', columnGap:22, marginTop:2 }}>
             {popularProducts.map((p, i) => (
               <button key={i} className="popular-pick" onClick={() => pickPopular(p)} style={{
-                display:'flex', alignItems:'center', gap:8,
-                padding:'7px 12px 7px 8px', background:'#fff', borderRadius:40,
-                border:'1px solid var(--border)', boxShadow:'0 2px 8px var(--shadow)',
-                cursor:'pointer',
+                display:'flex', alignItems:'center', gap:10, minWidth:0,
+                padding:'10px 0', background:'transparent', border:'none',
+                borderBottom:'1px solid var(--border)', cursor:'pointer', textAlign:'left',
               }}>
-                <span className="popular-pick-swatch" style={{ width:20, height:20, borderRadius:'50%', background:p.hex, flexShrink:0, boxShadow:`0 1px 4px ${p.hex}66`, border:'1px solid rgba(42,26,20,0.08)' }} />
-                <span style={{ display:'flex', flexDirection:'column', textAlign:'left' }}>
-                  <span className="popular-pick-shade" style={{ fontFamily:'Hanken Grotesk', fontSize:TYPE.link, fontWeight:700, letterSpacing:'0.05em', textTransform:'uppercase', color:'var(--espresso)', lineHeight:1.15 }}>{titleCase(p.shade)}</span>
-                  <span className="popular-pick-brand" style={{ fontFamily:'Hanken Grotesk', fontSize:TYPE.micro, color:'var(--text-muted)' }}>{brandName(p.brand)}</span>
+                <span style={{ width:10, height:26, borderRadius:2, background:p.hex, flexShrink:0 }} />
+                <span style={{ display:'flex', flexDirection:'column', minWidth:0 }}>
+                  <span className="popular-pick-shade" style={{ fontFamily:'Hanken Grotesk', fontSize:TYPE.body, color:'var(--espresso)', lineHeight:1.3, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{titleCase(p.shade)}</span>
+                  <span style={{ fontFamily:'Hanken Grotesk', fontSize:TYPE.micro, color:'var(--text-muted)', lineHeight:1.3 }}>{brandName(p.brand)}</span>
                 </span>
               </button>
             ))}
@@ -4525,7 +4517,7 @@ function App() {
             onMouseEnter={e => { e.currentTarget.style.borderColor='var(--blush)'; e.currentTarget.style.color='var(--blush-deep)'; }}
             onMouseLeave={e => { e.currentTarget.style.borderColor='var(--border)'; e.currentTarget.style.color='var(--espresso)'; }}
           >
-            How I Built It
+            How it works
           </a>
           <button className="header-fav"
             onClick={() => setShowWishlist(true)}
@@ -4554,7 +4546,7 @@ function App() {
         {/* Phones: the title takes the first line; the two page links share the second with My Favorites
             (links left, button right; .header-mobile-links in index.html puts them ahead of the button) */}
         <nav className="header-mobile-links" aria-label="Pages">
-          {[['/guides/', 'Guides', 'guides'], ['/about/', 'How I Built It', 'about']].map(([href, label, target]) => (
+          {[['/guides/', 'Guides', 'guides'], ['/about/', 'How it works', 'about']].map(([href, label, target]) => (
             <a key={target} href={href}
               onClick={() => window.gtag?.('event', 'nav_link_click', { target, location: 'header' })}
               style={{

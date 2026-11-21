@@ -225,13 +225,7 @@
   /* Below this the four squares get too small: two across */
   @media (max-width: 1000px) { .landing-grid { grid-template-columns: repeat(2, 1fr); max-width: 640px; } }
 
-  /* Dupe finder "popular shade" tiles read small on desktop — bump them up.
-     !important because the base sizes are inline styles in app.jsx. */
-  @media (min-width: 901px) {
-    .popular-pick { padding: 8px 14px 8px 9px !important; gap: 10px !important; }
-    .popular-pick-swatch { width: 24px !important; height: 24px !important; }
-    .popular-pick-brand { font-size: 12px !important; }
-  }
+  .popular-pick:hover .popular-pick-shade { text-decoration: underline; text-underline-offset: 3px; }
 
   @media (max-width: 900px) {
     .landing-main { padding: 32px 24px 40px; gap: 28px; }
@@ -395,7 +389,7 @@
       <a href="/lipstick-color-chart/">Color chart</a>
       <a href="/guides/">Guides</a>
       <a href="/color-science/">Color science</a>
-      <a href="/about/">How I built it</a>
+      <a href="/about/">How it works</a>
     </nav>
   </main>
 </div>
