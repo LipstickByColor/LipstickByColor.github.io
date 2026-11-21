@@ -102,7 +102,7 @@
       `<div tabindex="-1" style="padding:0 6px 6px;display:flex;flex-direction:column;gap:8px;outline:none">
         <div>
           <p style="margin:0;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#8C6858;font-weight:500">${esc(brand)}</p>
-          <p style="margin:2px 0 0;font-family:'Cormorant Garamond',serif;font-size:24px;line-height:1.05">${esc(shade)}</p>
+          <p style="margin:2px 0 0;font-family:'Gloock',serif;font-size:21px;line-height:1.05">${esc(shade)}</p>
         </div>
         <p style="margin:0;font-size:14px;line-height:1.5;color:#5C3D30;text-wrap:pretty"><strong style="color:${right ? '#2A1A14' : '#B0566F'};font-weight:600">${right ? 'You agree with the brands.' : 'You said ' + esc(a) + '. Brands say ' + esc(truth) + '.'}</strong></p>
         <img src="${ASSETS + img}" alt="${esc(brand + ' ' + shade)} swatch" style="width:100%;height:160px;object-fit:contain;background:#fff;border-radius:10px;display:block">
