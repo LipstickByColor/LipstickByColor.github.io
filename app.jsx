@@ -2509,11 +2509,7 @@ function ComparisonTray({ pinnedItems, onRemove, onClear }) {
 function ListPicker({ wishlist, selectedKey, onPick }) {
   return (
     <div style={{ width:'100%', maxWidth:440, padding:'4px 0 8px' }}>
-      <div style={{
-        fontSize:15,
-        color:'var(--espresso-mid)', lineHeight:1.5, textAlign:'center',
-        marginBottom:14,
-      }}>
+      <div style={{ fontFamily:'Gloock', fontSize:24, color:'var(--espresso)', lineHeight:1.2, textWrap:'balance', marginBottom:16 }}>
         Pick a saved shade to find similar ones
       </div>
       <div style={{
@@ -2956,7 +2952,7 @@ function trackExplore(action, params, once) {
   window.gtag?.('event', 'shade_explore', { action, ...params });
 }
 
-function ShadeExplorer({ draft, color, origin, zoom, onZoom, info, committed, pinned, onDraft, onStep, onCommit, onJump }) {
+function ShadeExplorer({ draft, color, origin, zoom, onZoom, info, committed, pinned, onDraft, onStep, onCommit, onJump, linkHex, onHex }) {
   const { LMIN, LMAX, SPAN, ZOOM, GRID } = EXPLORER, TYPE = EXPLORER_TYPE;
   const [stacked, setStacked] = useState(() => window.innerWidth <= 900);
   const [depthFocus, setDepthFocus] = useState(false);
@@ -2965,6 +2961,14 @@ function ShadeExplorer({ draft, color, origin, zoom, onZoom, info, committed, pi
   // above the map, so taking them away while the dot is dragged would slide the map out from under the pointer.
   // Their chips are only marked while the dot is still on the color they picked (onStart).
   const [start, setStart] = useState(null); // { fam, ti, di, hex }
+  // The Hex row: open after its chip is pressed, or on arriving with a color in the link (shown in the box)
+  const [hexOpen, setHexOpen] = useState(!!linkHex);
+  const [hexFocus, setHexFocus] = useState(false);
+  // The first visit to the chart, the Hex code chip glows a few times so hex users find it (once per browser)
+  const [hexGlow] = useState(() => {
+    try { if (localStorage.getItem('lipstick-hex-intro')) return false; localStorage.setItem('lipstick-hex-intro', '1'); return true; }
+    catch { return false; }
+  });
   const sel = start, onStart = !!start && start.hex === color.hex;
   const mapEl = React.useRef(null);
   const drag = React.useRef({}); // mouse: dragging the map · dot: dragging the marker · tap: a touch that may still be a tap
@@ -3042,17 +3046,23 @@ function ShadeExplorer({ draft, color, origin, zoom, onZoom, info, committed, pi
   function pickStart(fam, ti, di, row) {
     const lab = startLab(fam, ti, di);
     trackExplore(row, { name: row === 'tone' ? START_TONES[ti] : row === 'depth_chip' ? (START_FAMILIES[fam].depths || START_DEPTHS)[di][0] : fam });
-    setStart({ fam, ti, di, hex: labToHex(...lab) });
+    setStart({ fam, ti, di, hex: labToHex(...lab) }); setHexOpen(false);
     onDraft(draftFromLab(lab));
   }
-  const startChip = (name, hex, on, onClick) => (
-    <button key={name} type="button" aria-pressed={on} onClick={onClick} style={{
+  function openHex() {
+    if (!hexOpen) trackExplore('hex_open');
+    setStart(null); setHexOpen(true); setHexFocus(true);
+  }
+  const startChip = (name, hex, on, onClick, glyph, className) => (
+    <button key={name} type="button" aria-pressed={on} onClick={onClick} className={className} style={{
       flex:'none', whiteSpace:'nowrap', fontFamily:'Hanken Grotesk', fontSize:TYPE.body,
       display:'flex', alignItems:'center', gap:7, minHeight: stacked ? 44 : 0, padding:'6px 14px 6px 7px',
       borderRadius:20, border:`1.5px solid ${on ? 'var(--espresso)' : 'var(--border)'}`,
       background:'#fff', color:'var(--espresso)', cursor:'pointer',
     }}>
-      <span style={{ width:18, height:18, borderRadius:'50%', background:hex }} />{name}
+      {glyph
+        ? <span aria-hidden="true" style={{ width:18, height:18, borderRadius:'50%', background:'var(--cream-dark)', color:'var(--espresso)', fontSize:12, fontWeight:600, display:'flex', alignItems:'center', justifyContent:'center' }}>{glyph}</span>
+        : <span style={{ width:18, height:18, borderRadius:'50%', background:hex }} />}{name}
     </button>
   );
   // The label has a fixed width so the chips of the three rows line up
@@ -3097,19 +3107,26 @@ function ShadeExplorer({ draft, color, origin, zoom, onZoom, info, committed, pi
 
   return (
     <div style={{ width:'100%', display:'flex', flexDirection:'column', gap:16 }}>
-      <p style={{
-        fontSize:15,
-        color:'var(--espresso-mid)', textAlign:'center', lineHeight:1.5, maxWidth:360, alignSelf:'center',
-      }}>
-        Choose a spot on the map to find matching lipsticks, then go lighter or deeper.
+      <p style={{ fontFamily:'Gloock', fontSize:24, color:'var(--espresso)', lineHeight:1.2, textWrap:'balance' }}>
+        Pick a spot on the chart or enter a hex code to explore lipsticks
       </p>
       <p aria-live="polite" style={{ position:'absolute', width:1, height:1, margin:-1, overflow:'hidden', clip:'rect(0 0 0 0)', whiteSpace:'nowrap' }}>{liveMsg}</p>
 
       {/* Start from: a family, then (for most) its tone and depth */}
       <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
-        {startRow('Start from', EXPLORER_STARTS.map(([name, hex]) => START_FAMILIES[name]
+        {startRow('Start from', [startChip('Hex code', null, hexOpen, openHex, '#', hexGlow ? 'hex-chip-glow' : undefined),
+          ...EXPLORER_STARTS.map(([name, hex]) => START_FAMILIES[name]
           ? startChip(name, hex, sel?.fam === name, () => pickStart(name, 1, START_FAMILIES[name].open, 'start_from'))
-          : startChip(name, hex, hex === color.hex, () => { setStart(null); trackExplore('start_from', { name }); onDraft(draftFromLab(hexToLab(hex))); })))}
+          : startChip(name, hex, hex === color.hex, () => { setStart(null); setHexOpen(false); trackExplore('start_from', { name }); onDraft(draftFromLab(hexToLab(hex))); }))])}
+        {hexOpen && (
+          <div style={{ display:'flex', alignItems:'center', gap:8, padding:'2px 0' }}>
+            <label htmlFor="shade-hex" style={{
+              flex:'none', fontSize:TYPE.eyebrow, lineHeight:1.15, letterSpacing:'0.12em', textTransform:'uppercase',
+              color:'var(--espresso-mid)', fontWeight:500, width: stacked ? 52 : 72,
+            }}>Hex</label>
+            <ShadeHexForm id="shade-hex" initial={linkHex} autoFocus={hexFocus} stacked={stacked} onSubmit={onHex} />
+          </div>
+        )}
         {sel && startRow('Tone', START_TONES.map((name, ti) =>
           startChip(name, labToHex(...startLab(sel.fam, ti, sel.di)), onStart && sel.ti === ti, () => pickStart(sel.fam, ti, sel.di, 'tone'))), true)}
         {sel && (START_FAMILIES[sel.fam].depths || START_DEPTHS).length > 1 && startRow('Depth', (START_FAMILIES[sel.fam].depths || START_DEPTHS).map(([name], di) =>
@@ -3179,14 +3196,11 @@ function ShadeExplorer({ draft, color, origin, zoom, onZoom, info, committed, pi
 
       <p id="shade-map-help" style={{ fontSize:TYPE.body, lineHeight:1.6, color:'var(--espresso-mid)', textAlign:'center' }}>
         {zoom ? `Close-up of the shades around your pick. ${stacked ? 'Tap a spot to choose, or drag the dot.' : 'Select or drag to choose one.'}`
-          : stacked ? 'Tap a spot to choose, or drag the dot. Use the bar above to go lighter or deeper.'
-          : 'Select or drag across the map to explore colors. Use the depth bar to go lighter or deeper.'}
+          : stacked ? 'Tap a spot to choose, or drag the dot.'
+          : 'Select or drag across the map to explore colors.'}
       </p>
 
       {stacked && <ShadeZoomControl color={color} origin={origin} zoom={zoom} onZoom={onZoom} onDraft={onDraft} row />}
-
-      {/* Hex entry: here when stacked, under the card on desktop */}
-      {stacked && <ShadeHexForm id="shade-hex" big onDraft={onDraft} />}
 
       {/* Stacked layout: the pick and its button are fixed to the bottom of the screen, over the page.
           With the comparison tray open (it owns the bottom edge) the bar sits here in the page instead. */}
@@ -3227,36 +3241,48 @@ function ShadeExplorer({ draft, color, origin, zoom, onZoom, info, committed, pi
   );
 }
 
-// "Already know the hex?": a typed hex moves the dot to that color
-function ShadeHexForm({ id, big, onDraft }) {
+// The Hex row under Start from (opened by its "Hex code" chip). Show, Enter or pasting a full code
+// moves the dot to that color and opens its matches straight away.
+function parseHex(text) {
+  let s = (text || '').trim().replace(/^#/, '');
+  if (/^[0-9a-f]{3}$/i.test(s)) s = s.split('').map(c => c + c).join('');
+  return /^[0-9a-f]{6}$/i.test(s) ? '#' + s.toLowerCase() : null;
+}
+function ShadeHexForm({ id, initial, autoFocus, stacked, onSubmit }) {
   const TYPE = EXPLORER_TYPE;
-  const [hexText, setHexText] = useState('');
+  const [hexText, setHexText] = useState(initial ? initial.toUpperCase() : '');
   const [hexBad, setHexBad] = useState(false);
+  function go(hex, how) {
+    setHexBad(false);
+    trackExplore(how, { hex });
+    onSubmit(hex);
+  }
   function submitHex(e) {
     e.preventDefault();
-    let s = hexText.trim().replace(/^#/, '');
-    if (/^[0-9a-f]{3}$/i.test(s)) s = s.split('').map(c => c + c).join('');
-    if (!/^[0-9a-f]{6}$/i.test(s)) return setHexBad(true);
-    setHexBad(false);
-    trackExplore('hex_typed', { hex: '#' + s.toLowerCase() });
-    onDraft(draftFromLab(hexToLab('#' + s.toLowerCase())));
+    const hex = parseHex(hexText);
+    if (!hex) return setHexBad(true);
+    go(hex, 'hex_typed');
+  }
+  function pasteHex(e) {
+    const hex = parseHex(e.clipboardData?.getData('text'));
+    if (!hex) return;
+    e.preventDefault();
+    setHexText(hex.toUpperCase());
+    go(hex, 'hex_pasted');
   }
   return (
-    <form onSubmit={submitHex} style={{ display:'flex', flexDirection:'column', gap:8, padding:'0 4px' }}>
-      <label htmlFor={id} style={{ fontFamily:'Gloock', fontSize:TYPE.name, lineHeight:1.2, color:'var(--espresso)' }}>
-        Already know the hex?
-      </label>
+    <form onSubmit={submitHex} style={{ flex:1, minWidth:0, display:'flex', flexDirection:'column', gap:6 }}>
       <div style={{ display:'flex', gap:8 }}>
-        <input id={id} value={hexText} onChange={e => { setHexText(e.target.value); setHexBad(false); }}
-          placeholder="#B5252C" maxLength={7} spellCheck={false} autoComplete="off"
+        <input id={id} value={hexText} onChange={e => { setHexText(e.target.value); setHexBad(false); }} onPaste={pasteHex}
+          autoFocus={autoFocus} aria-label="Hex code" placeholder="#B5252C" maxLength={7} spellCheck={false} autoComplete="off"
           style={{
-            flex:1, minWidth:0, fontFamily:'Hanken Grotesk', fontSize: big ? TYPE.input : TYPE.caption, minHeight: big ? 44 : 0,
-            padding:'10px 14px', borderRadius:12, border:`1.5px solid ${hexBad ? 'var(--blush-deep)' : 'var(--border)'}`,
+            flex:1, minWidth:0, fontFamily:'Hanken Grotesk', fontSize:TYPE.input, minHeight: stacked ? 44 : 36,
+            padding:'6px 14px', borderRadius:20, border:`1.5px solid ${hexBad ? 'var(--blush-deep)' : 'var(--espresso)'}`,
             background:'#fff', color:'var(--espresso)', letterSpacing:'0.04em',
           }} />
         <button type="submit" style={{
-          fontFamily:'Hanken Grotesk', fontSize:TYPE.body, padding:'10px 18px', borderRadius:12,
-          border:'1.5px solid #C9B3A4', background:'transparent', color:'var(--espresso)', cursor:'pointer',
+          fontFamily:'Hanken Grotesk', fontSize:TYPE.body, padding:'6px 18px', borderRadius:20, minHeight: stacked ? 44 : 36,
+          border:'none', background:'var(--espresso)', color:'var(--cream)', cursor:'pointer',
         }}>Show</button>
       </div>
       {hexBad && <p role="alert" style={{ fontSize:TYPE.body, color:'var(--blush-deep)' }}>Use six characters, like #B5252C.</p>}
@@ -4327,6 +4353,11 @@ function App() {
     if (step !== true) setHexOrigin(next);
     if (hexHex) { setHexHex(null); setFilterParams([]); }
   }
+  // A hex code entered in the Hex row: the dot moves there and its matches open, no second press
+  function showHexResults(hex) {
+    const d = draftFromLab(hexToLab(hex));
+    changeHexDraft(d); setShadeZoom(null); setHexHex(draftColor(d).hex);
+  }
   // Closing the results sheet (stacked layout) starts over the same way, and hands focus back to the bar's button
   function closeShadeResults() {
     setHexHex(null); setFilterParams([]);
@@ -4626,7 +4657,8 @@ function App() {
             <>
               <div className="shade-picker">
                 <ShadeExplorer draft={hexDraft} color={draftCol} origin={hexOrigin} zoom={shadeZoom} onZoom={setShadeZoom} onStep={d => changeHexDraft(d, true)} info={shadeInfo} committed={!!hexHex} pinned={pinnedItems.length > 0}
-                  onDraft={changeHexDraft} onCommit={() => setHexHex(draftCol.hex)} onJump={jumpToNearestShade} />
+                  onDraft={changeHexDraft} onCommit={() => setHexHex(draftCol.hex)} onJump={jumpToNearestShade}
+                  linkHex={initialLink?.type === 'color' && !initialWheelColor ? initialLink.hex : null} onHex={showHexResults} />
               </div>
               <div className="shade-side">
                 {/* Desktop only (the class hides it when the columns stack, where the bar under the map does this job) */}
@@ -4634,8 +4666,6 @@ function App() {
                   <ShadeCard color={draftCol} info={shadeInfo} committed={!!hexHex} onCommit={() => setHexHex(draftCol.hex)} onJump={jumpToNearestShade} onDraft={changeHexDraft} origin={hexOrigin} zoom={shadeZoom} onZoom={setShadeZoom} />
                   {hexHex && <p style={{ fontSize:EXPLORER_TYPE.body, color:'var(--espresso-mid)', textAlign:'center', marginTop:12 }}>Move the dot or the depth bar to start over.</p>}
                 </div>
-                {/* Desktop: the hex field sits under the card until results take its place */}
-                {!hexHex && <div className="results-empty-state"><ShadeHexForm id="shade-hex-side" onDraft={changeHexDraft} /></div>}
                 {hexHex && <ShadeSheet color={draftCol} info={shadeInfo} pinned={pinnedItems.length > 0} onClose={closeShadeResults}>{resultsEl}</ShadeSheet>}
               </div>
             </>
