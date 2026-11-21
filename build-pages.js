@@ -158,8 +158,8 @@ const PAGE_CSS = `<style>
   /* Write-up under the tool; app.js seats it above the footer once mounted */
   .page-copy { position: relative; z-index: 1; border-top: 1px solid var(--border); padding: 44px 24px 52px; }
   .page-copy-inner { max-width: 680px; margin: 0 auto; }
-  .page-copy h2 { font-family: 'Cormorant Garamond', serif; font-weight: 400; font-size: 30px; line-height: 1.2; color: var(--espresso); margin-bottom: 14px; }
-  .page-copy h3 { font-family: 'Cormorant Garamond', serif; font-weight: 500; font-size: 21px; line-height: 1.3; color: var(--espresso); margin: 28px 0 8px; }
+  .page-copy h2 { font-family: 'Gloock', serif; font-weight: 400; font-size: 27px; line-height: 1.2; color: var(--espresso); margin-bottom: 14px; }
+  .page-copy h3 { font-family: 'Gloock', serif; font-weight: 400; font-size: 19px; line-height: 1.3; color: var(--espresso); margin: 28px 0 8px; }
   .page-copy p { font-size: 15px; line-height: 1.7; color: var(--text-body); margin-bottom: 12px; }
   .page-copy a { color: var(--blush-deep); text-decoration: underline; text-underline-offset: 3px; }
   .page-copy-links { display: flex; flex-wrap: wrap; gap: 10px; }

@@ -34,7 +34,7 @@
 <link rel="preconnect" href="https://m.media-amazon.com" />
 <link rel="preconnect" href="https://media.ulta.com" />
 <link rel="preconnect" href="https://www.sephora.com" />
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Gloock&family=Hanken+Grotesk:wght@300;400;500;600&display=swap" rel="stylesheet" />
 <script defer src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" integrity="sha384-DGyLxAyjq0f9SPpVevD6IgztCFlnMF6oW/XQGmfe+IsZ8TqEiDrcHkMLKI6fiB/Z" crossorigin="anonymous"></script>
 <script defer src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" integrity="sha384-gTGxhz21lVGYNMcdJOyq01Edg0jhn/c22nsx0kyqP0TxaV5WVdsSH1fSDUf5YJj1" crossorigin="anonymous"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.min.js" integrity="sha384-WgXwGL6fUsYJWNaKJgVbrJKGRQwc1vieh2oy4kw9nXqpNDz3tdSsqEYUgeHD/NuF" crossorigin="anonymous"></script>
@@ -60,7 +60,7 @@
     --shadow: rgba(42,26,20,0.10);
   }
 
-  html, body { height: 100%; background: var(--cream); color: var(--espresso); font-family: 'DM Sans', sans-serif; }
+  html, body { height: 100%; background: var(--cream); color: var(--espresso); font-family: 'Hanken Grotesk', sans-serif; }
 
   #root { min-height: 100vh; }
 
@@ -201,10 +201,9 @@
     padding: 48px 48px 56px; gap: 38px;
   }
   .landing-lede {
-    font-family: 'Cormorant Garamond', serif; font-weight: 300; font-size: 60px;
-    line-height: 1.1; letter-spacing: -0.015em; text-align: center;
+    font-family: 'Gloock', serif; font-weight: 400; font-size: 52px;
+    line-height: 1.1; letter-spacing: -0.01em; text-align: center;
   }
-  .landing-lede em { font-weight: 400; }
   .landing-grid {
     display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px;
     width: 100%; max-width: 1104px;
@@ -231,13 +230,12 @@
   @media (min-width: 901px) {
     .popular-pick { padding: 8px 14px 8px 9px !important; gap: 10px !important; }
     .popular-pick-swatch { width: 24px !important; height: 24px !important; }
-    .popular-pick-shade { font-size: 16px !important; }
     .popular-pick-brand { font-size: 12px !important; }
   }
 
   @media (max-width: 900px) {
     .landing-main { padding: 32px 24px 40px; gap: 28px; }
-    .landing-lede { font-size: 36px; }
+    .landing-lede { font-size: 32px; }
     .mobile-picker-tips {
       display: flex; flex-direction: column; gap: 16px;
       padding: 16px; border: 1px solid var(--border);
@@ -277,7 +275,7 @@
     .landing-corner { transform: scale(0.6); } /* drawn in fixed sizes, unlike the other pictures */
     .landing-card-text { justify-content: center; gap: 4px; padding: 14px 16px; }
     .landing-card-text h2 { font-size: 22px !important; }
-    .landing-lede { font-size: 28px; }
+    .landing-lede { font-size: 26px; }
     .app-header { padding: 14px 16px 10px; gap: 6px 8px; }
     .header-how-it-works { display: none !important; }
     /* …and return as text links on the second line, left of My Favorites. The title has the first
@@ -324,7 +322,7 @@
     display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px;
     text-align: center;
   }
-  .preload h1 { font-family: 'Cormorant Garamond', serif; font-weight: 400; font-size: 34px; line-height: 1.15; color: var(--espresso); }
+  .preload h1 { font-family: 'Gloock', serif; font-weight: 400; font-size: 30px; line-height: 1.15; color: var(--espresso); }
   .preload p { font-size: 13px; line-height: 1.7; color: var(--text-muted); }
   .preload nav { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px 20px; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; }
   .preload nav a { color: var(--espresso-mid); text-decoration: none; border-bottom: 1px solid var(--border); padding-bottom: 2px; }
@@ -363,8 +361,8 @@
   /* Write-up under the tool; app.js seats it above the footer once mounted */
   .page-copy { position: relative; z-index: 1; border-top: 1px solid var(--border); padding: 44px 24px 52px; }
   .page-copy-inner { max-width: 680px; margin: 0 auto; }
-  .page-copy h2 { font-family: 'Cormorant Garamond', serif; font-weight: 400; font-size: 30px; line-height: 1.2; color: var(--espresso); margin-bottom: 14px; }
-  .page-copy h3 { font-family: 'Cormorant Garamond', serif; font-weight: 500; font-size: 21px; line-height: 1.3; color: var(--espresso); margin: 28px 0 8px; }
+  .page-copy h2 { font-family: 'Gloock', serif; font-weight: 400; font-size: 27px; line-height: 1.2; color: var(--espresso); margin-bottom: 14px; }
+  .page-copy h3 { font-family: 'Gloock', serif; font-weight: 400; font-size: 19px; line-height: 1.3; color: var(--espresso); margin: 28px 0 8px; }
   .page-copy p { font-size: 15px; line-height: 1.7; color: var(--text-body); margin-bottom: 12px; }
   .page-copy a { color: var(--blush-deep); text-decoration: underline; text-underline-offset: 3px; }
   .page-copy-links { display: flex; flex-wrap: wrap; gap: 10px; }

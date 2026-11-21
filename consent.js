@@ -95,7 +95,7 @@ function gtag(){dataLayer.push(arguments);}
     el.style.cssText = 'position:fixed;left:16px;right:16px;bottom:16px;z-index:2147483000;margin:0 auto;max-width:560px;' +
       'display:flex;flex-wrap:wrap;align-items:center;gap:12px 16px;padding:16px 18px;' +
       'background:#fff;color:#3D2820;border:1px solid #E0D0C4;border-radius:14px;box-shadow:0 8px 30px rgba(42,26,20,0.16);' +
-      "font-family:'DM Sans',system-ui,sans-serif;font-size:13px;line-height:1.5;text-align:left";
+      "font-family:'Hanken Grotesk','DM Sans',system-ui,sans-serif;font-size:13px;line-height:1.5;text-align:left";
     var btn = 'font:inherit;font-weight:500;font-size:12px;letter-spacing:0.06em;text-transform:uppercase;' +
       'padding:10px 16px;border-radius:40px;cursor:pointer;border:1px solid #2A1A14;';
     el.innerHTML =

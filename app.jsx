@@ -42,7 +42,7 @@ function sizedImageUrl(url, px) {
 function heartBtnStyle(isLiked) {
   return {
     width:30, height:30, display:'flex', alignItems:'center', justifyContent:'center',
-    fontSize:15, lineHeight:1, fontFamily:'DM Sans', flexShrink:0,
+    fontSize:15, lineHeight:1, fontFamily:'Hanken Grotesk', flexShrink:0,
     background: isLiked ? 'rgba(232,180,192,0.55)' : 'rgba(255,255,255,0.82)',
     color: isLiked ? 'var(--blush-deep)' : 'var(--blush)', // the filled heart sits on pink
     border:'1px solid rgba(42,26,20,0.08)', borderRadius:'50%', cursor:'pointer',
@@ -126,7 +126,7 @@ const srOnly = { position:'absolute', width:1, height:1, overflow:'hidden', clip
 // How many shades the comparison tray holds
 const MAX_COMPARE = 6;
 
-const MATCH_CARD_TYPE = { brand:11, meta:12, body:13 };
+const MATCH_CARD_TYPE = { brand:11, meta:12, body:13, shade:14 };
 
 // Result cards name the format only for these, which aren't lipsticks in the
 // usual sense; the product line is in the detail view
@@ -179,7 +179,7 @@ function MatchCard({ p, wishlist, toggleWishlist, pinnedItems, togglePin, onOpen
             className="match-card-action"
             style={{
               width:30, height:30, display:'flex', alignItems:'center', justifyContent:'center',
-              fontSize:15, lineHeight:1, fontFamily:'DM Sans',
+              fontSize:15, lineHeight:1, fontFamily:'Hanken Grotesk',
               background: isPinned ? 'var(--espresso)' : 'rgba(255,255,255,0.82)',
               color: isPinned ? '#FAF6F1' : 'var(--blush)',
               border:'1px solid rgba(42,26,20,0.08)', borderRadius:'50%',
@@ -189,14 +189,14 @@ function MatchCard({ p, wishlist, toggleWishlist, pinnedItems, togglePin, onOpen
         </div>
       </div>
       <div style={{ padding:'8px 9px 9px', display:'flex', flexDirection:'column', gap:3, flex:1 }}>
-        <div style={{ fontSize:TYPE.brand, color:'var(--espresso-mid)', fontFamily:'DM Sans', fontWeight:500, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
+        <div style={{ fontSize:TYPE.brand, color:'var(--espresso)', fontFamily:'Hanken Grotesk', fontWeight:700, letterSpacing:'0.06em', textTransform:'uppercase', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
           <span style={srOnly}>Brand: </span>{brandName(p.brand)}
         </div>
-        <div style={{ fontSize:TYPE.meta, fontFamily:'DM Sans', color:'var(--espresso-mid)', lineHeight:1.35 }}>
+        <div style={{ fontSize:TYPE.shade, fontFamily:'Hanken Grotesk', color:'var(--espresso-mid)', lineHeight:1.3 }}>
           <span style={srOnly}>Shade: </span>{titleCase(p.shade)}
         </div>
         {CARD_FORMATS.has(p.format) && (
-          <div style={{ fontSize:TYPE.meta, fontFamily:'DM Sans', color:'var(--espresso-mid)', lineHeight:1.35 }}>
+          <div style={{ fontSize:TYPE.meta, fontFamily:'Hanken Grotesk', color:'var(--espresso-mid)', lineHeight:1.35 }}>
             <span style={srOnly}>Type: </span>{formatMenuLabel(p.format)}
           </div>
         )}
@@ -225,7 +225,7 @@ function detailSourceLabel(source) {
   return titleCase(key.slice(key.indexOf('|') + 1)) || 'Your shade';
 }
 
-const MATCH_DETAIL_TYPE = { eyebrow:11, brand:12, body:13, value:15, match:17, shade:26 };
+const MATCH_DETAIL_TYPE = { eyebrow:11, brand:12, body:13, value:15, match:17, shade:23 };
 
 // A result card opened up: bottom sheet on phones, centered dialog on desktop
 // (.match-detail in index.html). `source` is the color it was matched against,
@@ -248,7 +248,7 @@ function MatchDetail({ p, source, onClose, wishlist, toggleWishlist, pinnedItems
   ].filter(f => f && f[1]);
   const stripHalf = { flex:1, minWidth:0, display:'flex', alignItems:'flex-end', padding:'8px 10px', fontSize:TYPE.body, fontWeight:600 };
   const actionBtn = {
-    height:48, borderRadius:24, fontFamily:'DM Sans', fontSize:TYPE.value, fontWeight:500,
+    height:48, borderRadius:24, fontFamily:'Hanken Grotesk', fontSize:TYPE.value, fontWeight:500,
     display:'flex', alignItems:'center', justifyContent:'center', gap:8,
   };
 
@@ -259,11 +259,11 @@ function MatchDetail({ p, source, onClose, wishlist, toggleWishlist, pinnedItems
           <span className="match-detail-handle" aria-hidden="true" />
           <button onClick={onClose} aria-label="Close details" style={{
             position:'absolute', right:6, top:0, width:44, height:44, border:0, padding:0, cursor:'pointer',
-            background:'none', color:'var(--espresso-mid)', fontSize:20, lineHeight:1, fontFamily:'DM Sans',
+            background:'none', color:'var(--espresso-mid)', fontSize:20, lineHeight:1, fontFamily:'Hanken Grotesk',
           }}>✕</button>
         </div>
 
-        <div style={{ padding:'2px 18px 22px', display:'flex', flexDirection:'column', gap:16, fontFamily:'DM Sans' }}>
+        <div style={{ padding:'2px 18px 22px', display:'flex', flexDirection:'column', gap:16, fontFamily:'Hanken Grotesk' }}>
           <div style={{ display:'flex', gap:14, alignItems:'stretch' }}>
             <div className="match-detail-photo" style={{ position:'relative', flexShrink:0, borderRadius:12, background:'var(--cream-dark)' }}>
               <div style={{ position:'absolute', inset:8 }}>
@@ -272,11 +272,11 @@ function MatchDetail({ p, source, onClose, wishlist, toggleWishlist, pinnedItems
             </div>
             {/* Three levels: brand as a small label, the shade as the headline, the product line under it */}
             <div style={{ flex:1, minWidth:0, display:'flex', flexDirection:'column', justifyContent:'center', gap:6, overflowWrap:'anywhere' }}>
-              <div style={{ fontSize:TYPE.brand, fontWeight:500, color:'var(--espresso-mid)' }}>
+              <div style={{ fontSize:TYPE.body, fontWeight:700, letterSpacing:'0.06em', textTransform:'uppercase', color:'var(--espresso)' }}>
                 <span style={srOnly}>Brand: </span>{brandName(p.brand)}
               </div>
               <div style={{
-                fontFamily:'Cormorant Garamond', fontWeight:600, fontSize:TYPE.shade, lineHeight:1.08, color:'var(--espresso)',
+                fontFamily:'Gloock', fontWeight:400, fontSize:TYPE.shade, lineHeight:1.08, color:'var(--espresso)',
                 fontVariantNumeric:'lining-nums',
               }}>
                 <span style={srOnly}>Shade: </span>{titleCase(p.shade)}
@@ -474,7 +474,7 @@ function getHsl(hex) {
 // Each of the 40 colors gets its own arc segment — clear boundaries, labeled,
 // clickable. Colors ordered by family, then hue (wheelFamilyOrder); arranged in 2 rings
 // (lighter of each pair outer).
-const WHEEL_TYPE = { micro:11, name:15 };
+const WHEEL_TYPE = { micro:11, name:14 };
 // The order of the wheel's colors, clockwise from the novelty block at the bottom: reds
 // (orange-red to blue-red), pinks and berries (cool to warm), then nudes, corals and browns
 // (WHEEL_FAMILIES; "Nude and brown" splits into its lighter half, nudes, and deeper half,
@@ -717,8 +717,8 @@ function ColorWheel({ colors, selectedId, onSelect, hoveredId, onHover }) {
           );
         })()}
 
-        {/* Center circle: the color under the pointer, its name and kind ("Cherry", "Blue-red",
-            in the color chart's words); otherwise the picked color and its hex */}
+        {/* Center circle: the color under the pointer, otherwise the picked one, with its name
+            and kind ("Cherry", "Blue-red", in the color chart's words) */}
         {(() => {
           const r = (SINGLE_RING ? R_SINGLE_IN : R_INNER_IN) - 1;
           const picked = colors.find(c => c.id === selectedId);
@@ -730,25 +730,17 @@ function ColorWheel({ colors, selectedId, onSelect, hoveredId, onHover }) {
                 stroke="#E0D0C0" strokeWidth="1.5"
                 style={{ transition: hovered ? 'none' : 'fill 0.3s ease' }}
               />
-              {hovered ? (
+              {shown && (
                 <foreignObject x={CX - r} y={CY - r} width={r * 2} height={r * 2} style={{ pointerEvents:'none' }}>
                   <div style={{
                     width:'100%', height:'100%', padding:'0 8px', boxSizing:'border-box',
                     display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:3,
-                    textAlign:'center', color:bandInk(hovered.hex), userSelect:'none',
+                    textAlign:'center', color:bandInk(shown.hex), userSelect:'none',
                   }}>
-                    <div style={{ fontFamily:'Cormorant Garamond', fontSize:WHEEL_TYPE.name, fontWeight:600, lineHeight:1.05 }}>{hovered.name}</div>
-                    <div style={{ fontFamily:'DM Sans', fontSize:WHEEL_TYPE.micro, fontWeight:500, lineHeight:1.2 }}>{hovered.tag || chartColorName(hovered.hex)}</div>
+                    <div style={{ fontFamily:'Gloock', fontSize:WHEEL_TYPE.name, fontWeight:400, lineHeight:1.05 }}>{shown.name}</div>
+                    <div style={{ fontFamily:'Hanken Grotesk', fontSize:WHEEL_TYPE.micro, fontWeight:500, lineHeight:1.2 }}>{shown.tag || chartColorName(shown.hex)}</div>
                   </div>
                 </foreignObject>
-              ) : picked && (
-                <text x={CX} y={CY} textAnchor="middle" dominantBaseline="middle"
-                  fontSize="11" fontFamily="DM Sans, sans-serif" fontWeight="500"
-                  fill={luminance(picked.hex) > 0.32 ? 'rgba(42,26,20,0.7)' : 'rgba(255,255,255,0.85)'}
-                  style={{ pointerEvents:'none', userSelect:'none' }}
-                >
-                  {picked.hex.toUpperCase()}
-                </text>
               )}
             </>
           );
@@ -770,7 +762,7 @@ function FilterClear({ onClick }) {
       onMouseLeave={e => { e.currentTarget.style.textDecoration = 'none'; }}
       style={{
         fontSize:12, padding:0, border:'none', background:'transparent', flex:'none',
-        color:'var(--blush-deep)', cursor:'pointer', fontFamily:'DM Sans', fontWeight:500,
+        color:'var(--blush-deep)', cursor:'pointer', fontFamily:'Hanken Grotesk', fontWeight:500,
         letterSpacing:'0.04em', textUnderlineOffset:3,
       }}>Clear ✕</button>
   );
@@ -803,7 +795,7 @@ function FilterDropdown({ label, count, onClear, isOpen, onOpen, header, clearOn
         border:`1.5px solid ${count ? 'var(--espresso-mid)' : 'var(--border)'}`,
         background: count ? 'rgba(92,61,48,0.08)' : (isOpen ? 'var(--cream-dark)' : 'transparent'),
         color: count ? 'var(--espresso-mid)' : 'var(--text-muted)',
-        cursor:'pointer', fontFamily:'DM Sans', fontWeight: count ? 500 : 400,
+        cursor:'pointer', fontFamily:'Hanken Grotesk', fontWeight: count ? 500 : 400,
         letterSpacing:'0.06em', textTransform:'uppercase', transition:'all 0.15s',
       }}>
         {label}
@@ -829,7 +821,7 @@ function FilterDropdown({ label, count, onClear, isOpen, onOpen, header, clearOn
               display:'flex', alignItems:'center', justifyContent:'space-between',
               marginTop:12, paddingTop:10, borderTop:'1px solid var(--border)',
             }}>
-              <span style={{ fontSize:11, color:'var(--text-muted)', fontFamily:'DM Sans', letterSpacing:'0.04em' }}>
+              <span style={{ fontSize:11, color:'var(--text-muted)', fontFamily:'Hanken Grotesk', letterSpacing:'0.04em' }}>
                 {count} selected
               </span>
               <FilterClear onClick={onClear} />
@@ -1016,7 +1008,7 @@ function ResultsTable({ selectedColor, matches, totalProducts, pinnedItems, togg
       flex:1, display:'flex', alignItems:'center', justifyContent:'center',
       color:'var(--text-muted)', textAlign:'center', padding:40,
     }}>
-      <p style={{ fontFamily:'DM Sans', fontSize:13, letterSpacing:'0.02em' }}>
+      <p style={{ fontFamily:'Hanken Grotesk', fontSize:13, letterSpacing:'0.02em' }}>
         Your matches will appear here
       </p>
     </div>
@@ -1069,7 +1061,7 @@ function ResultsTable({ selectedColor, matches, totalProducts, pinnedItems, togg
   // Matches the other filters keep that are only missing because discontinued shades are hidden
   const hiddenDiscontinued = hideDiscontinued ? matches.filter(p => p.discontinued && passesExcept(p, null)).length : 0;
   const emptyBtn = {
-    fontFamily:'DM Sans', fontSize:12, fontWeight:500, letterSpacing:'0.06em', textTransform:'uppercase',
+    fontFamily:'Hanken Grotesk', fontSize:12, fontWeight:500, letterSpacing:'0.06em', textTransform:'uppercase',
     padding:'10px 18px', borderRadius:24, border:'1.5px solid var(--espresso)', background:'#fff', color:'var(--espresso)', cursor:'pointer',
   };
 
@@ -1096,10 +1088,10 @@ function ResultsTable({ selectedColor, matches, totalProducts, pinnedItems, togg
           flexShrink:0,
         }} />
         <div>
-          <p style={{ fontFamily:'Cormorant Garamond', fontSize:18, fontWeight:500, lineHeight:1.15 }}>
+          <p style={{ fontFamily:'Gloock', fontSize:16, fontWeight:400, lineHeight:1.15 }}>
             {selectedColor.name}
           </p>
-          <p style={{ fontSize:11, color:'var(--text-muted)', marginTop:2, fontFamily:'DM Sans', letterSpacing:'0.05em' }}>
+          <p style={{ fontSize:11, color:'var(--text-muted)', marginTop:2, fontFamily:'Hanken Grotesk', letterSpacing:'0.05em' }}>
             {selectedColor.hex.toUpperCase()} · {filtered.length} match{filtered.length !== 1 ? 'es' : ''} ranked by color similarity
           </p>
           {/* Reds and pinks: tone and depth, by the red and pink guides' rules */}
@@ -1114,7 +1106,7 @@ function ResultsTable({ selectedColor, matches, totalProducts, pinnedItems, togg
           borderRadius:12, border:'1px solid var(--border)', boxShadow:'0 2px 12px var(--shadow)',
         }}>
           <div role="group" aria-label="Lighter and deeper versions of this shade" style={{ display:'flex', gap:5, alignItems:'center' }}>
-            <span aria-hidden="true" style={{ fontSize:11, color:'var(--text-muted)', fontFamily:'DM Sans', letterSpacing:'0.03em', flexShrink:0 }}>Lighter</span>
+            <span aria-hidden="true" style={{ fontSize:11, color:'var(--text-muted)', fontFamily:'Hanken Grotesk', letterSpacing:'0.03em', flexShrink:0 }}>Lighter</span>
             {toneRamp.ramp.map((step, i) => {
               const isAnchor = i === toneRamp.anchorIdx;
               const isActive = i === toneIdx;
@@ -1148,10 +1140,10 @@ function ResultsTable({ selectedColor, matches, totalProducts, pinnedItems, togg
                 />
               );
             })}
-            <span aria-hidden="true" style={{ fontSize:11, color:'var(--text-muted)', fontFamily:'DM Sans', letterSpacing:'0.03em', flexShrink:0 }}>Deeper</span>
+            <span aria-hidden="true" style={{ fontSize:11, color:'var(--text-muted)', fontFamily:'Hanken Grotesk', letterSpacing:'0.03em', flexShrink:0 }}>Deeper</span>
           </div>
           <div style={{ marginTop:6, display:'flex', alignItems:'center', justifyContent:'space-between', minHeight:16 }}>
-            <span style={{ fontSize:11, fontFamily:'DM Sans', color:'var(--text-muted)', letterSpacing:'0.03em' }}>
+            <span style={{ fontSize:11, fontFamily:'Hanken Grotesk', color:'var(--text-muted)', letterSpacing:'0.03em' }}>
               {toneIdx === toneRamp.anchorIdx
                 ? 'Showing close matches for your exact shade'
                 : <span>Matches for a <strong style={{ color:'var(--espresso)', fontWeight:600 }}>{toneRamp.ramp[toneIdx]?.name.split('· ')[1] || 'variant'}</strong> version · {selectedColor.hex.toUpperCase()}</span>}
@@ -1159,7 +1151,7 @@ function ResultsTable({ selectedColor, matches, totalProducts, pinnedItems, togg
             {toneIdx !== toneRamp.anchorIdx && (
               <button onClick={() => setToneIdx(toneRamp.anchorIdx)} style={{
                 fontSize:11, padding:'3px 10px', borderRadius:20, border:'1px solid var(--border)',
-                background:'transparent', color:'var(--text-muted)', cursor:'pointer', fontFamily:'DM Sans',
+                background:'transparent', color:'var(--text-muted)', cursor:'pointer', fontFamily:'Hanken Grotesk',
                 letterSpacing:'0.04em', flexShrink:0, marginLeft:10,
               }}>Reset to my shade</button>
             )}
@@ -1170,7 +1162,7 @@ function ResultsTable({ selectedColor, matches, totalProducts, pinnedItems, togg
             const noDeep  = toneRamp.ramp.some((st, i) => !st.hasMatch && i > toneRamp.anchorIdx);
             if (!noLight && !noDeep) return null;
             return (
-              <p style={{ marginTop:4, fontSize:11, fontFamily:'DM Sans', color:'var(--text-muted)', letterSpacing:'0.03em' }}>
+              <p style={{ marginTop:4, fontSize:11, fontFamily:'Hanken Grotesk', color:'var(--text-muted)', letterSpacing:'0.03em' }}>
                 No lipsticks that {noLight && noDeep ? 'light or that deep' : noLight ? 'light' : 'deep'}
               </p>
             );
@@ -1181,7 +1173,7 @@ function ResultsTable({ selectedColor, matches, totalProducts, pinnedItems, togg
       {/* Compact filter bar */}
       {(orderedTones.length >= 1 || allBrands.length > 1 || allTiers.length > 1 || allFormats.length > 1 || hasDiscontinued || otherFilters > 0) && (
         <div className={`results-filters${collapsibleFilters && !filtersShown ? ' filters-collapsed' : ''}`} style={{ display:'flex', flexWrap:'wrap', alignItems:'center', gap:8, marginBottom:14 }}>
-          <span className="filter-label" style={{ fontSize:11, color:'var(--text-muted)', letterSpacing:'0.1em', textTransform:'uppercase', fontFamily:'DM Sans', marginRight:2 }}>
+          <span className="filter-label" style={{ fontSize:11, color:'var(--text-muted)', letterSpacing:'0.1em', textTransform:'uppercase', fontFamily:'Hanken Grotesk', marginRight:2 }}>
             Filter
           </span>
           {/* Color chart sheet on phones: the filters fold away behind this button (CSS shows it there only) */}
@@ -1193,7 +1185,7 @@ function ResultsTable({ selectedColor, matches, totalProducts, pinnedItems, togg
               border:`1.5px solid ${otherFilters ? 'var(--espresso-mid)' : 'var(--border)'}`,
               background: otherFilters ? 'rgba(92,61,48,0.08)' : (filtersShown ? 'var(--cream-dark)' : 'transparent'),
               color: otherFilters ? 'var(--espresso-mid)' : 'var(--text-muted)',
-              cursor:'pointer', fontFamily:'DM Sans', fontWeight: otherFilters ? 500 : 400,
+              cursor:'pointer', fontFamily:'Hanken Grotesk', fontWeight: otherFilters ? 500 : 400,
               letterSpacing:'0.06em', textTransform:'uppercase', transition:'all 0.15s',
             }}>
               Filters
@@ -1216,7 +1208,7 @@ function ResultsTable({ selectedColor, matches, totalProducts, pinnedItems, togg
                     border:`1.5px solid ${active ? '#8a6e2e' : 'var(--border)'}`,
                     background: active ? 'rgba(138,110,46,0.12)' : 'transparent',
                     color: active ? '#8a6e2e' : 'var(--text-muted)',
-                    cursor:'pointer', fontFamily:'DM Sans', fontWeight: active ? 600 : 400,
+                    cursor:'pointer', fontFamily:'Hanken Grotesk', fontWeight: active ? 600 : 400,
                     letterSpacing:'0.04em', transition:'all 0.15s', whiteSpace:'nowrap',
                   }}>{t}{active && <span style={{ marginLeft:5, opacity:0.6, fontSize:10 }}>✕</span>}</button>
                 );
@@ -1236,14 +1228,14 @@ function ResultsTable({ selectedColor, matches, totalProducts, pinnedItems, togg
                       autoFocus={window.matchMedia?.('(hover: hover)').matches}
                       placeholder="Search brands" aria-label="Search brands"
                       style={{
-                        flex:1, minWidth:0, boxSizing:'border-box', fontFamily:'DM Sans', fontSize:13,
+                        flex:1, minWidth:0, boxSizing:'border-box', fontFamily:'Hanken Grotesk', fontSize:13,
                         padding:'7px 12px', borderRadius:20, border:'1.5px solid var(--border)',
                         background:'var(--cream)', color:'var(--espresso)', outline:'none',
                       }} />
                     {activeBrands.length > 0 && <FilterClear onClick={() => setActiveBrands([])} />}
                   </div>
                   {brandSearch.trim() && !searchBrands(brandSearch, allBrands).length && (
-                    <div style={{ marginTop:8, fontSize:13, color:'var(--text-muted)', fontFamily:'DM Sans' }}>No brands match.</div>
+                    <div style={{ marginTop:8, fontSize:13, color:'var(--text-muted)', fontFamily:'Hanken Grotesk' }}>No brands match.</div>
                   )}
                 </div>
               )}>
@@ -1259,7 +1251,7 @@ function ResultsTable({ selectedColor, matches, totalProducts, pinnedItems, togg
                     border:`1.5px solid ${active ? 'var(--espresso-mid)' : 'var(--border)'}`,
                     background: active ? 'rgba(92,61,48,0.10)' : 'transparent',
                     color: active ? 'var(--espresso-mid)' : 'var(--text-muted)',
-                    cursor:'pointer', fontFamily:'DM Sans', fontWeight: active ? 500 : 400,
+                    cursor:'pointer', fontFamily:'Hanken Grotesk', fontWeight: active ? 500 : 400,
                     letterSpacing:'0.04em', transition:'all 0.15s', whiteSpace:'nowrap',
                   }}>{brandName(b)}{active && <span style={{ marginLeft:5, opacity:0.6, fontSize:10 }}>✕</span>}</button>
                 );
@@ -1279,7 +1271,7 @@ function ResultsTable({ selectedColor, matches, totalProducts, pinnedItems, togg
                     border:`1.5px solid ${active ? 'var(--espresso-mid)' : 'var(--border)'}`,
                     background: active ? 'rgba(92,61,48,0.10)' : 'transparent',
                     color: active ? 'var(--espresso-mid)' : 'var(--text-muted)',
-                    cursor:'pointer', fontFamily:'DM Sans', fontWeight: active ? 500 : 400,
+                    cursor:'pointer', fontFamily:'Hanken Grotesk', fontWeight: active ? 500 : 400,
                     letterSpacing:'0.04em', transition:'all 0.15s', whiteSpace:'nowrap',
                   }}>{formatMenuLabel(f)}{active && <span style={{ marginLeft:5, opacity:0.6, fontSize:10 }}>✕</span>}</button>
                 );
@@ -1293,8 +1285,8 @@ function ResultsTable({ selectedColor, matches, totalProducts, pinnedItems, togg
               onClear={() => setActiveFinishes([])}>
               {allFinishes.includes('Unlisted') && (
                 <p style={{
-                  width:'100%', margin:'0 0 2px', fontFamily:'Cormorant Garamond', fontStyle:'italic',
-                  fontSize:14, color:'var(--text-muted)', lineHeight:1.35,
+                  width:'100%', margin:'0 0 2px', 
+                  fontSize:13, color:'var(--text-muted)', lineHeight:1.35,
                 }}>
                   Finish isn't listed for every product — "Unlisted" includes those.
                 </p>
@@ -1308,7 +1300,7 @@ function ResultsTable({ selectedColor, matches, totalProducts, pinnedItems, togg
                     border:`1.5px ${unlisted ? 'dashed' : 'solid'} ${active ? 'var(--espresso-mid)' : 'var(--border)'}`,
                     background: active ? 'rgba(92,61,48,0.10)' : 'transparent',
                     color: active ? 'var(--espresso-mid)' : 'var(--text-muted)',
-                    cursor:'pointer', fontFamily:'DM Sans', fontWeight: active ? 500 : 400,
+                    cursor:'pointer', fontFamily:'Hanken Grotesk', fontWeight: active ? 500 : 400,
                     letterSpacing:'0.04em', transition:'all 0.15s', whiteSpace:'nowrap',
                   }}>{finishMenuLabel(f)}{active && <span style={{ marginLeft:5, opacity:0.6, fontSize:10 }}>✕</span>}</button>
                 );
@@ -1328,7 +1320,7 @@ function ResultsTable({ selectedColor, matches, totalProducts, pinnedItems, togg
                     border:`1.5px solid ${active ? 'var(--espresso-mid)' : 'var(--border)'}`,
                     background: active ? 'rgba(92,61,48,0.10)' : 'transparent',
                     color: active ? 'var(--espresso-mid)' : 'var(--text-muted)',
-                    cursor:'pointer', fontFamily:'DM Sans', letterSpacing:'0.04em',
+                    cursor:'pointer', fontFamily:'Hanken Grotesk', letterSpacing:'0.04em',
                     textTransform:'capitalize', transition:'all 0.15s', whiteSpace:'nowrap',
                   }}>{t}</button>
                 );
@@ -1344,7 +1336,7 @@ function ResultsTable({ selectedColor, matches, totalProducts, pinnedItems, togg
               border:`1.5px solid ${longLasting ? 'var(--espresso-mid)' : 'var(--border)'}`,
               background: longLasting ? 'rgba(92,61,48,0.08)' : 'transparent',
               color: longLasting ? 'var(--espresso-mid)' : 'var(--text-muted)',
-              cursor:'pointer', fontFamily:'DM Sans', fontWeight: longLasting ? 500 : 400,
+              cursor:'pointer', fontFamily:'Hanken Grotesk', fontWeight: longLasting ? 500 : 400,
               letterSpacing:'0.06em', textTransform:'uppercase', transition:'all 0.15s', whiteSpace:'nowrap',
             }}>
               <span aria-hidden="true" style={{
@@ -1366,7 +1358,7 @@ function ResultsTable({ selectedColor, matches, totalProducts, pinnedItems, togg
               border:`1.5px solid ${hideDiscontinued ? 'var(--espresso-mid)' : 'var(--border)'}`,
               background: hideDiscontinued ? 'rgba(92,61,48,0.08)' : 'transparent',
               color: hideDiscontinued ? 'var(--espresso-mid)' : 'var(--text-muted)',
-              cursor:'pointer', fontFamily:'DM Sans', fontWeight: hideDiscontinued ? 500 : 400,
+              cursor:'pointer', fontFamily:'Hanken Grotesk', fontWeight: hideDiscontinued ? 500 : 400,
               letterSpacing:'0.06em', textTransform:'uppercase', transition:'all 0.15s', whiteSpace:'nowrap',
             }}>
               <span aria-hidden="true" style={{
@@ -1382,13 +1374,13 @@ function ResultsTable({ selectedColor, matches, totalProducts, pinnedItems, togg
 
           {otherFilters > 0 && (
             <div className="filter-summary" style={{ display:'flex', alignItems:'center', gap:10, marginLeft:'auto' }}>
-              <span style={{ fontSize:11, color:'var(--text-muted)', fontFamily:'DM Sans' }}>
+              <span style={{ fontSize:11, color:'var(--text-muted)', fontFamily:'Hanken Grotesk' }}>
                 {filtered.length} of {matches.length} shown
               </span>
               <button onClick={clearFilters} style={{
                 fontSize:11, padding:'3px 10px', borderRadius:20, border:'1px solid var(--border)',
                 background:'transparent', color:'var(--blush-deep)', cursor:'pointer',
-                fontFamily:'DM Sans', letterSpacing:'0.04em',
+                fontFamily:'Hanken Grotesk', letterSpacing:'0.04em',
               }}>Clear all</button>
             </div>
           )}
@@ -1399,7 +1391,7 @@ function ResultsTable({ selectedColor, matches, totalProducts, pinnedItems, togg
       <div className="results-scroll" style={{ flex:1, overflowY:'auto' }}>
         {filtered.length === 0 ? (
           <div role="status" style={{ padding:'32px 16px', display:'flex', flexDirection:'column', alignItems:'center', gap:14, textAlign:'center' }}>
-            <p style={{ fontFamily:'DM Sans', fontSize:14, lineHeight:1.5, color:'var(--text-body)' }}>
+            <p style={{ fontFamily:'Hanken Grotesk', fontSize:14, lineHeight:1.5, color:'var(--text-body)' }}>
               {!hiddenDiscontinued ? (relaxGroup?.key === 'brand' && activeBrands.length === 1 ? <>No {brandName(activeBrands[0])} matches for this color.</> : 'No matches for the selected filters.')
                 : hiddenDiscontinued === 1 ? (otherFilters ? 'The only match for these filters is discontinued.' : 'The only match here is discontinued.')
                 : otherFilters ? `The ${hiddenDiscontinued} matches for these filters are discontinued.` : `All ${hiddenDiscontinued} matches here are discontinued.`}
@@ -1443,10 +1435,10 @@ function TweaksPanel({ tweaks, setTweak, onClose }) {
       background:'#fff', borderRadius:16, border:'1px solid var(--border)',
       boxShadow:'0 8px 32px rgba(42,26,20,0.16)',
       padding:24, width:240,
-      fontFamily:'DM Sans', fontSize:13,
+      fontFamily:'Hanken Grotesk', fontSize:13,
     }}>
       <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:20 }}>
-        <span style={{ fontFamily:'Cormorant Garamond', fontSize:18, fontWeight:500 }}>Tweaks</span>
+        <span style={{ fontFamily:'Gloock', fontSize:16, fontWeight:400 }}>Tweaks</span>
         <button onClick={onClose} style={{ background:'none', border:'none', cursor:'pointer', fontSize:18, color:'var(--text-muted)' }}>×</button>
       </div>
 
@@ -1571,10 +1563,10 @@ function drawShareImage(canvas, wishlist, images) {
   ctx.textAlign = 'center';
   ctx.textBaseline = 'alphabetic';
   ctx.fillStyle = CREAM;
-  ctx.font = '400 italic 80px "Cormorant Garamond", serif';
+  ctx.font = '400 68px "Gloock", serif';
   ctx.fillText('my lipstick shortlist', W / 2, 160);
   ctx.fillStyle = '#C9B3A6';
-  ctx.font = '500 22px "DM Sans", sans-serif';
+  ctx.font = '500 22px "Hanken Grotesk", sans-serif';
   const subtitle = `${n} ${n === 1 ? 'shade' : 'shades'}  ·  ${new Date().toLocaleDateString('en-US', { month:'long', day:'numeric', year:'numeric' })}`;
   ctx.fillText(subtitle, W / 2, 200);
 
@@ -1624,9 +1616,9 @@ function drawShareImage(canvas, wishlist, images) {
     const tx = x + 18 * sc, tw = cw - 36 * sc;
     ctx.textAlign = 'left';
     ctx.fillStyle = fg;
-    ctx.fillText(fit(titleCase(p.shade), tw, s => `500 ${s}px "Cormorant Garamond", serif`, Math.max(26, Math.round(38 * sc)), 18), tx, y + photoH + band * 0.46);
+    ctx.fillText(fit(titleCase(p.shade), tw, s => `400 ${s}px "Gloock", serif`, Math.max(26, Math.round(38 * sc)), 18), tx, y + photoH + band * 0.46);
     ctx.globalAlpha = 0.85;
-    ctx.fillText(fit(brandName(p.brand), tw, s => `600 ${s}px "DM Sans", sans-serif`, Math.max(15, Math.round(18 * sc)), 12), tx, y + photoH + band * 0.78);
+    ctx.fillText(fit(brandName(p.brand), tw, s => `600 ${s}px "Hanken Grotesk", sans-serif`, Math.max(15, Math.round(18 * sc)), 12), tx, y + photoH + band * 0.78);
     ctx.restore();
   }
 
@@ -1634,10 +1626,10 @@ function drawShareImage(canvas, wishlist, images) {
   ctx.textAlign = 'center';
   ctx.textBaseline = 'alphabetic';
   ctx.fillStyle = CREAM;
-  ctx.font = '500 24px "DM Sans", sans-serif';
+  ctx.font = '500 24px "Hanken Grotesk", sans-serif';
   ctx.fillText('made with Lipstick Color Finder', W / 2, H - 62);
   ctx.fillStyle = '#E7A9BF';
-  ctx.font = '600 24px "DM Sans", sans-serif';
+  ctx.font = '600 24px "Hanken Grotesk", sans-serif';
   ctx.fillText(SITE_URL, W / 2, H - 30);
 }
 
@@ -1738,7 +1730,7 @@ function ShareImageModal({ wishlist, onClose }) {
         }}>
           <div style={{ display:'flex', alignItems:'center', gap:12 }}>
             <span style={{ fontSize:18 }}>📸</span>
-            <h3 style={{ fontFamily:'Cormorant Garamond', fontWeight:500, fontSize:22, color:'var(--espresso)' }}>
+            <h3 style={{ fontFamily:'Gloock', fontWeight:400, fontSize:20, color:'var(--espresso)' }}>
               Share your shortlist
             </h3>
             <button onClick={onClose} aria-label="Close" style={{
@@ -1748,7 +1740,7 @@ function ShareImageModal({ wishlist, onClose }) {
             }}>✕</button>
           </div>
 
-          <p style={{ fontSize:13, color:'var(--text-muted)', fontFamily:'DM Sans', lineHeight:1.5, marginTop:-4 }}>
+          <p style={{ fontSize:13, color:'var(--text-muted)', fontFamily:'Hanken Grotesk', lineHeight:1.5, marginTop:-4 }}>
             A portrait card sized for Instagram (4:5), with each lipstick photo, its shade, and a link back to {SITE_URL}. Save it and post it to your story, feed, or send it to a friend.
           </p>
 
@@ -1769,7 +1761,7 @@ function ShareImageModal({ wishlist, onClose }) {
             {busy && (
               <span style={{
                 position:'absolute', color:'#FAF6F1',
-                fontFamily:'Cormorant Garamond', fontStyle:'italic', fontSize:16,
+                fontSize:14,
               }}>
                 Composing your card…
               </span>
@@ -1782,7 +1774,7 @@ function ShareImageModal({ wishlist, onClose }) {
               flex:1, padding:'14px',
               borderRadius:12, border:'none',
               background:'var(--espresso)', color:'var(--cream)',
-              cursor:'pointer', fontFamily:'DM Sans', fontSize:12, fontWeight:500,
+              cursor:'pointer', fontFamily:'Hanken Grotesk', fontSize:12, fontWeight:500,
               letterSpacing:'0.08em', textTransform:'uppercase',
             }}>
               ⬇  Save image
@@ -1791,7 +1783,7 @@ function ShareImageModal({ wishlist, onClose }) {
               flex:1, padding:'14px',
               borderRadius:12, border:'1.5px solid var(--border)',
               background:'#fff', color:'var(--espresso)',
-              cursor:'pointer', fontFamily:'DM Sans', fontSize:12, fontWeight:500,
+              cursor:'pointer', fontFamily:'Hanken Grotesk', fontSize:12, fontWeight:500,
               letterSpacing:'0.08em', textTransform:'uppercase',
             }}>
               📋  Copy image
@@ -1800,12 +1792,12 @@ function ShareImageModal({ wishlist, onClose }) {
 
           {status && (
             <p style={{
-              fontSize:12, color:'var(--blush-deep)', fontFamily:'DM Sans',
+              fontSize:12, color:'var(--blush-deep)', fontFamily:'Hanken Grotesk',
               textAlign:'center', letterSpacing:'0.06em',
             }}>{status}</p>
           )}
 
-          <p style={{ fontSize:12, color:'var(--text-muted)', fontFamily:'DM Sans', textAlign:'center', marginTop:-4 }}>
+          <p style={{ fontSize:12, color:'var(--text-muted)', fontFamily:'Hanken Grotesk', textAlign:'center', marginTop:-4 }}>
             Tip: on mobile, long-press the saved image to share it directly to Instagram or other apps.
           </p>
         </div>
@@ -1821,7 +1813,7 @@ function ShareImageModal({ wishlist, onClose }) {
 const GUIDES_NEW_UNTIL = new Date('2026-12-15T23:59:59-05:00');
 // The pill's look, shared with the Discontinued tag on the dupe finder card
 const PILL_TAG = {
-  fontFamily:"'DM Sans', sans-serif", fontWeight:500,
+  fontFamily:"'Hanken Grotesk', sans-serif", fontWeight:500,
   fontSize:9, lineHeight:1, letterSpacing:'0.12em', textTransform:'uppercase', whiteSpace:'nowrap',
   color:'#fff', background:'var(--blush-deep)',
   padding:'3px 6px 2px', borderRadius:10,
@@ -1997,7 +1989,7 @@ function pinkLabel(hex) {
 // The red or pink guide's name for a color, shown in small capitals under it
 function shadeLabel(hex) { return redLabel(hex) || pinkLabel(hex); }
 const RED_LABEL_STYLE = {
-  fontFamily:'DM Sans', fontSize:11, fontWeight:500,
+  fontFamily:'Hanken Grotesk', fontSize:11, fontWeight:500,
   letterSpacing:'0.12em', textTransform:'uppercase', color:'var(--blush-deep)',
 };
 
@@ -2019,7 +2011,7 @@ function bandInk(hex) {
 // red guide), with everything else below it.
 // Sizes, each with one job: title 18 for the brand, shade 15 for the shade name,
 // body 13 for the product, micro 11 for facts and the red label.
-const SHADE_ITEM_TYPE = { micro:11, body:13, shade:15, title:18 };
+const SHADE_ITEM_TYPE = { micro:11, body:13, shade:14, title:16 };
 function ShadeListItem({ p, action, glow }) {
   const TYPE = SHADE_ITEM_TYPE;
   const redName = shadeLabel(p.hex);
@@ -2038,7 +2030,7 @@ function ShadeListItem({ p, action, glow }) {
       <div style={{ flex:1, minWidth:0, display:'flex', flexDirection:'column' }}>
         <div style={{
           background:p.hex, color:ink, padding:'8px 14px 7px',
-          fontFamily:'Cormorant Garamond', fontWeight:500, lineHeight:1.15,
+          fontFamily:'Gloock', fontWeight:400, lineHeight:1.15,
           fontVariantNumeric:'lining-nums', // shade names are often numbers ("999", "0 Ultra Light")
         }}>
           <span style={srOnly}>Brand: </span>
@@ -2048,7 +2040,7 @@ function ShadeListItem({ p, action, glow }) {
           <span style={{ fontSize:TYPE.shade }}>{titleCase(p.shade)}</span>
         </div>
         <div style={{ flex:1, display:'flex', alignItems:'center', gap:12, padding:'9px 14px 10px' }}>
-          <div style={{ flex:1, minWidth:0, fontFamily:'DM Sans' }}>
+          <div style={{ flex:1, minWidth:0, fontFamily:'Hanken Grotesk' }}>
             <div style={{ fontSize:TYPE.body, lineHeight:1.35, color:'var(--text-body)' }}>
               {titleCase(p.product)}
             </div>
@@ -2185,7 +2177,7 @@ function WishlistPanel({ wishlist, onClose, onRemove, onClear, onFindSimilar, gl
           display:'flex', alignItems:'center', gap:12,
         }}>
           <span style={{ color:'var(--blush)', fontSize:22 }}>{HEART}</span>
-          <h2 style={{ fontFamily:'Cormorant Garamond', fontWeight:400, fontSize:26, color:'var(--espresso)' }}>
+          <h2 style={{ fontFamily:'Gloock', fontWeight:400, fontSize:23, color:'var(--espresso)' }}>
             My Favorites
           </h2>
           <span style={{ fontSize:11, color:'var(--text-muted)', letterSpacing:'0.06em' }}>
@@ -2203,7 +2195,7 @@ function WishlistPanel({ wishlist, onClose, onRemove, onClear, onFindSimilar, gl
           {wishlist.length === 0 ? (
             <div style={{ textAlign:'center', padding:'60px 20px', color:'var(--text-muted)' }}>
               <div style={{ fontSize:48, color:'var(--border)', marginBottom:16 }}>♡</div>
-              <p style={{ fontFamily:'Cormorant Garamond', fontSize:18, fontStyle:'italic', lineHeight:1.5 }}>
+              <p style={{ fontSize:15, lineHeight:1.5 }}>
                 Tap the heart on any product to save it here
               </p>
               <p style={{ fontSize:12, marginTop:12, color:'var(--text-muted)' }}>
@@ -2214,7 +2206,7 @@ function WishlistPanel({ wishlist, onClose, onRemove, onClear, onFindSimilar, gl
             <ul style={{ listStyle:'none', display:'flex', flexDirection:'column', gap:10 }}>
               {glowKey && (
                 <li role="status" style={{
-                  fontFamily:'Cormorant Garamond', fontSize:18, fontStyle:'italic', lineHeight:1.4,
+                  fontSize:15, lineHeight:1.5,
                   color:'var(--espresso)', marginBottom:6,
                 }}>
                   Saved. Every shade you heart is kept here — open it any time from My Favorites at the top.
@@ -2229,7 +2221,7 @@ function WishlistPanel({ wishlist, onClose, onRemove, onClear, onFindSimilar, gl
               <li style={{ textAlign:'center', padding:'10px 0 4px' }}>
                 <button onClick={onFindSimilar} style={{
                   border:'none', background:'none', padding:'6px 4px', cursor:'pointer',
-                  color:'var(--blush-deep)', fontFamily:'DM Sans', fontSize:13, fontWeight:500,
+                  color:'var(--blush-deep)', fontFamily:'Hanken Grotesk', fontSize:13, fontWeight:500,
                   textDecoration:'underline', textUnderlineOffset:3,
                 }}>
                   Find shades similar to {wishlist.length === 1 ? 'this one' : 'these'} →
@@ -2245,7 +2237,7 @@ function WishlistPanel({ wishlist, onClose, onRemove, onClear, onFindSimilar, gl
             borderTop:'1px solid var(--border)', padding:'20px 32px 24px',
             background:'#fff',
           }}>
-            <p style={{ fontSize:11, color:'var(--text-muted)', letterSpacing:'0.08em', textTransform:'uppercase', marginBottom:12, fontFamily:'DM Sans' }}>
+            <p style={{ fontSize:11, color:'var(--text-muted)', letterSpacing:'0.08em', textTransform:'uppercase', marginBottom:12, fontFamily:'Hanken Grotesk' }}>
               Take it with you
             </p>
 
@@ -2256,7 +2248,7 @@ function WishlistPanel({ wishlist, onClose, onRemove, onClear, onFindSimilar, gl
                   padding:'12px 14px', borderRadius:12,
                   border:'1.5px solid var(--border)', background:'var(--cream)',
                   color:'var(--espresso)', cursor:'pointer',
-                  fontFamily:'DM Sans', fontSize:13, fontWeight:500,
+                  fontFamily:'Hanken Grotesk', fontSize:13, fontWeight:500,
                   textAlign:'left', transition:'all 0.15s',
                 }}
                 onMouseEnter={e => { e.currentTarget.style.borderColor='var(--blush)'; e.currentTarget.style.color='var(--blush-deep)'; }}
@@ -2271,7 +2263,7 @@ function WishlistPanel({ wishlist, onClose, onRemove, onClear, onFindSimilar, gl
               marginTop:12, width:'100%', padding:'10px',
               border:'1px solid var(--border)', background:'transparent',
               color:'var(--text-muted)', cursor:'pointer',
-              fontSize:11, fontFamily:'DM Sans', letterSpacing:'0.06em', textTransform:'uppercase',
+              fontSize:11, fontFamily:'Hanken Grotesk', letterSpacing:'0.06em', textTransform:'uppercase',
               borderRadius:10,
             }}>
               Clear list
@@ -2320,7 +2312,7 @@ function SharedListPanel({ items, missing, loading, wishlist, toggleWishlist, on
           padding:'24px 32px 20px', borderBottom:'1px solid var(--border)',
           display:'flex', alignItems:'center', gap:12,
         }}>
-          <h2 style={{ fontFamily:'Cormorant Garamond', fontWeight:400, fontSize:26, color:'var(--espresso)' }}>
+          <h2 style={{ fontFamily:'Gloock', fontWeight:400, fontSize:23, color:'var(--espresso)' }}>
             Shared list
           </h2>
           {items && (
@@ -2338,7 +2330,7 @@ function SharedListPanel({ items, missing, loading, wishlist, toggleWishlist, on
         <div style={{ flex:1, overflowY:'auto', padding:'20px 32px' }}>
           {loading ? <CatalogueLoading /> : (
             <>
-              <p style={{ fontFamily:'Cormorant Garamond', fontStyle:'italic', fontSize:16, color:'var(--text-muted)', marginBottom:14 }}>
+              <p style={{ fontSize:14, lineHeight:1.5, color:'var(--text-muted)', marginBottom:14 }}>
                 Someone shared these shades with you. Tap a heart to save one to your favorites.
               </p>
               <ul style={{ listStyle:'none', display:'flex', flexDirection:'column', gap:10 }}>
@@ -2352,7 +2344,7 @@ function SharedListPanel({ items, missing, loading, wishlist, toggleWishlist, on
                 })}
               </ul>
               {missing > 0 && (
-                <p style={{ fontSize:11, color:'var(--text-muted)', marginTop:14, fontFamily:'DM Sans' }}>
+                <p style={{ fontSize:11, color:'var(--text-muted)', marginTop:14, fontFamily:'Hanken Grotesk' }}>
                   {missing} {missing === 1 ? 'shade is' : 'shades are'} no longer in the catalogue.
                 </p>
               )}
@@ -2368,7 +2360,7 @@ function SharedListPanel({ items, missing, loading, wishlist, toggleWishlist, on
               background: unsaved.length ? 'var(--blush-deep)' : 'transparent',
               color: unsaved.length ? '#fff' : 'var(--blush-deep)',
               cursor: unsaved.length ? 'pointer' : 'default',
-              fontFamily:'DM Sans', fontSize:13, fontWeight:500,
+              fontFamily:'Hanken Grotesk', fontSize:13, fontWeight:500,
             }}>
               {unsaved.length ? `${HEART} Save ${unsaved.length === items.length ? 'all' : unsaved.length} to my favorites` : `${HEART} All saved to your favorites`}
             </button>
@@ -2380,7 +2372,7 @@ function SharedListPanel({ items, missing, loading, wishlist, toggleWishlist, on
 }
 
 // ── Comparison Tray ────────────────────────────────────────────────────────────
-const TRAY_TYPE = { micro:11, body:13, title:18 };
+const TRAY_TYPE = { micro:11, body:13, title:16 };
 function ComparisonTray({ pinnedItems, onRemove, onClear }) {
   const TYPE = TRAY_TYPE;
   const [expanded, setExpanded] = useState(false);
@@ -2418,7 +2410,7 @@ function ComparisonTray({ pinnedItems, onRemove, onClear }) {
         {/* Tray header */}
         <div style={{ display:'flex', alignItems:'center', gap:12, marginBottom: expanded ? 20 : 12 }}>
           <span style={{
-            fontFamily:'Cormorant Garamond', fontSize:TYPE.title, fontWeight:500, color:'var(--espresso)', whiteSpace:'nowrap',
+            fontFamily:'Gloock', fontSize:TYPE.title, fontWeight:400, color:'var(--espresso)', whiteSpace:'nowrap',
           }}>
             Comparing {pinnedItems.length} shade{pinnedItems.length !== 1 ? 's' : ''}
           </span>
@@ -2429,14 +2421,14 @@ function ComparisonTray({ pinnedItems, onRemove, onClear }) {
             <button onClick={() => setExpanded(e => !e)} aria-expanded={expanded} style={{
               fontSize:TYPE.micro, padding:'4px 12px', borderRadius:20,
               border:'1px solid var(--border)', background:'transparent',
-              color:'var(--text-muted)', cursor:'pointer', fontFamily:'DM Sans', whiteSpace:'nowrap',
+              color:'var(--text-muted)', cursor:'pointer', fontFamily:'Hanken Grotesk', whiteSpace:'nowrap',
             }}>
               {expanded ? 'Collapse' : 'Expand'}
             </button>
             <button onClick={onClear} style={{
               fontSize:TYPE.micro, padding:'4px 12px', borderRadius:20,
               border:'1px solid var(--blush-deep)', background:'transparent',
-              color:'var(--blush-deep)', cursor:'pointer', fontFamily:'DM Sans', whiteSpace:'nowrap',
+              color:'var(--blush-deep)', cursor:'pointer', fontFamily:'Hanken Grotesk', whiteSpace:'nowrap',
             }}>
               Clear all
             </button>
@@ -2453,7 +2445,7 @@ function ComparisonTray({ pinnedItems, onRemove, onClear }) {
               style={{
                 flex:'none', width: expanded ? 96 : 76, padding:0, border:'none', background:'none', cursor:'pointer',
                 display:'flex', flexDirection:'column', alignItems:'center', gap: expanded ? 8 : 6,
-                fontFamily:'DM Sans', textAlign:'center', animation:'fadeUp 0.2s ease',
+                fontFamily:'Hanken Grotesk', textAlign:'center', animation:'fadeUp 0.2s ease',
               }}>
               <span style={{ position:'relative', display:'block', width:box, height:box }}>
                 <span style={{
@@ -2518,8 +2510,8 @@ function ListPicker({ wishlist, selectedKey, onPick }) {
   return (
     <div style={{ width:'100%', maxWidth:440, padding:'4px 0 8px' }}>
       <div style={{
-        fontFamily:'Cormorant Garamond', fontStyle:'italic', fontSize:21,
-        color:'var(--espresso-mid)', lineHeight:1.4, textAlign:'center',
+        fontSize:15,
+        color:'var(--espresso-mid)', lineHeight:1.5, textAlign:'center',
         marginBottom:14,
       }}>
         Pick a saved shade to find similar ones
@@ -2542,9 +2534,9 @@ function ListPicker({ wishlist, selectedKey, onPick }) {
             }}>
               <span style={{ display:'block', width:'100%', height:36, background:p.hex, flexShrink:0 }} />
               <span style={{ display:'flex', flexDirection:'column', gap:2, padding:'8px 10px 10px' }}>
-                <span style={{ fontFamily:'DM Sans', fontSize:11, color:'var(--text-muted)' }}>{brandName(p.brand)}</span>
-                <span style={{ fontFamily:'DM Sans', fontSize:13, fontWeight:500, color:'var(--espresso)', lineHeight:1.25 }}>{titleCase(p.shade)}</span>
-                <span style={{ fontFamily:'DM Sans', fontSize:12, color:'var(--espresso-mid)', lineHeight:1.3 }}>{chartColorName(p.hex)}</span>
+                <span style={{ fontFamily:'Hanken Grotesk', fontSize:11, color:'var(--text-muted)' }}>{brandName(p.brand)}</span>
+                <span style={{ fontFamily:'Hanken Grotesk', fontSize:13, fontWeight:500, color:'var(--espresso)', lineHeight:1.25 }}>{titleCase(p.shade)}</span>
+                <span style={{ fontFamily:'Hanken Grotesk', fontSize:12, color:'var(--espresso-mid)', lineHeight:1.3 }}>{chartColorName(p.hex)}</span>
               </span>
             </button>
           );
@@ -2685,24 +2677,24 @@ function PhotoPicker({ sampledHex, onColor }) {
         }}
       >
         <div style={{ fontSize:36, lineHeight:1, color:'var(--blush)' }}>⤓</div>
-        <div style={{ fontFamily:'Cormorant Garamond', fontSize:22, fontStyle:'italic', color:'var(--espresso)' }}>
+        <div style={{ fontFamily:'Gloock', fontSize:20, color:'var(--espresso)' }}>
           Drop a photo or screenshot here
         </div>
-        <div style={{ fontFamily:'DM Sans', fontSize:12, color:'var(--text-muted)', letterSpacing:'0.04em' }}>
+        <div style={{ fontFamily:'Hanken Grotesk', fontSize:12, color:'var(--text-muted)', letterSpacing:'0.04em' }}>
           or click to upload · JPG, PNG, HEIC
         </div>
         {error ? (
-          <div role="alert" style={{ fontFamily:'DM Sans', fontSize:13, fontWeight:500, color:'var(--blush-deep)', maxWidth:280, marginTop:8, lineHeight:1.5 }}>
+          <div role="alert" style={{ fontFamily:'Hanken Grotesk', fontSize:13, fontWeight:500, color:'var(--blush-deep)', maxWidth:280, marginTop:8, lineHeight:1.5 }}>
             We couldn't open that file. Try a JPG or PNG, or take a screenshot of it and upload that.
           </div>
         ) : (
-          <div style={{ fontFamily:'DM Sans', fontSize:12, color:'var(--text-muted)', maxWidth:260, marginTop:8, lineHeight:1.5 }}>
+          <div style={{ fontFamily:'Hanken Grotesk', fontSize:12, color:'var(--text-muted)', maxWidth:260, marginTop:8, lineHeight:1.5 }}>
             Tap anywhere on the photo to pick a shade.
           </div>
         )}
-        <div style={{ fontFamily:'DM Sans', fontSize:12, color:'var(--text-muted)', maxWidth:260, marginTop:14, lineHeight:1.5, display:'flex', alignItems:'center', gap:6 }}>
+        <div style={{ fontFamily:'Hanken Grotesk', fontSize:12, color:'var(--text-muted)', maxWidth:260, marginTop:14, lineHeight:1.5, display:'flex', alignItems:'center', gap:6 }}>
           <span style={{ fontSize:11, fontStyle:'normal' }}>🔒</span>
-          <span style={{ fontStyle:'italic' }}>Your photo stays on your device — we never upload or store it.</span>
+          <span>Your photo stays on your device — we never upload or store it.</span>
         </div>
         <input ref={fileInputRef} type="file" accept="image/*" style={{ display:'none' }}
           onChange={e => { handleFile(e.target.files?.[0]); e.target.value = ''; }}
@@ -2745,23 +2737,23 @@ function PhotoPicker({ sampledHex, onColor }) {
               flexShrink:0,
             }}/>
             <div style={{ flex:1, minWidth:0 }}>
-              <div style={{ fontFamily:'Cormorant Garamond', fontSize:16, fontStyle:'italic', color:'var(--espresso)' }}>
+              <div style={{ fontFamily:'Gloock', fontSize:15, color:'var(--espresso)' }}>
                 Sampled
               </div>
-              <div style={{ fontFamily:'DM Sans', fontSize:11, color:'var(--text-muted)', letterSpacing:'0.06em' }}>
+              <div style={{ fontFamily:'Hanken Grotesk', fontSize:11, color:'var(--text-muted)', letterSpacing:'0.06em' }}>
                 {sampledHex.toUpperCase()}
               </div>
             </div>
           </>
         )}
         {!sampledHex && (
-          <div style={{ flex:1, fontFamily:'Cormorant Garamond', fontStyle:'italic', fontSize:15, color:'var(--text-muted)' }}>
+          <div style={{ flex:1, fontSize:13, color:'var(--text-muted)' }}>
             Click anywhere on the photo to sample a color.
           </div>
         )}
       </div>
       <div style={{ display:'flex', alignItems:'center', gap:10, maxWidth:240, alignSelf:'flex-start' }}>
-        <label style={{ fontFamily:'DM Sans', fontSize:12, color:'var(--text-muted)', letterSpacing:'0.08em', textTransform:'uppercase', whiteSpace:'nowrap' }}>
+        <label style={{ fontFamily:'Hanken Grotesk', fontSize:12, color:'var(--text-muted)', letterSpacing:'0.08em', textTransform:'uppercase', whiteSpace:'nowrap' }}>
           Sample
         </label>
         <input
@@ -2770,13 +2762,13 @@ function PhotoPicker({ sampledHex, onColor }) {
           className="dainty-range"
           style={{ flex:1, accentColor:'var(--blush)', height:2 }}
         />
-        <span style={{ fontFamily:'DM Sans', fontSize:12, color:'var(--text-muted)', minWidth:28, textAlign:'right' }}>{radius}px</span>
+        <span style={{ fontFamily:'Hanken Grotesk', fontSize:12, color:'var(--text-muted)', minWidth:28, textAlign:'right' }}>{radius}px</span>
       </div>
       <div style={{ display:'flex', gap:8 }}>
         <button
           onClick={() => { setSrc(null); setPoint(null); onColor(null); }}
           style={{
-            flex:1, padding:'8px 12px', fontFamily:'DM Sans', fontSize:11,
+            flex:1, padding:'8px 12px', fontFamily:'Hanken Grotesk', fontSize:11,
             letterSpacing:'0.08em', textTransform:'uppercase', fontWeight:500,
             background:'var(--blush-deep)', color:'#fff',
             border:'none', borderRadius:20, cursor:'pointer',
@@ -2800,7 +2792,7 @@ function PhotoPicker({ sampledHex, onColor }) {
 // ZOOM: half-width of the close-up; GRID: spacing of its dots, wide enough apart that neighbors look different
 const EXPLORER = { LMIN: 8, LMAX: 95, SPAN: 80, ZOOM: 20, GRID: 5 };
 // input: 16px keeps iOS from zooming the page on focus. title: the picked color's name on the card.
-const EXPLORER_TYPE = { eyebrow:11, micro:11, link:12, body:13, caption:14, input:16, lede:21, title:30 };
+const EXPLORER_TYPE = { eyebrow:11, micro:11, link:12, body:13, caption:14, input:16, name:19, title:27 };
 const EXPLORER_STARTS = [['Red', '#b5252c'], ['Pink', '#d66796'], ['Berry', '#7d2349'], ['Coral', '#d77749'], ['Brown', '#b4856b'], ['Plum', '#5c3069'], ['Blue', '#004590'], ['Black', '#1f1f1f']];
 // Start-from families that open a Tone and a Depth row: hue (degrees) for [warm, neutral, cool], chroma,
 // and which depth a tap on the family opens on. The numbers are chosen so the card names each pick the
@@ -2947,7 +2939,7 @@ function shadeSummary(info) {
 }
 
 const EXPLORER_CTA = {
-  fontFamily:'DM Sans', fontSize:EXPLORER_TYPE.link, fontWeight:500, letterSpacing:'0.08em', textTransform:'uppercase',
+  fontFamily:'Hanken Grotesk', fontSize:EXPLORER_TYPE.link, fontWeight:500, letterSpacing:'0.08em', textTransform:'uppercase',
   background:'var(--espresso)', color:'var(--cream)', border:'none', borderRadius:40, cursor:'pointer',
 };
 
@@ -3055,7 +3047,7 @@ function ShadeExplorer({ draft, color, origin, zoom, onZoom, info, committed, pi
   }
   const startChip = (name, hex, on, onClick) => (
     <button key={name} type="button" aria-pressed={on} onClick={onClick} style={{
-      flex:'none', whiteSpace:'nowrap', fontFamily:'DM Sans', fontSize:TYPE.body,
+      flex:'none', whiteSpace:'nowrap', fontFamily:'Hanken Grotesk', fontSize:TYPE.body,
       display:'flex', alignItems:'center', gap:7, minHeight: stacked ? 44 : 0, padding:'6px 14px 6px 7px',
       borderRadius:20, border:`1.5px solid ${on ? 'var(--espresso)' : 'var(--border)'}`,
       background:'#fff', color:'var(--espresso)', cursor:'pointer',
@@ -3106,8 +3098,8 @@ function ShadeExplorer({ draft, color, origin, zoom, onZoom, info, committed, pi
   return (
     <div style={{ width:'100%', display:'flex', flexDirection:'column', gap:16 }}>
       <p style={{
-        fontFamily:'Cormorant Garamond', fontStyle:'italic', fontSize:TYPE.lede,
-        color:'var(--espresso-mid)', textAlign:'center', lineHeight:1.4, maxWidth:360, alignSelf:'center',
+        fontSize:15,
+        color:'var(--espresso-mid)', textAlign:'center', lineHeight:1.5, maxWidth:360, alignSelf:'center',
       }}>
         Choose a spot on the map to find matching lipsticks, then go lighter or deeper.
       </p>
@@ -3217,7 +3209,7 @@ function ShadeExplorer({ draft, color, origin, zoom, onZoom, info, committed, pi
           </div>
           <div style={{ flex:1, minWidth:0, display:'flex', flexDirection:'column', gap:2 }}>
             <span style={{
-              fontFamily:'Cormorant Garamond', fontStyle:'italic', fontSize:TYPE.lede, lineHeight:1.1,
+              fontFamily:'Gloock', fontSize:TYPE.name, lineHeight:1.1,
               whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis',
             }}>{color.name}</span>
             <span style={{ fontSize:TYPE.body, color:'var(--espresso-mid)' }}>
@@ -3251,19 +3243,19 @@ function ShadeHexForm({ id, big, onDraft }) {
   }
   return (
     <form onSubmit={submitHex} style={{ display:'flex', flexDirection:'column', gap:8, padding:'0 4px' }}>
-      <label htmlFor={id} style={{ fontFamily:'Cormorant Garamond', fontStyle:'italic', fontSize:TYPE.lede, lineHeight:1.2, color:'var(--espresso)' }}>
+      <label htmlFor={id} style={{ fontFamily:'Gloock', fontSize:TYPE.name, lineHeight:1.2, color:'var(--espresso)' }}>
         Already know the hex?
       </label>
       <div style={{ display:'flex', gap:8 }}>
         <input id={id} value={hexText} onChange={e => { setHexText(e.target.value); setHexBad(false); }}
           placeholder="#B5252C" maxLength={7} spellCheck={false} autoComplete="off"
           style={{
-            flex:1, minWidth:0, fontFamily:'DM Sans', fontSize: big ? TYPE.input : TYPE.caption, minHeight: big ? 44 : 0,
+            flex:1, minWidth:0, fontFamily:'Hanken Grotesk', fontSize: big ? TYPE.input : TYPE.caption, minHeight: big ? 44 : 0,
             padding:'10px 14px', borderRadius:12, border:`1.5px solid ${hexBad ? 'var(--blush-deep)' : 'var(--border)'}`,
             background:'#fff', color:'var(--espresso)', letterSpacing:'0.04em',
           }} />
         <button type="submit" style={{
-          fontFamily:'DM Sans', fontSize:TYPE.body, padding:'10px 18px', borderRadius:12,
+          fontFamily:'Hanken Grotesk', fontSize:TYPE.body, padding:'10px 18px', borderRadius:12,
           border:'1.5px solid #C9B3A4', background:'transparent', color:'var(--espresso)', cursor:'pointer',
         }}>Show</button>
       </div>
@@ -3283,7 +3275,7 @@ function ShadeZoomControl({ color, origin, zoom, onZoom, onDraft, row, wide }) {
       ? { flex:1, display:'flex', flexWrap:'wrap', alignItems:'center', justifyContent:'space-between', gap:10 }
       : { flex:'none', display:'flex', flexDirection:'column', alignItems: row ? 'center' : 'flex-end', gap:10 }}>
       <button type="button" aria-pressed={!!zoom} onClick={() => { trackExplore(zoom ? 'zoom_out' : 'zoom_in'); onZoom(zoom ? null : { a: color.a, b: color.b }); }} style={{
-        fontFamily:'DM Sans', fontSize:TYPE.link, fontWeight:500, letterSpacing:'0.06em', textTransform:'uppercase',
+        fontFamily:'Hanken Grotesk', fontSize:TYPE.link, fontWeight:500, letterSpacing:'0.06em', textTransform:'uppercase',
         minHeight: row ? 44 : 0, padding:'10px 18px', borderRadius:40, border:'1.5px solid var(--espresso)',
         background: zoom ? 'var(--espresso)' : '#fff', color: zoom ? 'var(--cream)' : 'var(--espresso)', cursor:'pointer',
       }}>
@@ -3291,7 +3283,7 @@ function ShadeZoomControl({ color, origin, zoom, onZoom, onDraft, row, wide }) {
       </button>
       {back && back.hex !== color.hex && (
         <button type="button" onClick={() => { trackExplore('return_to_origin'); onDraft(origin); }} style={{
-          fontFamily:'DM Sans', fontSize:TYPE.link, display:'flex', alignItems:'center', gap:8, minHeight: row ? 44 : 0,
+          fontFamily:'Hanken Grotesk', fontSize:TYPE.link, display:'flex', alignItems:'center', gap:8, minHeight: row ? 44 : 0,
           padding:0, border:'none', background:'none', color:'var(--espresso)', cursor:'pointer', textDecoration:'underline', textUnderlineOffset:3,
         }}>
           <span style={{ width:16, height:16, borderRadius:5, background:back.hex, boxShadow:'0 0 0 1px var(--border)' }} />
@@ -3324,7 +3316,7 @@ function ShadeCard({ color, origin, zoom, onZoom, info, committed, onCommit, onJ
             {[['Your first pick', before], ['Now', color]].map(([label, c]) => (
               <div key={label} style={{ flex:1, minWidth:0, display:'flex', flexDirection:'column', gap:4, paddingRight:12 }}>
                 <p style={{ fontSize:TYPE.eyebrow, fontWeight:500, letterSpacing:'0.12em', textTransform:'uppercase', color:'var(--espresso-mid)' }}>{label}</p>
-                <p style={{ fontFamily:'Cormorant Garamond', fontStyle:'italic', fontSize:TYPE.lede, lineHeight:1.15 }}>{c.name}</p>
+                <p style={{ fontFamily:'Gloock', fontSize:TYPE.name, lineHeight:1.15 }}>{c.name}</p>
                 <p style={{ fontSize:TYPE.body, color:'var(--espresso-mid)', letterSpacing:'0.04em' }}>{c.hex.toUpperCase()}</p>
               </div>
             ))}
@@ -3334,7 +3326,7 @@ function ShadeCard({ color, origin, zoom, onZoom, info, committed, onCommit, onJ
       <div style={{ display:'flex', flexWrap:'wrap', alignItems:'flex-start', justifyContent:'space-between', gap:16 }}>
         {!moved && (
           <div style={{ flex:'1 1 160px', minWidth:0, display:'flex', flexDirection:'column', gap:4 }}>
-            <p style={{ fontFamily:'Cormorant Garamond', fontStyle:'italic', fontSize:TYPE.title, lineHeight:1.1 }}>{color.name}</p>
+            <p style={{ fontFamily:'Gloock', fontSize:TYPE.title, lineHeight:1.1 }}>{color.name}</p>
             <p style={{ fontSize:TYPE.body, color:'var(--espresso-mid)', letterSpacing:'0.04em' }}>{color.hex.toUpperCase()}</p>
           </div>
         )}
@@ -3393,14 +3385,14 @@ function ShadeSheet({ color, info, pinned, onClose, children }) {
           <span style={{ width:40, height:40, borderRadius:10, flex:'none', background:color.hex, boxShadow:'inset 0 -2px 4px rgba(0,0,0,0.12)' }} />
           <div style={{ flex:1, minWidth:0, display:'flex', flexDirection:'column', gap:2 }}>
             <h2 id="shade-sheet-title" style={{
-              fontFamily:'Cormorant Garamond', fontStyle:'italic', fontWeight:400, fontSize:TYPE.lede, lineHeight:1.1,
+              fontFamily:'Gloock', fontWeight:400, fontSize:TYPE.name, lineHeight:1.1,
               whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis',
             }}>{color.name}</h2>
             <span style={{ fontSize:TYPE.body, color:'var(--espresso-mid)' }}>{summary.text}{summary.n ? ' · closest first' : ''}</span>
           </div>
           <button ref={closeBtn} type="button" aria-label="Close results" onClick={onClose} style={{
             flex:'none', width:44, height:44, borderRadius:'50%', border:'1px solid var(--border)',
-            background:'#fff', color:'var(--espresso)', fontFamily:'DM Sans', fontSize:20, lineHeight:1, cursor:'pointer',
+            background:'#fff', color:'var(--espresso)', fontFamily:'Hanken Grotesk', fontSize:20, lineHeight:1, cursor:'pointer',
           }}>×</button>
         </div>
       </div>
@@ -3564,34 +3556,35 @@ function DupeFinder({ product, onSelect, onUsePhoto, onUseWheel }) {
   // size for a new label; pick the closest existing role instead.
   //   eyebrow  11px  uppercase micro-labels (step labels, section dividers)
   //   micro    11px  secondary meta riding alongside primary text (counts, finish tags)
-  //   caption  14px  helper/hint sentences (italic serif, under inputs)
+  //   caption  14px  helper/hint sentences (sans, under inputs)
   //   link     12px  clickable CTA text ("match from a photo")
   //   body     13px  regular UI text (chips, list primary text)
-  //   lede     21px  panel intro headline
-  const TYPE = { eyebrow:11, micro:11, caption:14, link:12, body:13, lede:21 };
+  //   name     19px  picked shade name (serif)
+  //   lede     19px  panel intro headline (serif)
+  const TYPE = { eyebrow:11, micro:11, caption:14, link:12, body:13, name:19, lede:19 };
 
-  const stepNum = { width:22, height:22, borderRadius:'50%', background:'var(--espresso)', color:'var(--cream)', fontFamily:'DM Sans', fontSize:TYPE.eyebrow, fontWeight:500, display:'inline-flex', alignItems:'center', justifyContent:'center', flexShrink:0 };
-  const stepLabel = { fontFamily:'DM Sans', fontSize:TYPE.eyebrow, color:'var(--text-muted)', letterSpacing:'0.1em', textTransform:'uppercase' };
+  const stepNum = { width:22, height:22, borderRadius:'50%', background:'var(--espresso)', color:'var(--cream)', fontFamily:'Hanken Grotesk', fontSize:TYPE.eyebrow, fontWeight:500, display:'inline-flex', alignItems:'center', justifyContent:'center', flexShrink:0 };
+  const stepLabel = { fontFamily:'Hanken Grotesk', fontSize:TYPE.eyebrow, color:'var(--text-muted)', letterSpacing:'0.1em', textTransform:'uppercase' };
   const inputWrap = { display:'flex', alignItems:'center', gap:10, background:'#fff', borderRadius:14, border:'1.5px solid var(--border)', padding:'11px 14px', boxShadow:'0 2px 8px var(--shadow)' };
-  const inputStyle = { flex:1, border:'none', outline:'none', background:'transparent', fontFamily:'DM Sans', fontSize:15, color:'var(--espresso)', minWidth:0 };
+  const inputStyle = { flex:1, border:'none', outline:'none', background:'transparent', fontFamily:'Hanken Grotesk', fontSize:15, color:'var(--espresso)', minWidth:0 };
   const clearBtn = { background:'none', border:'none', cursor:'pointer', color:'var(--text-muted)', fontSize:16, lineHeight:1, padding:'0 2px' };
   const suggestBox = { display:'flex', flexDirection:'column', gap:2, maxHeight:260, overflowY:'auto', background:'#fff', border:'1px solid var(--border)', borderRadius:12, padding:6, boxShadow:'0 4px 16px var(--shadow)' };
   const chip = { display:'inline-flex', alignItems:'center', gap:8, padding:'7px 8px 7px 14px', background:'#fff', borderRadius:40, border:'1px solid var(--border)', boxShadow:'0 2px 8px var(--shadow)' };
   const chipX = { width:20, height:20, borderRadius:'50%', border:'none', background:'var(--cream-dark)', color:'var(--text-muted)', cursor:'pointer', fontSize:13, lineHeight:1, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 };
-  const emptyNote = { fontFamily:'Cormorant Garamond', fontStyle:'italic', fontSize:TYPE.caption, color:'var(--text-muted)', textAlign:'center', padding:'8px 0' };
-  const photoFallbackBtn = { marginTop:6, fontFamily:'DM Sans', fontSize:TYPE.link, letterSpacing:'0.06em', textTransform:'uppercase', color:'var(--blush-deep)', background:'transparent', border:'1px solid var(--blush-deep)', borderRadius:20, padding:'6px 14px', cursor:'pointer' };
+  const emptyNote = { fontSize:TYPE.body, color:'var(--text-muted)', textAlign:'center', padding:'8px 0' };
+  const photoFallbackBtn = { marginTop:6, fontFamily:'Hanken Grotesk', fontSize:TYPE.link, letterSpacing:'0.06em', textTransform:'uppercase', color:'var(--blush-deep)', background:'transparent', border:'1px solid var(--blush-deep)', borderRadius:20, padding:'6px 14px', cursor:'pointer' };
   const hov = () => ({ onMouseEnter: e => e.currentTarget.style.background = 'var(--cream)', onMouseLeave: e => e.currentTarget.style.background = 'transparent' });
 
   return (
     <div style={{ width:'100%', maxWidth:440, display:'flex', flexDirection:'column', gap:14, padding:'4px 0' }}>
       <div style={{ textAlign:'center', marginBottom:2 }}>
-        <p style={{ fontFamily:'Cormorant Garamond', fontStyle:'italic', fontSize:TYPE.lede, color:'var(--espresso-mid)', lineHeight:1.4 }}>
+        <p style={{ fontFamily:'Gloock', fontSize:TYPE.lede, color:'var(--espresso-mid)', lineHeight:1.4 }}>
           Find a color match for a lipstick you like
         </p>
-        <p style={{ fontFamily:'DM Sans', fontSize:TYPE.body, color:'var(--text-muted)', letterSpacing:'0.02em', marginTop:4 }}>
+        <p style={{ fontFamily:'Hanken Grotesk', fontSize:TYPE.body, color:'var(--text-muted)', letterSpacing:'0.02em', marginTop:4 }}>
           Search a brand, a shade or both
         </p>
-        <button onClick={() => { window.gtag?.('event', 'dupe_photo_fallback', { step: 'header' }); onUsePhoto(); }} style={{ marginTop:8, fontFamily:'DM Sans', fontSize:TYPE.link, letterSpacing:'0.05em', color:'var(--blush-deep)', background:'transparent', border:'none', borderBottom:'1px solid var(--blush-deep)', paddingBottom:1, cursor:'pointer' }}>
+        <button onClick={() => { window.gtag?.('event', 'dupe_photo_fallback', { step: 'header' }); onUsePhoto(); }} style={{ marginTop:8, fontFamily:'Hanken Grotesk', fontSize:TYPE.link, letterSpacing:'0.05em', color:'var(--blush-deep)', background:'transparent', border:'none', borderBottom:'1px solid var(--blush-deep)', paddingBottom:1, cursor:'pointer' }}>
           Can't find your lipstick? Match it from a photo →
         </button>
       </div>
@@ -3618,7 +3611,7 @@ function DupeFinder({ product, onSelect, onUsePhoto, onUseWheel }) {
           </div>
           {typedHex && (
             <div style={{ textAlign:'center', padding:'8px 0' }}>
-              <p style={{ fontFamily:'DM Sans', fontSize:TYPE.body, color:'var(--espresso)', margin:'0 0 10px' }}>This box searches brand and shade names, not color codes.</p>
+              <p style={{ fontFamily:'Hanken Grotesk', fontSize:TYPE.body, color:'var(--espresso)', margin:'0 0 10px' }}>This box searches brand and shade names, not color codes.</p>
               <a href={chartHexUrl} onClick={openChartHex} style={{ ...PILL_TAG, fontSize:TYPE.link, padding:'7px 14px 6px', borderRadius:20, display:'inline-block', textDecoration:'none' }}>
                 See lipsticks near #{typedHex} →
               </a>
@@ -3654,8 +3647,8 @@ function DupeFinder({ product, onSelect, onUsePhoto, onUseWheel }) {
                   background:'transparent', cursor:'pointer', textAlign:'left',
                   transition:'background 0.12s',
                 }}>
-                  <span style={{ fontFamily:'DM Sans', fontSize:13, fontWeight:500, color:'var(--espresso)' }}>{brandName(b)}</span>
-                  <span style={{ fontFamily:'DM Sans', fontSize:11, color:'var(--text-muted)', marginLeft:'auto', flexShrink:0 }}>
+                  <span style={{ fontFamily:'Hanken Grotesk', fontSize:13, fontWeight:500, color:'var(--espresso)' }}>{brandName(b)}</span>
+                  <span style={{ fontFamily:'Hanken Grotesk', fontSize:11, color:'var(--text-muted)', marginLeft:'auto', flexShrink:0 }}>
                     {brandCounts[b]} shade{brandCounts[b] !== 1 ? 's' : ''}
                   </span>
                 </button>
@@ -3673,15 +3666,15 @@ function DupeFinder({ product, onSelect, onUsePhoto, onUseWheel }) {
                 }}>
                   <span style={{ width:24, height:24, borderRadius:'50%', background:p.hex, flexShrink:0, boxShadow:`0 1px 4px ${p.hex}66`, border:'1px solid rgba(42,26,20,0.08)' }} />
                   <span style={{ display:'flex', flexDirection:'column', minWidth:0, textAlign:'left' }}>
-                    <span style={{ fontFamily:'Cormorant Garamond', fontStyle:'italic', fontSize:15, color:'var(--espresso)', lineHeight:1.2, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{titleCase(p.shade)}</span>
-                    <span style={{ fontFamily:'DM Sans', fontSize:TYPE.micro, color:'var(--text-muted)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{brandName(p.brand)} · {titleCase(p.product)}</span>
+                    <span style={{ fontFamily:'Hanken Grotesk', fontSize:13, fontWeight:700, letterSpacing:'0.05em', textTransform:'uppercase', color:'var(--espresso)', lineHeight:1.25, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{titleCase(p.shade)}</span>
+                    <span style={{ fontFamily:'Hanken Grotesk', fontSize:TYPE.micro, color:'var(--text-muted)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{brandName(p.brand)} · {titleCase(p.product)}</span>
                   </span>
                 </button>
               ))}
             </div>
           )}
           {!brandQuery && (
-            <p style={{ fontFamily:'Cormorant Garamond', fontStyle:'italic', fontSize:TYPE.caption, color:'var(--text-muted)', textAlign:'center', lineHeight:1.5, marginTop:2 }}>
+            <p style={{ fontSize:TYPE.body, color:'var(--text-muted)', textAlign:'center', lineHeight:1.5, marginTop:2 }}>
               Start typing a brand or shade — matches appear as you go.
             </p>
           )}
@@ -3691,7 +3684,7 @@ function DupeFinder({ product, onSelect, onUsePhoto, onUseWheel }) {
           <div style={{ display:'flex', alignItems:'center', gap:10 }}>
             <span style={stepNum}>1</span>
             <div style={chip}>
-              <span style={{ fontFamily:'DM Sans', fontSize:13, fontWeight:500, color:'var(--espresso)' }}>{brandName(brand)}</span>
+              <span style={{ fontFamily:'Hanken Grotesk', fontSize:13, fontWeight:500, color:'var(--espresso)' }}>{brandName(brand)}</span>
               <button onClick={changeBrand} title="Change brand" style={chipX}>×</button>
             </div>
           </div>
@@ -3728,8 +3721,8 @@ function DupeFinder({ product, onSelect, onUsePhoto, onUseWheel }) {
                           background:'transparent', cursor:'pointer', textAlign:'left',
                           transition:'background 0.12s',
                         }}>
-                          <span style={{ fontFamily:'DM Sans', fontSize:13, fontWeight:500, color:'var(--espresso)' }}>{brandName(b)}</span>
-                          <span style={{ fontFamily:'DM Sans', fontSize:11, color:'var(--text-muted)', marginLeft:'auto', flexShrink:0 }}>
+                          <span style={{ fontFamily:'Hanken Grotesk', fontSize:13, fontWeight:500, color:'var(--espresso)' }}>{brandName(b)}</span>
+                          <span style={{ fontFamily:'Hanken Grotesk', fontSize:11, color:'var(--text-muted)', marginLeft:'auto', flexShrink:0 }}>
                             {brandCounts[b]} shade{brandCounts[b] !== 1 ? 's' : ''}
                           </span>
                         </button>
@@ -3746,8 +3739,8 @@ function DupeFinder({ product, onSelect, onUsePhoto, onUseWheel }) {
                         }}>
                           <span style={{ width:24, height:24, borderRadius:'50%', background:p.hex, flexShrink:0, boxShadow:`0 1px 4px ${p.hex}66`, border:'1px solid rgba(42,26,20,0.08)' }} />
                           <span style={{ display:'flex', flexDirection:'column', minWidth:0, textAlign:'left' }}>
-                            <span style={{ fontFamily:'Cormorant Garamond', fontStyle:'italic', fontSize:15, color:'var(--espresso)', lineHeight:1.2, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{titleCase(p.shade)}</span>
-                            <span style={{ fontFamily:'DM Sans', fontSize:TYPE.micro, color:'var(--text-muted)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{brandName(p.brand)} · {titleCase(p.product)}</span>
+                            <span style={{ fontFamily:'Hanken Grotesk', fontSize:13, fontWeight:700, letterSpacing:'0.05em', textTransform:'uppercase', color:'var(--espresso)', lineHeight:1.25, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{titleCase(p.shade)}</span>
+                            <span style={{ fontFamily:'Hanken Grotesk', fontSize:TYPE.micro, color:'var(--text-muted)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{brandName(p.brand)} · {titleCase(p.product)}</span>
                           </span>
                         </button>
                       ))}
@@ -3777,8 +3770,8 @@ function DupeFinder({ product, onSelect, onUsePhoto, onUseWheel }) {
                     }}>
                       <span style={{ width:24, height:24, borderRadius:'50%', background:p.hex, flexShrink:0, boxShadow:`0 1px 4px ${p.hex}66`, border:'1px solid rgba(42,26,20,0.08)' }} />
                       <span style={{ display:'flex', flexDirection:'column', minWidth:0, textAlign:'left' }}>
-                        <span style={{ fontFamily:'Cormorant Garamond', fontStyle:'italic', fontSize:15, color:'var(--espresso)', lineHeight:1.2, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{titleCase(p.shade)}</span>
-                        <span style={{ fontFamily:'DM Sans', fontSize:TYPE.micro, color:'var(--text-muted)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{titleCase(p.product)} · {p.finish}</span>
+                        <span style={{ fontFamily:'Hanken Grotesk', fontSize:13, fontWeight:700, letterSpacing:'0.05em', textTransform:'uppercase', color:'var(--espresso)', lineHeight:1.25, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{titleCase(p.shade)}</span>
+                        <span style={{ fontFamily:'Hanken Grotesk', fontSize:TYPE.micro, color:'var(--text-muted)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{titleCase(p.product)} · {p.finish}</span>
                       </span>
                     </button>
                   ))}
@@ -3800,30 +3793,30 @@ function DupeFinder({ product, onSelect, onUsePhoto, onUseWheel }) {
                   </div>
                 </div>
                 <div style={{ padding:'16px 20px 18px', borderTop:'1px solid var(--border)' }}>
-                  <div style={{ fontFamily:'DM Sans', fontSize:TYPE.body, fontWeight:500, color:'var(--espresso)' }}>{brandName(product.brand)}</div>
-                  <div style={{ fontFamily:'Cormorant Garamond', fontSize:TYPE.lede, color:'var(--espresso-mid)', lineHeight:1.2, marginTop:2 }}>{titleCase(product.shade)}</div>
+                  <div style={{ fontFamily:'Hanken Grotesk', fontSize:TYPE.body, fontWeight:500, color:'var(--espresso)' }}>{brandName(product.brand)}</div>
+                  <div style={{ fontFamily:'Gloock', fontSize:TYPE.name, color:'var(--espresso-mid)', lineHeight:1.2, marginTop:2 }}>{titleCase(product.shade)}</div>
                   {product.product && (
-                    <div style={{ fontFamily:'DM Sans', fontSize:TYPE.body, color:'var(--text-muted)', marginTop:4 }}>{titleCase(product.product)}</div>
+                    <div style={{ fontFamily:'Hanken Grotesk', fontSize:TYPE.body, color:'var(--text-muted)', marginTop:4 }}>{titleCase(product.product)}</div>
                   )}
-                  <div style={{ fontFamily:'DM Sans', fontSize:TYPE.micro, color:'var(--text-muted)', marginTop:6, letterSpacing:'0.04em' }}>{product.hex.toUpperCase()}{product.discontinued && <DiscontinuedTag />}</div>
+                  <div style={{ fontFamily:'Hanken Grotesk', fontSize:TYPE.micro, color:'var(--text-muted)', marginTop:6, letterSpacing:'0.04em' }}>{product.hex.toUpperCase()}{product.discontinued && <DiscontinuedTag />}</div>
                 </div>
               </div>
               <div className="dupe-card-mobile" style={{ alignItems:'center', gap:14, padding:'14px 16px', background:'#fff', borderRadius:16, border:'1px solid var(--border)', boxShadow:'0 2px 12px var(--shadow)' }}>
                 <ProductThumb product={product} size={56} />
                 <ShadeChip hex={product.hex} height={56} width={9} />
                 <div style={{ flex:1, minWidth:0 }}>
-                  <div style={{ fontFamily:'DM Sans', fontSize:12, fontWeight:500, color:'var(--espresso)' }}>{brandName(product.brand)}</div>
-                  <div style={{ fontFamily:'Cormorant Garamond', fontSize:18, color:'var(--espresso-mid)', lineHeight:1.2 }}>{titleCase(product.shade)}</div>
-                  <div style={{ fontFamily:'DM Sans', fontSize:10, color:'var(--text-muted)', marginTop:2, letterSpacing:'0.04em' }}>{product.hex.toUpperCase()}{product.discontinued && <DiscontinuedTag />}</div>
+                  <div style={{ fontFamily:'Hanken Grotesk', fontSize:12, fontWeight:500, color:'var(--espresso)' }}>{brandName(product.brand)}</div>
+                  <div style={{ fontFamily:'Gloock', fontSize:16, color:'var(--espresso-mid)', lineHeight:1.2 }}>{titleCase(product.shade)}</div>
+                  <div style={{ fontFamily:'Hanken Grotesk', fontSize:10, color:'var(--text-muted)', marginTop:2, letterSpacing:'0.04em' }}>{product.hex.toUpperCase()}{product.discontinued && <DiscontinuedTag />}</div>
                 </div>
               </div>
               <button onClick={() => onSelect(null)} style={{
-                alignSelf:'flex-start', fontSize:11, fontFamily:'DM Sans',
+                alignSelf:'flex-start', fontSize:11, fontFamily:'Hanken Grotesk',
                 letterSpacing:'0.06em', textTransform:'uppercase', color:'var(--blush-deep)',
                 background:'transparent', border:'1px solid var(--blush-deep)', borderRadius:20,
                 padding:'6px 14px', cursor:'pointer',
               }}>← Pick another shade</button>
-              <p style={{ fontFamily:'Cormorant Garamond', fontStyle:'italic', fontSize:14, color:'var(--text-muted)', textAlign:'center', marginTop:2 }}>
+              <p style={{ fontSize:13, color:'var(--text-muted)', textAlign:'center', marginTop:2 }}>
                 <span className="only-wide">Closest dupes are ranked on the right →</span>
                 <span className="only-stacked">Closest dupes are ranked below ↓</span>
               </p>
@@ -3834,7 +3827,7 @@ function DupeFinder({ product, onSelect, onUsePhoto, onUseWheel }) {
 
       {!product && popularProducts.length > 0 && (
         <div style={{ marginTop:26, display:'flex', flexDirection:'column', gap:10 }}>
-          <p style={{ fontFamily:'DM Sans', fontSize:TYPE.eyebrow, color:'var(--text-muted)', letterSpacing:'0.1em', textTransform:'uppercase', textAlign:'center' }}>
+          <p style={{ fontFamily:'Hanken Grotesk', fontSize:TYPE.eyebrow, color:'var(--text-muted)', letterSpacing:'0.1em', textTransform:'uppercase', textAlign:'center' }}>
             Or try a popular shade
           </p>
           <div style={{ display:'flex', flexWrap:'wrap', gap:8, justifyContent:'center' }}>
@@ -3847,8 +3840,8 @@ function DupeFinder({ product, onSelect, onUsePhoto, onUseWheel }) {
               }}>
                 <span className="popular-pick-swatch" style={{ width:20, height:20, borderRadius:'50%', background:p.hex, flexShrink:0, boxShadow:`0 1px 4px ${p.hex}66`, border:'1px solid rgba(42,26,20,0.08)' }} />
                 <span style={{ display:'flex', flexDirection:'column', textAlign:'left' }}>
-                  <span className="popular-pick-shade" style={{ fontFamily:'Cormorant Garamond', fontStyle:'italic', fontSize:TYPE.body, color:'var(--espresso)', lineHeight:1.15 }}>{titleCase(p.shade)}</span>
-                  <span className="popular-pick-brand" style={{ fontFamily:'DM Sans', fontSize:TYPE.micro, color:'var(--text-muted)' }}>{brandName(p.brand)}</span>
+                  <span className="popular-pick-shade" style={{ fontFamily:'Hanken Grotesk', fontSize:TYPE.link, fontWeight:700, letterSpacing:'0.05em', textTransform:'uppercase', color:'var(--espresso)', lineHeight:1.15 }}>{titleCase(p.shade)}</span>
+                  <span className="popular-pick-brand" style={{ fontFamily:'Hanken Grotesk', fontSize:TYPE.micro, color:'var(--text-muted)' }}>{brandName(p.brand)}</span>
                 </span>
               </button>
             ))}
@@ -3970,7 +3963,7 @@ function LandingDupeArt() {
   return (
     <div className="landing-art-dupe" style={{ display:'flex', alignItems:'flex-end', justifyContent:'center', gap:22 }}>
       <LandingBullet bullet="#B5263A" sleeve="#D9B98A" base="var(--espresso)" tilt={-6} label="Yours" />
-      <span style={{ fontFamily:'Cormorant Garamond', fontSize:40, lineHeight:1, color:'var(--text-muted)', alignSelf:'center' }}>≈</span>
+      <span style={{ fontFamily:'Gloock', fontSize:36, lineHeight:1, color:'var(--text-muted)', alignSelf:'center' }}>≈</span>
       <LandingBullet bullet="#BA2A3C" sleeve="#E6CFC2" base="var(--blush)" tilt={6} label="Its twin" />
     </div>
   );
@@ -4019,7 +4012,7 @@ function LandingCard({ art, title, desc, href, onClick }) {
     >
       <div className="landing-art" aria-hidden="true">{art}</div>
       <div className="landing-card-text">
-        <h2 style={{ fontFamily:'Cormorant Garamond', fontWeight:400, fontSize:26, lineHeight:1.1, color:'var(--espresso)' }}>{title}</h2>
+        <h2 style={{ fontFamily:'Gloock', fontWeight:400, fontSize:23, lineHeight:1.1, color:'var(--espresso)' }}>{title}</h2>
         <p style={{ fontSize:14, lineHeight:1.55, color:'var(--espresso-mid)', textWrap:'pretty' }}>{desc}</p>
       </div>
     </Tag>
@@ -4028,7 +4021,7 @@ function LandingCard({ art, title, desc, href, onClick }) {
 
 function Landing({ onPick }) {
   const cards = [
-    { id:'wheel', title:'Explore by color', desc:'Start from 46 shades on a color wheel, then go lighter or deeper.', art:<LandingWheelArt /> },
+    { id:'wheel', title:'Explore the color wheel', desc:'Start from 46 shades on a color wheel, then go lighter or deeper.', art:<LandingWheelArt /> },
     { id:'dupe', title:'Find a dupe', desc:'Name a lipstick you own and see what matches.', art:<LandingDupeArt /> },
     { id:'photo', title:'Match a photo', desc:'Drop in any photo and tap the shade you want.', art:<LandingPhotoArt /> },
     { id:'hex', title:'Use the color chart', desc:'Pinpoint from hundreds of shades, or paste a hex code.', art:<LandingChartArt /> },
@@ -4038,11 +4031,8 @@ function Landing({ onPick }) {
     <>
       <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:14, textAlign:'center' }}>
         <h2 className="landing-lede">
-          How do you want <em style={{ fontStyle:'italic', fontWeight:400, color:'var(--espresso-mid)' }}>to search?</em>
+          Explore over 24,000 lipsticks by color
         </h2>
-        <p style={{ fontSize:15, lineHeight:1.5, color:'var(--espresso-mid)' }}>
-          Search over 24,000 lip products by color, not just by shade name.
-        </p>
       </div>
       <div className="landing-grid">
         {cards.map(c => (
@@ -4060,7 +4050,7 @@ function CatalogueLoading() {
   return (
     <div role="status" style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:14, padding:'48px 16px', textAlign:'center' }}>
       <div className="preload-spinner" />
-      <p style={{ fontFamily:'Cormorant Garamond, serif', fontStyle:'italic', fontSize:18, color:'var(--text-muted)' }}>
+      <p style={{ fontSize:15, color:'var(--text-muted)' }}>
         Loading over 24,000 shades…
       </p>
     </div>
@@ -4072,7 +4062,7 @@ function CatalogueLoading() {
 function DataLoadError() {
   return (
     <div style={{ minHeight:'100vh', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:18, padding:24, textAlign:'center' }}>
-      <p style={{ fontFamily:'Cormorant Garamond, serif', fontStyle:'italic', fontSize:28, color:'var(--espresso)' }}>
+      <p style={{ fontFamily:'Gloock', fontSize:26, color:'var(--espresso)' }}>
         We couldn't load the lipstick catalogue.
       </p>
       <p style={{ fontSize:14, color:'var(--text-muted)', maxWidth:380, lineHeight:1.6 }}>
@@ -4080,7 +4070,7 @@ function DataLoadError() {
       </p>
       <button onClick={() => location.reload()} style={{
         padding:'10px 22px', borderRadius:24, border:'1.5px solid var(--border)', background:'#fff',
-        color:'var(--espresso)', cursor:'pointer', fontFamily:'DM Sans, sans-serif', fontSize:12,
+        color:'var(--espresso)', cursor:'pointer', fontFamily:'Hanken Grotesk, sans-serif', fontSize:12,
         fontWeight:500, letterSpacing:'0.06em', textTransform:'uppercase',
       }}>
         Refresh
@@ -4480,7 +4470,7 @@ function App() {
         borderBottom:'1px solid var(--border)',
       }}>
         <h1 style={{
-          fontFamily:'DM Sans', fontWeight:500, fontSize:13,
+          fontFamily:'Hanken Grotesk', fontWeight:500, fontSize:13,
           letterSpacing:'0.16em', textTransform:'uppercase',
           color:'var(--espresso)',
         }}>
@@ -4498,7 +4488,7 @@ function App() {
           </a>
         </h1>
         <span className="header-product-count" style={{
-          fontFamily:'DM Sans', fontSize:11, color:'var(--text-muted)', letterSpacing:'0.02em',
+          fontFamily:'Hanken Grotesk', fontSize:11, color:'var(--text-muted)', letterSpacing:'0.02em',
         }}>
           · Over 24,000 lip products
         </span>
@@ -4512,7 +4502,7 @@ function App() {
               border:'1.5px solid var(--border)',
               background:'#fff',
               color:'var(--espresso)', textDecoration:'none',
-              fontFamily:'DM Sans', fontSize:12, fontWeight:500, letterSpacing:'0.06em',
+              fontFamily:'Hanken Grotesk', fontSize:12, fontWeight:500, letterSpacing:'0.06em',
               textTransform:'uppercase', transition:'all 0.15s',
             }}
             onMouseEnter={e => { e.currentTarget.style.borderColor='var(--blush)'; e.currentTarget.style.color='var(--blush-deep)'; }}
@@ -4529,7 +4519,7 @@ function App() {
               border:'1.5px solid var(--border)',
               background:'#fff',
               color:'var(--espresso)', textDecoration:'none',
-              fontFamily:'DM Sans', fontSize:12, fontWeight:500, letterSpacing:'0.06em',
+              fontFamily:'Hanken Grotesk', fontSize:12, fontWeight:500, letterSpacing:'0.06em',
               textTransform:'uppercase', transition:'all 0.15s',
             }}
             onMouseEnter={e => { e.currentTarget.style.borderColor='var(--blush)'; e.currentTarget.style.color='var(--blush-deep)'; }}
@@ -4544,13 +4534,15 @@ function App() {
               padding:'8px 16px', borderRadius:24,
               border:'1.5px solid var(--border)', background:'#fff',
               color:'var(--espresso)', cursor:'pointer',
-              fontFamily:'DM Sans', fontSize:12, fontWeight:500, letterSpacing:'0.06em',
+              fontFamily:'Hanken Grotesk', fontSize:12, fontWeight:500, letterSpacing:'0.06em',
               textTransform:'uppercase', transition:'all 0.15s',
             }}
             onMouseEnter={e => { e.currentTarget.style.borderColor='var(--blush)'; e.currentTarget.style.color='var(--blush-deep)'; }}
             onMouseLeave={e => { e.currentTarget.style.borderColor='var(--border)'; e.currentTarget.style.color='var(--espresso)'; }}
           >
-            <span style={{ color:'var(--blush)' }}>{HEART}</span> My Favorites
+            <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" style={{ flexShrink:0 }}>
+              <path fill="var(--blush-deep)" d="M12 21s-7.8-4.8-9.7-9.6C.9 7.9 3.1 4 7 4c2.2 0 3.8 1.2 5 3 1.2-1.8 2.8-3 5-3 3.9 0 6.1 3.9 4.7 7.4C19.8 16.2 12 21 12 21z" />
+            </svg> My Favorites
             {wishlist.length > 0 && (
               <span style={{
                 background:'var(--blush-deep)', color:'#fff',
@@ -4567,7 +4559,7 @@ function App() {
               onClick={() => window.gtag?.('event', 'nav_link_click', { target, location: 'header' })}
               style={{
                 position:'relative', color:'var(--espresso-mid)', textDecoration:'none',
-                fontFamily:'DM Sans', fontSize:12, fontWeight:500, letterSpacing:'0.06em', textTransform:'uppercase',
+                fontFamily:'Hanken Grotesk', fontSize:12, fontWeight:500, letterSpacing:'0.06em', textTransform:'uppercase',
                 borderBottom:'1px solid var(--border)', paddingBottom:2,
               }}>
               {label}
@@ -4601,7 +4593,7 @@ function App() {
             <button key={t.id} className="mode-tab"
               onClick={() => switchMode(t.id)}
               style={{
-                fontFamily:'DM Sans', display:'flex', alignItems:'center', gap:11,
+                fontFamily:'Hanken Grotesk', display:'flex', alignItems:'center', gap:11,
                 flexShrink:0, textAlign:'left', background: active ? '#fff' : 'transparent',
                 border:'none', borderBottom:`2px solid ${active ? 'var(--blush)' : 'transparent'}`,
                 padding:'14px 20px 12px', cursor:'pointer', transition:'background 0.15s',
@@ -4715,16 +4707,16 @@ function App() {
                   <ShadeChip hex={p.hex} height={72} width={9} />
                   <ProductThumb product={p} size={72} tint={false} />
                   <div style={{ flex:1, minWidth:0 }}>
-                    <div style={{ fontFamily:'DM Sans', fontSize:12, color:'var(--text-muted)' }}>{brandName(p.brand)}</div>
-                    <div style={{ fontFamily:'DM Sans', fontSize:16, fontWeight:500, color:'var(--espresso)', lineHeight:1.25, marginTop:2 }}>{titleCase(p.shade)}</div>
+                    <div style={{ fontFamily:'Hanken Grotesk', fontSize:12, color:'var(--text-muted)' }}>{brandName(p.brand)}</div>
+                    <div style={{ fontFamily:'Hanken Grotesk', fontSize:16, fontWeight:500, color:'var(--espresso)', lineHeight:1.25, marginTop:2 }}>{titleCase(p.shade)}</div>
                   </div>
                 </div>
                 <div style={{ padding:'14px 16px 16px', borderTop:'1px solid var(--border)', background:'var(--cream)', display:'flex', flexDirection:'column', alignItems:'flex-start', gap:12 }}>
-                  <div style={{ fontFamily:'DM Sans', fontSize:13, color:'var(--text-body)', lineHeight:1.5 }}>
+                  <div style={{ fontFamily:'Hanken Grotesk', fontSize:13, color:'var(--text-body)', lineHeight:1.5 }}>
                     Want it a little warmer or cooler? See the shades around it on the color chart.
                   </div>
                   <button type="button" onClick={() => exploreOnChart(p.hex)} style={{
-                    fontFamily:'DM Sans', fontSize:12, fontWeight:500, letterSpacing:'0.06em', textTransform:'uppercase',
+                    fontFamily:'Hanken Grotesk', fontSize:12, fontWeight:500, letterSpacing:'0.06em', textTransform:'uppercase',
                     minHeight:44, padding:'10px 18px', borderRadius:40, border:'none',
                     background:'var(--espresso)', color:'var(--cream)', cursor:'pointer',
                   }}>
@@ -4739,7 +4731,7 @@ function App() {
           {mode === 'wheel' && (
             <p style={{
               fontSize:11, color:'var(--text-muted)', letterSpacing:'0.05em',
-              fontFamily:'DM Sans', marginTop:8, textAlign:'center',
+              fontFamily:'Hanken Grotesk', marginTop:8, textAlign:'center',
             }}>
               Select a color to browse matching lipstick shades
             </p>
@@ -4748,7 +4740,7 @@ function App() {
           {/* Mobile-only: quiet placeholder shown below picker before a color is picked */}
           {!selectedColor && mode !== 'dupe' && mode !== 'hex' && (
             <div className="mobile-picker-tips" style={{ justifyContent:'center', textAlign:'center' }}>
-              <p style={{ fontFamily:'DM Sans', fontSize:13, color:'var(--text-muted)', letterSpacing:'0.02em' }}>
+              <p style={{ fontFamily:'Hanken Grotesk', fontSize:13, color:'var(--text-muted)', letterSpacing:'0.02em' }}>
                 Your matches will appear here
               </p>
             </div>

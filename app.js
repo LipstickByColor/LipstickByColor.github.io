@@ -61,7 +61,7 @@ function heartBtnStyle(isLiked) {
     justifyContent: 'center',
     fontSize: 15,
     lineHeight: 1,
-    fontFamily: 'DM Sans',
+    fontFamily: 'Hanken Grotesk',
     flexShrink: 0,
     background: isLiked ? 'rgba(232,180,192,0.55)' : 'rgba(255,255,255,0.82)',
     color: isLiked ? 'var(--blush-deep)' : 'var(--blush)',
@@ -182,7 +182,8 @@ const MAX_COMPARE = 6;
 const MATCH_CARD_TYPE = {
   brand: 11,
   meta: 12,
-  body: 13
+  body: 13,
+  shade: 14
 };
 
 // Result cards name the format only for these, which aren't lipsticks in the
@@ -312,7 +313,7 @@ function MatchCard({
       justifyContent: 'center',
       fontSize: 15,
       lineHeight: 1,
-      fontFamily: 'DM Sans',
+      fontFamily: 'Hanken Grotesk',
       background: isPinned ? 'var(--espresso)' : 'rgba(255,255,255,0.82)',
       color: isPinned ? '#FAF6F1' : 'var(--blush)',
       border: '1px solid rgba(42,26,20,0.08)',
@@ -331,9 +332,11 @@ function MatchCard({
   }, /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: TYPE.brand,
-      color: 'var(--espresso-mid)',
-      fontFamily: 'DM Sans',
-      fontWeight: 500,
+      color: 'var(--espresso)',
+      fontFamily: 'Hanken Grotesk',
+      fontWeight: 700,
+      letterSpacing: '0.06em',
+      textTransform: 'uppercase',
       overflow: 'hidden',
       textOverflow: 'ellipsis',
       whiteSpace: 'nowrap'
@@ -342,17 +345,17 @@ function MatchCard({
     style: srOnly
   }, "Brand: "), brandName(p.brand)), /*#__PURE__*/React.createElement("div", {
     style: {
-      fontSize: TYPE.meta,
-      fontFamily: 'DM Sans',
+      fontSize: TYPE.shade,
+      fontFamily: 'Hanken Grotesk',
       color: 'var(--espresso-mid)',
-      lineHeight: 1.35
+      lineHeight: 1.3
     }
   }, /*#__PURE__*/React.createElement("span", {
     style: srOnly
   }, "Shade: "), titleCase(p.shade)), CARD_FORMATS.has(p.format) && /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: TYPE.meta,
-      fontFamily: 'DM Sans',
+      fontFamily: 'Hanken Grotesk',
       color: 'var(--espresso-mid)',
       lineHeight: 1.35
     }
@@ -411,7 +414,7 @@ const MATCH_DETAIL_TYPE = {
   body: 13,
   value: 15,
   match: 17,
-  shade: 26
+  shade: 23
 };
 
 // A result card opened up: bottom sheet on phones, centered dialog on desktop
@@ -448,7 +451,7 @@ function MatchDetail({
   const actionBtn = {
     height: 48,
     borderRadius: 24,
-    fontFamily: 'DM Sans',
+    fontFamily: 'Hanken Grotesk',
     fontSize: TYPE.value,
     fontWeight: 500,
     display: 'flex',
@@ -495,7 +498,7 @@ function MatchDetail({
       color: 'var(--espresso-mid)',
       fontSize: 20,
       lineHeight: 1,
-      fontFamily: 'DM Sans'
+      fontFamily: 'Hanken Grotesk'
     }
   }, "\u2715")), /*#__PURE__*/React.createElement("div", {
     style: {
@@ -503,7 +506,7 @@ function MatchDetail({
       display: 'flex',
       flexDirection: 'column',
       gap: 16,
-      fontFamily: 'DM Sans'
+      fontFamily: 'Hanken Grotesk'
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
@@ -544,16 +547,18 @@ function MatchDetail({
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
-      fontSize: TYPE.brand,
-      fontWeight: 500,
-      color: 'var(--espresso-mid)'
+      fontSize: TYPE.body,
+      fontWeight: 700,
+      letterSpacing: '0.06em',
+      textTransform: 'uppercase',
+      color: 'var(--espresso)'
     }
   }, /*#__PURE__*/React.createElement("span", {
     style: srOnly
   }, "Brand: "), brandName(p.brand)), /*#__PURE__*/React.createElement("div", {
     style: {
-      fontFamily: 'Cormorant Garamond',
-      fontWeight: 600,
+      fontFamily: 'Gloock',
+      fontWeight: 400,
       fontSize: TYPE.shade,
       lineHeight: 1.08,
       color: 'var(--espresso)',
@@ -854,7 +859,7 @@ function getHsl(hex) {
 // (lighter of each pair outer).
 const WHEEL_TYPE = {
   micro: 11,
-  name: 15
+  name: 14
 };
 // The order of the wheel's colors, clockwise from the novelty block at the bottom: reds
 // (orange-red to blue-red), pinks and berries (cool to warm), then nudes, corals and browns
@@ -1168,7 +1173,7 @@ function ColorWheel({
       style: {
         transition: hovered ? 'none' : 'fill 0.3s ease'
       }
-    }), hovered ? /*#__PURE__*/React.createElement("foreignObject", {
+    }), shown && /*#__PURE__*/React.createElement("foreignObject", {
       x: CX - r,
       y: CY - r,
       width: r * 2,
@@ -1188,37 +1193,24 @@ function ColorWheel({
         justifyContent: 'center',
         gap: 3,
         textAlign: 'center',
-        color: bandInk(hovered.hex),
+        color: bandInk(shown.hex),
         userSelect: 'none'
       }
     }, /*#__PURE__*/React.createElement("div", {
       style: {
-        fontFamily: 'Cormorant Garamond',
+        fontFamily: 'Gloock',
         fontSize: WHEEL_TYPE.name,
-        fontWeight: 600,
+        fontWeight: 400,
         lineHeight: 1.05
       }
-    }, hovered.name), /*#__PURE__*/React.createElement("div", {
+    }, shown.name), /*#__PURE__*/React.createElement("div", {
       style: {
-        fontFamily: 'DM Sans',
+        fontFamily: 'Hanken Grotesk',
         fontSize: WHEEL_TYPE.micro,
         fontWeight: 500,
         lineHeight: 1.2
       }
-    }, hovered.tag || chartColorName(hovered.hex)))) : picked && /*#__PURE__*/React.createElement("text", {
-      x: CX,
-      y: CY,
-      textAnchor: "middle",
-      dominantBaseline: "middle",
-      fontSize: "11",
-      fontFamily: "DM Sans, sans-serif",
-      fontWeight: "500",
-      fill: luminance(picked.hex) > 0.32 ? 'rgba(42,26,20,0.7)' : 'rgba(255,255,255,0.85)',
-      style: {
-        pointerEvents: 'none',
-        userSelect: 'none'
-      }
-    }, picked.hex.toUpperCase()));
+    }, shown.tag || chartColorName(shown.hex)))));
   })(), /*#__PURE__*/React.createElement("circle", {
     cx: CX,
     cy: CY,
@@ -1250,7 +1242,7 @@ function FilterClear({
       flex: 'none',
       color: 'var(--blush-deep)',
       cursor: 'pointer',
-      fontFamily: 'DM Sans',
+      fontFamily: 'Hanken Grotesk',
       fontWeight: 500,
       letterSpacing: '0.04em',
       textUnderlineOffset: 3
@@ -1316,7 +1308,7 @@ function FilterDropdown({
       background: count ? 'rgba(92,61,48,0.08)' : isOpen ? 'var(--cream-dark)' : 'transparent',
       color: count ? 'var(--espresso-mid)' : 'var(--text-muted)',
       cursor: 'pointer',
-      fontFamily: 'DM Sans',
+      fontFamily: 'Hanken Grotesk',
       fontWeight: count ? 500 : 400,
       letterSpacing: '0.06em',
       textTransform: 'uppercase',
@@ -1373,7 +1365,7 @@ function FilterDropdown({
     style: {
       fontSize: 11,
       color: 'var(--text-muted)',
-      fontFamily: 'DM Sans',
+      fontFamily: 'Hanken Grotesk',
       letterSpacing: '0.04em'
     }
   }, count, " selected"), /*#__PURE__*/React.createElement(FilterClear, {
@@ -1633,7 +1625,7 @@ function ResultsTable({
     }
   }, /*#__PURE__*/React.createElement("p", {
     style: {
-      fontFamily: 'DM Sans',
+      fontFamily: 'Hanken Grotesk',
       fontSize: 13,
       letterSpacing: '0.02em'
     }
@@ -1700,7 +1692,7 @@ function ResultsTable({
   // Matches the other filters keep that are only missing because discontinued shades are hidden
   const hiddenDiscontinued = hideDiscontinued ? matches.filter(p => p.discontinued && passesExcept(p, null)).length : 0;
   const emptyBtn = {
-    fontFamily: 'DM Sans',
+    fontFamily: 'Hanken Grotesk',
     fontSize: 12,
     fontWeight: 500,
     letterSpacing: '0.06em',
@@ -1750,9 +1742,9 @@ function ResultsTable({
     }
   }), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
     style: {
-      fontFamily: 'Cormorant Garamond',
-      fontSize: 18,
-      fontWeight: 500,
+      fontFamily: 'Gloock',
+      fontSize: 16,
+      fontWeight: 400,
       lineHeight: 1.15
     }
   }, selectedColor.name), /*#__PURE__*/React.createElement("p", {
@@ -1760,7 +1752,7 @@ function ResultsTable({
       fontSize: 11,
       color: 'var(--text-muted)',
       marginTop: 2,
-      fontFamily: 'DM Sans',
+      fontFamily: 'Hanken Grotesk',
       letterSpacing: '0.05em'
     }
   }, selectedColor.hex.toUpperCase(), " \xB7 ", filtered.length, " match", filtered.length !== 1 ? 'es' : '', " ranked by color similarity"), redName && /*#__PURE__*/React.createElement("p", {
@@ -1790,7 +1782,7 @@ function ResultsTable({
     style: {
       fontSize: 11,
       color: 'var(--text-muted)',
-      fontFamily: 'DM Sans',
+      fontFamily: 'Hanken Grotesk',
       letterSpacing: '0.03em',
       flexShrink: 0
     }
@@ -1833,7 +1825,7 @@ function ResultsTable({
     style: {
       fontSize: 11,
       color: 'var(--text-muted)',
-      fontFamily: 'DM Sans',
+      fontFamily: 'Hanken Grotesk',
       letterSpacing: '0.03em',
       flexShrink: 0
     }
@@ -1848,7 +1840,7 @@ function ResultsTable({
   }, /*#__PURE__*/React.createElement("span", {
     style: {
       fontSize: 11,
-      fontFamily: 'DM Sans',
+      fontFamily: 'Hanken Grotesk',
       color: 'var(--text-muted)',
       letterSpacing: '0.03em'
     }
@@ -1867,7 +1859,7 @@ function ResultsTable({
       background: 'transparent',
       color: 'var(--text-muted)',
       cursor: 'pointer',
-      fontFamily: 'DM Sans',
+      fontFamily: 'Hanken Grotesk',
       letterSpacing: '0.04em',
       flexShrink: 0,
       marginLeft: 10
@@ -1880,7 +1872,7 @@ function ResultsTable({
       style: {
         marginTop: 4,
         fontSize: 11,
-        fontFamily: 'DM Sans',
+        fontFamily: 'Hanken Grotesk',
         color: 'var(--text-muted)',
         letterSpacing: '0.03em'
       }
@@ -1901,7 +1893,7 @@ function ResultsTable({
       color: 'var(--text-muted)',
       letterSpacing: '0.1em',
       textTransform: 'uppercase',
-      fontFamily: 'DM Sans',
+      fontFamily: 'Hanken Grotesk',
       marginRight: 2
     }
   }, "Filter"), collapsibleFilters && /*#__PURE__*/React.createElement("button", {
@@ -1922,7 +1914,7 @@ function ResultsTable({
       background: otherFilters ? 'rgba(92,61,48,0.08)' : filtersShown ? 'var(--cream-dark)' : 'transparent',
       color: otherFilters ? 'var(--espresso-mid)' : 'var(--text-muted)',
       cursor: 'pointer',
-      fontFamily: 'DM Sans',
+      fontFamily: 'Hanken Grotesk',
       fontWeight: otherFilters ? 500 : 400,
       letterSpacing: '0.06em',
       textTransform: 'uppercase',
@@ -1964,7 +1956,7 @@ function ResultsTable({
         background: active ? 'rgba(138,110,46,0.12)' : 'transparent',
         color: active ? '#8a6e2e' : 'var(--text-muted)',
         cursor: 'pointer',
-        fontFamily: 'DM Sans',
+        fontFamily: 'Hanken Grotesk',
         fontWeight: active ? 600 : 400,
         letterSpacing: '0.04em',
         transition: 'all 0.15s',
@@ -2007,7 +1999,7 @@ function ResultsTable({
         flex: 1,
         minWidth: 0,
         boxSizing: 'border-box',
-        fontFamily: 'DM Sans',
+        fontFamily: 'Hanken Grotesk',
         fontSize: 13,
         padding: '7px 12px',
         borderRadius: 20,
@@ -2023,7 +2015,7 @@ function ResultsTable({
         marginTop: 8,
         fontSize: 13,
         color: 'var(--text-muted)',
-        fontFamily: 'DM Sans'
+        fontFamily: 'Hanken Grotesk'
       }
     }, "No brands match."))
   }, (brandSearch.trim()
@@ -2041,7 +2033,7 @@ function ResultsTable({
         background: active ? 'rgba(92,61,48,0.10)' : 'transparent',
         color: active ? 'var(--espresso-mid)' : 'var(--text-muted)',
         cursor: 'pointer',
-        fontFamily: 'DM Sans',
+        fontFamily: 'Hanken Grotesk',
         fontWeight: active ? 500 : 400,
         letterSpacing: '0.04em',
         transition: 'all 0.15s',
@@ -2073,7 +2065,7 @@ function ResultsTable({
         background: active ? 'rgba(92,61,48,0.10)' : 'transparent',
         color: active ? 'var(--espresso-mid)' : 'var(--text-muted)',
         cursor: 'pointer',
-        fontFamily: 'DM Sans',
+        fontFamily: 'Hanken Grotesk',
         fontWeight: active ? 500 : 400,
         letterSpacing: '0.04em',
         transition: 'all 0.15s',
@@ -2096,9 +2088,7 @@ function ResultsTable({
     style: {
       width: '100%',
       margin: '0 0 2px',
-      fontFamily: 'Cormorant Garamond',
-      fontStyle: 'italic',
-      fontSize: 14,
+      fontSize: 13,
       color: 'var(--text-muted)',
       lineHeight: 1.35
     }
@@ -2116,7 +2106,7 @@ function ResultsTable({
         background: active ? 'rgba(92,61,48,0.10)' : 'transparent',
         color: active ? 'var(--espresso-mid)' : 'var(--text-muted)',
         cursor: 'pointer',
-        fontFamily: 'DM Sans',
+        fontFamily: 'Hanken Grotesk',
         fontWeight: active ? 500 : 400,
         letterSpacing: '0.04em',
         transition: 'all 0.15s',
@@ -2148,7 +2138,7 @@ function ResultsTable({
         background: active ? 'rgba(92,61,48,0.10)' : 'transparent',
         color: active ? 'var(--espresso-mid)' : 'var(--text-muted)',
         cursor: 'pointer',
-        fontFamily: 'DM Sans',
+        fontFamily: 'Hanken Grotesk',
         letterSpacing: '0.04em',
         textTransform: 'capitalize',
         transition: 'all 0.15s',
@@ -2169,7 +2159,7 @@ function ResultsTable({
       background: longLasting ? 'rgba(92,61,48,0.08)' : 'transparent',
       color: longLasting ? 'var(--espresso-mid)' : 'var(--text-muted)',
       cursor: 'pointer',
-      fontFamily: 'DM Sans',
+      fontFamily: 'Hanken Grotesk',
       fontWeight: longLasting ? 500 : 400,
       letterSpacing: '0.06em',
       textTransform: 'uppercase',
@@ -2206,7 +2196,7 @@ function ResultsTable({
       background: hideDiscontinued ? 'rgba(92,61,48,0.08)' : 'transparent',
       color: hideDiscontinued ? 'var(--espresso-mid)' : 'var(--text-muted)',
       cursor: 'pointer',
-      fontFamily: 'DM Sans',
+      fontFamily: 'Hanken Grotesk',
       fontWeight: hideDiscontinued ? 500 : 400,
       letterSpacing: '0.06em',
       textTransform: 'uppercase',
@@ -2241,7 +2231,7 @@ function ResultsTable({
     style: {
       fontSize: 11,
       color: 'var(--text-muted)',
-      fontFamily: 'DM Sans'
+      fontFamily: 'Hanken Grotesk'
     }
   }, filtered.length, " of ", matches.length, " shown"), /*#__PURE__*/React.createElement("button", {
     onClick: clearFilters,
@@ -2253,7 +2243,7 @@ function ResultsTable({
       background: 'transparent',
       color: 'var(--blush-deep)',
       cursor: 'pointer',
-      fontFamily: 'DM Sans',
+      fontFamily: 'Hanken Grotesk',
       letterSpacing: '0.04em'
     }
   }, "Clear all"))), /*#__PURE__*/React.createElement("div", {
@@ -2274,7 +2264,7 @@ function ResultsTable({
     }
   }, /*#__PURE__*/React.createElement("p", {
     style: {
-      fontFamily: 'DM Sans',
+      fontFamily: 'Hanken Grotesk',
       fontSize: 14,
       lineHeight: 1.5,
       color: 'var(--text-body)'
@@ -2345,7 +2335,7 @@ function TweaksPanel({
       boxShadow: '0 8px 32px rgba(42,26,20,0.16)',
       padding: 24,
       width: 240,
-      fontFamily: 'DM Sans',
+      fontFamily: 'Hanken Grotesk',
       fontSize: 13
     }
   }, /*#__PURE__*/React.createElement("div", {
@@ -2357,9 +2347,9 @@ function TweaksPanel({
     }
   }, /*#__PURE__*/React.createElement("span", {
     style: {
-      fontFamily: 'Cormorant Garamond',
-      fontSize: 18,
-      fontWeight: 500
+      fontFamily: 'Gloock',
+      fontSize: 16,
+      fontWeight: 400
     }
   }, "Tweaks"), /*#__PURE__*/React.createElement("button", {
     onClick: onClose,
@@ -2551,10 +2541,10 @@ function drawShareImage(canvas, wishlist, images) {
   ctx.textAlign = 'center';
   ctx.textBaseline = 'alphabetic';
   ctx.fillStyle = CREAM;
-  ctx.font = '400 italic 80px "Cormorant Garamond", serif';
+  ctx.font = '400 68px "Gloock", serif';
   ctx.fillText('my lipstick shortlist', W / 2, 160);
   ctx.fillStyle = '#C9B3A6';
-  ctx.font = '500 22px "DM Sans", sans-serif';
+  ctx.font = '500 22px "Hanken Grotesk", sans-serif';
   const subtitle = `${n} ${n === 1 ? 'shade' : 'shades'}  ·  ${new Date().toLocaleDateString('en-US', {
     month: 'long',
     day: 'numeric',
@@ -2615,9 +2605,9 @@ function drawShareImage(canvas, wishlist, images) {
       tw = cw - 36 * sc;
     ctx.textAlign = 'left';
     ctx.fillStyle = fg;
-    ctx.fillText(fit(titleCase(p.shade), tw, s => `500 ${s}px "Cormorant Garamond", serif`, Math.max(26, Math.round(38 * sc)), 18), tx, y + photoH + band * 0.46);
+    ctx.fillText(fit(titleCase(p.shade), tw, s => `400 ${s}px "Gloock", serif`, Math.max(26, Math.round(38 * sc)), 18), tx, y + photoH + band * 0.46);
     ctx.globalAlpha = 0.85;
-    ctx.fillText(fit(brandName(p.brand), tw, s => `600 ${s}px "DM Sans", sans-serif`, Math.max(15, Math.round(18 * sc)), 12), tx, y + photoH + band * 0.78);
+    ctx.fillText(fit(brandName(p.brand), tw, s => `600 ${s}px "Hanken Grotesk", sans-serif`, Math.max(15, Math.round(18 * sc)), 12), tx, y + photoH + band * 0.78);
     ctx.restore();
   }
 
@@ -2625,10 +2615,10 @@ function drawShareImage(canvas, wishlist, images) {
   ctx.textAlign = 'center';
   ctx.textBaseline = 'alphabetic';
   ctx.fillStyle = CREAM;
-  ctx.font = '500 24px "DM Sans", sans-serif';
+  ctx.font = '500 24px "Hanken Grotesk", sans-serif';
   ctx.fillText('made with Lipstick Color Finder', W / 2, H - 62);
   ctx.fillStyle = '#E7A9BF';
-  ctx.font = '600 24px "DM Sans", sans-serif';
+  ctx.font = '600 24px "Hanken Grotesk", sans-serif';
   ctx.fillText(SITE_URL, W / 2, H - 30);
 }
 
@@ -2767,9 +2757,9 @@ function ShareImageModal({
     }
   }, "\uD83D\uDCF8"), /*#__PURE__*/React.createElement("h3", {
     style: {
-      fontFamily: 'Cormorant Garamond',
-      fontWeight: 500,
-      fontSize: 22,
+      fontFamily: 'Gloock',
+      fontWeight: 400,
+      fontSize: 20,
       color: 'var(--espresso)'
     }
   }, "Share your shortlist"), /*#__PURE__*/React.createElement("button", {
@@ -2790,7 +2780,7 @@ function ShareImageModal({
     style: {
       fontSize: 13,
       color: 'var(--text-muted)',
-      fontFamily: 'DM Sans',
+      fontFamily: 'Hanken Grotesk',
       lineHeight: 1.5,
       marginTop: -4
     }
@@ -2822,9 +2812,7 @@ function ShareImageModal({
     style: {
       position: 'absolute',
       color: '#FAF6F1',
-      fontFamily: 'Cormorant Garamond',
-      fontStyle: 'italic',
-      fontSize: 16
+      fontSize: 14
     }
   }, "Composing your card\u2026")), /*#__PURE__*/React.createElement("div", {
     style: {
@@ -2841,7 +2829,7 @@ function ShareImageModal({
       background: 'var(--espresso)',
       color: 'var(--cream)',
       cursor: 'pointer',
-      fontFamily: 'DM Sans',
+      fontFamily: 'Hanken Grotesk',
       fontSize: 12,
       fontWeight: 500,
       letterSpacing: '0.08em',
@@ -2857,7 +2845,7 @@ function ShareImageModal({
       background: '#fff',
       color: 'var(--espresso)',
       cursor: 'pointer',
-      fontFamily: 'DM Sans',
+      fontFamily: 'Hanken Grotesk',
       fontSize: 12,
       fontWeight: 500,
       letterSpacing: '0.08em',
@@ -2867,7 +2855,7 @@ function ShareImageModal({
     style: {
       fontSize: 12,
       color: 'var(--blush-deep)',
-      fontFamily: 'DM Sans',
+      fontFamily: 'Hanken Grotesk',
       textAlign: 'center',
       letterSpacing: '0.06em'
     }
@@ -2875,7 +2863,7 @@ function ShareImageModal({
     style: {
       fontSize: 12,
       color: 'var(--text-muted)',
-      fontFamily: 'DM Sans',
+      fontFamily: 'Hanken Grotesk',
       textAlign: 'center',
       marginTop: -4
     }
@@ -2889,7 +2877,7 @@ function ShareImageModal({
 const GUIDES_NEW_UNTIL = new Date('2026-12-15T23:59:59-05:00');
 // The pill's look, shared with the Discontinued tag on the dupe finder card
 const PILL_TAG = {
-  fontFamily: "'DM Sans', sans-serif",
+  fontFamily: "'Hanken Grotesk', sans-serif",
   fontWeight: 500,
   fontSize: 9,
   lineHeight: 1,
@@ -3167,7 +3155,7 @@ function shadeLabel(hex) {
   return redLabel(hex) || pinkLabel(hex);
 }
 const RED_LABEL_STYLE = {
-  fontFamily: 'DM Sans',
+  fontFamily: 'Hanken Grotesk',
   fontSize: 11,
   fontWeight: 500,
   letterSpacing: '0.12em',
@@ -3196,8 +3184,8 @@ function bandInk(hex) {
 const SHADE_ITEM_TYPE = {
   micro: 11,
   body: 13,
-  shade: 15,
-  title: 18
+  shade: 14,
+  title: 16
 };
 function ShadeListItem({
   p,
@@ -3251,8 +3239,8 @@ function ShadeListItem({
       background: p.hex,
       color: ink,
       padding: '8px 14px 7px',
-      fontFamily: 'Cormorant Garamond',
-      fontWeight: 500,
+      fontFamily: 'Gloock',
+      fontWeight: 400,
       lineHeight: 1.15,
       fontVariantNumeric: 'lining-nums' // shade names are often numbers ("999", "0 Ultra Light")
     }
@@ -3286,7 +3274,7 @@ function ShadeListItem({
     style: {
       flex: 1,
       minWidth: 0,
-      fontFamily: 'DM Sans'
+      fontFamily: 'Hanken Grotesk'
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
@@ -3496,9 +3484,9 @@ function WishlistPanel({
     }
   }, HEART), /*#__PURE__*/React.createElement("h2", {
     style: {
-      fontFamily: 'Cormorant Garamond',
+      fontFamily: 'Gloock',
       fontWeight: 400,
-      fontSize: 26,
+      fontSize: 23,
       color: 'var(--espresso)'
     }
   }, "My Favorites"), /*#__PURE__*/React.createElement("span", {
@@ -3541,9 +3529,7 @@ function WishlistPanel({
     }
   }, "\u2661"), /*#__PURE__*/React.createElement("p", {
     style: {
-      fontFamily: 'Cormorant Garamond',
-      fontSize: 18,
-      fontStyle: 'italic',
+      fontSize: 15,
       lineHeight: 1.5
     }
   }, "Tap the heart on any product to save it here"), /*#__PURE__*/React.createElement("p", {
@@ -3562,10 +3548,8 @@ function WishlistPanel({
   }, glowKey && /*#__PURE__*/React.createElement("li", {
     role: "status",
     style: {
-      fontFamily: 'Cormorant Garamond',
-      fontSize: 18,
-      fontStyle: 'italic',
-      lineHeight: 1.4,
+      fontSize: 15,
+      lineHeight: 1.5,
       color: 'var(--espresso)',
       marginBottom: 6
     }
@@ -3592,7 +3576,7 @@ function WishlistPanel({
       padding: '6px 4px',
       cursor: 'pointer',
       color: 'var(--blush-deep)',
-      fontFamily: 'DM Sans',
+      fontFamily: 'Hanken Grotesk',
       fontSize: 13,
       fontWeight: 500,
       textDecoration: 'underline',
@@ -3611,7 +3595,7 @@ function WishlistPanel({
       letterSpacing: '0.08em',
       textTransform: 'uppercase',
       marginBottom: 12,
-      fontFamily: 'DM Sans'
+      fontFamily: 'Hanken Grotesk'
     }
   }, "Take it with you"), /*#__PURE__*/React.createElement("div", {
     style: {
@@ -3632,7 +3616,7 @@ function WishlistPanel({
       background: 'var(--cream)',
       color: 'var(--espresso)',
       cursor: 'pointer',
-      fontFamily: 'DM Sans',
+      fontFamily: 'Hanken Grotesk',
       fontSize: 13,
       fontWeight: 500,
       textAlign: 'left',
@@ -3661,7 +3645,7 @@ function WishlistPanel({
       color: 'var(--text-muted)',
       cursor: 'pointer',
       fontSize: 11,
-      fontFamily: 'DM Sans',
+      fontFamily: 'Hanken Grotesk',
       letterSpacing: '0.06em',
       textTransform: 'uppercase',
       borderRadius: 10
@@ -3726,9 +3710,9 @@ function SharedListPanel({
     }
   }, /*#__PURE__*/React.createElement("h2", {
     style: {
-      fontFamily: 'Cormorant Garamond',
+      fontFamily: 'Gloock',
       fontWeight: 400,
-      fontSize: 26,
+      fontSize: 23,
       color: 'var(--espresso)'
     }
   }, "Shared list"), items && /*#__PURE__*/React.createElement("span", {
@@ -3759,9 +3743,8 @@ function SharedListPanel({
     }
   }, loading ? /*#__PURE__*/React.createElement(CatalogueLoading, null) : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("p", {
     style: {
-      fontFamily: 'Cormorant Garamond',
-      fontStyle: 'italic',
-      fontSize: 16,
+      fontSize: 14,
+      lineHeight: 1.5,
       color: 'var(--text-muted)',
       marginBottom: 14
     }
@@ -3790,7 +3773,7 @@ function SharedListPanel({
       fontSize: 11,
       color: 'var(--text-muted)',
       marginTop: 14,
-      fontFamily: 'DM Sans'
+      fontFamily: 'Hanken Grotesk'
     }
   }, missing, " ", missing === 1 ? 'shade is' : 'shades are', " no longer in the catalogue."))), !loading && items.length > 0 && /*#__PURE__*/React.createElement("div", {
     style: {
@@ -3809,7 +3792,7 @@ function SharedListPanel({
       background: unsaved.length ? 'var(--blush-deep)' : 'transparent',
       color: unsaved.length ? '#fff' : 'var(--blush-deep)',
       cursor: unsaved.length ? 'pointer' : 'default',
-      fontFamily: 'DM Sans',
+      fontFamily: 'Hanken Grotesk',
       fontSize: 13,
       fontWeight: 500
     }
@@ -3820,7 +3803,7 @@ function SharedListPanel({
 const TRAY_TYPE = {
   micro: 11,
   body: 13,
-  title: 18
+  title: 16
 };
 function ComparisonTray({
   pinnedItems,
@@ -3878,9 +3861,9 @@ function ComparisonTray({
     }
   }, /*#__PURE__*/React.createElement("span", {
     style: {
-      fontFamily: 'Cormorant Garamond',
+      fontFamily: 'Gloock',
       fontSize: TYPE.title,
-      fontWeight: 500,
+      fontWeight: 400,
       color: 'var(--espresso)',
       whiteSpace: 'nowrap'
     }
@@ -3909,7 +3892,7 @@ function ComparisonTray({
       background: 'transparent',
       color: 'var(--text-muted)',
       cursor: 'pointer',
-      fontFamily: 'DM Sans',
+      fontFamily: 'Hanken Grotesk',
       whiteSpace: 'nowrap'
     }
   }, expanded ? 'Collapse' : 'Expand'), /*#__PURE__*/React.createElement("button", {
@@ -3922,7 +3905,7 @@ function ComparisonTray({
       background: 'transparent',
       color: 'var(--blush-deep)',
       cursor: 'pointer',
-      fontFamily: 'DM Sans',
+      fontFamily: 'Hanken Grotesk',
       whiteSpace: 'nowrap'
     }
   }, "Clear all"))), (() => {
@@ -3954,7 +3937,7 @@ function ComparisonTray({
         flexDirection: 'column',
         alignItems: 'center',
         gap: expanded ? 8 : 6,
-        fontFamily: 'DM Sans',
+        fontFamily: 'Hanken Grotesk',
         textAlign: 'center',
         animation: 'fadeUp 0.2s ease'
       }
@@ -4078,11 +4061,9 @@ function ListPicker({
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
-      fontFamily: 'Cormorant Garamond',
-      fontStyle: 'italic',
-      fontSize: 21,
+      fontSize: 15,
       color: 'var(--espresso-mid)',
-      lineHeight: 1.4,
+      lineHeight: 1.5,
       textAlign: 'center',
       marginBottom: 14
     }
@@ -4130,13 +4111,13 @@ function ListPicker({
       }
     }, /*#__PURE__*/React.createElement("span", {
       style: {
-        fontFamily: 'DM Sans',
+        fontFamily: 'Hanken Grotesk',
         fontSize: 11,
         color: 'var(--text-muted)'
       }
     }, brandName(p.brand)), /*#__PURE__*/React.createElement("span", {
       style: {
-        fontFamily: 'DM Sans',
+        fontFamily: 'Hanken Grotesk',
         fontSize: 13,
         fontWeight: 500,
         color: 'var(--espresso)',
@@ -4144,7 +4125,7 @@ function ListPicker({
       }
     }, titleCase(p.shade)), /*#__PURE__*/React.createElement("span", {
       style: {
-        fontFamily: 'DM Sans',
+        fontFamily: 'Hanken Grotesk',
         fontSize: 12,
         color: 'var(--espresso-mid)',
         lineHeight: 1.3
@@ -4346,14 +4327,13 @@ function PhotoPicker({
       }
     }, "\u2913"), /*#__PURE__*/React.createElement("div", {
       style: {
-        fontFamily: 'Cormorant Garamond',
-        fontSize: 22,
-        fontStyle: 'italic',
+        fontFamily: 'Gloock',
+        fontSize: 20,
         color: 'var(--espresso)'
       }
     }, "Drop a photo or screenshot here"), /*#__PURE__*/React.createElement("div", {
       style: {
-        fontFamily: 'DM Sans',
+        fontFamily: 'Hanken Grotesk',
         fontSize: 12,
         color: 'var(--text-muted)',
         letterSpacing: '0.04em'
@@ -4361,7 +4341,7 @@ function PhotoPicker({
     }, "or click to upload \xB7 JPG, PNG, HEIC"), error ? /*#__PURE__*/React.createElement("div", {
       role: "alert",
       style: {
-        fontFamily: 'DM Sans',
+        fontFamily: 'Hanken Grotesk',
         fontSize: 13,
         fontWeight: 500,
         color: 'var(--blush-deep)',
@@ -4371,7 +4351,7 @@ function PhotoPicker({
       }
     }, "We couldn't open that file. Try a JPG or PNG, or take a screenshot of it and upload that.") : /*#__PURE__*/React.createElement("div", {
       style: {
-        fontFamily: 'DM Sans',
+        fontFamily: 'Hanken Grotesk',
         fontSize: 12,
         color: 'var(--text-muted)',
         maxWidth: 260,
@@ -4380,7 +4360,7 @@ function PhotoPicker({
       }
     }, "Tap anywhere on the photo to pick a shade."), /*#__PURE__*/React.createElement("div", {
       style: {
-        fontFamily: 'DM Sans',
+        fontFamily: 'Hanken Grotesk',
         fontSize: 12,
         color: 'var(--text-muted)',
         maxWidth: 260,
@@ -4395,11 +4375,7 @@ function PhotoPicker({
         fontSize: 11,
         fontStyle: 'normal'
       }
-    }, "\uD83D\uDD12"), /*#__PURE__*/React.createElement("span", {
-      style: {
-        fontStyle: 'italic'
-      }
-    }, "Your photo stays on your device \u2014 we never upload or store it.")), /*#__PURE__*/React.createElement("input", {
+    }, "\uD83D\uDD12"), /*#__PURE__*/React.createElement("span", null, "Your photo stays on your device \u2014 we never upload or store it.")), /*#__PURE__*/React.createElement("input", {
       ref: fileInputRef,
       type: "file",
       accept: "image/*",
@@ -4486,14 +4462,13 @@ function PhotoPicker({
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
-      fontFamily: 'Cormorant Garamond',
-      fontSize: 16,
-      fontStyle: 'italic',
+      fontFamily: 'Gloock',
+      fontSize: 15,
       color: 'var(--espresso)'
     }
   }, "Sampled"), /*#__PURE__*/React.createElement("div", {
     style: {
-      fontFamily: 'DM Sans',
+      fontFamily: 'Hanken Grotesk',
       fontSize: 11,
       color: 'var(--text-muted)',
       letterSpacing: '0.06em'
@@ -4501,9 +4476,7 @@ function PhotoPicker({
   }, sampledHex.toUpperCase()))), !sampledHex && /*#__PURE__*/React.createElement("div", {
     style: {
       flex: 1,
-      fontFamily: 'Cormorant Garamond',
-      fontStyle: 'italic',
-      fontSize: 15,
+      fontSize: 13,
       color: 'var(--text-muted)'
     }
   }, "Click anywhere on the photo to sample a color.")), /*#__PURE__*/React.createElement("div", {
@@ -4516,7 +4489,7 @@ function PhotoPicker({
     }
   }, /*#__PURE__*/React.createElement("label", {
     style: {
-      fontFamily: 'DM Sans',
+      fontFamily: 'Hanken Grotesk',
       fontSize: 12,
       color: 'var(--text-muted)',
       letterSpacing: '0.08em',
@@ -4537,7 +4510,7 @@ function PhotoPicker({
     }
   }), /*#__PURE__*/React.createElement("span", {
     style: {
-      fontFamily: 'DM Sans',
+      fontFamily: 'Hanken Grotesk',
       fontSize: 12,
       color: 'var(--text-muted)',
       minWidth: 28,
@@ -4557,7 +4530,7 @@ function PhotoPicker({
     style: {
       flex: 1,
       padding: '8px 12px',
-      fontFamily: 'DM Sans',
+      fontFamily: 'Hanken Grotesk',
       fontSize: 11,
       letterSpacing: '0.08em',
       textTransform: 'uppercase',
@@ -4595,8 +4568,8 @@ const EXPLORER_TYPE = {
   body: 13,
   caption: 14,
   input: 16,
-  lede: 21,
-  title: 30
+  name: 19,
+  title: 27
 };
 const EXPLORER_STARTS = [['Red', '#b5252c'], ['Pink', '#d66796'], ['Berry', '#7d2349'], ['Coral', '#d77749'], ['Brown', '#b4856b'], ['Plum', '#5c3069'], ['Blue', '#004590'], ['Black', '#1f1f1f']];
 // Start-from families that open a Tone and a Depth row: hue (degrees) for [warm, neutral, cool], chroma,
@@ -4841,7 +4814,7 @@ function shadeSummary(info) {
   };
 }
 const EXPLORER_CTA = {
-  fontFamily: 'DM Sans',
+  fontFamily: 'Hanken Grotesk',
   fontSize: EXPLORER_TYPE.link,
   fontWeight: 500,
   letterSpacing: '0.08em',
@@ -5019,7 +4992,7 @@ function ShadeExplorer({
     style: {
       flex: 'none',
       whiteSpace: 'nowrap',
-      fontFamily: 'DM Sans',
+      fontFamily: 'Hanken Grotesk',
       fontSize: TYPE.body,
       display: 'flex',
       alignItems: 'center',
@@ -5152,12 +5125,10 @@ function ShadeExplorer({
     }
   }, /*#__PURE__*/React.createElement("p", {
     style: {
-      fontFamily: 'Cormorant Garamond',
-      fontStyle: 'italic',
-      fontSize: TYPE.lede,
+      fontSize: 15,
       color: 'var(--espresso-mid)',
       textAlign: 'center',
-      lineHeight: 1.4,
+      lineHeight: 1.5,
       maxWidth: 360,
       alignSelf: 'center'
     }
@@ -5433,9 +5404,8 @@ function ShadeExplorer({
     }
   }, /*#__PURE__*/React.createElement("span", {
     style: {
-      fontFamily: 'Cormorant Garamond',
-      fontStyle: 'italic',
-      fontSize: TYPE.lede,
+      fontFamily: 'Gloock',
+      fontSize: TYPE.name,
       lineHeight: 1.1,
       whiteSpace: 'nowrap',
       overflow: 'hidden',
@@ -5491,9 +5461,8 @@ function ShadeHexForm({
   }, /*#__PURE__*/React.createElement("label", {
     htmlFor: id,
     style: {
-      fontFamily: 'Cormorant Garamond',
-      fontStyle: 'italic',
-      fontSize: TYPE.lede,
+      fontFamily: 'Gloock',
+      fontSize: TYPE.name,
       lineHeight: 1.2,
       color: 'var(--espresso)'
     }
@@ -5516,7 +5485,7 @@ function ShadeHexForm({
     style: {
       flex: 1,
       minWidth: 0,
-      fontFamily: 'DM Sans',
+      fontFamily: 'Hanken Grotesk',
       fontSize: big ? TYPE.input : TYPE.caption,
       minHeight: big ? 44 : 0,
       padding: '10px 14px',
@@ -5529,7 +5498,7 @@ function ShadeHexForm({
   }), /*#__PURE__*/React.createElement("button", {
     type: "submit",
     style: {
-      fontFamily: 'DM Sans',
+      fontFamily: 'Hanken Grotesk',
       fontSize: TYPE.body,
       padding: '10px 18px',
       borderRadius: 12,
@@ -5589,7 +5558,7 @@ function ShadeZoomControl({
       });
     },
     style: {
-      fontFamily: 'DM Sans',
+      fontFamily: 'Hanken Grotesk',
       fontSize: TYPE.link,
       fontWeight: 500,
       letterSpacing: '0.06em',
@@ -5609,7 +5578,7 @@ function ShadeZoomControl({
       onDraft(origin);
     },
     style: {
-      fontFamily: 'DM Sans',
+      fontFamily: 'Hanken Grotesk',
       fontSize: TYPE.link,
       display: 'flex',
       alignItems: 'center',
@@ -5718,9 +5687,8 @@ function ShadeCard({
     }
   }, label), /*#__PURE__*/React.createElement("p", {
     style: {
-      fontFamily: 'Cormorant Garamond',
-      fontStyle: 'italic',
-      fontSize: TYPE.lede,
+      fontFamily: 'Gloock',
+      fontSize: TYPE.name,
       lineHeight: 1.15
     }
   }, c.name), /*#__PURE__*/React.createElement("p", {
@@ -5747,8 +5715,7 @@ function ShadeCard({
     }
   }, /*#__PURE__*/React.createElement("p", {
     style: {
-      fontFamily: 'Cormorant Garamond',
-      fontStyle: 'italic',
+      fontFamily: 'Gloock',
       fontSize: TYPE.title,
       lineHeight: 1.1
     }
@@ -5916,10 +5883,9 @@ function ShadeSheet({
   }, /*#__PURE__*/React.createElement("h2", {
     id: "shade-sheet-title",
     style: {
-      fontFamily: 'Cormorant Garamond',
-      fontStyle: 'italic',
+      fontFamily: 'Gloock',
       fontWeight: 400,
-      fontSize: TYPE.lede,
+      fontSize: TYPE.name,
       lineHeight: 1.1,
       whiteSpace: 'nowrap',
       overflow: 'hidden',
@@ -5943,7 +5909,7 @@ function ShadeSheet({
       border: '1px solid var(--border)',
       background: '#fff',
       color: 'var(--espresso)',
-      fontFamily: 'DM Sans',
+      fontFamily: 'Hanken Grotesk',
       fontSize: 20,
       lineHeight: 1,
       cursor: 'pointer'
@@ -6183,17 +6149,19 @@ function DupeFinder({
   // size for a new label; pick the closest existing role instead.
   //   eyebrow  11px  uppercase micro-labels (step labels, section dividers)
   //   micro    11px  secondary meta riding alongside primary text (counts, finish tags)
-  //   caption  14px  helper/hint sentences (italic serif, under inputs)
+  //   caption  14px  helper/hint sentences (sans, under inputs)
   //   link     12px  clickable CTA text ("match from a photo")
   //   body     13px  regular UI text (chips, list primary text)
-  //   lede     21px  panel intro headline
+  //   name     19px  picked shade name (serif)
+  //   lede     19px  panel intro headline (serif)
   const TYPE = {
     eyebrow: 11,
     micro: 11,
     caption: 14,
     link: 12,
     body: 13,
-    lede: 21
+    name: 19,
+    lede: 19
   };
   const stepNum = {
     width: 22,
@@ -6201,7 +6169,7 @@ function DupeFinder({
     borderRadius: '50%',
     background: 'var(--espresso)',
     color: 'var(--cream)',
-    fontFamily: 'DM Sans',
+    fontFamily: 'Hanken Grotesk',
     fontSize: TYPE.eyebrow,
     fontWeight: 500,
     display: 'inline-flex',
@@ -6210,7 +6178,7 @@ function DupeFinder({
     flexShrink: 0
   };
   const stepLabel = {
-    fontFamily: 'DM Sans',
+    fontFamily: 'Hanken Grotesk',
     fontSize: TYPE.eyebrow,
     color: 'var(--text-muted)',
     letterSpacing: '0.1em',
@@ -6231,7 +6199,7 @@ function DupeFinder({
     border: 'none',
     outline: 'none',
     background: 'transparent',
-    fontFamily: 'DM Sans',
+    fontFamily: 'Hanken Grotesk',
     fontSize: 15,
     color: 'var(--espresso)',
     minWidth: 0
@@ -6283,16 +6251,14 @@ function DupeFinder({
     flexShrink: 0
   };
   const emptyNote = {
-    fontFamily: 'Cormorant Garamond',
-    fontStyle: 'italic',
-    fontSize: TYPE.caption,
+    fontSize: TYPE.body,
     color: 'var(--text-muted)',
     textAlign: 'center',
     padding: '8px 0'
   };
   const photoFallbackBtn = {
     marginTop: 6,
-    fontFamily: 'DM Sans',
+    fontFamily: 'Hanken Grotesk',
     fontSize: TYPE.link,
     letterSpacing: '0.06em',
     textTransform: 'uppercase',
@@ -6323,15 +6289,14 @@ function DupeFinder({
     }
   }, /*#__PURE__*/React.createElement("p", {
     style: {
-      fontFamily: 'Cormorant Garamond',
-      fontStyle: 'italic',
+      fontFamily: 'Gloock',
       fontSize: TYPE.lede,
       color: 'var(--espresso-mid)',
       lineHeight: 1.4
     }
   }, "Find a color match for a lipstick you like"), /*#__PURE__*/React.createElement("p", {
     style: {
-      fontFamily: 'DM Sans',
+      fontFamily: 'Hanken Grotesk',
       fontSize: TYPE.body,
       color: 'var(--text-muted)',
       letterSpacing: '0.02em',
@@ -6346,7 +6311,7 @@ function DupeFinder({
     },
     style: {
       marginTop: 8,
-      fontFamily: 'DM Sans',
+      fontFamily: 'Hanken Grotesk',
       fontSize: TYPE.link,
       letterSpacing: '0.05em',
       color: 'var(--blush-deep)',
@@ -6406,7 +6371,7 @@ function DupeFinder({
     }
   }, /*#__PURE__*/React.createElement("p", {
     style: {
-      fontFamily: 'DM Sans',
+      fontFamily: 'Hanken Grotesk',
       fontSize: TYPE.body,
       color: 'var(--espresso)',
       margin: '0 0 10px'
@@ -6492,14 +6457,14 @@ function DupeFinder({
     }
   }), /*#__PURE__*/React.createElement("span", {
     style: {
-      fontFamily: 'DM Sans',
+      fontFamily: 'Hanken Grotesk',
       fontSize: 13,
       fontWeight: 500,
       color: 'var(--espresso)'
     }
   }, brandName(b)), /*#__PURE__*/React.createElement("span", {
     style: {
-      fontFamily: 'DM Sans',
+      fontFamily: 'Hanken Grotesk',
       fontSize: 11,
       color: 'var(--text-muted)',
       marginLeft: 'auto',
@@ -6554,18 +6519,20 @@ function DupeFinder({
     }
   }, /*#__PURE__*/React.createElement("span", {
     style: {
-      fontFamily: 'Cormorant Garamond',
-      fontStyle: 'italic',
-      fontSize: 15,
+      fontFamily: 'Hanken Grotesk',
+      fontSize: 13,
+      fontWeight: 700,
+      letterSpacing: '0.05em',
+      textTransform: 'uppercase',
       color: 'var(--espresso)',
-      lineHeight: 1.2,
+      lineHeight: 1.25,
       overflow: 'hidden',
       textOverflow: 'ellipsis',
       whiteSpace: 'nowrap'
     }
   }, titleCase(p.shade)), /*#__PURE__*/React.createElement("span", {
     style: {
-      fontFamily: 'DM Sans',
+      fontFamily: 'Hanken Grotesk',
       fontSize: TYPE.micro,
       color: 'var(--text-muted)',
       overflow: 'hidden',
@@ -6574,9 +6541,7 @@ function DupeFinder({
     }
   }, brandName(p.brand), " \xB7 ", titleCase(p.product)))))), !brandQuery && /*#__PURE__*/React.createElement("p", {
     style: {
-      fontFamily: 'Cormorant Garamond',
-      fontStyle: 'italic',
-      fontSize: TYPE.caption,
+      fontSize: TYPE.body,
       color: 'var(--text-muted)',
       textAlign: 'center',
       lineHeight: 1.5,
@@ -6600,7 +6565,7 @@ function DupeFinder({
     style: chip
   }, /*#__PURE__*/React.createElement("span", {
     style: {
-      fontFamily: 'DM Sans',
+      fontFamily: 'Hanken Grotesk',
       fontSize: 13,
       fontWeight: 500,
       color: 'var(--espresso)'
@@ -6686,14 +6651,14 @@ function DupeFinder({
     }
   }), /*#__PURE__*/React.createElement("span", {
     style: {
-      fontFamily: 'DM Sans',
+      fontFamily: 'Hanken Grotesk',
       fontSize: 13,
       fontWeight: 500,
       color: 'var(--espresso)'
     }
   }, brandName(b)), /*#__PURE__*/React.createElement("span", {
     style: {
-      fontFamily: 'DM Sans',
+      fontFamily: 'Hanken Grotesk',
       fontSize: 11,
       color: 'var(--text-muted)',
       marginLeft: 'auto',
@@ -6743,18 +6708,20 @@ function DupeFinder({
     }
   }, /*#__PURE__*/React.createElement("span", {
     style: {
-      fontFamily: 'Cormorant Garamond',
-      fontStyle: 'italic',
-      fontSize: 15,
+      fontFamily: 'Hanken Grotesk',
+      fontSize: 13,
+      fontWeight: 700,
+      letterSpacing: '0.05em',
+      textTransform: 'uppercase',
       color: 'var(--espresso)',
-      lineHeight: 1.2,
+      lineHeight: 1.25,
       overflow: 'hidden',
       textOverflow: 'ellipsis',
       whiteSpace: 'nowrap'
     }
   }, titleCase(p.shade)), /*#__PURE__*/React.createElement("span", {
     style: {
-      fontFamily: 'DM Sans',
+      fontFamily: 'Hanken Grotesk',
       fontSize: TYPE.micro,
       color: 'var(--text-muted)',
       overflow: 'hidden',
@@ -6837,18 +6804,20 @@ function DupeFinder({
     }
   }, /*#__PURE__*/React.createElement("span", {
     style: {
-      fontFamily: 'Cormorant Garamond',
-      fontStyle: 'italic',
-      fontSize: 15,
+      fontFamily: 'Hanken Grotesk',
+      fontSize: 13,
+      fontWeight: 700,
+      letterSpacing: '0.05em',
+      textTransform: 'uppercase',
       color: 'var(--espresso)',
-      lineHeight: 1.2,
+      lineHeight: 1.25,
       overflow: 'hidden',
       textOverflow: 'ellipsis',
       whiteSpace: 'nowrap'
     }
   }, titleCase(p.shade)), /*#__PURE__*/React.createElement("span", {
     style: {
-      fontFamily: 'DM Sans',
+      fontFamily: 'Hanken Grotesk',
       fontSize: TYPE.micro,
       color: 'var(--text-muted)',
       overflow: 'hidden',
@@ -6923,29 +6892,29 @@ function DupeFinder({
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
-      fontFamily: 'DM Sans',
+      fontFamily: 'Hanken Grotesk',
       fontSize: TYPE.body,
       fontWeight: 500,
       color: 'var(--espresso)'
     }
   }, brandName(product.brand)), /*#__PURE__*/React.createElement("div", {
     style: {
-      fontFamily: 'Cormorant Garamond',
-      fontSize: TYPE.lede,
+      fontFamily: 'Gloock',
+      fontSize: TYPE.name,
       color: 'var(--espresso-mid)',
       lineHeight: 1.2,
       marginTop: 2
     }
   }, titleCase(product.shade)), product.product && /*#__PURE__*/React.createElement("div", {
     style: {
-      fontFamily: 'DM Sans',
+      fontFamily: 'Hanken Grotesk',
       fontSize: TYPE.body,
       color: 'var(--text-muted)',
       marginTop: 4
     }
   }, titleCase(product.product)), /*#__PURE__*/React.createElement("div", {
     style: {
-      fontFamily: 'DM Sans',
+      fontFamily: 'Hanken Grotesk',
       fontSize: TYPE.micro,
       color: 'var(--text-muted)',
       marginTop: 6,
@@ -6976,21 +6945,21 @@ function DupeFinder({
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
-      fontFamily: 'DM Sans',
+      fontFamily: 'Hanken Grotesk',
       fontSize: 12,
       fontWeight: 500,
       color: 'var(--espresso)'
     }
   }, brandName(product.brand)), /*#__PURE__*/React.createElement("div", {
     style: {
-      fontFamily: 'Cormorant Garamond',
-      fontSize: 18,
+      fontFamily: 'Gloock',
+      fontSize: 16,
       color: 'var(--espresso-mid)',
       lineHeight: 1.2
     }
   }, titleCase(product.shade)), /*#__PURE__*/React.createElement("div", {
     style: {
-      fontFamily: 'DM Sans',
+      fontFamily: 'Hanken Grotesk',
       fontSize: 10,
       color: 'var(--text-muted)',
       marginTop: 2,
@@ -7001,7 +6970,7 @@ function DupeFinder({
     style: {
       alignSelf: 'flex-start',
       fontSize: 11,
-      fontFamily: 'DM Sans',
+      fontFamily: 'Hanken Grotesk',
       letterSpacing: '0.06em',
       textTransform: 'uppercase',
       color: 'var(--blush-deep)',
@@ -7013,9 +6982,7 @@ function DupeFinder({
     }
   }, "\u2190 Pick another shade"), /*#__PURE__*/React.createElement("p", {
     style: {
-      fontFamily: 'Cormorant Garamond',
-      fontStyle: 'italic',
-      fontSize: 14,
+      fontSize: 13,
       color: 'var(--text-muted)',
       textAlign: 'center',
       marginTop: 2
@@ -7033,7 +7000,7 @@ function DupeFinder({
     }
   }, /*#__PURE__*/React.createElement("p", {
     style: {
-      fontFamily: 'DM Sans',
+      fontFamily: 'Hanken Grotesk',
       fontSize: TYPE.eyebrow,
       color: 'var(--text-muted)',
       letterSpacing: '0.1em',
@@ -7082,16 +7049,18 @@ function DupeFinder({
   }, /*#__PURE__*/React.createElement("span", {
     className: "popular-pick-shade",
     style: {
-      fontFamily: 'Cormorant Garamond',
-      fontStyle: 'italic',
-      fontSize: TYPE.body,
+      fontFamily: 'Hanken Grotesk',
+      fontSize: TYPE.link,
+      fontWeight: 700,
+      letterSpacing: '0.05em',
+      textTransform: 'uppercase',
       color: 'var(--espresso)',
       lineHeight: 1.15
     }
   }, titleCase(p.shade)), /*#__PURE__*/React.createElement("span", {
     className: "popular-pick-brand",
     style: {
-      fontFamily: 'DM Sans',
+      fontFamily: 'Hanken Grotesk',
       fontSize: TYPE.micro,
       color: 'var(--text-muted)'
     }
@@ -7434,8 +7403,8 @@ function LandingDupeArt() {
     label: "Yours"
   }), /*#__PURE__*/React.createElement("span", {
     style: {
-      fontFamily: 'Cormorant Garamond',
-      fontSize: 40,
+      fontFamily: 'Gloock',
+      fontSize: 36,
       lineHeight: 1,
       color: 'var(--text-muted)',
       alignSelf: 'center'
@@ -7552,9 +7521,9 @@ function LandingCard({
     className: "landing-card-text"
   }, /*#__PURE__*/React.createElement("h2", {
     style: {
-      fontFamily: 'Cormorant Garamond',
+      fontFamily: 'Gloock',
       fontWeight: 400,
-      fontSize: 26,
+      fontSize: 23,
       lineHeight: 1.1,
       color: 'var(--espresso)'
     }
@@ -7572,7 +7541,7 @@ function Landing({
 }) {
   const cards = [{
     id: 'wheel',
-    title: 'Explore by color',
+    title: 'Explore the color wheel',
     desc: 'Start from 46 shades on a color wheel, then go lighter or deeper.',
     art: /*#__PURE__*/React.createElement(LandingWheelArt, null)
   }, {
@@ -7601,19 +7570,7 @@ function Landing({
     }
   }, /*#__PURE__*/React.createElement("h2", {
     className: "landing-lede"
-  }, "How do you want ", /*#__PURE__*/React.createElement("em", {
-    style: {
-      fontStyle: 'italic',
-      fontWeight: 400,
-      color: 'var(--espresso-mid)'
-    }
-  }, "to search?")), /*#__PURE__*/React.createElement("p", {
-    style: {
-      fontSize: 15,
-      lineHeight: 1.5,
-      color: 'var(--espresso-mid)'
-    }
-  }, "Search over 24,000 lip products by color, not just by shade name.")), /*#__PURE__*/React.createElement("div", {
+  }, "Explore over 24,000 lipsticks by color")), /*#__PURE__*/React.createElement("div", {
     className: "landing-grid"
   }, cards.map(c => /*#__PURE__*/React.createElement(LandingCard, {
     key: c.id,
@@ -7643,9 +7600,7 @@ function CatalogueLoading() {
     className: "preload-spinner"
   }), /*#__PURE__*/React.createElement("p", {
     style: {
-      fontFamily: 'Cormorant Garamond, serif',
-      fontStyle: 'italic',
-      fontSize: 18,
+      fontSize: 15,
       color: 'var(--text-muted)'
     }
   }, "Loading over 24,000 shades\u2026"));
@@ -7667,9 +7622,8 @@ function DataLoadError() {
     }
   }, /*#__PURE__*/React.createElement("p", {
     style: {
-      fontFamily: 'Cormorant Garamond, serif',
-      fontStyle: 'italic',
-      fontSize: 28,
+      fontFamily: 'Gloock',
+      fontSize: 26,
       color: 'var(--espresso)'
     }
   }, "We couldn't load the lipstick catalogue."), /*#__PURE__*/React.createElement("p", {
@@ -7688,7 +7642,7 @@ function DataLoadError() {
       background: '#fff',
       color: 'var(--espresso)',
       cursor: 'pointer',
-      fontFamily: 'DM Sans, sans-serif',
+      fontFamily: 'Hanken Grotesk, sans-serif',
       fontSize: 12,
       fontWeight: 500,
       letterSpacing: '0.06em',
@@ -8258,7 +8212,7 @@ function App() {
     }
   }, /*#__PURE__*/React.createElement("h1", {
     style: {
-      fontFamily: 'DM Sans',
+      fontFamily: 'Hanken Grotesk',
       fontWeight: 500,
       fontSize: 13,
       letterSpacing: '0.16em',
@@ -8295,7 +8249,7 @@ function App() {
   }, "Lipstick Color Finder")), /*#__PURE__*/React.createElement("span", {
     className: "header-product-count",
     style: {
-      fontFamily: 'DM Sans',
+      fontFamily: 'Hanken Grotesk',
       fontSize: 11,
       color: 'var(--text-muted)',
       letterSpacing: '0.02em'
@@ -8326,7 +8280,7 @@ function App() {
       background: '#fff',
       color: 'var(--espresso)',
       textDecoration: 'none',
-      fontFamily: 'DM Sans',
+      fontFamily: 'Hanken Grotesk',
       fontSize: 12,
       fontWeight: 500,
       letterSpacing: '0.06em',
@@ -8358,7 +8312,7 @@ function App() {
       background: '#fff',
       color: 'var(--espresso)',
       textDecoration: 'none',
-      fontFamily: 'DM Sans',
+      fontFamily: 'Hanken Grotesk',
       fontSize: 12,
       fontWeight: 500,
       letterSpacing: '0.06em',
@@ -8386,7 +8340,7 @@ function App() {
       background: '#fff',
       color: 'var(--espresso)',
       cursor: 'pointer',
-      fontFamily: 'DM Sans',
+      fontFamily: 'Hanken Grotesk',
       fontSize: 12,
       fontWeight: 500,
       letterSpacing: '0.06em',
@@ -8401,11 +8355,18 @@ function App() {
       e.currentTarget.style.borderColor = 'var(--border)';
       e.currentTarget.style.color = 'var(--espresso)';
     }
-  }, /*#__PURE__*/React.createElement("span", {
+  }, /*#__PURE__*/React.createElement("svg", {
+    "aria-hidden": "true",
+    width: "14",
+    height: "14",
+    viewBox: "0 0 24 24",
     style: {
-      color: 'var(--blush)'
+      flexShrink: 0
     }
-  }, HEART), " My Favorites", wishlist.length > 0 && /*#__PURE__*/React.createElement("span", {
+  }, /*#__PURE__*/React.createElement("path", {
+    fill: "var(--blush-deep)",
+    d: "M12 21s-7.8-4.8-9.7-9.6C.9 7.9 3.1 4 7 4c2.2 0 3.8 1.2 5 3 1.2-1.8 2.8-3 5-3 3.9 0 6.1 3.9 4.7 7.4C19.8 16.2 12 21 12 21z"
+  })), " My Favorites", wishlist.length > 0 && /*#__PURE__*/React.createElement("span", {
     style: {
       background: 'var(--blush-deep)',
       color: '#fff',
@@ -8428,7 +8389,7 @@ function App() {
       position: 'relative',
       color: 'var(--espresso-mid)',
       textDecoration: 'none',
-      fontFamily: 'DM Sans',
+      fontFamily: 'Hanken Grotesk',
       fontSize: 12,
       fontWeight: 500,
       letterSpacing: '0.06em',
@@ -8473,7 +8434,7 @@ function App() {
       className: "mode-tab",
       onClick: () => switchMode(t.id),
       style: {
-        fontFamily: 'DM Sans',
+        fontFamily: 'Hanken Grotesk',
         display: 'flex',
         alignItems: 'center',
         gap: 11,
@@ -8695,13 +8656,13 @@ function App() {
       }
     }, /*#__PURE__*/React.createElement("div", {
       style: {
-        fontFamily: 'DM Sans',
+        fontFamily: 'Hanken Grotesk',
         fontSize: 12,
         color: 'var(--text-muted)'
       }
     }, brandName(p.brand)), /*#__PURE__*/React.createElement("div", {
       style: {
-        fontFamily: 'DM Sans',
+        fontFamily: 'Hanken Grotesk',
         fontSize: 16,
         fontWeight: 500,
         color: 'var(--espresso)',
@@ -8720,7 +8681,7 @@ function App() {
       }
     }, /*#__PURE__*/React.createElement("div", {
       style: {
-        fontFamily: 'DM Sans',
+        fontFamily: 'Hanken Grotesk',
         fontSize: 13,
         color: 'var(--text-body)',
         lineHeight: 1.5
@@ -8729,7 +8690,7 @@ function App() {
       type: "button",
       onClick: () => exploreOnChart(p.hex),
       style: {
-        fontFamily: 'DM Sans',
+        fontFamily: 'Hanken Grotesk',
         fontSize: 12,
         fontWeight: 500,
         letterSpacing: '0.06em',
@@ -8748,7 +8709,7 @@ function App() {
       fontSize: 11,
       color: 'var(--text-muted)',
       letterSpacing: '0.05em',
-      fontFamily: 'DM Sans',
+      fontFamily: 'Hanken Grotesk',
       marginTop: 8,
       textAlign: 'center'
     }
@@ -8760,7 +8721,7 @@ function App() {
     }
   }, /*#__PURE__*/React.createElement("p", {
     style: {
-      fontFamily: 'DM Sans',
+      fontFamily: 'Hanken Grotesk',
       fontSize: 13,
       color: 'var(--text-muted)',
       letterSpacing: '0.02em'
