@@ -96,6 +96,13 @@ const PAGES = [
     copy: `
     <h2>How lipstick photo match works</h2>
     <p>Upload any photo or screenshot: a celebrity's red-carpet look, a selfie, a swatch, a product shot. Tap the spot whose color you want. The finder reads that color and ranks lipsticks by how close their measured color is, closest first. Then narrow the list by price, brand, format, finish, or undertone.</p>
+    <h3>Can it identify the lipstick in a photo?</h3>
+    <p>It finds the lipsticks closest in color, not the exact product someone wore. Upload a screenshot from a video, post or ad, tap the lips, and the results give the brand and shade of each match, across 24,000+ lipsticks. Use it to find a lipstick you can't name, or one in a similar color.</p>
+    <h3>Matching a celebrity's, influencer's or your own lip color</h3>
+    <p>The photo can be of anyone: a celebrity, an influencer, or you wearing a lipstick that ran out, was discontinued or costs more than you want to spend. Pick a clear, well-lit shot where the lips fill a good part of the frame.</p>
+    <p>A color on lips can look different from the same lipstick in its product photo, which is where each shade's color is measured. Sheer and glossy formulas let the natural lip color show through, so they can look softer or deeper once worn. Filtering by the finish and format you see in the photo, such as sheer, gloss or matte, can matter as much as the color itself.</p>
+    <h3>Save colors from several photos</h3>
+    <p>The same lipstick can look different from one photo to the next. Try a few photos, and use Save color on each one to keep it in My Favorites under a name you choose. Seeing the saved colors side by side shows the range the shade falls in, so you can choose lipsticks from the middle of that range.</p>
     <h3>Is my photo uploaded anywhere?</h3>
     <p>No. The image is read by your browser. It is never uploaded or stored. See the <a href="/privacy/">privacy page</a>.</p>
     <h3>How do I get a better match?</h3>
