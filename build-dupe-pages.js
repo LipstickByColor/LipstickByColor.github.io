@@ -584,7 +584,7 @@ ${grid(`Closest ${esc(s.short)} dupes under $15`, 'The 5 closest matches under $
     </div>
 
     <nav class="more" aria-label="Dupes for other cult shades">
-      <div class="more-head"><span class="eyebrow">Dupes for other cult shades</span><hr><a class="u" href="/dupe-finder/">Search any lipstick →</a></div>
+      <div class="more-head"><span class="eyebrow">Dupes for other cult shades</span><hr><a class="u" href="/dupe-finder/">Search any lipstick →</a><a class="u" href="/photo-match/">Match from a photo →</a></div>
       <div class="shades">${SHADES.filter(o => o !== s).map(o => `
         <a href="${pageUrl(o)}"><i aria-hidden="true" style="background:${o.hex}"></i>${esc(o.name)}</a>`).join('')}
       </div>

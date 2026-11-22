@@ -98,12 +98,12 @@
     margin-bottom: 20px;
   }
   .body-text:last-of-type { margin-bottom: 36px; }
-  .body-text a {
+  .body-text a, .mode-list a, .step-cap a {
     color: var(--blush-deep); text-decoration: none;
     border-bottom: 1px solid currentColor; padding-bottom: 1px;
     transition: opacity 0.15s;
   }
-  .body-text a:hover { opacity: 0.7; }
+  .body-text a:hover, .mode-list a:hover, .step-cap a:hover { opacity: 0.7; }
 
   /* — Why / What / How — labeled premise sequence ——————————————— */
   .premise {
@@ -893,7 +893,7 @@
         <li>
           <span class="lede-num">2</span>
           <span>When a reference exists — a photo, a screenshot, something spotted on someone, or a
-          product that needs a dupe — the <strong>photo upload</strong> finds the closest
+          product that needs a dupe — the <a href="/photo-match/"><strong>photo upload</strong></a> finds the closest
           color matches across the catalog.</span>
         </li>
         <li>
@@ -911,7 +911,7 @@
         </div>
         <div class="flow-step">
           <img src="/assets/flow-photo-a.png" alt="Uploading a photo and sampling a color from it" />
-          <p class="step-cap">Or sample a color from a photo.</p>
+          <p class="step-cap">Or <a href="/photo-match/">sample a color from a photo</a>.</p>
         </div>
         <div class="flow-step">
           <img src="/assets/flow-wheel-b.png" alt="Results list of closest lip matches for the chosen shade" />
