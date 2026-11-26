@@ -1,15 +1,20 @@
 // Analytics and consent, shared by every page (loaded in <head>, before any other script).
-// Google Analytics is only requested once analytics is allowed:
+// Google Analytics and the Pinterest tag (conversions from promoted pins) are only requested once analytics is allowed:
 //   - visitors on a European time zone are asked first (banner below), and nothing loads until they accept
 //   - browsers sending Global Privacy Control are treated as "no" without asking
 //   - everyone else gets analytics by default and can switch it off on /privacy/
 // The choice lives in localStorage under 'lipstick-consent' ('granted' | 'denied').
-// gtag() is always defined, so `window.gtag?.('event', …)` calls elsewhere are safe either way.
+// gtag() and pintrk() are always defined, so calls elsewhere are safe either way.
 window.dataLayer = window.dataLayer || [];
 function gtag(){dataLayer.push(arguments);}
+// Pinterest's queue stub, as in its base code: calls wait here until core.js loads
+if (!window.pintrk) {
+  window.pintrk = function () { window.pintrk.queue.push(Array.prototype.slice.call(arguments)); };
+  window.pintrk.queue = []; window.pintrk.version = '3.0';
+}
 
 (function () {
-  var GA_ID = 'G-3D5R6QNPX3', KEY = 'lipstick-consent';
+  var GA_ID = 'G-3D5R6QNPX3', PIN_TAG_ID = '2613828201378', KEY = 'lipstick-consent';
 
   var stored = null;
   try { stored = localStorage.getItem(KEY); } catch (e) {}
@@ -32,13 +37,21 @@ function gtag(){dataLayer.push(arguments);}
     s.async = true;
     s.src = 'https://www.googletagmanager.com/gtag/js?id=' + GA_ID;
     document.head.appendChild(s);
+    // Pinterest tag: no email is passed (the site never asks for one)
+    pintrk('load', PIN_TAG_ID);
+    pintrk('page');
+    var p = document.createElement('script');
+    p.async = true;
+    p.src = 'https://s.pinimg.com/ct/core.js';
+    document.head.appendChild(p);
   }
 
-  // Best effort: GA's cookies are _ga and _ga_<stream id>
+  // Best effort: GA's cookies are _ga and _ga_<stream id>; Pinterest's first-party ones are
+  // _pin_unauth, _epik, _derived_epik and _pinterest_ct_*
   function clearAnalyticsCookies() {
     document.cookie.split(';').forEach(function (c) {
       var name = c.split('=')[0].trim();
-      if (!/^_ga/.test(name)) return;
+      if (!/^(_ga|_pin_|_pinterest_|_epik|_derived_epik)/.test(name)) return;
       var gone = name + '=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/';
       document.cookie = gone;
       document.cookie = gone + '; domain=' + location.hostname;
@@ -99,7 +112,7 @@ function gtag(){dataLayer.push(arguments);}
     var btn = 'font:inherit;font-weight:500;font-size:12px;letter-spacing:0.06em;text-transform:uppercase;' +
       'padding:10px 16px;border-radius:40px;cursor:pointer;border:1px solid #2A1A14;';
     el.innerHTML =
-      '<p style="flex:1 1 260px;margin:0">May we use Google Analytics cookies to see which parts of the site get used? ' +
+      '<p style="flex:1 1 260px;margin:0">May we use Google Analytics and Pinterest cookies to see which parts of the site get used and which pins bring visitors? ' +
       '<a href="/privacy/" style="color:#5C3D30">Privacy</a></p>' +
       '<div style="display:flex;gap:8px;flex:none">' +
       '<button type="button" data-consent="denied" style="' + btn + 'background:#fff;color:#2A1A14">No thanks</button>' +
