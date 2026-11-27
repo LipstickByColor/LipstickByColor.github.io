@@ -265,7 +265,7 @@
       margin-right: 0; width: 100%;
       max-width: 380px; align-self: center;
     }
-    .app-footer { padding: 12px 24px; flex-wrap: wrap; gap: 12px; }
+    .site-foot .site-foot-in { padding: 20px 24px; }
     .compare-tray-body { padding-left: 24px !important; padding-right: 24px !important; }
   }
 
@@ -300,12 +300,15 @@
     /* Odd tab out (e.g. "From My List") spans the full row */
     .mode-tab:last-child:nth-child(odd) { grid-column: 1 / -1; }
     .app-main { padding: 16px 12px 24px; }
-    .app-footer { padding: 10px 16px; font-size: 10px; }
+    .site-foot .site-foot-in { padding: 20px 16px; }
     .compare-tray-body { padding-left: 16px !important; padding-right: 16px !important; }
   }
 
-  /* Default footer padding (matches earlier 12px 48px) */
-  .app-footer { padding: 12px 48px; }
+  /* Footer: the same look as on the dupe pages and the other pages (.site-foot), lined up with the header */
+  .site-foot { border-top: 1px solid var(--border); }
+  .site-foot-in { display: flex; flex-wrap: wrap; gap: 8px 20px; padding: 20px 48px; font-size: 13px; color: #5C3D30; }
+  .site-foot a { color: #5C3D30; }
+  .site-foot-in > :first-child { margin-right: auto; }
 
   @keyframes spin { to { transform: rotate(360deg); } }
   #root:empty::after, .preload-spinner {

@@ -8868,46 +8868,12 @@ function App() {
       const copy = document.getElementById('page-copy');
       if (el && copy && copy.parentNode !== el) el.appendChild(copy);
     }
-  }), /*#__PURE__*/React.createElement("footer", {
-    className: "app-footer",
-    style: {
-      borderTop: '1px solid var(--border)',
-      display: 'flex',
-      gap: 24,
-      alignItems: 'center'
-    }
-  }, mode !== 'landing' && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 11,
-      color: 'var(--text-muted)',
-      letterSpacing: '0.05em'
-    }
-  }, "Showing closest matches by color distance (\u0394E)"), /*#__PURE__*/React.createElement("a", {
-    href: "/color-science/",
-    onClick: () => window.gtag?.('event', 'nav_link_click', {
-      target: 'color_guide',
-      location: 'footer'
-    }),
-    style: {
-      fontSize: 11,
-      color: 'var(--blush-deep)',
-      letterSpacing: '0.05em',
-      textDecoration: 'none',
-      borderBottom: '1px solid currentColor',
-      paddingBottom: 1,
-      transition: 'opacity 0.15s'
-    }
-  }, "What is \u0394E?")), /*#__PURE__*/React.createElement("a", {
-    href: "/privacy/",
-    style: {
-      fontSize: 11,
-      color: 'var(--blush-deep)',
-      letterSpacing: '0.05em',
-      textDecoration: 'none',
-      borderBottom: '1px solid currentColor',
-      paddingBottom: 1,
-      transition: 'opacity 0.15s'
-    }
+  }), mode !== 'landing' && /*#__PURE__*/React.createElement("footer", {
+    className: "site-foot"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "site-foot-in"
+  }, /*#__PURE__*/React.createElement("span", null, "Lipstick Color Finder"), /*#__PURE__*/React.createElement("a", {
+    href: "/privacy/"
   }, "Privacy"), /*#__PURE__*/React.createElement("a", {
     href: "https://www.pinterest.com/lipstickbycolor/",
     target: "_blank",
@@ -8915,16 +8881,7 @@ function App() {
     onClick: () => window.gtag?.('event', 'nav_link_click', {
       target: 'pinterest',
       location: 'footer'
-    }),
-    style: {
-      fontSize: 11,
-      color: 'var(--blush-deep)',
-      letterSpacing: '0.05em',
-      textDecoration: 'none',
-      borderBottom: '1px solid currentColor',
-      paddingBottom: 1,
-      transition: 'opacity 0.15s'
-    }
+    })
   }, "Pinterest"), /*#__PURE__*/React.createElement("a", {
     href: "https://www.instagram.com/lipstick.color.finder/",
     target: "_blank",
@@ -8932,16 +8889,7 @@ function App() {
     onClick: () => window.gtag?.('event', 'nav_link_click', {
       target: 'instagram',
       location: 'footer'
-    }),
-    style: {
-      fontSize: 11,
-      color: 'var(--blush-deep)',
-      letterSpacing: '0.05em',
-      textDecoration: 'none',
-      borderBottom: '1px solid currentColor',
-      paddingBottom: 1,
-      transition: 'opacity 0.15s'
-    }
+    })
   }, "Instagram"), /*#__PURE__*/React.createElement("a", {
     href: "https://forms.gle/EeCaetrPGkz3TTxU8",
     target: "_blank",
@@ -8949,22 +8897,8 @@ function App() {
     onClick: () => window.gtag?.('event', 'nav_link_click', {
       target: 'feedback',
       location: 'footer'
-    }),
-    style: {
-      fontSize: 11,
-      color: 'var(--blush-deep)',
-      letterSpacing: '0.05em',
-      textDecoration: 'none',
-      borderBottom: '1px solid currentColor',
-      paddingBottom: 1,
-      transition: 'opacity 0.15s'
-    }
-  }, "Leave Feedback"), selectedColor && matches.length > 0 && /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 11,
-      color: 'var(--text-muted)'
-    }
-  }, "\xB7 ", matches.length, " closest match", matches.length !== 1 ? 'es' : '', " from ", REAL_PRODUCTS.length, " products")), showTweaks && /*#__PURE__*/React.createElement(TweaksPanel, {
+    })
+  }, "Leave Feedback"))), showTweaks && /*#__PURE__*/React.createElement(TweaksPanel, {
     tweaks: tweaks,
     setTweak: setTweak,
     onClose: () => {

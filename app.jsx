@@ -4823,66 +4823,23 @@ function App() {
       <div style={{ display: mode === PAGE_MODE ? 'block' : 'none' }}
         ref={el => { const copy = document.getElementById('page-copy'); if (el && copy && copy.parentNode !== el) el.appendChild(copy); }} />
 
-      {/* Footer */}
-      <footer className="app-footer" style={{
-        borderTop:'1px solid var(--border)',
-        display:'flex', gap:24, alignItems:'center',
-      }}>
-        {/* About the results, so not on the landing page, which has none */}
-        {mode !== 'landing' && <>
-          <span style={{ fontSize:11, color:'var(--text-muted)', letterSpacing:'0.05em' }}>
-            Showing closest matches by color distance (ΔE)
-          </span>
-          <a href="/color-science/"
-            onClick={() => window.gtag?.('event', 'nav_link_click', { target: 'color_guide', location: 'footer' })}
-            style={{
-            fontSize:11, color:'var(--blush-deep)', letterSpacing:'0.05em',
-            textDecoration:'none', borderBottom:'1px solid currentColor', paddingBottom:1,
-            transition:'opacity 0.15s',
-          }}>
-            What is ΔE?
-          </a>
-        </>}
-        <a href="/privacy/" style={{
-          fontSize:11, color:'var(--blush-deep)', letterSpacing:'0.05em',
-          textDecoration:'none', borderBottom:'1px solid currentColor', paddingBottom:1,
-          transition:'opacity 0.15s',
-        }}>
-          Privacy
-        </a>
-        <a href="https://www.pinterest.com/lipstickbycolor/" target="_blank" rel="noopener noreferrer"
-          onClick={() => window.gtag?.('event', 'nav_link_click', { target: 'pinterest', location: 'footer' })}
-          style={{
-          fontSize:11, color:'var(--blush-deep)', letterSpacing:'0.05em',
-          textDecoration:'none', borderBottom:'1px solid currentColor', paddingBottom:1,
-          transition:'opacity 0.15s',
-        }}>
-          Pinterest
-        </a>
-        <a href="https://www.instagram.com/lipstick.color.finder/" target="_blank" rel="noopener noreferrer"
-          onClick={() => window.gtag?.('event', 'nav_link_click', { target: 'instagram', location: 'footer' })}
-          style={{
-          fontSize:11, color:'var(--blush-deep)', letterSpacing:'0.05em',
-          textDecoration:'none', borderBottom:'1px solid currentColor', paddingBottom:1,
-          transition:'opacity 0.15s',
-        }}>
-          Instagram
-        </a>
-        <a href="https://forms.gle/EeCaetrPGkz3TTxU8" target="_blank" rel="noopener noreferrer"
-          onClick={() => window.gtag?.('event', 'nav_link_click', { target: 'feedback', location: 'footer' })}
-          style={{
-          fontSize:11, color:'var(--blush-deep)', letterSpacing:'0.05em',
-          textDecoration:'none', borderBottom:'1px solid currentColor', paddingBottom:1,
-          transition:'opacity 0.15s',
-        }}>
-          Leave Feedback
-        </a>
-        {selectedColor && matches.length > 0 && (
-          <span style={{ fontSize:11, color:'var(--text-muted)' }}>
-            · {matches.length} closest match{matches.length !== 1 ? 'es' : ''} from {REAL_PRODUCTS.length} products
-          </span>
-        )}
-      </footer>
+      {/* Footer, the same as on the other pages (.site-foot), but the site name is plain text: a link
+          home would only lead back to the wheel. Not on the landing page, where a first-time visitor
+          picks a way in. */}
+      {mode !== 'landing' && (
+        <footer className="site-foot">
+          <div className="site-foot-in">
+            <span>Lipstick Color Finder</span>
+            <a href="/privacy/">Privacy</a>
+            <a href="https://www.pinterest.com/lipstickbycolor/" target="_blank" rel="noopener noreferrer"
+              onClick={() => window.gtag?.('event', 'nav_link_click', { target: 'pinterest', location: 'footer' })}>Pinterest</a>
+            <a href="https://www.instagram.com/lipstick.color.finder/" target="_blank" rel="noopener noreferrer"
+              onClick={() => window.gtag?.('event', 'nav_link_click', { target: 'instagram', location: 'footer' })}>Instagram</a>
+            <a href="https://forms.gle/EeCaetrPGkz3TTxU8" target="_blank" rel="noopener noreferrer"
+              onClick={() => window.gtag?.('event', 'nav_link_click', { target: 'feedback', location: 'footer' })}>Leave Feedback</a>
+          </div>
+        </footer>
+      )}
 
       {/* Tweaks panel */}
       {showTweaks && (
