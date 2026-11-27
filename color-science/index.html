@@ -64,6 +64,13 @@ a{color:#2A1A14}a:hover{color:#5C3D30}
 @media (max-width:374px){.scene-fig{--s:.7}.ro-wide{display:none}}
 @media (max-width:359px){.scene-fig{--s:.6}}
 </style>
+<style>
+/* Site footer, the same as on the dupe pages */
+.site-foot{border-top:1px solid #E0D0C4;font-family:'Hanken Grotesk',system-ui,sans-serif}
+.site-foot-in{max-width:1200px;margin:0 auto;display:flex;flex-wrap:wrap;gap:8px 20px;padding:20px 56px;font-size:13px;color:#5C3D30}
+.site-foot a{color:#5C3D30}.site-foot a:first-child{margin-right:auto}
+@media (max-width:540px){.site-foot .site-foot-in{padding:20px}}
+</style>
 </head>
 <body>
 <main style="max-width:780px;margin:0 auto;padding:clamp(32px,6vw,48px) clamp(20px,5vw,40px) 80px">
@@ -338,12 +345,14 @@ a{color:#2A1A14}a:hover{color:#5C3D30}
     <p style="font-size:13px;line-height:1.6;color:#5C3D30;padding-left:2em;text-indent:-2em;text-wrap:pretty">Xiao, K., Zhai, Q., Li, C., Zhu, Y., &amp; Pointer, M. R. (2017). Color difference evaluation for human skin. <em>Optics Express, 25</em>(18), 21212–21222.</p>
   </section>
 
-  <footer style="margin-top:32px;padding-top:24px;border-top:1px solid #E0D0C4;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:16px">
-    <span style="font-size:11px;color:#8C6858;letter-spacing:.08em;text-transform:uppercase">Lipstick Color Finder · Color science · <a href="/privacy/" style="color:inherit">Privacy</a> · <a href="https://www.pinterest.com/lipstickbycolor/" target="_blank" rel="noopener noreferrer" style="color:inherit">Pinterest</a> · <a href="https://www.instagram.com/lipstick.color.finder/" target="_blank" rel="noopener noreferrer" style="color:inherit">Instagram</a> · <a href="https://forms.gle/EeCaetrPGkz3TTxU8" target="_blank" rel="noopener noreferrer" style="color:inherit">Leave Feedback</a></span>
+  <div style="margin-top:32px">
     <a class="h3" href="/" style="display:inline-flex;align-items:center;gap:8px;background:#2A1A14;color:#FAF6F1;font-size:12px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;padding:12px 24px;border-radius:40px;text-decoration:none;transition:background .15s">Back to Color Finder →</a>
-  </footer>
+  </div>
 
 </main>
+<footer class="site-foot">
+  <div class="site-foot-in"><a href="/">Lipstick Color Finder</a><a href="/privacy/">Privacy</a><a href="https://www.pinterest.com/lipstickbycolor/" target="_blank" rel="noopener noreferrer">Pinterest</a><a href="https://www.instagram.com/lipstick.color.finder/" target="_blank" rel="noopener noreferrer">Instagram</a><a href="https://forms.gle/EeCaetrPGkz3TTxU8" target="_blank" rel="noopener noreferrer">Leave Feedback</a></div>
+</footer>
 <script>
 // Turns the depth/undertone scene and fills the readout; everything else on the page is static HTML.
 (function () {

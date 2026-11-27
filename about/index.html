@@ -510,15 +510,7 @@
     flex-shrink: 0;
   }
 
-  .page-footer {
-    margin-top: 64px;
-    padding-top: 24px;
-    border-top: 1px solid var(--border);
-    display: flex; justify-content: space-between; align-items: center;
-  }
-  .page-footer-label {
-    font-size: 11px; color: var(--text-muted); letter-spacing: 0.08em; text-transform: uppercase;
-  }
+  .page-end { margin-top: 64px; }
   .cta {
     display: inline-flex; align-items: center; gap: 8px;
     background: var(--espresso); color: #FAF6F1;
@@ -658,6 +650,13 @@
   }
 }
 </script>
+<style>
+/* Site footer, the same as on the dupe pages */
+.site-foot{border-top:1px solid #E0D0C4;font-family:'Hanken Grotesk',system-ui,sans-serif}
+.site-foot-in{max-width:1200px;margin:0 auto;display:flex;flex-wrap:wrap;gap:8px 20px;padding:20px 56px;font-size:13px;color:#5C3D30}
+.site-foot a{color:#5C3D30}.site-foot a:first-child{margin-right:auto}
+@media (max-width:540px){.site-foot .site-foot-in{padding:20px}}
+</style>
 </head>
 <body>
 <div class="page">
@@ -1089,13 +1088,15 @@
     </div>
   </section>
 
-  <div class="page-footer">
-    <span class="page-footer-label">Lipstick Color Finder · How I Built It · <a href="/privacy/" style="color:inherit">Privacy</a> · <a href="https://www.pinterest.com/lipstickbycolor/" target="_blank" rel="noopener noreferrer" style="color:inherit">Pinterest</a> · <a href="https://www.instagram.com/lipstick.color.finder/" target="_blank" rel="noopener noreferrer" style="color:inherit">Instagram</a> · <a href="https://forms.gle/EeCaetrPGkz3TTxU8" target="_blank" rel="noopener noreferrer" style="color:inherit">Leave Feedback</a></span>
+  <div class="page-end">
     <a href="/" class="cta">
       Back to Color Finder →
     </a>
   </div>
 
 </div>
+<footer class="site-foot">
+  <div class="site-foot-in"><a href="/">Lipstick Color Finder</a><a href="/privacy/">Privacy</a><a href="https://www.pinterest.com/lipstickbycolor/" target="_blank" rel="noopener noreferrer">Pinterest</a><a href="https://www.instagram.com/lipstick.color.finder/" target="_blank" rel="noopener noreferrer">Instagram</a><a href="https://forms.gle/EeCaetrPGkz3TTxU8" target="_blank" rel="noopener noreferrer">Leave Feedback</a></div>
+</footer>
 </body>
 </html>

@@ -42,6 +42,13 @@ a{color:#B0566F}a:hover{color:#2A1A14}
 .h6:hover{color:#fff!important}
 .h7:hover{background:#fff!important}
 </style>
+<style>
+/* Site footer, the same as on the dupe pages */
+.site-foot{border-top:1px solid #E0D0C4;font-family:'Hanken Grotesk',system-ui,sans-serif}
+.site-foot-in{max-width:1200px;margin:0 auto;display:flex;flex-wrap:wrap;gap:8px 20px;padding:20px 56px;font-size:13px;color:#5C3D30}
+.site-foot a{color:#5C3D30}.site-foot a:first-child{margin-right:auto}
+@media (max-width:540px){.site-foot .site-foot-in{padding:20px}}
+</style>
 </head>
 <body>
 <div style="min-height:100vh;background:#FAF6F1;overflow-x:hidden">
@@ -568,8 +575,10 @@ a{color:#B0566F}a:hover{color:#2A1A14}
       </div>
     </div>
   </section>
-  <p style="max-width:1120px;margin:0 auto;padding:0 clamp(18px,5vw,32px) 48px;font-size:12px;color:#8C6858"><a href="/privacy/" style="color:inherit">Privacy</a> · <a href="https://www.pinterest.com/lipstickbycolor/" target="_blank" rel="noopener noreferrer" style="color:inherit">Pinterest</a> · <a href="https://www.instagram.com/lipstick.color.finder/" target="_blank" rel="noopener noreferrer" style="color:inherit">Instagram</a> · <a href="https://forms.gle/EeCaetrPGkz3TTxU8" target="_blank" rel="noopener noreferrer" style="color:inherit">Leave Feedback</a></p>
 </div>
+<footer class="site-foot">
+  <div class="site-foot-in"><a href="/">Lipstick Color Finder</a><a href="/privacy/">Privacy</a><a href="https://www.pinterest.com/lipstickbycolor/" target="_blank" rel="noopener noreferrer">Pinterest</a><a href="https://www.instagram.com/lipstick.color.finder/" target="_blank" rel="noopener noreferrer">Instagram</a><a href="https://forms.gle/EeCaetrPGkz3TTxU8" target="_blank" rel="noopener noreferrer">Leave Feedback</a></div>
+</footer>
 <script>
 (function () {
   var btn = document.getElementById('copy-feed'), status = document.getElementById('copy-status'), timer;
